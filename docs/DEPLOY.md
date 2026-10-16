@@ -61,10 +61,9 @@ Založte projekt typu Next.js v **EU** regionu. Do Vercelu patří `NEXT_PUBLIC_
 
 Landing page je samostatný projekt Vercel (Root Directory `apps/landingpage`, doména `sparxdeck.com`).
 
-> **Známý problém landing page (před nasazením vyřešit):**
-> - Produkční build (`next build`) na Next.js 16.1.1 padá při předgenerování stránek: `InvariantError: Expected workUnitAsyncStorage to have a store`. Je to chyba v Next.js; vývojový server funguje.
-> - Přechod na novější Next.js narazí na nastavení Turbopacku v monorepozitáři (`turbopack.root`) a na rozjetý `package-lock.json` landing page (neodpovídá `package.json`).
-> - Platformy se to netýká. Řešení je samostatný úkol: srovnat lockfile, sjednotit verzi Next.js s platformou (16.3.8) a ověřit build.
+Landing page: Root Directory `apps/landingpage`, Install Command `npm ci --prefix .`, Next.js zafixovaný na 16.1.1. Adresy nastavují proměnné `NEXT_PUBLIC_SITE_URL` a `NEXT_PUBLIC_APP_URL` (výchozí `sparxdeck.com` a `app.sparxdeck.com`); platforma odkazuje na landing page přes `NEXT_PUBLIC_MARKETING_URL`.
+
+**Současný stav (2026-10-16, bez vlastní domény):** tým Vercel `sparxdeck`, projekt `sparxdeck` (landing page) na https://sparxdeck.vercel.app, projekt `sparxdeck-app` (platforma) na https://sparxdeck-app.vercel.app, produkční Supabase `ellnjenfqupwqelsojjg`. Po koupi domény: přidat domény k projektům, změnit uvedené proměnné a Site URL v Supabase a nasadit znovu.
 
 ## 6. Kontrola po nasazení
 
