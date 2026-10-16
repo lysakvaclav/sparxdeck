@@ -21,7 +21,7 @@
     "flag-icons": "^7.5.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
-    "next": "^16.1.1",
+    "next": "16.1.1",
     "next-themes": "^0.4.6",
     "postprocessing": "^6.38.0",
     "react": "19.2.0",
@@ -35,7 +35,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^16.1.1",
+    "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

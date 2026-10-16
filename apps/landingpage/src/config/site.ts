@@ -1,12 +1,17 @@
 // Central brand + contact settings. Change values here, not in components.
+
+/** Addresses can be set per deployment (e.g. *.vercel.app before the domain exists). */
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sparxdeck.com";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.sparxdeck.com";
+
 export const SITE = {
   name: "SparxDeck",
-  url: "https://sparxdeck.com",
+  url: siteUrl,
   email: "hello@sparxdeck.com",
   /** The SparxDeck web app. */
-  appUrl: "https://app.sparxdeck.com",
-  loginUrl: "https://app.sparxdeck.com/login",
-  signupUrl: "https://app.sparxdeck.com/signup",
+  appUrl,
+  loginUrl: `${appUrl}/login`,
+  signupUrl: `${appUrl}/signup`,
   /** Where "book a demo" CTAs point (swap for a cal.com link once it exists). */
   bookingUrl: "mailto:hello@sparxdeck.com?subject=SparxDeck%20demo",
   /** Social profiles; leave null to hide the button. */
