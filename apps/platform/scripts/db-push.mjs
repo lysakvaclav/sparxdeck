@@ -22,11 +22,14 @@ if (!dbUrl) {
   process.exit(1);
 }
 
-// The project reference is the pooler user name: postgres.<ref>
+// The project reference: pooler user postgres.<ref>, or direct host db.<ref>.supabase.co
 let project = "unknown";
 try {
   const url = new URL(dbUrl);
-  project = decodeURIComponent(url.username).split(".")[1] ?? url.hostname;
+  project =
+    decodeURIComponent(url.username).split(".")[1] ??
+    url.hostname.match(/^db\.([a-z0-9]+)\.supabase\.co$/)?.[1] ??
+    url.hostname;
 } catch {
   console.error("SUPABASE_DB_URL is not a valid connection string.");
   process.exit(1);
