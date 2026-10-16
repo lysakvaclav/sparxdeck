@@ -34,7 +34,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 9 | Protokoly (PDF a e-mail) | J, L (protokol) | Hotovo, odesílání e-mailem čeká na nastavení Resend |
 | 10 | Přehled termínů a týdenní souhrn | K, L (souhrn) | Hotovo, odesílání souhrnu čeká na Resend a nasazení |
 | 11 | Hledání, průvodce a export | S (hledání), X, R | Hotovo |
-| 12 | Kvalita a spuštění | T (PWA), V, Y | Připraveno ke spuštění, čeká na účty (Vercel, Supabase Pro, Resend) |
+| 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na sparxdeck-app.vercel.app (landing sparxdeck.vercel.app); doména, e-maily a placené plány před prvním zákazníkem |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -347,6 +347,56 @@ Zbývá:
   - Zbylých 14 položek P1 čeká jen na e-maily (Resend), nasazení, zálohy v produkci, Sentry DSN a test na skutečném iPhonu.
 
 **Od tebe:** účet Vercel a doména; rozhodnutí o placeném plánu Supabase (bezplatný plán nemá automatické zálohy).
+
+---
+
+## Fáze 2: po MVP (části 13–26)
+
+**Stav na začátku (2026-10-16):** P1 104 ze 118, P2 3 z 83, P3 0 ze 41. Zbylých 14 položek P1 je hotových v kódu a čeká na doménu, e-maily (Resend), placené plány a zkoušku na skutečném telefonu. To se udělá před prvním zákazníkem (viz DEPLOY.md), nezávisle na částech níže.
+
+Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u částí 1–12: vždy jen jedna část, na další se jde po „jdeme na další“. Položky označené ✉ potřebují doménu a e-maily, ty se dodělají, až budou.
+
+| # | Část | Hlavní položky checklistu | Od tebe |
+|---|---|---|---|
+| 13 | Půdorysy budov | D: půdorys patra (P2), zařízení na půdorysu (P3) | ukázkový plán (obrázek nebo PDF), který firmy běžně dostávají |
+| 14 | Import z Excelu | R: import zákazníků, budov a zařízení; F: import zařízení | vzorový Excel od servisní firmy, pokud nějaký seženeš |
+| 15 | Revize v terénu 2 | H: nepřístupné/nenalezeno s důvodem, nové zařízení během revize, zrušení rozdělané revize, oprava dokončené revize se záznamem, diktování; I: nabídka uzavření závady po úspěšné kontrole | nic |
+| 16 | Offline naplno | M: stažení budovy předem, kontrola bez signálu od začátku, konflikty, smazání dat po odhlášení, testy výpadku | nic |
+| 17 | Zařízení a šablony 2 | E: vlastní typy, vlastní údaje podle typu, kopie šablony, výběr z možností, povinná fotka; F: fotky zařízení, rok výroby a konec životnosti, přesun s historií, hromadné úpravy | položky šablon pro další typy jen od revizního technika |
+| 18 | Protokol 2 a podpis | N: podpis zákazníka prstem, jméno a čas; J: fotky závad v protokolu, nová verze po opravě, souhrnný protokol; Q: formát číslování | ověřit s technikem, co má podpis v protokolu obsahovat |
+| 19 | Plánování a závady 2 | K: kalendář revizí, vytížení techniků; I: přiřazení závady člověku, termín odstranění | nic |
+| 20 | Tým a přihlášení 2 | B: technik vidí jen své zákazníky, jedna osoba ve více firmách; A: Google, dvoufázové ověření, aktivní zařízení a odhlášení všude | účet Google Cloud pro přihlášení přes Google |
+| 21 | Zákazníci a budovy 2 | C: více kontaktů, štítky, slučování duplicit; D: mapa a navigace; S: koš a obnovení smazaného | nic |
+| 22 | Upozornění a e-maily 2 ✉ | L: připomínky zákazníkům, nastavení upozornění, šablony e-mailů; J+Q: vlastní text a více příjemců | doména a Resend |
+| 23 | Portál pro správce budov ✉ | O: přístup jen ke svým budovám, stav zařízení, protokoly, pozvání | doména a Resend |
+| 24 | Provoz, bezpečnost a GDPR | V: záznam změn (audit log), omezení požadavků, export a výmaz osobních údajů; R: úplný export firmy; W: přehled firem pro provozovatele, pozastavení účtu, vstup podpory se záznamem; Y: hlídání dostupnosti | zpracovatelská smlouva a texty od právníka |
+| 25 | Předplatné a platby | P: zkušební doba, plány a limity, platba kartou, faktury, neúspěšné platby, zrušení | cena, plány, účet u platební brány (např. Stripe), fakturační údaje |
+| 26 | Nápověda a zpětná vazba | X: nápověda a návody, kontakt na podporu, zpětná vazba v aplikaci | kontaktní e-mail podpory, případně videa |
+
+**P2 hotové v kódu, odškrtnou se po ověření** (v rámci nejbližší části, která se jich týká):
+- Přihlášení odkazem v e-mailu (část 1) ✉.
+- Ruční zadání čísla štítku při revizi (část 7).
+- Fronta změn a fotek v telefonu a hláška „bez spojení, N změn čeká“ (část 7), základ části 16.
+- Export seznamu termínů do CSV: export zařízení s filtrem termínu (části 10 a 11).
+- Stránkování všech seznamů a indexy na časté dotazy (části 3–11).
+- Tmavý režim a kontrast WCAG AA (část 12), spodní lišta na telefonu (část 8), rychlé akce na úvodní stránce (část 10).
+
+**Později (P3):** vlastní role, NFC a termotiskárny, kalendář ICS, statistiky, SMS a push, elektronický podpis s razítkem, další země a jazyky (arménština, gruzínština, arabština), API a napojení na účetnictví, nativní aplikace. Až podle zpětné vazby.
+
+**Záměrně se nestaví** (z CHECKLIST.md): vlastní fakturace a účetnictví, tvrzení o souladu s předpisy, umělá inteligence, další typy zařízení před ověřením u zákazníků, vymyšlené recenze a čísla.
+
+### Část 13: Půdorysy budov
+
+**Cíl:** technik i kancelář vidí, kde v budově zařízení je. Na telefonu během revize ukáže plán, co je zkontrolované a co zbývá.
+
+- Půdorys je obrázek patra nahraný k budově (JPEG, PNG, WebP; PDF plán se převede na obrázek v prohlížeči). Patro má název a pořadí, volitelně vazbu na lokaci.
+- Zařízení se na plán umístí tažením značky. Poloha je v poměru k obrázku, takže sedí při jakékoli velikosti obrazovky.
+- Značky mají ikonu typu a barvu podle termínu (po termínu, brzy, v pořádku). Klik otevře zařízení.
+- Na telefonu přiblížení a posun prsty. Během revize jsou na plánu vidět zkontrolovaná a zbývající zařízení a klik na značku otevře kontrolu.
+- Plán s umístěním jde vytisknout nebo stáhnout jako PDF, např. pro správce budovy.
+- Soubory v soukromém úložišti pod `<organization_id>/`, ověření typu z obsahu, RLS a test izolace.
+
+**Hotovo, když:** nahraju plán patra, rozmístím na něj zařízení z budovy, na telefonu během revize vidím na plánu, co zbývá, a cizí firma plán nevidí.
 
 ---
 
