@@ -283,7 +283,9 @@
     "emailDisabled": "Sending e-mails isn't set up yet.",
     "emailFailed": "The e-mail couldn't be sent. Check the address and try again.",
     "sampleExists": "The sample data is already there.",
-    "noDeviceType": "The company has no device type. Add one under Settings → Device types."
+    "noDeviceType": "The company has no device type. Add one under Settings → Device types.",
+    "planUnreadable": "The file couldn't be read. Try another image or PDF.",
+    "floorPlansMismatch": "The floor plans changed in the meantime. Reload the page and try again."
   },
   "email": {
     "invite": {
@@ -491,6 +493,127 @@
     "actions": "Actions for {name}",
     "deleteTitle": "Delete this location?",
     "deleteBody": "The location \"{name}\" will be removed. Its devices stay in the building without a location."
+  },
+  "plans": {
+    "title": "Floor plans",
+    "description": "Floor plans with the devices on them. During an inspection the technician sees on them what's left to check.",
+    "upload": "Upload floor plan",
+    "empty": "No floor plan yet. Upload a plan of a floor as an image or PDF and place the devices on it.",
+    "emptyReadOnly": "This building has no floor plan yet.",
+    "devicesCount": "{count, plural, =0 {No devices} one {# device} other {# devices}}",
+    "imageAlt": "Floor plan {name}",
+    "moveUp": "Move up: {name}",
+    "moveDown": "Move down: {name}",
+    "actions": "Actions for floor plan {name}",
+    "form": {
+      "file": "Plan file",
+      "fileHint": "An image (JPG, PNG, WebP) or a PDF. Large plans are scaled down so they load fast, also on a phone.",
+      "choose": "Choose file",
+      "chooseOther": "Choose another file",
+      "drop": "or drop the file here",
+      "preparing": "Preparing the plan…",
+      "page": "PDF page",
+      "pageOption": "Page {page} of {pages}",
+      "preview": "Plan preview",
+      "name": "Name",
+      "namePlaceholder": "e.g. First floor",
+      "location": "Location (floor)",
+      "locationNone": "No location",
+      "locationHint": "Optional. When placing devices, the ones from this location come first.",
+      "submit": "Upload",
+      "uploading": "Uploading…",
+      "replaceTitle": "Replace plan image",
+      "replaceHint": "Devices keep their spots relative to the image. Useful for a better copy of the same plan.",
+      "replaceSubmit": "Replace",
+      "editTitle": "Edit floor plan",
+      "save": "Save",
+      "errors": {
+        "fileTooLarge": "This file is too large. A plan can be up to 40 MB.",
+        "fileTypeInvalid": "Upload an image (JPG, PNG, WebP) or a PDF.",
+        "planUnreadable": "The file couldn't be read. Try another image or PDF."
+      }
+    },
+    "detail": {
+      "edit": "Edit",
+      "replace": "Replace image",
+      "download": "Download PDF",
+      "deleteTitle": "Delete floor plan?",
+      "deleteBody": "The floor plan “{name}” will be deleted with its image. The devices stay in the building, just without a spot on this plan.",
+      "plans": "Floor plans of the building"
+    },
+    "viewer": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Show the whole plan",
+      "loading": "Loading the plan…",
+      "failed": "The plan couldn't be loaded.",
+      "reload": "Load again",
+      "label": "Floor plan {name}",
+      "hint": "Drag to move, zoom with the mouse wheel or two fingers.",
+      "marker": "{label}, {type}: {state}"
+    },
+    "panel": {
+      "onPlan": "On this plan",
+      "elsewhere": "On another plan",
+      "unplaced": "Not placed yet",
+      "search": "Search label number",
+      "place": "Place",
+      "moveHere": "Move here",
+      "remove": "Remove from plan",
+      "openDevice": "Open device",
+      "noneOnPlan": "Nothing on the plan yet.",
+      "noneFound": "No device with this number.",
+      "allPlaced": "All devices of the building are on floor plans.",
+      "noDevices": "This building has no active devices yet.",
+      "placing": "Tap the plan where device {label} is.",
+      "cancel": "Cancel",
+      "edit": "Edit placement",
+      "editDone": "Done",
+      "editHint": "Move devices by dragging them or with the arrow keys.",
+      "saved": "Placement saved.",
+      "removed": "Device {label} removed from the plan.",
+      "onOtherPlan": "on plan {plan}",
+      "nextDue": "Next inspection",
+      "location": "Location",
+      "noLocation": "No location"
+    },
+    "legend": {
+      "title": "Legend",
+      "overdue": "Overdue",
+      "soon": "Soon",
+      "ok": "OK",
+      "never": "Never inspected"
+    },
+    "device": {
+      "title": "Spot on the floor plan",
+      "notPlaced": "This device isn't on a floor plan yet.",
+      "place": "Place on floor plan",
+      "placeOn": "Place: {plan}",
+      "noPlans": "This building has no floor plan yet.",
+      "uploadPlan": "Upload a floor plan",
+      "open": "Open floor plan"
+    },
+    "run": {
+      "view": "View",
+      "list": "List",
+      "plan": "Floor plan",
+      "notOnPlan": "{count, plural, one {# device isn't} other {# devices aren't}} on any floor plan. You'll find them in the list.",
+      "noneOnPlan": "No devices of this inspection are on this floor plan."
+    },
+    "pdf": {
+      "title": "Floor plan",
+      "devices": "Devices on the plan",
+      "generated": "Created {date}",
+      "page": "Page {page} of {pages}",
+      "none": "There are no devices on the plan.",
+      "columns": {
+        "label": "Label",
+        "type": "Type",
+        "location": "Location",
+        "nextDue": "Next inspection",
+        "state": "State"
+      }
+    }
   },
   "graph": {
     "title": "Connections",

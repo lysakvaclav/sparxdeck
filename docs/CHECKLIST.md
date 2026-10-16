@@ -64,8 +64,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Adresa budovy a poznámky k přístupu (klíče, vrátnice, kontakt) (část 3: přístup je na stránce budovy nahoře a zvýrazněný)
 - [x] P1 Lokace v budově (patro, místnost, chodba) se seřazením (část 3: `src/app/(app)/sites/[id]/locations.tsx`, přidání, přejmenování, posun nahoru/dolů, smazání s potvrzením; pořadí ukládá funkce `reorder_locations` najednou)
 - [ ] P2 Mapa a odkaz do navigace na adresu budovy
-- [ ] P2 Nahrání půdorysu patra jako obrázku
-- [ ] P3 Umístění zařízení na půdorysu (značky na plánku)
+- [x] P2 Nahrání půdorysu patra jako obrázku (část 13: obrázek nebo PDF s výběrem strany, převod a zmenšení v prohlížeči, kontrola obsahu na serveru; karta Půdorysy na budově, pořadí, přejmenování, výměna obrázku, smazání; PDF plánu ke stažení; ukázková data mají dva plány)
+- [x] P3 Umístění zařízení na půdorysu (značky na plánku) (část 13: umístění klepnutím, přesun tažením i šipkami, přesun na jiný plán, barvy podle termínu; plán na detailu zařízení a v revizi na telefonu podle stavu kontroly)
 - [ ] P3 Souřadnice GPS u budovy a zařízení
 
 ## E. Typy zařízení a šablony kontrol

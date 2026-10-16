@@ -50,6 +50,12 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - Otevřená závada stejné položky (shoda textu otázky) na zařízení dostane místo nové událost `observed`. Náhled `defectPreview()` v `src/lib/inspection-data.ts` počítá totéž.
   - Závady řeší každý člen (i technik). Vyřešení vyžaduje poznámku.
   - Na telefonu jsou ve spodní liště Přehled, Revize, Závady a Zařízení, ostatní pod „Více“.
+- Půdorysy (část 13):
+  - Tabulky `floor_plans` (obrázek v `org-assets` pod `<org>/floor-plans/<site>/`, rozměry, volitelná lokace, pořadí) a `device_placements` (jedno místo na zařízení, x a y 0..1 vůči obrázku). Klíče vážou zařízení i plán na stejnou budovu.
+  - Zápis umístění jen přes `place_device` (security invoker, upravuje jen plán a souřadnice), pořadí přes `reorder_floor_plans`. Migrace `20261018090000_floor_plans.sql`.
+  - Výpočty pohledu (přiblížení, sevření prsty, převod bodů, velikost obrázku) v `src/lib/floor-plans.ts` s testy. Prohlížeč `src/components/app/plan-viewer.tsx` (gesta v refech, ne ve stavu: události ukazatele předběhnou vykreslení).
+  - Převod souboru v prohlížeči `src/lib/client/plan-image.ts` (pdf.js 6.3, legacy build, worker z vlastního původu). Serverové akce `src/app/(app)/sites/plan-actions.ts`, načítání `src/lib/floor-plans-data.ts` (podepsané odkazy obrázků se znovu používají, dokud platí, jinak prohlížeč plán po každé změně stahuje znovu).
+  - PDF `src/lib/pdf/floor-plan.tsx` přes `/sites/[id]/plans/[planId]/pdf`. Ukázkový plán `src/assets/sample/floor-plan.webp` generuje `scripts/generate-sample-plan.mjs` ze SVG.
 - PDF: `@react-pdf/renderer` na serveru (`serverExternalPackages` v `next.config.ts`), písmo Noto Sans (OFL) v `src/assets/fonts` (`src/lib/pdf/fonts.ts`) s `outputFileTracingIncludes`, aby se dostalo i do nasazení. Dělení slov je vypnuté. Past: `lineHeight` na `Page` skryje dynamický text (`render`, číslo strany); výšku řádku nenastavovat.
 - Protokoly:
   - Tabulky `protocols` (číslo `ROK-NNNN` po firmě a roce z `organization_counters`, jazyk firmy, `pdf_path`) a `protocol_emails`.
@@ -83,7 +89,7 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - Chybové stránky: `(app)/error.tsx` a `global-error.tsx`. `/api/health` ověřuje databázi.
 - PWA: `src/app/manifest.ts`, ikony z `src/assets/brand/mark.png` generuje `scripts/generate-app-icons.mjs`.
 - Prostředí:
-  - Vývoj používá `.env.local`, produkce `.env.production.local`. Do produkce se nahrává přes `npm run db:push:production` (s potvrzením).
+  - Vývoj používá `.env.local`, produkce `.env.prod.local` (nikdy ne `.env.production.local`: ten si Next.js načte při každém lokálním `next build` a `next start`, takže by lokální build mluvil s ostrou databází). Do produkce se nahrává přes `npm run db:push:production` (s potvrzením).
   - Soubory se zálohují a obnovují přes `scripts/backup-storage.mjs` a `restore-storage.mjs`. CI je v `.github/workflows/platform.yml`.
 
 ## Pravidla

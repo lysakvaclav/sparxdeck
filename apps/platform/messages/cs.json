@@ -283,7 +283,9 @@
     "emailDisabled": "Odesílání e-mailů zatím není nastavené.",
     "emailFailed": "E-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste to znovu.",
     "sampleExists": "Ukázková data už ve firmě jsou.",
-    "noDeviceType": "Firma nemá žádný typ zařízení. Přidejte ho v Nastavení → Typy zařízení."
+    "noDeviceType": "Firma nemá žádný typ zařízení. Přidejte ho v Nastavení → Typy zařízení.",
+    "planUnreadable": "Soubor se nepodařilo přečíst. Zkuste jiný obrázek nebo PDF.",
+    "floorPlansMismatch": "Půdorysy se mezitím změnily. Obnovte stránku a zkuste to znovu."
   },
   "email": {
     "invite": {
@@ -491,6 +493,127 @@
     "actions": "Akce pro lokaci {name}",
     "deleteTitle": "Smazat lokaci?",
     "deleteBody": "Lokace „{name}“ bude odstraněna. Zařízení v ní zůstanou v budově bez lokace."
+  },
+  "plans": {
+    "title": "Půdorysy",
+    "description": "Plány pater s rozmístěnými zařízeními. Technik na nich během revize vidí, co zbývá zkontrolovat.",
+    "upload": "Nahrát půdorys",
+    "empty": "Zatím žádný půdorys. Nahrajte plán patra jako obrázek nebo PDF a rozmístěte na něj zařízení.",
+    "emptyReadOnly": "Budova zatím nemá půdorys.",
+    "devicesCount": "{count, plural, =0 {Bez zařízení} other {# zařízení}}",
+    "imageAlt": "Půdorys {name}",
+    "moveUp": "Posunout nahoru: {name}",
+    "moveDown": "Posunout dolů: {name}",
+    "actions": "Akce pro půdorys {name}",
+    "form": {
+      "file": "Soubor s plánem",
+      "fileHint": "Obrázek (JPG, PNG, WebP) nebo PDF. Velké plány se zmenší, aby se rychle načítaly i na telefonu.",
+      "choose": "Vybrat soubor",
+      "chooseOther": "Vybrat jiný soubor",
+      "drop": "nebo sem soubor přetáhněte",
+      "preparing": "Připravuji plán…",
+      "page": "Strana PDF",
+      "pageOption": "Strana {page} z {pages}",
+      "preview": "Náhled plánu",
+      "name": "Název",
+      "namePlaceholder": "např. 1. patro",
+      "location": "Lokace (patro)",
+      "locationNone": "Bez lokace",
+      "locationHint": "Nepovinné. Při rozmisťování budou zařízení z této lokace nahoře.",
+      "submit": "Nahrát",
+      "uploading": "Nahrávám…",
+      "replaceTitle": "Nahradit obrázek plánu",
+      "replaceHint": "Zařízení zůstanou na stejných místech vzhledem k obrázku. Hodí se pro lepší kopii téhož plánu.",
+      "replaceSubmit": "Nahradit",
+      "editTitle": "Upravit půdorys",
+      "save": "Uložit",
+      "errors": {
+        "fileTooLarge": "Soubor je příliš velký. Plán může mít nejvýše 40 MB.",
+        "fileTypeInvalid": "Nahrajte obrázek (JPG, PNG, WebP) nebo PDF.",
+        "planUnreadable": "Soubor se nepodařilo přečíst. Zkuste jiný obrázek nebo PDF."
+      }
+    },
+    "detail": {
+      "edit": "Upravit",
+      "replace": "Nahradit obrázek",
+      "download": "Stáhnout PDF",
+      "deleteTitle": "Smazat půdorys?",
+      "deleteBody": "Půdorys „{name}“ bude smazán i s obrázkem. Zařízení zůstanou v budově, jen bez umístění na tomto plánu.",
+      "plans": "Půdorysy budovy"
+    },
+    "viewer": {
+      "zoomIn": "Přiblížit",
+      "zoomOut": "Oddálit",
+      "fit": "Zobrazit celý plán",
+      "loading": "Načítám plán…",
+      "failed": "Plán se nepodařilo načíst.",
+      "reload": "Načíst znovu",
+      "label": "Půdorys {name}",
+      "hint": "Posun tažením, přiblížení kolečkem myši nebo dvěma prsty.",
+      "marker": "{label}, {type}: {state}"
+    },
+    "panel": {
+      "onPlan": "Na tomto plánu",
+      "elsewhere": "Na jiném plánu",
+      "unplaced": "Neumístěná zařízení",
+      "search": "Hledat číslo štítku",
+      "place": "Umístit",
+      "moveHere": "Přesunout sem",
+      "remove": "Odebrat z plánu",
+      "openDevice": "Otevřít zařízení",
+      "noneOnPlan": "Na plánu zatím nic není.",
+      "noneFound": "Žádné zařízení s tímto číslem.",
+      "allPlaced": "Všechna zařízení budovy jsou na půdorysech.",
+      "noDevices": "Budova zatím nemá žádná aktivní zařízení.",
+      "placing": "Klepněte na plán tam, kde je zařízení {label}.",
+      "cancel": "Zrušit",
+      "edit": "Upravit rozmístění",
+      "editDone": "Hotovo",
+      "editHint": "Zařízení přesunete tažením nebo šipkami na klávesnici.",
+      "saved": "Umístění uloženo.",
+      "removed": "Zařízení {label} odebráno z plánu.",
+      "onOtherPlan": "na plánu {plan}",
+      "nextDue": "Příští revize",
+      "location": "Lokace",
+      "noLocation": "Bez lokace"
+    },
+    "legend": {
+      "title": "Legenda",
+      "overdue": "Po termínu",
+      "soon": "Brzy",
+      "ok": "V pořádku",
+      "never": "Bez revize"
+    },
+    "device": {
+      "title": "Umístění na půdorysu",
+      "notPlaced": "Zařízení zatím není na půdorysu.",
+      "place": "Umístit na půdorys",
+      "placeOn": "Umístit: {plan}",
+      "noPlans": "Budova zatím nemá půdorys.",
+      "uploadPlan": "Nahrát půdorys budovy",
+      "open": "Otevřít půdorys"
+    },
+    "run": {
+      "view": "Zobrazení",
+      "list": "Seznam",
+      "plan": "Půdorys",
+      "notOnPlan": "{count, plural, one {# zařízení není} few {# zařízení nejsou} other {# zařízení není}} na žádném půdorysu. Najdete je v seznamu.",
+      "noneOnPlan": "Na tomto půdorysu nejsou žádná zařízení revize."
+    },
+    "pdf": {
+      "title": "Půdorys",
+      "devices": "Zařízení na plánu",
+      "generated": "Vytvořeno {date}",
+      "page": "Strana {page} z {pages}",
+      "none": "Na plánu nejsou žádná zařízení.",
+      "columns": {
+        "label": "Štítek",
+        "type": "Typ",
+        "location": "Lokace",
+        "nextDue": "Příští revize",
+        "state": "Stav"
+      }
+    }
   },
   "graph": {
     "title": "Mapa vazeb",

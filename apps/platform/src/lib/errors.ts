@@ -72,6 +72,8 @@ export type ErrorCode =
   | "emailFailed"
   | "sampleExists"
   | "noDeviceType"
+  | "planUnreadable"
+  | "floorPlansMismatch"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -124,6 +126,7 @@ export function databaseErrorCode(
   if (message.includes("customer_deleted")) return "customerDeleted";
   if (message.includes("site_deleted")) return "siteDeleted";
   if (message.includes("locations_mismatch")) return "locationsMismatch";
+  if (message.includes("floor_plans_mismatch")) return "floorPlansMismatch";
   if (message.includes("invalid_template")) return "templateInvalid";
   if (message.includes("checks_unfinished")) return "checksUnfinished";
   if (message.includes("inspection_closed")) return "inspectionClosed";

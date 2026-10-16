@@ -1,7 +1,7 @@
 // Uploads files saved by backup-storage.mjs back to Storage (same bucket and
 // path; existing files are replaced). For restoring after a database restore.
 //
-//   node --env-file=.env.production.local scripts/restore-storage.mjs <folder>
+//   node --env-file=.env.prod.local scripts/restore-storage.mjs <folder>
 import fs from "node:fs";
 import path from "node:path";
 

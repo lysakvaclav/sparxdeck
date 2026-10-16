@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/auth";
 import { databaseErrorCode, type ActionResult } from "@/lib/errors";
+import { addSamplePlans } from "@/lib/sample-plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,7 @@ export async function createSampleData(): Promise<ActionResult<{ customerId: str
     p_org: active.organization.id,
   });
   if (error || !data) return { ok: false, error: databaseErrorCode(error) };
+  await addSamplePlans(active.organization.id, data);
   revalidatePath("/", "layout");
   return { ok: true, data: { customerId: data } };
 }

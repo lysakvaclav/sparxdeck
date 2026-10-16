@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/server";
 import { StartInspectionButton } from "../../inspections/start-button";
 import { deleteSite } from "../actions";
 import { SiteDevicesCard } from "./devices-card";
+import { SiteFloorPlansCard } from "./floor-plans-card";
 import { Locations } from "./locations";
 
 type Props = { params: Promise<{ id: string }> };
@@ -127,6 +128,8 @@ export default async function SitePage({ params }: Props) {
               today={todayInTimeZone(organization.timezone)}
               soonDays={organization.due_soon_days}
             />
+
+            <SiteFloorPlansCard siteId={site.id} manager={manager} locations={list} />
 
             <DefectsCard scope={{ site: site.id }} />
 

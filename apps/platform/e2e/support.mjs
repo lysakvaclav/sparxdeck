@@ -177,3 +177,58 @@ export async function selectRows(table, query) {
   if (!Array.isArray(result)) throw new Error(`select ${table}: ${JSON.stringify(result)}`);
   return result;
 }
+
+/**
+ * Writes a two-page vector PDF of floor plans (walls and a title per page, the
+ * font not embedded) and returns its path.
+ */
+export function writeTestPlanPdf(dir) {
+  const walls = [
+    "6 w 40 40 762 515 re S 3 w 40 300 m 802 300 l S 300 40 m 300 300 l S 560 300 m 560 555 l S",
+    "6 w 40 40 762 515 re S 3 w 420 40 m 420 555 l S 40 200 m 420 200 l S 620 300 m 802 300 l S",
+  ];
+  const pages = walls.map(
+    (lines, index) =>
+      `0.16 0.22 0.26 RG ${lines} BT /F1 24 Tf 60 515 Td (Floor ${index + 1}) Tj ET`,
+  );
+  const objects = [
+    null,
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${pages.map((_, i) => `${4 + 2 * i} 0 R`).join(" ")}] /Count ${pages.length} >>`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  pages.forEach((content, i) => {
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R >> >> /Contents ${5 + 2 * i} 0 R >>`,
+      `<< /Length ${Buffer.byteLength(content)} >>\nstream\n${content}\nendstream`,
+    );
+  });
+  let pdf = "%PDF-1.4\n";
+  const offsets = [];
+  for (let n = 1; n < objects.length; n++) {
+    offsets[n] = Buffer.byteLength(pdf);
+    pdf += `${n} 0 obj\n${objects[n]}\nendobj\n`;
+  }
+  const xref = Buffer.byteLength(pdf);
+  pdf +=
+    `xref\n0 ${objects.length}\n0000000000 65535 f \n` +
+    offsets
+      .slice(1)
+      .map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`)
+      .join("") +
+    `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.resolve(dir, "test-plan.pdf");
+  fs.writeFileSync(file, pdf);
+  return file;
+}
+
+/** Every file in a folder of a bucket, through the admin API. */
+export const filesIn = listFiles;
+
+/** Downloads a stored file through the admin API. */
+export async function downloadFile(bucket, objectPath) {
+  const response = await fetch(`${url}/storage/v1/object/${bucket}/${objectPath}`, { headers: H });
+  if (!response.ok) throw new Error(`download ${objectPath}: ${response.status}`);
+  return Buffer.from(await response.arrayBuffer());
+}

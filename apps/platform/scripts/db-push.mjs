@@ -2,7 +2,7 @@
 // so neither Docker nor `supabase login` is needed.
 //
 //   npm run db:push                 development: SUPABASE_DB_URL (.env.local)
-//   npm run db:push:production      production: SUPABASE_DB_URL (.env.production.local),
+//   npm run db:push:production      production: SUPABASE_DB_URL (.env.prod.local),
 //                                   after you type the project's reference to confirm
 //
 // Extra arguments go to `supabase db push` (e.g. --dry-run to list pending migrations).
@@ -13,7 +13,7 @@ import { createInterface } from "node:readline/promises";
 
 const production = process.argv.includes("--production");
 const args = process.argv.slice(2).filter((arg) => arg !== "--production");
-const source = production ? ".env.production.local" : ".env.local";
+const source = production ? ".env.prod.local" : ".env.local";
 const dbUrl = process.env.SUPABASE_DB_URL;
 if (!dbUrl) {
   console.error(

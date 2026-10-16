@@ -15,18 +15,51 @@ import {
   TickIcon,
   type IconComponent,
 } from "@/components/icons";
+import {
+  PlanLegend,
+  PlanViewer,
+  type MarkerTone,
+  type PlanMarker,
+} from "@/components/app/plan-viewer";
 import { QrScanner } from "@/components/app/qr-scanner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { devicesWithDrafts, subscribeDrafts } from "@/lib/client/check-drafts";
 import { labelQuery } from "@/lib/devices";
+import type { PlanSummary } from "@/lib/floor-plans-data";
 import type { RunCheck, RunDevice } from "@/lib/inspection-data";
 import { readScan } from "@/lib/inspections";
 import { cn } from "@/lib/utils";
 
 type Tab = "remaining" | "done" | "all";
+type ViewMode = "list" | "plan";
+type RunState = "passed" | "failed" | "open" | "remaining";
+
+const RUN_TONE: Record<RunState, MarkerTone> = {
+  passed: "success",
+  failed: "danger",
+  open: "warning",
+  remaining: "neutral",
+};
+
+/** The list or the plan: remembered on this phone for the next inspection. */
+const VIEW_KEY = "sparxdeck.inspection.view";
+
+function storedView(): ViewMode {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === "plan" ? "plan" : "list";
+  } catch {
+    return "list"; // Storage unavailable (private mode).
+  }
+}
+
+function subscribeView(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
 
 /** Unsent drafts live in localStorage; read them without a hydration mismatch. */
 function useDrafts(inspectionId: string) {
@@ -48,21 +81,40 @@ export function InspectionRun({
   devices,
   checks,
   appUrl,
+  plans,
+  placements,
 }: {
   inspectionId: string;
   accessNotes: string | null;
   devices: RunDevice[];
   checks: Record<string, RunCheck>;
   appUrl: string;
+  /** The building's floor plans and where devices are on them. */
+  plans: PlanSummary[];
+  placements: Record<string, { planId: string; x: number; y: number }>;
 }) {
   const t = useTranslations("inspections");
   const tSites = useTranslations("sites.detail");
+  const tPlans = useTranslations("plans");
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("remaining");
   const [query, setQuery] = useState("");
   const [scanning, setScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const drafts = useDrafts(inspectionId);
+  const remembered = useSyncExternalStore(subscribeView, storedView, () => "list" as const);
+  const [chosen, setChosen] = useState<ViewMode | null>(null);
+  const mode: ViewMode = plans.length ? (chosen ?? remembered) : "list";
+  const [planId, setPlanId] = useState(() => plans[0]?.id ?? null);
+
+  function changeMode(next: ViewMode) {
+    setChosen(next);
+    try {
+      window.localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      // Not remembered; nothing else depends on it.
+    }
+  }
 
   useEffect(() => {
     const refresh = () => {
@@ -135,6 +187,38 @@ export function InspectionRun({
     return { icon: DotIcon, tone: "text-subtle", text: t("outcome.remaining") };
   };
 
+  const plan = plans.find((item) => item.id === planId) ?? plans[0] ?? null;
+  const runState = (device: RunDevice): RunState => {
+    const check = checks[device.id];
+    if (check?.outcome === "passed" || check?.outcome === "failed") return check.outcome;
+    return check ? "open" : "remaining";
+  };
+  const planMarkers: PlanMarker[] = plan
+    ? devices.flatMap((device) => {
+        const spot = placements[device.id];
+        if (spot?.planId !== plan.id) return [];
+        return [
+          {
+            id: device.id,
+            x: spot.x,
+            y: spot.y,
+            label: device.number,
+            tone: RUN_TONE[runState(device)],
+            description: tPlans("viewer.marker", {
+              label: device.number,
+              type: device.typeName,
+              state: state(device).text,
+            }),
+          },
+        ];
+      })
+    : [];
+  const onPlanCounts: Record<RunState, number> = { remaining: 0, open: 0, passed: 0, failed: 0 };
+  for (const device of devices)
+    if (placements[device.id]?.planId === plan?.id) onPlanCounts[runState(device)]++;
+  const notOnPlan = devices.filter((device) => !placements[device.id]).length;
+  const showPlan = mode === "plan" && plan !== null;
+
   return (
     <div className="space-y-2.5 sm:space-y-[15px]">
       {accessNotes && (
@@ -196,95 +280,177 @@ export function InspectionRun({
       </Card>
 
       <Card>
-        <div className="flex flex-col gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] sm:flex-row sm:items-center sm:justify-between">
-          <div role="tablist" className="flex rounded-md bg-muted p-0.5">
-            {(
-              [
-                ["remaining", t("run.remaining"), devices.length - done.length],
-                ["done", t("run.done"), done.length],
-                ["all", t("run.all"), devices.length],
-              ] as const
-            ).map(([id, label, count]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={tab === id}
-                onClick={() => setTab(id)}
-                className={cn(
-                  "min-h-[30px] flex-1 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
-                  tab === id
-                    ? "bg-background font-semibold shadow-elevation-1"
-                    : "text-muted-foreground",
-                )}
-              >
-                {label} <span className="text-muted-foreground tabular-nums">{count}</span>
-              </button>
-            ))}
+        {plans.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
+            <div
+              role="radiogroup"
+              aria-label={tPlans("run.view")}
+              className="flex flex-1 rounded-md bg-muted p-0.5 sm:flex-none"
+            >
+              {(["list", "plan"] as const).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={mode === id}
+                  onClick={() => changeMode(id)}
+                  className={cn(
+                    "min-h-[30px] flex-1 rounded-[3px] px-4 text-ui whitespace-nowrap pointer-coarse:min-h-11",
+                    mode === id
+                      ? "bg-background font-semibold shadow-elevation-1"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {tPlans(`run.${id}`)}
+                </button>
+              ))}
+            </div>
+            {showPlan && plans.length > 1 && (
+              <div className="w-full sm:w-auto sm:min-w-[200px]">
+                <NativeSelect
+                  aria-label={tPlans("title")}
+                  value={plan.id}
+                  onChange={(event) => setPlanId(event.target.value)}
+                >
+                  {plans.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
           </div>
-          <div className="relative w-full sm:max-w-[200px]">
-            <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              inputMode="numeric"
-              aria-label={t("run.search")}
-              placeholder={t("run.search")}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="ps-[30px]"
-            />
-          </div>
-        </div>
+        )}
 
-        {devices.length === 0 ? (
-          <p className="px-[15px] py-6 text-center text-muted-foreground">{t("run.noDevices")}</p>
-        ) : shown.length === 0 ? (
-          <p className="px-[15px] py-6 text-center text-muted-foreground">
-            {query.trim()
-              ? t("run.emptySearch")
-              : tab === "remaining"
-                ? t("run.emptyRemaining")
-                : t("run.emptyDone")}
-          </p>
+        {showPlan ? (
+          <>
+            <PlanViewer
+              key={plan.id}
+              name={plan.name}
+              imageUrl={plan.imageUrl}
+              size={{ width: plan.width, height: plan.height }}
+              markers={planMarkers}
+              onSelect={(id) => id && router.push(checkUrl(id))}
+              onReload={() => router.refresh()}
+              fitShape
+              className="max-h-[65dvh] min-h-[260px] w-full"
+            />
+            <div className="space-y-1.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">
+              <PlanLegend
+                items={(["remaining", "open", "passed", "failed"] as const).map((id) => ({
+                  tone: RUN_TONE[id],
+                  label: t(`outcome.${id}`),
+                  count: onPlanCounts[id],
+                }))}
+              />
+              {planMarkers.length === 0 && (
+                <p className="text-ui text-muted-foreground">{tPlans("run.noneOnPlan")}</p>
+              )}
+              {notOnPlan > 0 && (
+                <p className="text-ui-sm text-muted-foreground">
+                  {tPlans("run.notOnPlan", { count: notOnPlan })}
+                </p>
+              )}
+            </div>
+          </>
         ) : (
-          <ul>
-            {groups.map((group) => (
-              <li key={group.key}>
-                {group.name && (
-                  <p className="bg-muted px-[15px] py-1 text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]">
-                    {group.name}
-                  </p>
-                )}
-                <ul>
-                  {group.rows.map((device) => {
-                    const status = state(device);
-                    return (
-                      <li key={device.id}>
-                        <Link
-                          href={checkUrl(device.id)}
-                          className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-[rgb(191_204_214/0.3)]"
-                        >
-                          <status.icon size={20} className={cn("shrink-0", status.tone)} />
-                          <span className="min-w-0 flex-1">
-                            <span className="block font-mono text-ui-lg font-semibold tabular-nums">
-                              {device.number}
-                            </span>
-                            <span className="block truncate text-ui-sm text-muted-foreground">
-                              {[device.typeName, device.serialNumber].filter(Boolean).join(" · ")}
-                            </span>
-                          </span>
-                          <span className={cn("shrink-0 text-ui-sm", status.tone)}>
-                            {status.text}
-                          </span>
-                          <ChevronRightIcon className="shrink-0 text-subtle rtl:rotate-180" />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="flex flex-col gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] sm:flex-row sm:items-center sm:justify-between">
+              <div role="tablist" className="flex rounded-md bg-muted p-0.5">
+                {(
+                  [
+                    ["remaining", t("run.remaining"), devices.length - done.length],
+                    ["done", t("run.done"), done.length],
+                    ["all", t("run.all"), devices.length],
+                  ] as const
+                ).map(([id, label, count]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === id}
+                    onClick={() => setTab(id)}
+                    className={cn(
+                      "min-h-[30px] flex-1 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
+                      tab === id
+                        ? "bg-background font-semibold shadow-elevation-1"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {label} <span className="text-muted-foreground tabular-nums">{count}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="relative w-full sm:max-w-[200px]">
+                <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="search"
+                  inputMode="numeric"
+                  aria-label={t("run.search")}
+                  placeholder={t("run.search")}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="ps-[30px]"
+                />
+              </div>
+            </div>
+
+            {devices.length === 0 ? (
+              <p className="px-[15px] py-6 text-center text-muted-foreground">
+                {t("run.noDevices")}
+              </p>
+            ) : shown.length === 0 ? (
+              <p className="px-[15px] py-6 text-center text-muted-foreground">
+                {query.trim()
+                  ? t("run.emptySearch")
+                  : tab === "remaining"
+                    ? t("run.emptyRemaining")
+                    : t("run.emptyDone")}
+              </p>
+            ) : (
+              <ul>
+                {groups.map((group) => (
+                  <li key={group.key}>
+                    {group.name && (
+                      <p className="bg-muted px-[15px] py-1 text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]">
+                        {group.name}
+                      </p>
+                    )}
+                    <ul>
+                      {group.rows.map((device) => {
+                        const status = state(device);
+                        return (
+                          <li key={device.id}>
+                            <Link
+                              href={checkUrl(device.id)}
+                              className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-[rgb(191_204_214/0.3)]"
+                            >
+                              <status.icon size={20} className={cn("shrink-0", status.tone)} />
+                              <span className="min-w-0 flex-1">
+                                <span className="block font-mono text-ui-lg font-semibold tabular-nums">
+                                  {device.number}
+                                </span>
+                                <span className="block truncate text-ui-sm text-muted-foreground">
+                                  {[device.typeName, device.serialNumber]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </span>
+                              </span>
+                              <span className={cn("shrink-0 text-ui-sm", status.tone)}>
+                                {status.text}
+                              </span>
+                              <ChevronRightIcon className="shrink-0 text-subtle rtl:rotate-180" />
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </Card>
 

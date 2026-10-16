@@ -20,7 +20,7 @@ Prostředí jsou dvě:
 ## 2. Supabase: produkční projekt
 
 1. Založte nový projekt v regionu **EU** (Frankfurt nebo Irsko). Silné heslo databáze uložte do správce hesel.
-2. Do `apps/platform/.env.production.local` (git ho ignoruje) zapište produkční hodnoty podle `.env.example`. Platí to hlavně pro `SUPABASE_DB_URL`: *Connect → Session pooler*.
+2. Do `apps/platform/.env.prod.local` (git ho ignoruje) zapište produkční hodnoty podle `.env.example`. Platí to hlavně pro `SUPABASE_DB_URL`: *Connect → Session pooler*.
 3. Nahrajte databázi:
    ```
    cd apps/platform
@@ -85,8 +85,8 @@ Landing page: Root Directory `apps/landingpage`, Install Command `npm ci --prefi
 **Soubory** (loga, fotky, PDF protokolů) nejsou v zálohách databáze. Zálohujte je skriptem, jednou týdně a vždy před větším zásahem:
 ```
 cd apps/platform
-node --env-file=.env.production.local scripts/backup-storage.mjs            # do backups/storage-<datum>
-node --env-file=.env.production.local scripts/restore-storage.mjs <složka>  # nahraje zpět
+node --env-file=.env.prod.local scripts/backup-storage.mjs            # do backups/storage-<datum>
+node --env-file=.env.prod.local scripts/restore-storage.mjs <složka>  # nahraje zpět
 ```
 
 **Zkouška obnovení** (jednou za čtvrtletí, poprvé před prvním zákazníkem):

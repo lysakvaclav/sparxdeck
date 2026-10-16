@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { launch, sleep } from "./driver.mjs";
-const APP = "http://localhost:3001",
+const APP = process.env.E2E_APP_URL ?? "http://localhost:3001",
   OUT = process.argv[2];
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
   key = process.env.SUPABASE_SECRET_KEY;

@@ -21,6 +21,7 @@ import {
 import { requireMembership } from "@/lib/auth";
 import { formatLabel } from "@/lib/devices";
 import { serverEnv } from "@/lib/env";
+import { sitePlacements, sitePlans } from "@/lib/floor-plans-data";
 import { getInspection, loadInspectionRun, memberNames } from "@/lib/inspection-data";
 import type { CheckOutcome } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
@@ -72,7 +73,11 @@ export default async function InspectionPage({ params }: Props) {
   );
 
   if (!completed) {
-    const run = await loadInspectionRun(inspection, membership.user_id);
+    const [run, plans, placements] = await Promise.all([
+      loadInspectionRun(inspection, membership.user_id),
+      sitePlans(inspection.site_id),
+      sitePlacements(inspection.site_id),
+    ]);
     return (
       <>
         {header}
@@ -83,6 +88,8 @@ export default async function InspectionPage({ params }: Props) {
             devices={run.devices}
             checks={run.checks}
             appUrl={serverEnv().NEXT_PUBLIC_APP_URL}
+            plans={plans}
+            placements={placements}
           />
         </PageBody>
       </>

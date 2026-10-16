@@ -2092,6 +2092,331 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("floor plans", () => {
+    let site: string;
+    let otherSite: string;
+    let floor: string;
+    let plan: string;
+    let secondPlan: string;
+    let device: string;
+    let deviceElsewhere: string;
+    let bobSite: string;
+    let bobDevice: string;
+    let bobPlan: string;
+    const image = (org: string, siteId: string) =>
+      `${org}/floor-plans/${siteId}/${randomUUID()}.webp`;
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").limit(1).single();
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Plans customer" })
+        .select("id")
+        .single();
+      const { data: sites } = await alice.client
+        .from("sites")
+        .insert([
+          { organization_id: orgA, customer_id: customer!.id, name: "Plan site" },
+          { organization_id: orgA, customer_id: customer!.id, name: "Plan other site" },
+        ])
+        .select("id, name");
+      site = sites!.find((s) => s.name === "Plan site")!.id;
+      otherSite = sites!.find((s) => s.name === "Plan other site")!.id;
+      const { data: location } = await alice.client
+        .from("locations")
+        .insert({ organization_id: orgA, site_id: site, name: "1. patro" })
+        .select("id")
+        .single();
+      floor = location!.id;
+      const { data: devices } = await alice.client
+        .from("devices")
+        .insert([
+          { organization_id: orgA, site_id: site, device_type_id: type!.id },
+          { organization_id: orgA, site_id: otherSite, device_type_id: type!.id },
+        ])
+        .select("id, site_id");
+      device = devices!.find((d) => d.site_id === site)!.id;
+      deviceElsewhere = devices!.find((d) => d.site_id === otherSite)!.id;
+
+      const { data: bobType } = await bob.client
+        .from("device_types")
+        .select("id")
+        .limit(1)
+        .single();
+      const { data: bobCustomer } = await bob.client
+        .from("customers")
+        .insert({ organization_id: orgB, name: "Bob plans" })
+        .select("id")
+        .single();
+      const { data: bobSiteRow } = await bob.client
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: bobCustomer!.id, name: "Bob site" })
+        .select("id")
+        .single();
+      bobSite = bobSiteRow!.id;
+      const { data: bobDeviceRow } = await bob.client
+        .from("devices")
+        .insert({ organization_id: orgB, site_id: bobSite, device_type_id: bobType!.id })
+        .select("id")
+        .single();
+      bobDevice = bobDeviceRow!.id;
+      const { data: bobPlanRow, error } = await bob.client
+        .from("floor_plans")
+        .insert({
+          organization_id: orgB,
+          site_id: bobSite,
+          name: "Bob plan",
+          image_path: image(orgB, bobSite),
+          image_width: 100,
+          image_height: 100,
+        })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      bobPlan = bobPlanRow!.id;
+    });
+
+    it("an owner adds plans of a building and places its devices", async () => {
+      const { data, error } = await alice.client
+        .from("floor_plans")
+        .insert([
+          {
+            organization_id: orgA,
+            site_id: site,
+            location_id: floor,
+            name: "1. patro",
+            sort_order: 1,
+            image_path: image(orgA, site),
+            image_width: 4096,
+            image_height: 2048,
+          },
+          {
+            organization_id: orgA,
+            site_id: site,
+            name: "Suterén",
+            sort_order: 2,
+            image_path: image(orgA, site),
+            image_width: 2000,
+            image_height: 2000,
+          },
+        ])
+        .select("id, name, created_by");
+      expect(error).toBeNull();
+      plan = data!.find((p) => p.name === "1. patro")!.id;
+      secondPlan = data!.find((p) => p.name === "Suterén")!.id;
+      expect(data!.every((p) => p.created_by === alice.id)).toBe(true);
+
+      const { error: placeError } = await alice.client.rpc("place_device", {
+        p_device: device,
+        p_plan: plan,
+        p_x: 0.25,
+        p_y: 0.75,
+      });
+      expect(placeError).toBeNull();
+      // Placing again moves it (to another plan of the building).
+      const { error: moveError } = await alice.client.rpc("place_device", {
+        p_device: device,
+        p_plan: secondPlan,
+        p_x: 0.5,
+        p_y: 0.5,
+      });
+      expect(moveError).toBeNull();
+      const { data: spots } = await alice.client
+        .from("device_placements")
+        .select("floor_plan_id, site_id, x, y, updated_by")
+        .eq("device_id", device);
+      expect(spots).toEqual([
+        { floor_plan_id: secondPlan, site_id: site, x: 0.5, y: 0.5, updated_by: alice.id },
+      ]);
+    });
+
+    it("another organization can't see, change or use them", async () => {
+      const { data: plans } = await bob.client.from("floor_plans").select("id").eq("site_id", site);
+      expect(plans).toEqual([]);
+      const { data: spots } = await bob.client
+        .from("device_placements")
+        .select("device_id")
+        .eq("device_id", device);
+      expect(spots).toEqual([]);
+      const { data: renamed } = await bob.client
+        .from("floor_plans")
+        .update({ name: "Hacked" })
+        .eq("id", plan)
+        .select("id");
+      expect(renamed).toEqual([]);
+      const { data: deleted } = await bob.client
+        .from("floor_plans")
+        .delete()
+        .eq("id", plan)
+        .select("id");
+      expect(deleted).toEqual([]);
+      // Not a plan in A's building, nor A's device on B's plan, nor B's on A's.
+      const { error: plant } = await bob.client.from("floor_plans").insert({
+        organization_id: orgB,
+        site_id: site,
+        name: "Planted",
+        image_path: image(orgB, site),
+        image_width: 10,
+        image_height: 10,
+      });
+      expect(plant).not.toBeNull();
+      const { error: steal } = await bob.client.rpc("place_device", {
+        p_device: device,
+        p_plan: bobPlan,
+        p_x: 0.1,
+        p_y: 0.1,
+      });
+      expect(steal).not.toBeNull();
+      const { error: intrude } = await bob.client.rpc("place_device", {
+        p_device: bobDevice,
+        p_plan: plan,
+        p_x: 0.1,
+        p_y: 0.1,
+      });
+      expect(intrude).not.toBeNull();
+      const { data: unchanged } = await admin
+        .from("device_placements")
+        .select("floor_plan_id")
+        .eq("device_id", device)
+        .single();
+      expect(unchanged?.floor_plan_id).toBe(secondPlan);
+    });
+
+    it("a technician sees the plans but can't change them", async () => {
+      const { data } = await carol.client.from("floor_plans").select("id").eq("site_id", site);
+      expect(data).toHaveLength(2);
+      const { data: spots } = await carol.client
+        .from("device_placements")
+        .select("device_id")
+        .eq("device_id", device);
+      expect(spots).toHaveLength(1);
+      const { error: insert } = await carol.client.from("floor_plans").insert({
+        organization_id: orgA,
+        site_id: site,
+        name: "Technician plan",
+        image_path: image(orgA, site),
+        image_width: 10,
+        image_height: 10,
+      });
+      expect(insert).not.toBeNull();
+      const { error: place } = await carol.client.rpc("place_device", {
+        p_device: device,
+        p_plan: plan,
+        p_x: 0.9,
+        p_y: 0.9,
+      });
+      expect(place).not.toBeNull();
+      const { data: removed } = await carol.client
+        .from("device_placements")
+        .delete()
+        .eq("device_id", device)
+        .select("device_id");
+      expect(removed).toEqual([]);
+    });
+
+    it("a device and its plan are in the same building; spots stay on the plan", async () => {
+      const { error: elsewhere } = await alice.client.rpc("place_device", {
+        p_device: deviceElsewhere,
+        p_plan: plan,
+        p_x: 0.5,
+        p_y: 0.5,
+      });
+      expect(elsewhere?.code).toBe("23503");
+      const { error: outside } = await alice.client.rpc("place_device", {
+        p_device: device,
+        p_plan: plan,
+        p_x: 1.2,
+        p_y: 0.5,
+      });
+      expect(outside?.code).toBe("23514");
+    });
+
+    it("the image is in the organization's folder; building and author don't change", async () => {
+      const { error: foreign } = await alice.client.from("floor_plans").insert({
+        organization_id: orgA,
+        site_id: site,
+        name: "Foreign image",
+        image_path: image(orgB, bobSite),
+        image_width: 10,
+        image_height: 10,
+      });
+      expect(foreign?.code).toBe("23514");
+      const { error: move } = await alice.client
+        .from("floor_plans")
+        .update({ site_id: otherSite } as never)
+        .eq("id", plan);
+      expect(move).not.toBeNull();
+      const { error: author } = await alice.client
+        .from("floor_plans")
+        .update({ created_by: bob.id } as never)
+        .eq("id", plan);
+      expect(author).not.toBeNull();
+    });
+
+    it("plans are reordered as a complete set", async () => {
+      const { error: partial } = await alice.client.rpc("reorder_floor_plans", {
+        p_site: site,
+        p_ordered: [plan],
+      });
+      expect(partial?.message).toMatch(/floor_plans_mismatch/);
+      const { error } = await alice.client.rpc("reorder_floor_plans", {
+        p_site: site,
+        p_ordered: [secondPlan, plan],
+      });
+      expect(error).toBeNull();
+      const { data } = await alice.client
+        .from("floor_plans")
+        .select("id")
+        .eq("site_id", site)
+        .order("sort_order");
+      expect(data?.map((p) => p.id)).toEqual([secondPlan, plan]);
+      const { error: technician } = await carol.client.rpc("reorder_floor_plans", {
+        p_site: site,
+        p_ordered: [plan, secondPlan],
+      });
+      expect(technician).toBeNull(); // security invoker: RLS lets the update touch nothing
+      const { data: still } = await alice.client
+        .from("floor_plans")
+        .select("id")
+        .eq("site_id", site)
+        .order("sort_order");
+      expect(still?.map((p) => p.id)).toEqual([secondPlan, plan]);
+    });
+
+    it("deleting a plan takes its placements; the device stays", async () => {
+      const { data, error } = await alice.client
+        .from("floor_plans")
+        .delete()
+        .eq("id", secondPlan)
+        .select("id");
+      expect(error).toBeNull();
+      expect(data).toHaveLength(1);
+      const { data: spots } = await admin
+        .from("device_placements")
+        .select("device_id")
+        .eq("device_id", device);
+      expect(spots).toEqual([]);
+      const { data: kept } = await alice.client.from("devices").select("id").eq("id", device);
+      expect(kept).toHaveLength(1);
+    });
+
+    it("no new plans in a deleted building", async () => {
+      await alice.client
+        .from("sites")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", otherSite);
+      const { error } = await alice.client.from("floor_plans").insert({
+        organization_id: orgA,
+        site_id: otherSite,
+        name: "Late",
+        image_path: image(orgA, otherSite),
+        image_width: 10,
+        image_height: 10,
+      });
+      expect(error?.message).toMatch(/site_deleted/);
+    });
+  });
+
   describe("member management", () => {
     async function membershipOf(user: TestUser) {
       const { data } = await admin

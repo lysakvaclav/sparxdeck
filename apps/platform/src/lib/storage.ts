@@ -39,3 +39,18 @@ export async function signedUrl(path: string | null | undefined): Promise<string
     .createSignedUrl(path, SIGNED_URL_SECONDS);
   return data?.signedUrl ?? null;
 }
+
+/** Short-lived signed URLs for several private objects at once, by path. */
+export async function signedUrls(paths: string[]): Promise<Map<string, string>> {
+  const unique = [...new Set(paths.filter(Boolean))];
+  if (!unique.length) return new Map();
+  const supabase = await createClient();
+  const { data } = await supabase.storage
+    .from(ORG_ASSETS_BUCKET)
+    .createSignedUrls(unique, SIGNED_URL_SECONDS);
+  return new Map(
+    (data ?? []).flatMap((item) =>
+      item.path && item.signedUrl ? [[item.path, item.signedUrl]] : [],
+    ),
+  );
+}

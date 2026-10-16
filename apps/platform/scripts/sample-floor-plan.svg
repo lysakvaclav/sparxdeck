@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1500" viewBox="0 0 1600 1000">
+  <!-- Sample floor plan of an apartment house floor (no text: works in any language).
+       Rendered to src/assets/sample/floor-plan.webp by scripts/generate-sample-plan.mjs. -->
+  <rect width="1600" height="1000" fill="#ffffff"/>
+  <!-- grid -->
+  <g stroke="#eef2f5" stroke-width="1">
+    <path d="M100 0V1000M200 0V1000M300 0V1000M400 0V1000M500 0V1000M600 0V1000M700 0V1000M800 0V1000M900 0V1000M1000 0V1000M1100 0V1000M1200 0V1000M1300 0V1000M1400 0V1000M1500 0V1000"/>
+    <path d="M0 100H1600M0 200H1600M0 300H1600M0 400H1600M0 500H1600M0 600H1600M0 700H1600M0 800H1600M0 900H1600"/>
+  </g>
+  <!-- floors of rooms -->
+  <g fill="#f7f9fa">
+    <rect x="80" y="80" width="1440" height="840"/>
+  </g>
+  <!-- corridor -->
+  <rect x="80" y="430" width="1440" height="140" fill="#eef3f7"/>
+  <!-- stairwell -->
+  <rect x="700" y="80" width="200" height="350" fill="#e8edf1"/>
+  <g stroke="#8a9ba8" stroke-width="2">
+    <path d="M720 110H880M720 140H880M720 170H880M720 200H880M720 230H880M720 260H880M720 290H880M720 320H880M720 350H880M720 380H880"/>
+    <path d="M800 110V400"/>
+  </g>
+  <path d="M760 400L800 380L840 400" fill="none" stroke="#5c7080" stroke-width="3"/>
+  <!-- lift -->
+  <rect x="930" y="300" width="110" height="120" fill="#dfe6eb" stroke="#5c7080" stroke-width="4"/>
+  <path d="M930 300L1040 420M1040 300L930 420" stroke="#a7b6c2" stroke-width="2"/>
+  <!-- walls -->
+  <g fill="none" stroke="#293742" stroke-linecap="square">
+    <rect x="80" y="80" width="1440" height="840" stroke-width="18"/>
+    <!-- corridor walls with door gaps -->
+    <path d="M80 430H180M260 430H560M640 430H700M900 430H930M1040 430H1140M1220 430H1520" stroke-width="10"/>
+    <path d="M80 570H300M380 570H760M840 570H1180M1260 570H1520" stroke-width="10"/>
+    <!-- partitions north -->
+    <path d="M420 80V430M700 80V430M900 80V430M1180 80V430" stroke-width="10"/>
+    <path d="M80 260H260M330 260H420M1180 260H1300M1370 260H1520" stroke-width="6"/>
+    <!-- partitions south -->
+    <path d="M560 570V920M1000 570V920" stroke-width="10"/>
+    <path d="M80 760H230M300 760H560M1000 740H1140M1210 740H1520" stroke-width="6"/>
+    <path d="M300 570V660M300 720V760" stroke-width="6"/>
+    <path d="M1300 740V830M1300 880V920" stroke-width="6"/>
+  </g>
+  <!-- doors (leaf and swing) -->
+  <g fill="none" stroke="#5c7080" stroke-width="3">
+    <path d="M180 430V350A80 80 0 0 1 260 430"/>
+    <path d="M560 430V350A80 80 0 0 1 640 430"/>
+    <path d="M1140 430V350A80 80 0 0 1 1220 430"/>
+    <path d="M300 570V650A80 80 0 0 0 380 570"/>
+    <path d="M760 570V650A80 80 0 0 0 840 570"/>
+    <path d="M1180 570V650A80 80 0 0 0 1260 570"/>
+    <path d="M260 260H330"/><path d="M1300 260H1370"/>
+    <path d="M230 760H300"/><path d="M1140 740H1210"/>
+    <!-- entrance -->
+    <path d="M1520 460V540"/>
+    <path d="M1520 460H1580M1520 540H1580"/>
+  </g>
+  <!-- windows -->
+  <g stroke="#137cbd" stroke-width="6">
+    <path d="M160 80H340M500 80H640M960 80H1120M1260 80H1460"/>
+    <path d="M160 920H480M660 920H900M1080 920H1240M1360 920H1480"/>
+    <path d="M80 140V220M80 640V720"/>
+  </g>
+  <!-- bathrooms fixtures -->
+  <g fill="#ffffff" stroke="#8a9ba8" stroke-width="2">
+    <rect x="110" y="110" width="70" height="120" rx="20"/>
+    <circle cx="350" cy="140" r="22"/>
+    <rect x="1210" y="110" width="70" height="120" rx="20"/>
+    <circle cx="1460" cy="140" r="22"/>
+    <rect x="110" y="790" width="70" height="110" rx="20"/>
+    <rect x="1330" y="770" width="70" height="120" rx="20"/>
+  </g>
+  <!-- kitchen counters -->
+  <g fill="#ffffff" stroke="#8a9ba8" stroke-width="2">
+    <rect x="440" y="100" width="40" height="240"/>
+    <rect x="1290" y="590" width="210" height="40"/>
+    <rect x="580" y="860" width="260" height="40"/>
+  </g>
+  <!-- north arrow -->
+  <g transform="translate(40 962)">
+    <circle cx="0" cy="0" r="26" fill="#ffffff" stroke="#293742" stroke-width="3"/>
+    <path d="M0 -20L11 10L0 3L-11 10Z" fill="#293742"/>
+  </g>
+</svg>

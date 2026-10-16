@@ -398,6 +398,39 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 **Hotovo, když:** nahraju plán patra, rozmístím na něj zařízení z budovy, na telefonu během revize vidím na plánu, co zbývá, a cizí firma plán nevidí.
 
+**Stav (2026-10-16): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Nahrání:**
+  - Obrázek (JPG, PNG, WebP, i fotka z telefonu) nebo PDF, u vícestránkového PDF s výběrem strany a náhledem.
+  - Prohlížeč plán vykreslí (pdf.js, vektorové plány ostře), zmenší na 4096 px a uloží jako WebP pod 2 MB. Server ověří typ i rozměry z obsahu.
+  - Název se doplní z patra nebo ze souboru. Plán jde přejmenovat, přiřadit k patru, seřadit, vyměnit mu obrázek (zařízení zůstanou na místě) a smazat i se souborem.
+- **Prohlížeč plánu:**
+  - Posun tažením, přiblížení kolečkem, dvojklikem a dvěma prsty, klávesnice (+, −, 0, šipky).
+  - Značky mají na obrazovce stálou velikost a na dotykovém displeji plochu 44 px. Barva podle termínu: po termínu, brzy, v pořádku, bez revize.
+- **Rozmístění** (vlastník a administrátor):
+  - Zařízení se vybere v panelu a klepne se na plán. Zařízení z patra plánu jsou v panelu nahoře.
+  - Přesun tažením nebo šipkami (Shift = větší krok), přesun na jiný plán budovy, odebrání z plánu.
+  - Změny se ukážou hned a ukládají se na pozadí. Technik plány jen prohlíží.
+- **Napojení:**
+  - Karta Půdorysy na budově.
+  - Umístění na detailu zařízení (malý plán, nebo odkazy „Umístit“).
+  - V revizi přepínač Seznam / Půdorys: barvy podle stavu kontroly, klepnutí na značku otevře kontrolu, volba se pamatuje v telefonu.
+- **PDF:** plán se značkami a legendou (A4 na šířku nebo na výšku podle plánu) a tabulka zařízení.
+- **Ukázková data:** budova Lipová 12 má plány přízemí a 1. patra s rozmístěnými zařízeními. Smazání ukázky smaže i jejich soubory.
+- **Zabezpečení:** RLS a 8 testů izolace v `tests/rls.test.ts`.
+  - Cizí firma nic nevidí a nezmění.
+  - Zařízení a plán musí být ze stejné budovy.
+  - Obrázek musí být ve složce firmy.
+  - Budovu plánu ani autora nejde změnit.
+- **Ověření:**
+  - E2E `e2e/part13.mjs`: 15 kroků na počítači i telefonu, technik, cizí firma, tmavý režim a angličtina.
+  - 13 jednotkových testů výpočtů (`tests/floor-plans.test.ts`).
+- **Opraveno při tom:**
+  - Produkční klíče jsou v `.env.prod.local`. Next.js totiž `.env.production.local` načítá i při lokálním buildu.
+  - Ukázková data vybírala budovu podle času založení, který je u obou stejný.
+
+**Od tebe:** vyzkoušet nahrání skutečného plánu (PDF nebo fotky výkresu) a rozmístění na počítači i na telefonu.
+
 ---
 
 ## Hotové navíc (P2, mimo plán)

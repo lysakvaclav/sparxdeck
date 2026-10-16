@@ -1,7 +1,7 @@
 // Downloads every stored file (logos, photos, protocol PDFs) to a folder.
 // Supabase database backups don't include Storage files, so this is their backup.
 //
-//   node --env-file=.env.production.local scripts/backup-storage.mjs [folder]
+//   node --env-file=.env.prod.local scripts/backup-storage.mjs [folder]
 //
 // The folder defaults to backups/storage-<date>; files keep their bucket and path,
 // so they can be uploaded back as they were.

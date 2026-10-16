@@ -9,13 +9,14 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // PDFs are rendered in Node with react-pdf; its fonts are read from disk.
   serverExternalPackages: ["@react-pdf/renderer"],
-  // Labels and protocols are rendered from several routes and server actions.
-  outputFileTracingIncludes: { "/**": ["./src/assets/fonts/**"] },
+  // Labels and protocols are rendered from several routes and server actions;
+  // the sample floor plan is uploaded by the sample data action.
+  outputFileTracingIncludes: { "/**": ["./src/assets/fonts/**", "./src/assets/sample/**"] },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
   experimental: {
-    // Logos are capped at 2 MB; leave headroom for multipart overhead.
+    // Logos and floor plans are capped at 2 MB; leave headroom for multipart overhead.
     serverActions: { bodySizeLimit: "3mb" },
     // No on-disk cache for `next dev`: on Windows a dev server stopped by force
     // (turbo, Ctrl+C) leaves it damaged and the next start crashes with a

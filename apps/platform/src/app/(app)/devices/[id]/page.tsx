@@ -47,6 +47,7 @@ import { getDevice } from "@/lib/records";
 import { StartInspectionButton } from "../../inspections/start-button";
 import { deleteDevice } from "../actions";
 import { DeviceHistoryCard } from "./history-card";
+import { DevicePlanCard } from "./plan-card";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -326,6 +327,13 @@ export default async function DevicePage({ params }: Props) {
                 ]}
               />
             </Card>
+            {site && active && (
+              <DevicePlanCard
+                device={{ id: device.id, label, typeName, due: state }}
+                siteId={site.id}
+                manager={manager}
+              />
+            )}
             {device.notes && (
               <Card>
                 <CardHeader>

@@ -404,3 +404,25 @@ export const defectNoteSchema = z.object({ note: name(2000) });
 export const defectDescriptionSchema = z.object({ description: name(2000) });
 
 export type DefectInput = z.input<typeof defectSchema>;
+
+// ---------------------------------------------------------------------------
+// Floor plans
+// ---------------------------------------------------------------------------
+
+/** Name and floor of a plan (the image itself is checked separately, by content). */
+export const floorPlanSchema = z.object({
+  name: name(200),
+  locationId: optional(z.uuid("notFound")),
+});
+
+/** A device's spot on a plan, 0..1 from the plan's left and top edge. */
+export const placementSchema = z.object({
+  planId: requiredId,
+  deviceId: requiredId,
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+
+export type FloorPlanInput = z.input<typeof floorPlanSchema>;
+export type FloorPlanValues = z.output<typeof floorPlanSchema>;
+export type PlacementInput = z.input<typeof placementSchema>;

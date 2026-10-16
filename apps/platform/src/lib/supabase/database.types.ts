@@ -365,6 +365,99 @@ export type Database = {
           },
         ];
       };
+      floor_plans: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string;
+          location_id: string | null;
+          name: string;
+          sort_order: number;
+          /** "<organization_id>/floor-plans/..." in org-assets. */
+          image_path: string;
+          image_width: number;
+          image_height: number;
+          created_by: string | null;
+        } & Timestamps;
+        Insert: {
+          organization_id: string;
+          site_id: string;
+          location_id?: string | null;
+          name: string;
+          sort_order?: number;
+          image_path: string;
+          image_width: number;
+          image_height: number;
+        };
+        Update: Partial<{
+          location_id: string | null;
+          name: string;
+          sort_order: number;
+          image_path: string;
+          image_width: number;
+          image_height: number;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "floor_plans_site_id_organization_id_fkey";
+            columns: ["site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "floor_plans_location_id_site_id_fkey";
+            columns: ["location_id", "site_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id", "site_id"];
+          },
+        ];
+      };
+      device_placements: {
+        Row: {
+          device_id: string;
+          organization_id: string;
+          site_id: string;
+          floor_plan_id: string;
+          /** Position relative to the plan image, 0..1 from the left and top. */
+          x: number;
+          y: number;
+          updated_by: string | null;
+        } & Timestamps;
+        Insert: {
+          device_id: string;
+          organization_id: string;
+          site_id: string;
+          floor_plan_id: string;
+          x: number;
+          y: number;
+        };
+        Update: Partial<{ floor_plan_id: string; x: number; y: number }>;
+        Relationships: [
+          {
+            foreignKeyName: "device_placements_device_id_site_id_fkey";
+            columns: ["device_id", "site_id"];
+            isOneToOne: true;
+            referencedRelation: "devices";
+            referencedColumns: ["id", "site_id"];
+          },
+          {
+            foreignKeyName: "device_placements_floor_plan_id_site_id_fkey";
+            columns: ["floor_plan_id", "site_id"];
+            isOneToOne: false;
+            referencedRelation: "floor_plans";
+            referencedColumns: ["id", "site_id"];
+          },
+          {
+            foreignKeyName: "device_placements_site_id_organization_id_fkey";
+            columns: ["site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
       inspections: {
         Row: {
           id: string;
@@ -656,6 +749,11 @@ export type Database = {
       remove_member: { Args: { p_membership: string }; Returns: undefined };
       transfer_ownership: { Args: { p_membership: string }; Returns: undefined };
       reorder_locations: { Args: { p_site: string; p_ordered: string[] }; Returns: undefined };
+      reorder_floor_plans: { Args: { p_site: string; p_ordered: string[] }; Returns: undefined };
+      place_device: {
+        Args: { p_device: string; p_plan: string; p_x: number; p_y: number };
+        Returns: undefined;
+      };
       start_inspection: { Args: { p_site: string }; Returns: string };
       open_device_check: {
         Args: { p_inspection: string; p_device: string; p_take_over?: boolean };
