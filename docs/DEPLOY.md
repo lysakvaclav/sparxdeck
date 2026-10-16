@@ -1,0 +1,113 @@
+# Spuštění platformy (app.sparxdeck.com)
+
+Postup od účtů po první produkční revizi. Všechno v kódu je připravené; tady jsou kroky v administraci služeb, které musí udělat majitel účtů. Odhad: 2–3 hodiny poprvé.
+
+## 1. Účty a rozhodnutí
+
+| Služba | K čemu | Plán |
+|---|---|---|
+| **Vercel** | běh aplikace a týdenní úloha | **Pro** (bezplatný plán nesmí sloužit komerčnímu provozu) |
+| **Supabase** | databáze, přihlášení, soubory | **Pro** pro produkci: denní zálohy (7 dní), volitelně obnova k libovolnému okamžiku (PITR) |
+| **Resend** | e-maily (pozvánky, protokoly, týdenní souhrn, přihlášení) | bezplatný plán stačí na začátek (3 000 e-mailů měsíčně) |
+| **Sentry** | hlášení chyb | bezplatný plán; při zakládání zvolit **EU** |
+| **GitHub** | kód a automatické kontroly | stávající repozitář |
+| Doména | `app.sparxdeck.com`, odesílací doména e-mailů | stávající `sparxdeck.com` |
+
+Prostředí jsou dvě:
+- **Vývoj:** současný projekt Supabase `zclhipzzqvhmpqxxaust`. Používá ho lokální vývoj, náhledy na Vercelu a testy.
+- **Produkce:** nový projekt Supabase. Vidí ho jen produkční nasazení a nikdy v něm neběží testy.
+
+## 2. Supabase: produkční projekt
+
+1. Založte nový projekt v regionu **EU** (Frankfurt nebo Irsko). Silné heslo databáze uložte do správce hesel.
+2. Do `apps/platform/.env.production.local` (git ho ignoruje) zapište produkční hodnoty podle `.env.example`. Platí to hlavně pro `SUPABASE_DB_URL`: *Connect → Session pooler*.
+3. Nahrajte databázi:
+   ```
+   cd apps/platform
+   npm run db:push:production -- --dry-run   # jen vypíše, co by se nahrálo
+   npm run db:push:production                # zeptá se na referenci projektu
+   ```
+4. *Authentication → URL Configuration:* Site URL `https://app.sparxdeck.com`, Redirect URLs `https://app.sparxdeck.com/**`.
+5. *Authentication → Email Templates:* vložte soubory ze `supabase/templates/` (předměty jsou v `subjects.json`).
+6. *Authentication → SMTP Settings:* Resend (host `smtp.resend.com`, port `465`, uživatel `resend`, heslo = Resend API klíč, odesílatel `noreply@sparxdeck.com`).
+7. *Database → Backups:* ověřte, že běží denní zálohy (plán Pro).
+
+## 3. Resend
+
+1. Přidejte doménu `sparxdeck.com` a do DNS vložte záznamy, které Resend ukáže (SPF, DKIM, případně DMARC).
+2. Po ověření vytvořte API klíč s právem odesílat. Ten jde do Vercelu (`RESEND_API_KEY`) i do SMTP v Supabase.
+
+## 4. Sentry (volitelné, doporučené)
+
+Založte projekt typu Next.js v **EU** regionu. Do Vercelu patří `NEXT_PUBLIC_SENTRY_DSN`. Pro čitelné chyby přidejte také `SENTRY_ORG`, `SENTRY_PROJECT` a `SENTRY_AUTH_TOKEN` (token s právem nahrávat zdrojové mapy). Bez DSN aplikace nic neposílá.
+
+## 5. Vercel
+
+1. *Add New → Project*, vyberte repozitář. **Root Directory:** `apps/platform`. Framework: Next.js.
+2. **Install Command:** `npm ci --prefix . --legacy-peer-deps` (platforma má vlastní `package-lock.json`).
+3. *Settings → Functions → Region:* `fra1` (Frankfurt, blízko databáze).
+4. Proměnné prostředí (*Settings → Environment Variables*):
+
+   | Proměnná | Production | Preview |
+   |---|---|---|
+   | `NEXT_PUBLIC_APP_URL` | `https://app.sparxdeck.com` | adresa náhledu nebo vývojová |
+   | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` | produkční projekt | vývojový projekt |
+   | `RESEND_API_KEY`, `EMAIL_FROM` | ano | nechat prázdné (náhledy e-maily neposílají) |
+   | `CRON_SECRET` | dlouhý náhodný řetězec | nechat prázdné |
+   | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | ano | volitelně |
+
+5. *Settings → Domains:* přidejte `app.sparxdeck.com` a u registrátora nastavte CNAME na `cname.vercel-dns.com`.
+6. Týdenní souhrn se naplánuje sám podle `vercel.json` (pondělí 5:00 UTC). Vercel posílá `CRON_SECRET` automaticky.
+
+Landing page je samostatný projekt Vercel (Root Directory `apps/landingpage`, doména `sparxdeck.com`).
+
+> **Známý problém landing page (před nasazením vyřešit):**
+> - Produkční build (`next build`) na Next.js 16.1.1 padá při předgenerování stránek: `InvariantError: Expected workUnitAsyncStorage to have a store`. Je to chyba v Next.js; vývojový server funguje.
+> - Přechod na novější Next.js narazí na nastavení Turbopacku v monorepozitáři (`turbopack.root`) a na rozjetý `package-lock.json` landing page (neodpovídá `package.json`).
+> - Platformy se to netýká. Řešení je samostatný úkol: srovnat lockfile, sjednotit verzi Next.js s platformou (16.3.8) a ověřit build.
+
+## 6. Kontrola po nasazení
+
+- [ ] `https://app.sparxdeck.com/api/health` vrátí `{"status":"ok","database":"ok"}`.
+- [ ] Registrace nového účtu: potvrzovací e-mail dorazí a odkaz funguje.
+- [ ] Založení firmy, pozvánka kolegy: e-mail dorazí.
+- [ ] Zákazník, budova, zařízení. **Tisk štítku z produkční adresy:** QR musí vést na `app.sparxdeck.com`.
+- [ ] Naskenování štítku telefonem: otevře se zařízení (fotoaparát funguje jen přes HTTPS, tady poprvé naostro).
+- [ ] Revize na telefonu až po protokol, stažení PDF, odeslání protokolu e-mailem sobě.
+- [ ] Náhled týdenního souhrnu: `curl -H "Authorization: Bearer <CRON_SECRET>" "https://app.sparxdeck.com/api/cron/weekly-summary?dry"`.
+- [ ] Sentry: v prohlížeči na produkci se vyvolaná chyba objeví v Sentry (volitelné).
+- [ ] Hlídání dostupnosti (např. Better Stack nebo UptimeRobot) míří na `/api/health` a upozorní e-mailem.
+- [ ] Instalace na plochu: v Chrome na Androidu „Nainstalovat aplikaci“, v Safari na iPhonu „Sdílet → Přidat na plochu“.
+
+## 7. Zálohy a obnovení
+
+**Databáze:** Supabase Pro dělá denní zálohu a drží ji 7 dní (s PITR na libovolný okamžik). Obnovuje se v *Database → Backups*. Obnovení přepíše databázi, proto ho nejdřív zkuste do nového projektu (*Restore to a new project*).
+
+**Soubory** (loga, fotky, PDF protokolů) nejsou v zálohách databáze. Zálohujte je skriptem, jednou týdně a vždy před větším zásahem:
+```
+cd apps/platform
+node --env-file=.env.production.local scripts/backup-storage.mjs            # do backups/storage-<datum>
+node --env-file=.env.production.local scripts/restore-storage.mjs <složka>  # nahraje zpět
+```
+
+**Zkouška obnovení** (jednou za čtvrtletí, poprvé před prvním zákazníkem):
+1. Obnovte poslední zálohu databáze do nového dočasného projektu Supabase.
+2. Do něj nahrajte soubory skriptem `restore-storage.mjs` (s `.env` dočasného projektu).
+3. Spusťte aplikaci lokálně proti dočasnému projektu. Přihlaste se, otevřete zařízení, stáhněte protokol a porovnejte počty firem a zařízení s produkcí.
+4. Dočasný projekt smažte a výsledek zapište do `docs/ROADMAP.md` (datum, kdo, výsledek).
+
+## 8. Vydávání změn
+
+1. Změna jde přes pull request. GitHub Actions spustí lint, typy, testy a build (`.github/workflows/platform.yml`).
+2. Test celého hlavního toku poběží v CI po nastavení proměnné `RUN_MAIN_FLOW=true` a tajemství `DEV_SUPABASE_URL`, `DEV_SUPABASE_PUBLISHABLE_KEY` a `DEV_SUPABASE_SECRET_KEY` (vývojový projekt). Lokálně stačí `npm run build && npm run test:flow`.
+3. Nové migrace se nahrávají do produkce **před** nasazením kódu, který je potřebuje (`npm run db:push:production`). Migrace jsou psané tak, aby starší kód fungoval i po nich.
+4. Po sloučení do hlavní větve Vercel nasadí produkci sám. Projděte rychle body z části 6, které se změny týkají.
+
+## 9. Klíče
+
+Klíče z vývoje nikdy nepoužívejte v produkci. Kdyby klíč unikl (např. do commitu nebo e-mailu):
+1. V Supabase vygenerujte nový *secret key* (*Settings → API Keys*).
+2. Ve Vercelu ho vyměňte a nasaďte znovu.
+3. Starý klíč zrušte.
+
+Stejně se mění `CRON_SECRET`, Resend a Sentry token.

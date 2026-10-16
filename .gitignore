@@ -1,0 +1,19 @@
+node_modules
+.next
+.vercel
+.turbo/
+
+# Environment files: never commit secrets. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+backups/

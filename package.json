@@ -1,0 +1,26 @@
+{
+  "name": "sparxdeck",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/stop-dev.mjs 3000 3001 && turbo dev",
+    "dev:platform": "node scripts/stop-dev.mjs 3001 && turbo dev --filter=platform",
+    "dev:landingpage": "node scripts/stop-dev.mjs 3000 && turbo dev --filter=landingpage",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:stop": "node scripts/stop-dev.mjs"
+  },
+  "devDependencies": {
+    "turbo": "^2.7.2"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-tooltip": "^1.2.8"
+  }
+}

@@ -1,0 +1,2222 @@
+/**
+ * Tenant isolation against the real database (dev Supabase project from .env.local).
+ * Creates throwaway users and organizations, checks that Row Level Security keeps
+ * them apart, and deletes everything afterwards. Skipped when Supabase isn't configured.
+ */
+import { randomUUID } from "node:crypto";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type { Database } from "@/lib/supabase/database.types";
+import { generateToken, hashToken } from "@/lib/tokens";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const serviceKey = process.env.SUPABASE_SECRET_KEY;
+const configured = Boolean(url && anonKey && serviceKey);
+
+type Client = SupabaseClient<Database>;
+type TestUser = { id: string; email: string; client: Client };
+
+const run = randomUUID().slice(0, 8);
+const password = `Rls-${randomUUID()}`;
+
+let admin: Client;
+const users: TestUser[] = [];
+
+async function createUser(label: string): Promise<TestUser> {
+  const email = `rls-${label}-${run}@sparxdeck.test`;
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (error || !data.user) throw error ?? new Error("createUser failed");
+
+  const client = createClient<Database>(url!, anonKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { error: signInError } = await client.auth.signInWithPassword({ email, password });
+  if (signInError) throw signInError;
+
+  const user = { id: data.user.id, email, client };
+  users.push(user);
+  return user;
+}
+
+async function createOrg(user: TestUser, name: string) {
+  const { data, error } = await user.client.rpc("create_organization", {
+    p_name: name,
+    p_display_name: name,
+  });
+  if (error || !data) throw error ?? new Error("create_organization failed");
+  return data;
+}
+
+describe.skipIf(!configured)("row level security: organizations are isolated", () => {
+  let alice: TestUser;
+  let bob: TestUser;
+  let carol: TestUser;
+  let orgA: string;
+  let orgB: string;
+
+  beforeAll(async () => {
+    admin = createClient<Database>(url!, serviceKey!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    [alice, bob, carol] = await Promise.all([
+      createUser("alice"),
+      createUser("bob"),
+      createUser("carol"),
+    ]);
+    orgA = await createOrg(alice, `RLS A ${run}`);
+    orgB = await createOrg(bob, `RLS B ${run}`);
+  });
+
+  afterAll(async () => {
+    if (!admin) return;
+    for (const org of [orgA, orgB].filter(Boolean)) {
+      const { data: files } = await admin.storage.from("org-assets").list(org);
+      if (files?.length)
+        await admin.storage.from("org-assets").remove(files.map((f) => `${org}/${f.name}`));
+    }
+    await admin.from("organizations").delete().in("id", [orgA, orgB].filter(Boolean));
+    await Promise.all(users.map((user) => admin.auth.admin.deleteUser(user.id)));
+  });
+
+  it("each user sees only their own organization", async () => {
+    const { data: aOrgs } = await alice.client.from("organizations").select("id");
+    const { data: bOrgs } = await bob.client.from("organizations").select("id");
+    expect(aOrgs?.map((o) => o.id)).toEqual([orgA]);
+    expect(bOrgs?.map((o) => o.id)).toEqual([orgB]);
+  });
+
+  it("each user sees only their own teammates", async () => {
+    const { data } = await alice.client.from("memberships").select("organization_id, user_id");
+    expect(data).toEqual([{ organization_id: orgA, user_id: alice.id }]);
+  });
+
+  it("cannot read another organization even by id", async () => {
+    const { data } = await alice.client.from("organizations").select("id").eq("id", orgB);
+    expect(data).toEqual([]);
+  });
+
+  it("cannot rename another organization", async () => {
+    await alice.client.from("organizations").update({ name: "hacked" }).eq("id", orgB);
+    const { data } = await admin.from("organizations").select("name").eq("id", orgB).single();
+    expect(data?.name).toBe(`RLS B ${run}`);
+  });
+
+  it("cannot invite people into another organization", async () => {
+    const { error } = await alice.client.from("invitations").insert({
+      organization_id: orgB,
+      email: `intruder-${run}@sparxdeck.test`,
+      role: "admin",
+      token_hash: hashToken(generateToken()),
+      invited_by: alice.id,
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("cannot create a second organization", async () => {
+    const { error } = await alice.client.rpc("create_organization", {
+      p_name: "Second",
+      p_display_name: "A",
+    });
+    expect(error?.message).toContain("already_member");
+  });
+
+  it("anonymous visitors see nothing", async () => {
+    const anon = createClient<Database>(url!, anonKey!, { auth: { persistSession: false } });
+    const { data } = await anon.from("organizations").select("id");
+    expect(data ?? []).toEqual([]);
+  });
+
+  describe("invitations", () => {
+    let token: string;
+
+    it("an owner can invite into their own organization, and other orgs can't see it", async () => {
+      token = generateToken();
+      const { error } = await alice.client.from("invitations").insert({
+        organization_id: orgA,
+        email: carol.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: alice.id,
+      });
+      expect(error).toBeNull();
+
+      const { data } = await bob.client.from("invitations").select("id");
+      expect(data).toEqual([]);
+    });
+
+    it("cannot be accepted by someone with a different e-mail", async () => {
+      const { error } = await bob.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Bob",
+      });
+      expect(error?.message).toMatch(/invitation_email_mismatch|already_member/);
+    });
+
+    it("the invitee joins as technician and sees only that organization", async () => {
+      const { data: joined, error } = await carol.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Carol",
+      });
+      expect(error).toBeNull();
+      expect(joined).toBe(orgA);
+
+      const { data: orgs } = await carol.client.from("organizations").select("id");
+      expect(orgs?.map((o) => o.id)).toEqual([orgA]);
+    });
+
+    it("a used invitation can't be accepted again", async () => {
+      const { error } = await carol.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Carol",
+      });
+      expect(error).not.toBeNull();
+    });
+
+    it("a technician can't invite or change organization details", async () => {
+      const { error: inviteError } = await carol.client.from("invitations").insert({
+        organization_id: orgA,
+        email: `someone-${run}@sparxdeck.test`,
+        role: "admin",
+        token_hash: hashToken(generateToken()),
+        invited_by: carol.id,
+      });
+      expect(inviteError).not.toBeNull();
+
+      await carol.client.from("organizations").update({ name: "renamed by tech" }).eq("id", orgA);
+      const { data } = await admin.from("organizations").select("name").eq("id", orgA).single();
+      expect(data?.name).toBe(`RLS A ${run}`);
+    });
+  });
+  describe("organization settings and files", () => {
+    // 1×1 transparent PNG.
+    const png = Uint8Array.from(
+      atob(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      ),
+      (c) => c.charCodeAt(0),
+    );
+
+    it("the database rejects an invalid time zone or threshold", async () => {
+      const { error: tzError } = await alice.client
+        .from("organizations")
+        .update({ timezone: "Mars/Olympus" })
+        .eq("id", orgA);
+      expect(tzError?.message).toContain("invalid_timezone");
+      const { error: daysError } = await alice.client
+        .from("organizations")
+        .update({ due_soon_days: 0 })
+        .eq("id", orgA);
+      expect(daysError).not.toBeNull();
+      const { error: okError } = await alice.client
+        .from("organizations")
+        .update({ timezone: "Asia/Tbilisi", due_soon_days: 45 })
+        .eq("id", orgA);
+      expect(okError).toBeNull();
+    });
+
+    it("a technician can't change settings", async () => {
+      await carol.client.from("organizations").update({ due_soon_days: 7 }).eq("id", orgA);
+      const { data } = await admin
+        .from("organizations")
+        .select("due_soon_days")
+        .eq("id", orgA)
+        .single();
+      expect(data?.due_soon_days).toBe(45);
+    });
+
+    it("the owner uploads a logo into the organization's folder", async () => {
+      const { error } = await alice.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/logo-test.png`, png, { contentType: "image/png" });
+      expect(error).toBeNull();
+      const { error: pathError } = await alice.client
+        .from("organizations")
+        .update({ logo_path: `${orgA}/logo-test.png` })
+        .eq("id", orgA);
+      expect(pathError).toBeNull();
+    });
+
+    it("the logo path can't point into another organization's folder", async () => {
+      const { error } = await alice.client
+        .from("organizations")
+        .update({ logo_path: `${orgB}/logo.png` })
+        .eq("id", orgA);
+      expect(error).not.toBeNull();
+    });
+
+    it("teammates can read the logo, other organizations and visitors can't", async () => {
+      const { error: carolError } = await carol.client.storage
+        .from("org-assets")
+        .download(`${orgA}/logo-test.png`);
+      expect(carolError).toBeNull();
+
+      const { data: bobData } = await bob.client.storage
+        .from("org-assets")
+        .download(`${orgA}/logo-test.png`);
+      expect(bobData).toBeNull();
+      const { data: bobList } = await bob.client.storage.from("org-assets").list(orgA);
+      expect(bobList ?? []).toEqual([]);
+
+      const anon = createClient<Database>(url!, anonKey!, { auth: { persistSession: false } });
+      const { data: anonData } = await anon.storage
+        .from("org-assets")
+        .download(`${orgA}/logo-test.png`);
+      expect(anonData).toBeNull();
+    });
+
+    it("technicians and other organizations can't upload", async () => {
+      const { error: carolError } = await carol.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/sneaky.png`, png, { contentType: "image/png" });
+      expect(carolError).not.toBeNull();
+      const { error: aliceIntoB } = await alice.client.storage
+        .from("org-assets")
+        .upload(`${orgB}/sneaky.png`, png, { contentType: "image/png" });
+      expect(aliceIntoB).not.toBeNull();
+    });
+
+    it("the bucket rejects files that aren't allowed images", async () => {
+      const { error } = await alice.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/page.html`, new TextEncoder().encode("<script>alert(1)</script>"), {
+          contentType: "text/html",
+        });
+      expect(error).not.toBeNull();
+    });
+  });
+
+  describe("customers, sites and locations", () => {
+    let customerA: string;
+    let siteA: string;
+    let customerB: string;
+
+    it("an owner creates a customer, a site and locations", async () => {
+      const { data: customer, error } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Bytové družstvo Lipová", company_id: "27082440" })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      customerA = customer!.id;
+
+      const { data: site, error: siteError } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customerA, name: "Lipová 12" })
+        .select("id")
+        .single();
+      expect(siteError).toBeNull();
+      siteA = site!.id;
+
+      const { error: locationError } = await alice.client.from("locations").insert([
+        { organization_id: orgA, site_id: siteA, name: "Suterén", sort_order: 1 },
+        { organization_id: orgA, site_id: siteA, name: "1. patro", sort_order: 2 },
+        { organization_id: orgA, site_id: siteA, name: "2. patro", sort_order: 3 },
+      ]);
+      expect(locationError).toBeNull();
+
+      const { data: other } = await bob.client
+        .from("customers")
+        .insert({ organization_id: orgB, name: "Customer of B" })
+        .select("id")
+        .single();
+      customerB = other!.id;
+    });
+
+    it("another organization can't read or change them", async () => {
+      const [{ data: customers }, { data: sites }, { data: locations }] = await Promise.all([
+        bob.client.from("customers").select("id").eq("id", customerA),
+        bob.client.from("sites").select("id").eq("id", siteA),
+        bob.client.from("locations").select("id").eq("site_id", siteA),
+      ]);
+      expect(customers).toEqual([]);
+      expect(sites).toEqual([]);
+      expect(locations).toEqual([]);
+
+      const { data: updated } = await bob.client
+        .from("customers")
+        .update({ name: "hijacked" })
+        .eq("id", customerA)
+        .select("id");
+      expect(updated).toEqual([]);
+      const { error: insertError } = await bob.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "planted" });
+      expect(insertError).not.toBeNull();
+    });
+
+    it("a site can't be attached to another organization's customer", async () => {
+      // Bob's own organization, Alice's customer: the composite foreign key refuses it.
+      const { error } = await bob.client
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: customerA, name: "cross-tenant" });
+      expect(error).not.toBeNull();
+      // And Alice can't attach a location in her org to a site id she doesn't own.
+      const { data: bobSite } = await admin
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: customerB, name: "B site" })
+        .select("id")
+        .single();
+      const { error: locationError } = await alice.client
+        .from("locations")
+        .insert({ organization_id: orgA, site_id: bobSite!.id, name: "cross-tenant" });
+      expect(locationError).not.toBeNull();
+    });
+
+    it("a technician can read but not write", async () => {
+      const { data: customers } = await carol.client
+        .from("customers")
+        .select("id")
+        .eq("id", customerA);
+      expect(customers?.map((c) => c.id)).toEqual([customerA]);
+      const { data: locations } = await carol.client
+        .from("locations")
+        .select("id")
+        .eq("site_id", siteA);
+      expect(locations).toHaveLength(3);
+
+      const { error: insertError } = await carol.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "by technician" });
+      expect(insertError).not.toBeNull();
+      const { data: updated } = await carol.client
+        .from("sites")
+        .update({ name: "renamed by tech" })
+        .eq("id", siteA)
+        .select("id");
+      expect(updated).toEqual([]);
+      const { data: deleted } = await carol.client
+        .from("locations")
+        .delete()
+        .eq("site_id", siteA)
+        .select("id");
+      expect(deleted).toEqual([]);
+      const { error: reorderError } = await carol.client.rpc("reorder_locations", {
+        p_site: siteA,
+        p_ordered: (locations ?? []).map((l) => l.id).reverse(),
+      });
+      // Security invoker: the update matches nothing for a technician.
+      expect(reorderError).toBeNull();
+      const { data: order } = await admin
+        .from("locations")
+        .select("name")
+        .eq("site_id", siteA)
+        .order("sort_order");
+      expect(order?.map((l) => l.name)).toEqual(["Suterén", "1. patro", "2. patro"]);
+    });
+
+    it("customers and sites can't be hard-deleted, only soft-deleted", async () => {
+      const { error } = await alice.client.from("customers").delete().eq("id", customerA);
+      expect(error).not.toBeNull();
+      const { data } = await admin.from("customers").select("id").eq("id", customerA);
+      expect(data).toHaveLength(1);
+    });
+
+    it("locations are reordered atomically and must be the complete set", async () => {
+      const { data: locations } = await alice.client
+        .from("locations")
+        .select("id, name")
+        .eq("site_id", siteA)
+        .order("sort_order");
+      const ids = (locations ?? []).map((l) => l.id);
+
+      const { error: partial } = await alice.client.rpc("reorder_locations", {
+        p_site: siteA,
+        p_ordered: ids.slice(1),
+      });
+      expect(partial?.message).toMatch(/locations_mismatch/);
+
+      const { error } = await alice.client.rpc("reorder_locations", {
+        p_site: siteA,
+        p_ordered: [ids[2]!, ids[0]!, ids[1]!],
+      });
+      expect(error).toBeNull();
+      const { data: order } = await alice.client
+        .from("locations")
+        .select("name")
+        .eq("site_id", siteA)
+        .order("sort_order");
+      expect(order?.map((l) => l.name)).toEqual(["2. patro", "Suterén", "1. patro"]);
+    });
+
+    it("search input can't break out of the filter", async () => {
+      const { ilikeAny } = await import("@/lib/search");
+      const columns = ["name", "contact_person", "company_id"];
+      const search = (q: string) =>
+        alice.client
+          .from("customers")
+          .select("name")
+          .eq("organization_id", orgA)
+          .or(ilikeAny(columns, q)!);
+
+      expect((await search("lipov")).data?.map((c) => c.name)).toEqual(["Bytové družstvo Lipová"]);
+      expect((await search("27082440")).data).toHaveLength(1);
+      for (const hostile of ["%", "_", "a,name.neq.x", "x),or(name.neq.", '"', "\\", "zz*zz"]) {
+        const { data, error } = await search(hostile);
+        expect(error, hostile).toBeNull();
+        expect(data, hostile).toEqual([]);
+      }
+    });
+
+    it("deleting a customer hides its sites, and no new site can be added under it", async () => {
+      const { data, error } = await alice.client
+        .from("customers")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", customerA)
+        .select("id");
+      expect(error).toBeNull();
+      expect(data).toHaveLength(1);
+
+      const { data: site } = await admin
+        .from("sites")
+        .select("deleted_at")
+        .eq("id", siteA)
+        .single();
+      expect(site?.deleted_at).not.toBeNull();
+
+      const { error: siteError } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customerA, name: "too late" });
+      expect(siteError?.message).toMatch(/customer_deleted/);
+    });
+  });
+
+  describe("device types and checklist templates", () => {
+    let typeA: string;
+    let firstVersion: string;
+    const item = (
+      label: string,
+      type = "pass_fail",
+      required = true,
+      failCreatesDefect = false,
+    ) => ({
+      label,
+      type,
+      required,
+      failCreatesDefect,
+    });
+
+    it("every organization starts with a sample fire extinguisher and checklist", async () => {
+      const { data: types } = await alice.client
+        .from("device_types")
+        .select("id, code, inspection_interval_months, is_sample");
+      expect(types).toHaveLength(1);
+      expect(types?.[0]).toMatchObject({
+        code: "fire_extinguisher",
+        inspection_interval_months: 12,
+        is_sample: true,
+      });
+      typeA = types![0]!.id;
+
+      const { data: templates } = await alice.client
+        .from("checklist_templates")
+        .select("id, version, active, is_sample")
+        .eq("device_type_id", typeA);
+      expect(templates).toEqual([
+        expect.objectContaining({ version: 1, active: true, is_sample: true }),
+      ]);
+      firstVersion = templates![0]!.id;
+
+      const { data: items } = await alice.client
+        .from("checklist_template_items")
+        .select("sort_order, item_type, required, fail_creates_defect")
+        .eq("template_id", firstVersion)
+        .order("sort_order");
+      expect(items).toHaveLength(7);
+      expect(items?.[0]).toMatchObject({
+        item_type: "pass_fail",
+        required: true,
+        fail_creates_defect: true,
+      });
+      expect(items?.[6]).toMatchObject({
+        item_type: "text",
+        required: false,
+        fail_creates_defect: false,
+      });
+    });
+
+    it("another organization can't see or change them", async () => {
+      const { data } = await bob.client.from("device_types").select("id").eq("id", typeA);
+      expect(data).toEqual([]);
+      const { data: templates } = await bob.client
+        .from("checklist_templates")
+        .select("id")
+        .eq("device_type_id", typeA);
+      expect(templates).toEqual([]);
+      const { error } = await bob.client.rpc("save_checklist_template", {
+        p_device_type: typeA,
+        p_name: "hijacked",
+        p_items: [item("x")],
+      });
+      expect(error?.message).toMatch(/forbidden/);
+    });
+
+    it("a technician can read but not change types or templates", async () => {
+      const { data } = await carol.client.from("device_types").select("id").eq("id", typeA);
+      expect(data).toHaveLength(1);
+      const { data: updated } = await carol.client
+        .from("device_types")
+        .update({ inspection_interval_months: 1 })
+        .eq("id", typeA)
+        .select("id");
+      expect(updated).toEqual([]);
+      const { error } = await carol.client.rpc("save_checklist_template", {
+        p_device_type: typeA,
+        p_name: "by technician",
+        p_items: [item("x")],
+      });
+      expect(error?.message).toMatch(/forbidden/);
+    });
+
+    it("templates can't be written directly, only through a new version", async () => {
+      const { error: insertError } = await alice.client.from("checklist_template_items").insert({
+        organization_id: orgA,
+        template_id: firstVersion,
+        sort_order: 99,
+        label: "planted",
+        item_type: "text",
+      } as never);
+      expect(insertError).not.toBeNull();
+      const { error: updateError } = await alice.client
+        .from("checklist_templates")
+        .update({ name: "renamed" } as never)
+        .eq("id", firstVersion);
+      expect(updateError).not.toBeNull();
+    });
+
+    it("the owner sets the interval; the database rejects nonsense", async () => {
+      const { data, error } = await alice.client
+        .from("device_types")
+        .update({ inspection_interval_months: 6, is_sample: false })
+        .eq("id", typeA)
+        .select("inspection_interval_months");
+      expect(error).toBeNull();
+      expect(data?.[0]?.inspection_interval_months).toBe(6);
+      const { error: zero } = await alice.client
+        .from("device_types")
+        .update({ inspection_interval_months: 0 })
+        .eq("id", typeA);
+      expect(zero).not.toBeNull();
+      const { error: code } = await alice.client
+        .from("device_types")
+        .update({ code: "other" } as never)
+        .eq("id", typeA);
+      expect(code).not.toBeNull();
+    });
+
+    it("saving creates a new active version and keeps the old one untouched", async () => {
+      const items = [
+        item("Plomba je neporušená", "pass_fail", true, true),
+        item("Tlak (bar)", "number"),
+        item("Poznámka", "text", false),
+      ];
+      const { data: second, error } = await alice.client.rpc("save_checklist_template", {
+        p_device_type: typeA,
+        p_name: "Kontrola hasicího přístroje",
+        p_items: items,
+      });
+      expect(error).toBeNull();
+      expect(second).not.toBe(firstVersion);
+
+      const { data: versions } = await alice.client
+        .from("checklist_templates")
+        .select("id, version, active, is_sample")
+        .eq("device_type_id", typeA)
+        .order("version");
+      expect(versions?.map((v) => [v.version, v.active, v.is_sample])).toEqual([
+        [1, false, true],
+        [2, true, true],
+      ]);
+
+      const { count: oldCount } = await alice.client
+        .from("checklist_template_items")
+        .select("id", { count: "exact", head: true })
+        .eq("template_id", firstVersion);
+      expect(oldCount).toBe(7);
+      const { data: newItems } = await alice.client
+        .from("checklist_template_items")
+        .select("label, item_type, required, fail_creates_defect")
+        .eq("template_id", second!)
+        .order("sort_order");
+      expect(newItems).toEqual([
+        {
+          label: "Plomba je neporušená",
+          item_type: "pass_fail",
+          required: true,
+          fail_creates_defect: true,
+        },
+        { label: "Tlak (bar)", item_type: "number", required: true, fail_creates_defect: false },
+        { label: "Poznámka", item_type: "text", required: false, fail_creates_defect: false },
+      ]);
+
+      // Saving the same content again keeps version 2.
+      const { data: same } = await alice.client.rpc("save_checklist_template", {
+        p_device_type: typeA,
+        p_name: " Kontrola hasicího přístroje ",
+        p_items: items.map((entry) => ({ ...entry, label: ` ${entry.label}` })),
+      });
+      expect(same).toBe(second);
+
+      // Confirming the items creates version 3 without the sample flag.
+      const { data: third } = await alice.client.rpc("save_checklist_template", {
+        p_device_type: typeA,
+        p_name: "Kontrola hasicího přístroje",
+        p_items: items,
+        p_verified: true,
+      });
+      const { data: latest } = await alice.client
+        .from("checklist_templates")
+        .select("version, active, is_sample")
+        .eq("id", third!)
+        .single();
+      expect(latest).toEqual({ version: 3, active: true, is_sample: false });
+    });
+
+    it("invalid templates are refused", async () => {
+      for (const items of [
+        [],
+        [item("")],
+        [item("Tlak", "number", true, true)],
+        [{ label: "x", type: "photo", required: true, failCreatesDefect: false }],
+      ]) {
+        const { error } = await alice.client.rpc("save_checklist_template", {
+          p_device_type: typeA,
+          p_name: "Kontrola",
+          p_items: items,
+        });
+        expect(error?.message, JSON.stringify(items)).toMatch(/invalid_template/);
+      }
+    });
+
+    it("a new company is seeded in its creator's language", async () => {
+      const dave = await createUser("dave");
+      const { data: org, error } = await dave.client.rpc("create_organization", {
+        p_name: `RLS EN ${run}`,
+        p_display_name: "Dave",
+        p_locale: "en",
+      });
+      expect(error).toBeNull();
+      try {
+        const { data: organization } = await dave.client
+          .from("organizations")
+          .select("default_locale")
+          .eq("id", org!)
+          .single();
+        expect(organization?.default_locale).toBe("en");
+        const { data: types } = await dave.client.from("device_types").select("name");
+        expect(types?.map((t) => t.name)).toEqual(["Fire extinguisher"]);
+      } finally {
+        await admin.from("organizations").delete().eq("id", org!);
+      }
+    });
+  });
+
+  describe("devices and due dates", () => {
+    let typeA: string;
+    let siteA: string;
+    let siteA2: string;
+    let otherLocation: string;
+    let first: string;
+    const created: { id: string; label_number: number; public_token: string }[] = [];
+    const columns = "id, label_number, public_token" as const;
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").single();
+      typeA = type!.id;
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Devices customer" })
+        .select("id")
+        .single();
+      const { data: sites } = await alice.client
+        .from("sites")
+        .insert([
+          { organization_id: orgA, customer_id: customer!.id, name: "Device site" },
+          { organization_id: orgA, customer_id: customer!.id, name: "Other site" },
+        ])
+        .select("id, name");
+      siteA = sites!.find((s) => s.name === "Device site")!.id;
+      siteA2 = sites!.find((s) => s.name === "Other site")!.id;
+      const { data: location } = await alice.client
+        .from("locations")
+        .insert({ organization_id: orgA, site_id: siteA2, name: "Elsewhere" })
+        .select("id")
+        .single();
+      otherLocation = location!.id;
+    });
+
+    const device = (extra: object = {}) => ({
+      organization_id: orgA,
+      site_id: siteA,
+      device_type_id: typeA,
+      ...extra,
+    });
+
+    it("label numbers count up per organization, in the order devices are added", async () => {
+      const { data: one, error } = await alice.client
+        .from("devices")
+        .insert(device({ serial_number: "FIRST" }))
+        .select(columns)
+        .single();
+      expect(error).toBeNull();
+      expect(one?.label_number).toBe(1);
+      first = one!.id;
+      created.push(one!);
+
+      const serials = ["S1", "S2", "S3", "S4", "S5"];
+      const { data: bulk, error: bulkError } = await alice.client
+        .from("devices")
+        .insert(serials.map((serial_number) => device({ serial_number })))
+        .select(`${columns}, serial_number`);
+      expect(bulkError).toBeNull();
+      expect(bulk?.map((d) => [d.label_number, d.serial_number])).toEqual([
+        [2, "S1"],
+        [3, "S2"],
+        [4, "S3"],
+        [5, "S4"],
+        [6, "S5"],
+      ]);
+      created.push(...bulk!);
+
+      // Bob's company has its own numbering.
+      const { data: bobType } = await bob.client.from("device_types").select("id").single();
+      const { data: bobCustomer } = await bob.client
+        .from("customers")
+        .insert({ organization_id: orgB, name: "B devices" })
+        .select("id")
+        .single();
+      const { data: bobSite } = await bob.client
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: bobCustomer!.id, name: "B building" })
+        .select("id")
+        .single();
+      const { data: bobDevice } = await bob.client
+        .from("devices")
+        .insert({ organization_id: orgB, site_id: bobSite!.id, device_type_id: bobType!.id })
+        .select("label_number")
+        .single();
+      expect(bobDevice?.label_number).toBe(1);
+    });
+
+    it("labels stay unique and consecutive when devices are added at the same time", async () => {
+      const batches = await Promise.all(
+        [0, 1, 2, 3].map(() =>
+          alice.client
+            .from("devices")
+            .insert(Array.from({ length: 5 }, () => device()))
+            .select(columns),
+        ),
+      );
+      const labels: number[] = [];
+      for (const { data, error } of batches) {
+        expect(error).toBeNull();
+        const numbers = data!.map((d) => d.label_number);
+        // Each insert gets a block without gaps.
+        expect(numbers).toEqual(numbers.map((_, i) => numbers[0]! + i));
+        labels.push(...numbers);
+        created.push(...data!);
+      }
+      expect([...labels].sort((a, b) => a - b)).toEqual(
+        Array.from({ length: 20 }, (_, i) => 7 + i),
+      );
+    });
+
+    it("every device gets a random 12-character label token", () => {
+      const tokens = created.map((d) => d.public_token);
+      for (const token of tokens) expect(token).toMatch(/^[0-9a-hjkmnp-tv-z]{12}$/);
+      expect(new Set(tokens).size).toBe(tokens.length);
+    });
+
+    it("a scanned token finds the device only within its own organization", async () => {
+      const token = created[0]!.public_token;
+      const byToken = (client: Client) =>
+        client.from("devices").select("id").eq("public_token", token).maybeSingle();
+      expect((await byToken(alice.client)).data?.id).toBe(created[0]!.id);
+      expect((await byToken(carol.client)).data?.id).toBe(created[0]!.id);
+      // Another company and signed-out visitors get nothing, the same as for an unknown token.
+      expect((await byToken(bob.client)).data).toBeNull();
+      const anon = createClient<Database>(url!, anonKey!, { auth: { persistSession: false } });
+      expect((await byToken(anon)).data).toBeNull();
+    });
+
+    it("label numbers, tokens, due dates and the site can't be written by clients", async () => {
+      const { error: insertError } = await alice.client
+        .from("devices")
+        .insert(device({ label_number: 999 }) as never);
+      expect(insertError).not.toBeNull();
+      for (const change of [
+        { label_number: 999 },
+        { public_token: "0000000000aa" },
+        { next_due_on: "2099-01-01" },
+        { site_id: siteA2 },
+        { organization_id: orgB },
+      ]) {
+        const { error } = await alice.client
+          .from("devices")
+          .update(change as never)
+          .eq("id", first);
+        expect(error, JSON.stringify(change)).not.toBeNull();
+      }
+      const { data } = await admin
+        .from("devices")
+        .select("label_number, next_due_on, site_id")
+        .eq("id", first)
+        .single();
+      expect(data).toEqual({ label_number: 1, next_due_on: null, site_id: siteA });
+    });
+
+    it("the database computes next due dates exactly like the app", async () => {
+      const { NEXT_DUE_CASES } = await import("./fixtures/due-cases");
+      for (const [last, months, next] of NEXT_DUE_CASES) {
+        await admin
+          .from("device_types")
+          .update({ inspection_interval_months: months })
+          .eq("id", typeA);
+        const { data, error } = await alice.client
+          .from("devices")
+          .update({ last_inspection_on: last })
+          .eq("id", first)
+          .select("next_due_on")
+          .single();
+        expect(error).toBeNull();
+        expect(data?.next_due_on, `${last} + ${months}`).toBe(next);
+      }
+    });
+
+    it("changing a type's interval moves its devices' due dates", async () => {
+      await alice.client
+        .from("devices")
+        .update({ last_inspection_on: "2026-01-31" })
+        .eq("id", first);
+      await alice.client
+        .from("device_types")
+        .update({ inspection_interval_months: 12 })
+        .eq("id", typeA);
+      const read = async () =>
+        (await admin.from("devices").select("next_due_on").eq("id", first).single()).data
+          ?.next_due_on;
+      expect(await read()).toBe("2027-01-31");
+      await alice.client
+        .from("device_types")
+        .update({ inspection_interval_months: 1 })
+        .eq("id", typeA);
+      expect(await read()).toBe("2026-02-28");
+      await alice.client.from("devices").update({ last_inspection_on: null }).eq("id", first);
+      expect(await read()).toBeNull();
+    });
+
+    it("another organization can't see, change or plant devices", async () => {
+      const { data: seen } = await bob.client.from("devices").select("id").eq("id", first);
+      expect(seen).toEqual([]);
+      const { data: updated } = await bob.client
+        .from("devices")
+        .update({ notes: "hijacked" })
+        .eq("id", first)
+        .select("id");
+      expect(updated).toEqual([]);
+      const { error: plant } = await bob.client.from("devices").insert(device());
+      expect(plant).not.toBeNull();
+      // Bob's organization with Alice's building or device type: the foreign keys refuse.
+      const { data: bobType } = await bob.client.from("device_types").select("id").single();
+      const { error: crossSite } = await bob.client
+        .from("devices")
+        .insert({ organization_id: orgB, site_id: siteA, device_type_id: bobType!.id });
+      expect(crossSite).not.toBeNull();
+
+      const anon = createClient<Database>(url!, anonKey!, { auth: { persistSession: false } });
+      const { data: anonData } = await anon.from("devices").select("id");
+      expect(anonData ?? []).toEqual([]);
+    });
+
+    it("a device's location must be in the device's building", async () => {
+      const { error } = await alice.client
+        .from("devices")
+        .insert(device({ location_id: otherLocation }));
+      expect(error).not.toBeNull();
+      const { error: moveError } = await alice.client
+        .from("devices")
+        .update({ location_id: otherLocation })
+        .eq("id", first);
+      expect(moveError).not.toBeNull();
+    });
+
+    it("deleting a location keeps its devices, without the location", async () => {
+      const { data: location } = await alice.client
+        .from("locations")
+        .insert({ organization_id: orgA, site_id: siteA, name: "Temporary" })
+        .select("id")
+        .single();
+      await alice.client.from("devices").update({ location_id: location!.id }).eq("id", first);
+      const { error } = await alice.client.from("locations").delete().eq("id", location!.id);
+      expect(error).toBeNull();
+      const { data } = await admin
+        .from("devices")
+        .select("location_id, site_id, deleted_at")
+        .eq("id", first)
+        .single();
+      expect(data).toEqual({ location_id: null, site_id: siteA, deleted_at: null });
+    });
+
+    it("a technician can read devices but not add or change them", async () => {
+      // Carol is still a technician here (member management runs later).
+      const { data } = await carol.client.from("devices").select("id").eq("id", first);
+      expect(data).toHaveLength(1);
+      const { error } = await carol.client.from("devices").insert(device());
+      expect(error).not.toBeNull();
+      const { data: updated } = await carol.client
+        .from("devices")
+        .update({ status: "removed" })
+        .eq("id", first)
+        .select("id");
+      expect(updated).toEqual([]);
+    });
+
+    it("devices are soft-deleted; deleting a building hides them and blocks new ones", async () => {
+      const { error: hardDelete } = await alice.client.from("devices").delete().eq("id", first);
+      expect(hardDelete).not.toBeNull();
+
+      const { data, error } = await alice.client
+        .from("sites")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", siteA)
+        .select("id");
+      expect(error).toBeNull();
+      expect(data).toHaveLength(1);
+      const { count } = await admin
+        .from("devices")
+        .select("id", { count: "exact", head: true })
+        .eq("site_id", siteA)
+        .is("deleted_at", null);
+      expect(count).toBe(0);
+
+      const { error: insertError } = await alice.client.from("devices").insert(device());
+      expect(insertError?.message).toMatch(/site_deleted/);
+      const { error: restoreError } = await alice.client
+        .from("devices")
+        .update({ deleted_at: null })
+        .eq("id", first);
+      expect(restoreError?.message).toMatch(/site_deleted/);
+    });
+
+    it("an organization with devices can be deleted completely", async () => {
+      const erin = await createUser("erin");
+      const org = await createOrg(erin, `RLS devices ${run}`);
+      const { data: type } = await erin.client.from("device_types").select("id").single();
+      const { data: customer } = await erin.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: site } = await erin.client
+        .from("sites")
+        .insert({ organization_id: org, customer_id: customer!.id, name: "S" })
+        .select("id")
+        .single();
+      const { data: location } = await erin.client
+        .from("locations")
+        .insert({ organization_id: org, site_id: site!.id, name: "L" })
+        .select("id")
+        .single();
+      const { error: insertError } = await erin.client.from("devices").insert({
+        organization_id: org,
+        site_id: site!.id,
+        location_id: location!.id,
+        device_type_id: type!.id,
+      });
+      expect(insertError).toBeNull();
+      const { error } = await admin.from("organizations").delete().eq("id", org);
+      expect(error).toBeNull();
+      const { count } = await admin
+        .from("devices")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", org);
+      expect(count).toBe(0);
+    });
+  });
+
+  describe("inspections", () => {
+    let site: string;
+    let devices: string[];
+    let inspection: string;
+    const items: Record<string, string> = {};
+    let questions: { id: string; item_type: string; required: boolean }[];
+    const png = Uint8Array.from(
+      atob(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      ),
+      (c) => c.charCodeAt(0),
+    );
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").single();
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Inspection customer" })
+        .select("id")
+        .single();
+      const { data: s } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customer!.id, name: "Inspection site" })
+        .select("id")
+        .single();
+      site = s!.id;
+      await alice.client
+        .from("device_types")
+        .update({ inspection_interval_months: 12 })
+        .eq("id", type!.id);
+      const { data: rows } = await alice.client
+        .from("devices")
+        .insert(
+          [1, 2, 3].map(() => ({ organization_id: orgA, site_id: site, device_type_id: type!.id })),
+        )
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: template } = await alice.client
+        .from("checklist_templates")
+        .select("id, checklist_template_items(id, item_type, required, sort_order)")
+        .eq("device_type_id", type!.id)
+        .eq("active", true)
+        .single();
+      questions = [...template!.checklist_template_items].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
+    });
+
+    /** A valid answer for every required question (yes/no answered `pass`). */
+    async function answerAll(client: Client, item: string, pass = true) {
+      for (const question of questions.filter((q) => q.required)) {
+        const { error } = await client.rpc("save_answer", {
+          p_item: item,
+          p_template_item: question.id,
+          p_value_pass: question.item_type === "pass_fail" ? pass : null,
+          p_value_number: question.item_type === "number" ? 12.5 : null,
+          p_value_text: question.item_type === "text" ? "OK" : null,
+        });
+        expect(error).toBeNull();
+      }
+    }
+
+    it("anyone in the company starts the building's inspection; starting again joins it", async () => {
+      const { data, error } = await carol.client.rpc("start_inspection", { p_site: site });
+      expect(error).toBeNull();
+      inspection = data!;
+      const { data: again } = await alice.client.rpc("start_inspection", { p_site: site });
+      expect(again).toBe(inspection);
+      const { error: bobError } = await bob.client.rpc("start_inspection", { p_site: site });
+      expect(bobError?.message).toMatch(/not_found/);
+    });
+
+    it("a device's check is held by one person; a colleague sees who and may take it over", async () => {
+      const { data: opened } = await carol.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+      });
+      const item = (opened as { item: string }).item;
+      items[devices[0]!] = item;
+      expect(opened).toEqual({ item });
+
+      const { data: blocked } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+      });
+      expect(blocked).toEqual({ item, heldBy: "Carol" });
+      const { error: notHolding } = await alice.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: questions[0]!.id,
+        p_value_pass: true,
+      });
+      expect(notHolding?.message).toMatch(/check_taken_over/);
+
+      const { data: taken } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+        p_take_over: true,
+      });
+      expect(taken).toEqual({ item });
+      // Carol's next save is refused rather than silently overwriting Alice's work.
+      const { error: lost } = await carol.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: questions[0]!.id,
+        p_value_pass: true,
+      });
+      expect(lost?.message).toMatch(/check_taken_over/);
+    });
+
+    it("answers must fit the question", async () => {
+      const item = items[devices[0]!]!;
+      const yesNo = questions.find((q) => q.item_type === "pass_fail")!;
+      const number = questions.find((q) => q.item_type === "number")!;
+      const { error: wrongType } = await alice.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: yesNo.id,
+        p_value_number: 3,
+      });
+      expect(wrongType?.message).toMatch(/invalid_answer/);
+      const { error: textInNumber } = await alice.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: number.id,
+        p_value_text: "many",
+      });
+      expect(textInNumber?.message).toMatch(/invalid_answer/);
+      const { data: otherTemplateItem } = await admin
+        .from("checklist_template_items")
+        .select("id, checklist_templates!inner(active)")
+        .eq("organization_id", orgA)
+        .eq("checklist_templates.active", false)
+        .limit(1)
+        .single();
+      const { error: foreign } = await alice.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: otherTemplateItem!.id,
+        p_value_pass: true,
+      });
+      expect(foreign?.message).toMatch(/not_found/);
+    });
+
+    it("a check finishes only with every required answer, and fails on any 'no'", async () => {
+      const item = items[devices[0]!]!;
+      const { error: early } = await alice.client.rpc("finish_device_check", { p_item: item });
+      expect(early?.message).toMatch(/check_incomplete/);
+      await answerAll(alice.client, item, true);
+      const { data: passed } = await alice.client.rpc("finish_device_check", { p_item: item });
+      expect(passed).toBe("passed");
+
+      const { data: second } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[1]!,
+      });
+      items[devices[1]!] = (second as { item: string }).item;
+      await answerAll(alice.client, items[devices[1]!]!, false);
+      const { data: failed } = await alice.client.rpc("finish_device_check", {
+        p_item: items[devices[1]!]!,
+      });
+      expect(failed).toBe("failed");
+    });
+
+    it("changing an answer of a finished check reopens it", async () => {
+      const item = items[devices[1]!]!;
+      await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[1]!,
+      });
+      await answerAll(alice.client, item, true);
+      const { data } = await admin
+        .from("inspection_items")
+        .select("outcome")
+        .eq("id", item)
+        .single();
+      expect(data?.outcome).toBeNull();
+      // Back to a failed check for the rest of the tests.
+      await answerAll(alice.client, item, false);
+      await alice.client.rpc("finish_device_check", { p_item: item });
+    });
+
+    it("photos go to the held check's folder only", async () => {
+      const { data: opened } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[2]!,
+      });
+      const item = (opened as { item: string }).item;
+      const path = `${orgA}/inspections/${inspection}/${item}/photo-${run}.png`;
+      const { error: upload } = await alice.client.storage
+        .from("org-assets")
+        .upload(path, png, { contentType: "image/png" });
+      expect(upload).toBeNull();
+      const { data: photo, error } = await alice.client.rpc("add_inspection_photo", {
+        p_item: item,
+        p_template_item: questions[0]!.id,
+        p_path: path,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      expect(error).toBeNull();
+
+      // A technician who doesn't hold the check, another company, a missing file: refused.
+      const { error: carolUpload } = await carol.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/inspections/${inspection}/${item}/carol-${run}.png`, png, {
+          contentType: "image/png",
+        });
+      expect(carolUpload).not.toBeNull();
+      const { error: carolPhoto } = await carol.client.rpc("add_inspection_photo", {
+        p_item: item,
+        p_template_item: null,
+        p_path: path,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      expect(carolPhoto?.message).toMatch(/check_taken_over/);
+      const { error: bobUpload } = await bob.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/inspections/${inspection}/${item}/bob-${run}.png`, png, {
+          contentType: "image/png",
+        });
+      expect(bobUpload).not.toBeNull();
+      const { error: ghost } = await alice.client.rpc("add_inspection_photo", {
+        p_item: item,
+        p_template_item: null,
+        p_path: `${orgA}/inspections/${inspection}/${item}/missing.png`,
+        p_content_type: "image/png",
+        p_size: 10,
+      });
+      expect(ghost?.message).toMatch(/not_found/);
+
+      const { data: removedPath } = await alice.client.rpc("delete_inspection_photo", {
+        p_photo: photo!,
+      });
+      expect(removedPath).toBe(path);
+      const { error: removeFile } = await alice.client.storage.from("org-assets").remove([path]);
+      expect(removeFile).toBeNull();
+      // The third device stays unchecked.
+      await alice.client.rpc("release_device_check", { p_item: item });
+      await admin.from("inspection_items").delete().eq("id", item);
+    });
+
+    it("another company can't see or work on the inspection", async () => {
+      const { data } = await bob.client.from("inspections").select("id").eq("id", inspection);
+      expect(data).toEqual([]);
+      const { data: answers } = await bob.client.from("inspection_answers").select("id");
+      expect(answers).toEqual([]);
+      const { error } = await bob.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+      });
+      expect(error?.message).toMatch(/not_found/);
+      const { error: write } = await bob.client.rpc("save_answer", {
+        p_item: items[devices[0]!]!,
+        p_template_item: questions[0]!.id,
+        p_value_pass: false,
+      });
+      expect(write?.message).toMatch(/not_found/);
+      const { error: direct } = await alice.client
+        .from("inspection_answers")
+        .update({ value_pass: false } as never)
+        .eq("item_id", items[devices[0]!]!);
+      expect(direct).not.toBeNull();
+    });
+
+    it("completing records unchecked devices and moves the date of passed devices only", async () => {
+      // A started but unfinished check blocks completion.
+      await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[2]!,
+      });
+      const { error: unfinished } = await alice.client.rpc("complete_inspection", {
+        p_inspection: inspection,
+      });
+      expect(unfinished?.message).toMatch(/checks_unfinished/);
+      const { data: open } = await admin
+        .from("inspection_items")
+        .select("id")
+        .eq("inspection_id", inspection)
+        .eq("device_id", devices[2]!)
+        .single();
+      await admin.from("inspection_items").delete().eq("id", open!.id);
+
+      const { data: summary, error } = await carol.client.rpc("complete_inspection", {
+        p_inspection: inspection,
+        p_notes: " Vše v pořádku kromě jednoho. ",
+      });
+      expect(error).toBeNull();
+      // The failed device answered the defect question "no": one defect.
+      expect(summary).toEqual({
+        passed: 1,
+        failed: 1,
+        notChecked: 1,
+        defects: 1,
+        protocol: expect.any(String),
+      });
+
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tbilisi" }).format(
+        new Date(),
+      );
+      const { data: rows } = await admin
+        .from("devices")
+        .select("id, last_inspection_on, next_due_on")
+        .in("id", devices);
+      const byId = new Map(rows!.map((row) => [row.id, row]));
+      // orgA's time zone was set to Asia/Tbilisi in the settings tests.
+      expect(byId.get(devices[0]!)?.last_inspection_on).toBe(today);
+      expect(byId.get(devices[0]!)?.next_due_on).not.toBeNull();
+      expect(byId.get(devices[1]!)?.last_inspection_on).toBeNull();
+      expect(byId.get(devices[2]!)?.last_inspection_on).toBeNull();
+
+      const { data: done } = await admin
+        .from("inspections")
+        .select("status, completed_at, notes")
+        .eq("id", inspection)
+        .single();
+      expect(done).toMatchObject({ status: "completed", notes: "Vše v pořádku kromě jednoho." });
+
+      const { error: late } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[2]!,
+      });
+      expect(late?.message).toMatch(/inspection_closed/);
+      const { data: next } = await alice.client.rpc("start_inspection", { p_site: site });
+      expect(next).not.toBe(inspection);
+    });
+  });
+
+  describe("defects", () => {
+    let site: string;
+    let devices: string[];
+    let questions: {
+      id: string;
+      item_type: string;
+      required: boolean;
+      fail_creates_defect: boolean;
+    }[];
+    let found: string;
+    let foundNumber: number;
+    let reported: string;
+    const png = Uint8Array.from(
+      atob(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      ),
+      (c) => c.charCodeAt(0),
+    );
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").single();
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Defects customer" })
+        .select("id")
+        .single();
+      const { data: s } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customer!.id, name: "Defects site" })
+        .select("id")
+        .single();
+      site = s!.id;
+      const { data: rows } = await alice.client
+        .from("devices")
+        .insert(
+          [1, 2].map(() => ({ organization_id: orgA, site_id: site, device_type_id: type!.id })),
+        )
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: template } = await alice.client
+        .from("checklist_templates")
+        .select(
+          "checklist_template_items(id, item_type, required, fail_creates_defect, sort_order)",
+        )
+        .eq("device_type_id", type!.id)
+        .eq("active", true)
+        .single();
+      questions = [...template!.checklist_template_items].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
+    });
+
+    /** Checks a device in an inspection; `fail` answers the defect question "no". */
+    async function check(inspection: string, device: string, fail: boolean, severity?: string) {
+      const { data } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: device,
+      });
+      const item = (data as { item: string }).item;
+      for (const question of questions.filter((q) => q.required)) {
+        const failing = fail && question.fail_creates_defect;
+        const { error } = await alice.client.rpc("save_answer", {
+          p_item: item,
+          p_template_item: question.id,
+          p_value_pass: question.item_type === "pass_fail" ? !failing : null,
+          p_value_number: question.item_type === "number" ? 5 : null,
+          p_value_text: question.item_type === "text" ? "OK" : null,
+          p_note: failing ? "Plomba chybí" : null,
+          p_defect_severity: failing && severity ? (severity as "critical") : null,
+        });
+        expect(error).toBeNull();
+      }
+      await alice.client.rpc("finish_device_check", { p_item: item });
+      return item;
+    }
+
+    it("a failed defect question becomes a defect when the inspection completes", async () => {
+      const { data: inspection } = await alice.client.rpc("start_inspection", { p_site: site });
+      await check(inspection!, devices[0]!, true, "critical");
+      await check(inspection!, devices[1]!, false);
+      const { data: summary } = await alice.client.rpc("complete_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(summary).toMatchObject({ passed: 1, failed: 1, defects: 1 });
+
+      const { data: defects } = await alice.client
+        .from("defects")
+        .select("id, number, device_id, inspection_id, description, severity, status")
+        .eq("device_id", devices[0]!);
+      expect(defects).toHaveLength(1);
+      expect(defects![0]).toMatchObject({
+        inspection_id: inspection,
+        severity: "critical",
+        status: "open",
+      });
+      expect(defects![0]!.description).toMatch(/: Plomba chybí$/);
+      found = defects![0]!.id;
+      foundNumber = defects![0]!.number;
+      const { data: events } = await alice.client
+        .from("defect_events")
+        .select("kind, to_value, inspection_id")
+        .eq("defect_id", found);
+      expect(events).toEqual([
+        { kind: "created", to_value: "critical", inspection_id: inspection },
+      ]);
+    });
+
+    it("the same defect found again goes into its history instead of a duplicate", async () => {
+      const { data: inspection } = await alice.client.rpc("start_inspection", { p_site: site });
+      await check(inspection!, devices[0]!, true);
+      await check(inspection!, devices[1]!, false);
+      const { data: summary } = await alice.client.rpc("complete_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(summary).toMatchObject({ defects: 0 });
+      const { count } = await alice.client
+        .from("defects")
+        .select("id", { count: "exact", head: true })
+        .eq("device_id", devices[0]!);
+      expect(count).toBe(1);
+      const { data: events } = await alice.client
+        .from("defect_events")
+        .select("kind, inspection_id")
+        .eq("defect_id", found)
+        .order("created_at");
+      expect(events?.map((e) => e.kind)).toEqual(["created", "observed"]);
+      expect(events?.[1]?.inspection_id).toBe(inspection);
+    });
+
+    it("a severity belongs only to a failed answer", async () => {
+      const { data: inspection } = await alice.client.rpc("start_inspection", { p_site: site });
+      const { data } = await alice.client.rpc("open_device_check", {
+        p_inspection: inspection!,
+        p_device: devices[1]!,
+      });
+      const yesNo = questions.find((q) => q.item_type === "pass_fail")!;
+      const { error } = await alice.client.rpc("save_answer", {
+        p_item: (data as { item: string }).item,
+        p_template_item: yesNo.id,
+        p_value_pass: true,
+        p_defect_severity: "minor",
+      });
+      expect(error?.message).toMatch(/invalid_answer/);
+    });
+
+    it("members report, work on, resolve and reopen defects; the history says who", async () => {
+      const { data: id, error } = await carol.client.rpc("create_defect", {
+        p_device: devices[1]!,
+        p_description: " Dveře nejdou zavřít ",
+        p_severity: "minor",
+      });
+      expect(error).toBeNull();
+      reported = id!;
+      const { data: defect } = await carol.client
+        .from("defects")
+        .select("number, description, created_by")
+        .eq("id", reported)
+        .single();
+      // Numbered in sequence within the company.
+      expect(defect).toEqual({
+        number: foundNumber + 1,
+        description: "Dveře nejdou zavřít",
+        created_by: carol.id,
+      });
+
+      await carol.client.rpc("change_defect_status", {
+        p_defect: reported,
+        p_status: "in_progress",
+      });
+      const { error: noNote } = await carol.client.rpc("change_defect_status", {
+        p_defect: reported,
+        p_status: "resolved",
+      });
+      expect(noNote?.message).toMatch(/resolution_required/);
+      await carol.client.rpc("change_defect_status", {
+        p_defect: reported,
+        p_status: "resolved",
+        p_note: "Seřízen zavírač.",
+      });
+      const { data: resolved } = await alice.client
+        .from("defects")
+        .select("status, resolved_by, resolution_note, resolved_at")
+        .eq("id", reported)
+        .single();
+      expect(resolved).toMatchObject({
+        status: "resolved",
+        resolved_by: carol.id,
+        resolution_note: "Seřízen zavírač.",
+      });
+
+      await alice.client.rpc("change_defect_status", { p_defect: reported, p_status: "open" });
+      await alice.client.rpc("change_defect_severity", { p_defect: reported, p_severity: "major" });
+      await alice.client.rpc("edit_defect_description", {
+        p_defect: reported,
+        p_description: "Dveře nedovírají",
+      });
+      await alice.client.rpc("comment_defect", { p_defect: reported, p_note: "Objednán díl." });
+      const { data: reopened } = await alice.client
+        .from("defects")
+        .select("status, resolved_at, resolution_note, severity")
+        .eq("id", reported)
+        .single();
+      expect(reopened).toEqual({
+        status: "open",
+        resolved_at: null,
+        resolution_note: null,
+        severity: "major",
+      });
+      const { data: events } = await alice.client
+        .from("defect_events")
+        .select("kind, actor, from_value, to_value")
+        .eq("defect_id", reported)
+        .order("created_at");
+      expect(events?.map((e) => [e.kind, e.from_value, e.to_value])).toEqual([
+        ["created", null, "minor"],
+        ["status", "open", "in_progress"],
+        ["status", "in_progress", "resolved"],
+        ["status", "resolved", "open"],
+        ["severity", "minor", "major"],
+        ["description", "Dveře nejdou zavřít", "Dveře nedovírají"],
+        ["comment", null, null],
+      ]);
+      expect(events?.slice(0, 3).every((e) => e.actor === carol.id)).toBe(true);
+    });
+
+    it("another company can't see, report or change defects", async () => {
+      const { data } = await bob.client.from("defects").select("id");
+      expect(data).toEqual([]);
+      const { data: events } = await bob.client.from("defect_events").select("id");
+      expect(events).toEqual([]);
+      const { error: report } = await bob.client.rpc("create_defect", {
+        p_device: devices[0]!,
+        p_description: "planted",
+        p_severity: "minor",
+      });
+      expect(report?.message).toMatch(/not_found/);
+      const { error: comment } = await bob.client.rpc("comment_defect", {
+        p_defect: found,
+        p_note: "hijacked",
+      });
+      expect(comment?.message).toMatch(/not_found/);
+      const { error: direct } = await alice.client
+        .from("defects")
+        .update({ status: "resolved" } as never)
+        .eq("id", found);
+      expect(direct).not.toBeNull();
+    });
+
+    it("photos go to the defect's folder of its own company", async () => {
+      const path = `${orgA}/defects/${found}/photo-${run}.png`;
+      const { error: upload } = await carol.client.storage
+        .from("org-assets")
+        .upload(path, png, { contentType: "image/png" });
+      expect(upload).toBeNull();
+      const { error } = await carol.client.rpc("add_defect_photo", {
+        p_defect: found,
+        p_path: path,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      expect(error).toBeNull();
+      const { error: bobUpload } = await bob.client.storage
+        .from("org-assets")
+        .upload(`${orgA}/defects/${found}/bob-${run}.png`, png, { contentType: "image/png" });
+      expect(bobUpload).not.toBeNull();
+      const { error: elsewhere } = await carol.client.rpc("add_defect_photo", {
+        p_defect: found,
+        p_path: `${orgA}/defects/${reported}/photo-${run}.png`,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      expect(elsewhere?.message).toMatch(/not_found/);
+      await carol.client.storage.from("org-assets").remove([path]);
+    });
+
+    // Last in this group: it replaces the type's checklist with a new version.
+    it("an item that records defects only on request still adds to an open one", async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").single();
+      const { error: saved } = await alice.client.rpc("save_checklist_template", {
+        p_device_type: type!.id,
+        p_name: "Signs",
+        p_items: [
+          { label: "Sign legible", type: "pass_fail", required: true, failCreatesDefect: false },
+        ],
+      });
+      expect(saved).toBeNull();
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Signs customer" })
+        .select("id")
+        .single();
+      const { data: signSite } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customer!.id, name: "Signs site" })
+        .select("id")
+        .single();
+      const { data: device } = await alice.client
+        .from("devices")
+        .insert({ organization_id: orgA, site_id: signSite!.id, device_type_id: type!.id })
+        .select("id")
+        .single();
+      const { data: question } = await alice.client
+        .from("checklist_template_items")
+        .select("id, template:checklist_templates!inner(device_type_id, active)")
+        .eq("template.device_type_id", type!.id)
+        .eq("template.active", true)
+        .single();
+
+      /** One inspection where the sign fails; returns how many defects it created. */
+      async function failSign(severity: "minor" | null) {
+        const { data: inspection } = await alice.client.rpc("start_inspection", {
+          p_site: signSite!.id,
+        });
+        const { data } = await alice.client.rpc("open_device_check", {
+          p_inspection: inspection!,
+          p_device: device!.id,
+        });
+        const item = (data as { item: string }).item;
+        await alice.client.rpc("save_answer", {
+          p_item: item,
+          p_template_item: question!.id,
+          p_value_pass: false,
+          p_value_number: null,
+          p_value_text: null,
+          p_note: null,
+          p_defect_severity: severity,
+        });
+        await alice.client.rpc("finish_device_check", { p_item: item });
+        const { data: summary } = await alice.client.rpc("complete_inspection", {
+          p_inspection: inspection!,
+        });
+        return (summary as { defects: number }).defects;
+      }
+
+      // Not asked for: nothing recorded.
+      expect(await failSign(null)).toBe(0);
+      // Asked for: a defect.
+      expect(await failSign("minor")).toBe(1);
+      // Not asked for again, but the defect is open: added to its history.
+      expect(await failSign(null)).toBe(0);
+      const { data: defects } = await alice.client
+        .from("defects")
+        .select("severity, defect_events(kind)")
+        .eq("device_id", device!.id);
+      expect(defects).toHaveLength(1);
+      expect(defects![0]!.severity).toBe("minor");
+      expect(defects![0]!.defect_events.map((event) => event.kind).sort()).toEqual([
+        "created",
+        "observed",
+      ]);
+    });
+  });
+
+  describe("protocols", () => {
+    let sites: string[] = [];
+    let first: { id: string; inspection: string; number: number };
+    const pdf = new Blob(["%PDF-1.7"], { type: "application/pdf" });
+
+    beforeAll(async () => {
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Protocols customer" })
+        .select("id")
+        .single();
+      const { data } = await alice.client
+        .from("sites")
+        .insert(
+          [1, 2, 3, 4].map((n) => ({
+            organization_id: orgA,
+            customer_id: customer!.id,
+            name: `Protocols site ${n}`,
+          })),
+        )
+        .select("id");
+      sites = data!.map((site) => site.id);
+    });
+
+    /** Completes an inspection of a building (nothing checked) and returns the summary. */
+    async function completeOn(site: string) {
+      const { data: inspection } = await alice.client.rpc("start_inspection", { p_site: site });
+      const { data, error } = await alice.client.rpc("complete_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(error).toBeNull();
+      return { inspection: inspection!, protocol: (data as { protocol: string }).protocol };
+    }
+
+    it("completing an inspection numbers its protocol in the company's language", async () => {
+      const { inspection, protocol } = await completeOn(sites[0]!);
+      const { data } = await alice.client
+        .from("protocols")
+        .select("id, inspection_id, year, number, locale, pdf_path")
+        .eq("id", protocol)
+        .single();
+      const year = Number(
+        new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Europe/Prague" }).format(
+          new Date(),
+        ),
+      );
+      expect(data).toMatchObject({ inspection_id: inspection, year, locale: "cs", pdf_path: null });
+      first = { id: protocol, inspection, number: data!.number };
+    });
+
+    it("completions at the same time get consecutive numbers, none shared", async () => {
+      const started = await Promise.all(
+        sites.slice(1).map(async (site) => {
+          const { data } = await alice.client.rpc("start_inspection", { p_site: site });
+          return data!;
+        }),
+      );
+      const results = await Promise.all(
+        started.map((inspection) =>
+          alice.client.rpc("complete_inspection", { p_inspection: inspection }),
+        ),
+      );
+      expect(results.map((result) => result.error)).toEqual([null, null, null]);
+      const { data } = await alice.client
+        .from("protocols")
+        .select("number")
+        .in("inspection_id", started)
+        .order("number");
+      expect(data?.map((row) => row.number)).toEqual([
+        first.number + 1,
+        first.number + 2,
+        first.number + 3,
+      ]);
+    });
+
+    it("asking again returns the same protocol; an open inspection has none", async () => {
+      const { data: again } = await alice.client.rpc("ensure_protocol", {
+        p_inspection: first.inspection,
+      });
+      expect(again).toBe(first.id);
+      const { data: open } = await alice.client.rpc("start_inspection", { p_site: sites[0]! });
+      const { error } = await alice.client.rpc("ensure_protocol", { p_inspection: open! });
+      expect(error?.message).toMatch(/inspection_open/);
+      await alice.client.rpc("complete_inspection", { p_inspection: open! });
+    });
+
+    it("nobody in the app writes protocols or their files", async () => {
+      const { error: insert } = await alice.client
+        .from("protocols")
+        .insert({ organization_id: orgA, inspection_id: first.inspection } as never);
+      expect(insert).not.toBeNull();
+      const { data: updated } = await alice.client
+        .from("protocols")
+        .update({ pdf_path: `${orgA}/protocols/fake.pdf` })
+        .eq("id", first.id)
+        .select("id");
+      expect(updated ?? []).toEqual([]);
+      // Not even the owner, who may upload the company's logo.
+      const { error: upload } = await alice.client.storage
+        .from("protocols")
+        .upload(`${orgA}/2026/${first.id}.pdf`, pdf, { contentType: "application/pdf" });
+      expect(upload).not.toBeNull();
+    });
+
+    it("an e-mail is recorded only for a stored PDF, with who sent it", async () => {
+      const { error: missing } = await alice.client.rpc("record_protocol_email", {
+        p_protocol: first.id,
+        p_recipient: "zakaznik@example.com",
+      });
+      expect(missing?.message).toMatch(/protocol_missing/);
+
+      // The server stores the PDF with the service role.
+      const path = `${orgA}/2026/${first.id}.pdf`;
+      const { error: stored } = await admin.storage
+        .from("protocols")
+        .upload(path, pdf, { contentType: "application/pdf", upsert: true });
+      expect(stored).toBeNull();
+      await admin
+        .from("protocols")
+        .update({ pdf_path: path, pdf_size: 8, generated_at: new Date().toISOString() })
+        .eq("id", first.id);
+
+      const { error } = await alice.client.rpc("record_protocol_email", {
+        p_protocol: first.id,
+        p_recipient: " zakaznik@example.com ",
+      });
+      expect(error).toBeNull();
+      const { data: sent } = await alice.client
+        .from("protocol_emails")
+        .select("recipient, sent_by")
+        .eq("protocol_id", first.id);
+      expect(sent).toEqual([{ recipient: "zakaznik@example.com", sent_by: alice.id }]);
+      const { data: file } = await alice.client.storage.from("protocols").download(path);
+      expect(await file?.text()).toBe("%PDF-1.7");
+    });
+
+    it("another company sees none of it and can't touch it", async () => {
+      const { data: protocols } = await bob.client
+        .from("protocols")
+        .select("id")
+        .eq("id", first.id);
+      expect(protocols).toEqual([]);
+      const { data: emails } = await bob.client
+        .from("protocol_emails")
+        .select("id")
+        .eq("protocol_id", first.id);
+      expect(emails).toEqual([]);
+      const { error: ensure } = await bob.client.rpc("ensure_protocol", {
+        p_inspection: first.inspection,
+      });
+      expect(ensure?.message).toMatch(/not_found/);
+      const { error: record } = await bob.client.rpc("record_protocol_email", {
+        p_protocol: first.id,
+        p_recipient: "bob@example.com",
+      });
+      expect(record?.message).toMatch(/not_found/);
+      const { data: file } = await bob.client.storage
+        .from("protocols")
+        .download(`${orgA}/2026/${first.id}.pdf`);
+      expect(file).toBeNull();
+      await admin.storage.from("protocols").remove([`${orgA}/2026/${first.id}.pdf`]);
+    });
+  });
+
+  describe("weekly summary", () => {
+    it("owners turn it on and off; technicians can't", async () => {
+      const { data: initial } = await alice.client
+        .from("organizations")
+        .select("weekly_digest")
+        .eq("id", orgA)
+        .single();
+      expect(initial?.weekly_digest).toBe(true);
+      const { data: off } = await alice.client
+        .from("organizations")
+        .update({ weekly_digest: false })
+        .eq("id", orgA)
+        .select("weekly_digest");
+      expect(off).toEqual([{ weekly_digest: false }]);
+      const { data: technician } = await carol.client
+        .from("organizations")
+        .update({ weekly_digest: true })
+        .eq("id", orgA)
+        .select("id");
+      expect(technician ?? []).toEqual([]);
+      await alice.client.from("organizations").update({ weekly_digest: true }).eq("id", orgA);
+    });
+
+    it("a week is sent once; owners and admins of the company see it", async () => {
+      const { error: byUser } = await alice.client
+        .from("organization_digests")
+        .insert({ organization_id: orgA, week: "2026-10-12", recipients: 1 } as never);
+      expect(byUser).not.toBeNull();
+
+      // The Monday job (service role) claims the week; a second claim fails.
+      const { error } = await admin
+        .from("organization_digests")
+        .insert({ organization_id: orgA, week: "2026-10-12", recipients: 2 });
+      expect(error).toBeNull();
+      const { error: again } = await admin
+        .from("organization_digests")
+        .insert({ organization_id: orgA, week: "2026-10-12", recipients: 2 });
+      expect(again?.code).toBe("23505");
+      // Weeks are Mondays.
+      const { error: tuesday } = await admin
+        .from("organization_digests")
+        .insert({ organization_id: orgA, week: "2026-10-13", recipients: 1 });
+      expect(tuesday).not.toBeNull();
+
+      const { data: owner } = await alice.client
+        .from("organization_digests")
+        .select("week, recipients")
+        .eq("organization_id", orgA);
+      expect(owner).toEqual([{ week: "2026-10-12", recipients: 2 }]);
+      const { data: technician } = await carol.client
+        .from("organization_digests")
+        .select("id")
+        .eq("organization_id", orgA);
+      expect(technician).toEqual([]);
+      const { data: other } = await bob.client
+        .from("organization_digests")
+        .select("id")
+        .eq("organization_id", orgA);
+      expect(other).toEqual([]);
+    });
+  });
+
+  describe("getting started", () => {
+    const year = Number(
+      new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Europe/Prague" }).format(
+        new Date(),
+      ),
+    );
+    /** The highest real (or, with `sample`, sample) number in use. */
+    async function highest(table: "devices" | "protocols", sample = false) {
+      if (table === "devices") {
+        const query = admin.from("devices").select("label_number").eq("organization_id", orgA);
+        const { data } = await (
+          sample ? query.gt("label_number", 900000) : query.lt("label_number", 900000)
+        )
+          .order("label_number", { ascending: false })
+          .limit(1);
+        return data?.[0]?.label_number ?? 0;
+      }
+      const query = admin
+        .from("protocols")
+        .select("number")
+        .eq("organization_id", orgA)
+        .eq("year", year);
+      const { data } = await (sample ? query.gt("number", 900000) : query.lt("number", 900000))
+        .order("number", { ascending: false })
+        .limit(1);
+      return data?.[0]?.number ?? 0;
+    }
+
+    it("only owners and admins add sample data, and only once", async () => {
+      const { error: technician } = await carol.client.rpc("create_sample_data", { p_org: orgA });
+      expect(technician?.message).toMatch(/forbidden/);
+      const { error: other } = await bob.client.rpc("create_sample_data", { p_org: orgA });
+      expect(other?.message).toMatch(/forbidden/);
+
+      const labelsBefore = await highest("devices");
+      const { data: customer, error } = await alice.client.rpc("create_sample_data", {
+        p_org: orgA,
+      });
+      expect(error).toBeNull();
+      const { data: sample } = await alice.client
+        .from("customers")
+        .select("is_sample, sites(id, devices(label_number, status, next_due_on))")
+        .eq("id", customer!)
+        .single();
+      expect(sample?.is_sample).toBe(true);
+      expect(sample?.sites).toHaveLength(2);
+      const devices = sample!.sites.flatMap((site) => site.devices);
+      expect(devices).toHaveLength(9);
+      // Sample numbers of their own, far from the real ones.
+      expect(devices.map((d) => d.label_number).sort((a, b) => a - b)).toEqual(
+        Array.from({ length: 9 }, (_, i) => 900001 + i),
+      );
+      expect(await highest("devices")).toBe(labelsBefore);
+      expect(devices.filter((d) => d.status === "active" && d.next_due_on === null)).toHaveLength(
+        1,
+      );
+
+      const { error: twice } = await alice.client.rpc("create_sample_data", { p_org: orgA });
+      expect(twice?.message).toMatch(/sample_exists/);
+    });
+
+    it("no one marks a real customer as a sample, or unmarks one", async () => {
+      const { error: insert } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Fake sample", is_sample: true } as never);
+      expect(insert).not.toBeNull();
+      const { data: real } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Real customer" })
+        .select("id")
+        .single();
+      const { error: mark } = await alice.client
+        .from("customers")
+        .update({ is_sample: true } as never)
+        .eq("id", real!.id);
+      expect(mark).not.toBeNull();
+    });
+
+    it("removing sample data takes what was done with it; real numbers never moved", async () => {
+      const labels = await highest("devices");
+      const protocols = await highest("protocols");
+      // Try it out: an inspection on a sample building numbers a protocol.
+      const { data: sampleSite } = await alice.client
+        .from("sites")
+        .select("id, customer:customers!inner(is_sample)")
+        .eq("customer.is_sample", true)
+        .limit(1)
+        .single();
+      const { data: inspection } = await alice.client.rpc("start_inspection", {
+        p_site: sampleSite!.id,
+      });
+      await alice.client.rpc("complete_inspection", { p_inspection: inspection! });
+      expect(await highest("protocols", true)).toBe(900001);
+      expect(await highest("protocols")).toBe(protocols);
+
+      const { error: other } = await bob.client.rpc("remove_sample_data", { p_org: orgA });
+      expect(other?.message).toMatch(/forbidden/);
+      const { error: technician } = await carol.client.rpc("remove_sample_data", { p_org: orgA });
+      expect(technician?.message).toMatch(/forbidden/);
+
+      const { data: files, error } = await alice.client.rpc("remove_sample_data", { p_org: orgA });
+      expect(error).toBeNull();
+      expect(files).toEqual([]);
+      const { data: left } = await admin
+        .from("customers")
+        .select("id")
+        .eq("organization_id", orgA)
+        .eq("is_sample", true);
+      expect(left).toEqual([]);
+      const { data: gone } = await admin.from("inspections").select("id").eq("id", inspection!);
+      expect(gone).toEqual([]);
+
+      // Real numbers continue right after the highest real one.
+      const { data: real } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "After the sample" })
+        .select("id")
+        .single();
+      const { data: site } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: real!.id, name: "After the sample site" })
+        .select("id")
+        .single();
+      const { data: type } = await alice.client.from("device_types").select("id").limit(1).single();
+      const { data: device } = await alice.client
+        .from("devices")
+        .insert({ organization_id: orgA, site_id: site!.id, device_type_id: type!.id })
+        .select("label_number")
+        .single();
+      expect(device?.label_number).toBe(labels + 1);
+      const { data: next } = await alice.client.rpc("start_inspection", { p_site: site!.id });
+      await alice.client.rpc("complete_inspection", { p_inspection: next! });
+      expect(await highest("protocols")).toBe(protocols + 1);
+    });
+
+    it("printing labels is noted for the company, by its members only", async () => {
+      const { error: other } = await bob.client.rpc("note_labels_printed", { p_org: orgA });
+      expect(other?.message).toMatch(/not_found/);
+      const { error } = await carol.client.rpc("note_labels_printed", { p_org: orgA });
+      expect(error).toBeNull();
+      const { data } = await alice.client
+        .from("organizations")
+        .select("labels_printed_at")
+        .eq("id", orgA)
+        .single();
+      expect(data?.labels_printed_at).not.toBeNull();
+    });
+  });
+
+  describe("member management", () => {
+    async function membershipOf(user: TestUser) {
+      const { data } = await admin
+        .from("memberships")
+        .select("id, role, display_name, email")
+        .eq("user_id", user.id)
+        .eq("organization_id", orgA)
+        .single();
+      return data!;
+    }
+
+    it("a technician can't change roles or remove anyone", async () => {
+      const aliceMembership = await membershipOf(alice);
+      const { error: roleError } = await carol.client.rpc("change_member_role", {
+        p_membership: aliceMembership.id,
+        p_role: "technician",
+      });
+      expect(roleError).not.toBeNull();
+      const { error: removeError } = await carol.client.rpc("remove_member", {
+        p_membership: aliceMembership.id,
+      });
+      expect(removeError).not.toBeNull();
+    });
+
+    it("another organization can't touch our members", async () => {
+      const carolMembership = await membershipOf(carol);
+      const { error } = await bob.client.rpc("change_member_role", {
+        p_membership: carolMembership.id,
+        p_role: "admin",
+      });
+      expect(error?.message).toContain("forbidden");
+      const { error: removeError } = await bob.client.rpc("remove_member", {
+        p_membership: carolMembership.id,
+      });
+      expect(removeError?.message).toContain("forbidden");
+      expect((await membershipOf(carol)).role).toBe("technician");
+    });
+
+    it("the owner can promote a technician to admin", async () => {
+      const carolMembership = await membershipOf(carol);
+      const { error } = await alice.client.rpc("change_member_role", {
+        p_membership: carolMembership.id,
+        p_role: "admin",
+      });
+      expect(error).toBeNull();
+      expect((await membershipOf(carol)).role).toBe("admin");
+    });
+
+    it("an admin can't demote, remove or replace the owner", async () => {
+      const aliceMembership = await membershipOf(alice);
+      const { error: roleError } = await carol.client.rpc("change_member_role", {
+        p_membership: aliceMembership.id,
+        p_role: "technician",
+      });
+      expect(roleError?.message).toContain("owner_protected");
+      const { error: removeError } = await carol.client.rpc("remove_member", {
+        p_membership: aliceMembership.id,
+      });
+      expect(removeError?.message).toContain("owner_protected");
+      const { error: transferError } = await carol.client.rpc("transfer_ownership", {
+        p_membership: (await membershipOf(carol)).id,
+      });
+      expect(transferError).not.toBeNull();
+      const { error: promoteError } = await carol.client.rpc("change_member_role", {
+        p_membership: (await membershipOf(carol)).id,
+        p_role: "owner",
+      });
+      expect(promoteError).not.toBeNull();
+      expect((await membershipOf(alice)).role).toBe("owner");
+    });
+
+    it("members edit only their own name, never their role", async () => {
+      await carol.client
+        .from("memberships")
+        .update({ display_name: "Carol C." })
+        .eq("user_id", carol.id);
+      expect((await membershipOf(carol)).display_name).toBe("Carol C.");
+
+      await carol.client
+        .from("memberships")
+        .update({ display_name: "hacked" })
+        .eq("user_id", alice.id);
+      expect((await membershipOf(alice)).display_name).not.toBe("hacked");
+
+      // Column privileges: role isn't writable through the API at all.
+      const { error } = await carol.client
+        .from("memberships")
+        .update({ role: "owner" } as never)
+        .eq("user_id", carol.id);
+      expect(error).not.toBeNull();
+      expect((await membershipOf(carol)).role).toBe("admin");
+    });
+
+    it("a confirmed e-mail change is copied to memberships", async () => {
+      const newEmail = `rls-carol-new-${run}@sparxdeck.test`;
+      const { error } = await admin.auth.admin.updateUserById(carol.id, {
+        email: newEmail,
+        email_confirm: true,
+      });
+      expect(error).toBeNull();
+      expect((await membershipOf(carol)).email).toBe(newEmail);
+    });
+
+    it("ownership can be handed over and back, with exactly one owner", async () => {
+      const { error } = await alice.client.rpc("transfer_ownership", {
+        p_membership: (await membershipOf(carol)).id,
+      });
+      expect(error).toBeNull();
+      expect((await membershipOf(carol)).role).toBe("owner");
+      expect((await membershipOf(alice)).role).toBe("admin");
+
+      const { error: backError } = await carol.client.rpc("transfer_ownership", {
+        p_membership: (await membershipOf(alice)).id,
+      });
+      expect(backError).toBeNull();
+      expect((await membershipOf(alice)).role).toBe("owner");
+    });
+
+    it("a removed member loses access", async () => {
+      const { error } = await alice.client.rpc("remove_member", {
+        p_membership: (await membershipOf(carol)).id,
+      });
+      expect(error).toBeNull();
+      const { data } = await carol.client.from("organizations").select("id");
+      expect(data).toEqual([]);
+    });
+  });
+});

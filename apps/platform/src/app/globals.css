@@ -1,0 +1,395 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Workspace design, modelled on Palantir's Blueprint (the toolkit behind Foundry):
+ * system UI font at 14px, a cool gray palette, one blue for actions and
+ * selection, 30px controls with a light gradient and inset borders, hairline
+ * dividers and soft elevations. Object types carry their own colour.
+ *
+ * The sign-in screens keep the landing page look: see `.brand`, applied by the
+ * (auth) layout.
+ */
+:root {
+  --ui-font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  --page: #f5f8fa;
+  --canvas: #ebf1f5;
+  --background: #ffffff;
+  --foreground: #182026;
+  --card: #ffffff;
+  --card-foreground: #182026;
+  --popover: #ffffff;
+  --popover-foreground: #182026;
+  --primary: #137cbd;
+  --primary-hover: #106ba3;
+  --primary-active: #0e5a8a;
+  --primary-foreground: #ffffff;
+  --link: #106ba3;
+  --secondary: #f5f8fa;
+  --secondary-foreground: #182026;
+  --muted: #f5f8fa;
+  --muted-foreground: #5c7080;
+  --subtle: #607485;
+  --accent: rgb(167 182 194 / 0.3);
+  --accent-strong: rgb(115 134 148 / 0.3);
+  --accent-foreground: #182026;
+  --selected: rgb(19 124 189 / 0.15);
+  --border: rgb(16 22 26 / 0.15);
+  --border-strong: rgb(16 22 26 / 0.2);
+  --input: rgb(16 22 26 / 0.15);
+  --ring: #137cbd;
+  --focus: rgb(19 124 189 / 0.6);
+  --destructive: #db3737;
+  --destructive-hover: #c23030;
+  --destructive-active: #a82a2a;
+  --destructive-text: #c23030;
+  --destructive-foreground: #ffffff;
+  --success: #0f9960;
+  --success-text: #0d8050;
+  --warning: #d9822b;
+  --warning-text: #87501a;
+  --highlight: #ffc940;
+  --rail: #293742;
+  --rail-foreground: #a7b6c2;
+  --rail-hover: #30404d;
+  --rail-active: #394b59;
+  --node-header: #182026;
+  --node-customer: #137cbd;
+  --node-site: #238c2c;
+  --node-location: #96622d;
+  --node-device: #db2c6f;
+  --edge: #8a9ba8;
+  --tooltip: #394b59;
+  --tooltip-foreground: #f5f8fa;
+  /* Controls */
+  --btn-bg: #f5f8fa;
+  --btn-bg-hover: #ebf1f5;
+  --btn-bg-active: #d8e1e8;
+  --btn-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0));
+  --btn-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.2), inset 0 -1px 0 rgb(16 22 26 / 0.1);
+  --btn-shadow-active: inset 0 0 0 1px rgb(16 22 26 / 0.2), inset 0 1px 2px rgb(16 22 26 / 0.2);
+  --btn-disabled-bg: rgb(206 217 224 / 0.5);
+  --btn-disabled-fg: rgb(92 112 128 / 0.6);
+  --btn-icon: #5c7080;
+  --btn-intent-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0));
+  --btn-intent-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.4), inset 0 -1px 0 rgb(16 22 26 / 0.2);
+  --btn-intent-shadow-active:
+    inset 0 0 0 1px rgb(16 22 26 / 0.4), inset 0 1px 2px rgb(16 22 26 / 0.2);
+  --input-bg: #ffffff;
+  --input-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.15), inset 0 1px 1px rgb(16 22 26 / 0.2);
+  --input-placeholder: rgb(92 112 128 / 0.6);
+  /* Elevations */
+  --elevation-0: 0 0 0 1px rgb(16 22 26 / 0.15);
+  --elevation-1: 0 0 0 1px rgb(16 22 26 / 0.1), 0 1px 1px rgb(16 22 26 / 0.2);
+  --elevation-2:
+    0 0 0 1px rgb(16 22 26 / 0.1), 0 1px 1px rgb(16 22 26 / 0.2), 0 2px 6px rgb(16 22 26 / 0.2);
+  --elevation-3:
+    0 0 0 1px rgb(16 22 26 / 0.1), 0 2px 4px rgb(16 22 26 / 0.2), 0 8px 24px rgb(16 22 26 / 0.2);
+  --elevation-4:
+    0 0 0 1px rgb(16 22 26 / 0.1), 0 4px 8px rgb(16 22 26 / 0.2),
+    0 18px 46px 6px rgb(16 22 26 / 0.2);
+  --gradient-heading: linear-gradient(to bottom, #111111 0%, #5c5c5c 45%, #b3b3b3 100%);
+  color-scheme: light;
+}
+
+.dark {
+  --page: #293742;
+  --canvas: #202b33;
+  --background: #30404d;
+  --foreground: #f5f8fa;
+  --card: #30404d;
+  --card-foreground: #f5f8fa;
+  --popover: #30404d;
+  --popover-foreground: #f5f8fa;
+  --link: #5cb7f2;
+  --secondary: #394b59;
+  --secondary-foreground: #f5f8fa;
+  --muted: #293742;
+  --muted-foreground: #a7b6c2;
+  --subtle: #9eacb8;
+  --accent: rgb(138 155 168 / 0.15);
+  --accent-strong: rgb(138 155 168 / 0.3);
+  --accent-foreground: #f5f8fa;
+  --selected: rgb(19 124 189 / 0.3);
+  --border: rgb(16 22 26 / 0.4);
+  --border-strong: rgb(16 22 26 / 0.5);
+  --input: rgb(16 22 26 / 0.3);
+  --ring: #48aff0;
+  --focus: rgb(72 175 240 / 0.6);
+  --destructive-text: #ff8a8a;
+  --success-text: #3dcc91;
+  --warning-text: #ffb366;
+  --rail: #182026;
+  --rail-foreground: #a7b6c2;
+  --rail-hover: #202b33;
+  --rail-active: #30404d;
+  --node-header: #10161a;
+  --edge: #5c7080;
+  --tooltip: #e1e8ed;
+  --tooltip-foreground: #182026;
+  --btn-bg: #394b59;
+  --btn-bg-hover: #30404d;
+  --btn-bg-active: #202b33;
+  --btn-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0));
+  --btn-shadow: 0 0 0 1px rgb(16 22 26 / 0.4);
+  --btn-shadow-active: 0 0 0 1px rgb(16 22 26 / 0.6), inset 0 1px 2px rgb(16 22 26 / 0.2);
+  --btn-disabled-bg: rgb(57 75 89 / 0.5);
+  --btn-disabled-fg: rgb(167 182 194 / 0.6);
+  --btn-icon: #a7b6c2;
+  --input-bg: rgb(16 22 26 / 0.3);
+  --input-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.3), inset 0 1px 1px rgb(16 22 26 / 0.4);
+  --input-placeholder: rgb(167 182 194 / 0.6);
+  --elevation-0: 0 0 0 1px rgb(16 22 26 / 0.4);
+  --elevation-1: 0 0 0 1px rgb(16 22 26 / 0.2), 0 1px 1px rgb(16 22 26 / 0.4);
+  --elevation-2:
+    0 0 0 1px rgb(16 22 26 / 0.2), 0 1px 1px rgb(16 22 26 / 0.4), 0 2px 6px rgb(16 22 26 / 0.4);
+  --elevation-3:
+    0 0 0 1px rgb(16 22 26 / 0.2), 0 2px 4px rgb(16 22 26 / 0.4), 0 8px 24px rgb(16 22 26 / 0.4);
+  --elevation-4:
+    0 0 0 1px rgb(16 22 26 / 0.2), 0 4px 8px rgb(16 22 26 / 0.4),
+    0 18px 46px 6px rgb(16 22 26 / 0.4);
+  --gradient-heading: linear-gradient(to bottom, #ffffff 0%, #bdbdbd 45%, #5c5c5c 100%);
+  color-scheme: dark;
+}
+
+/* Sign-in screens: the landing page palette, typeface and shapes. */
+.brand {
+  --ui-font: var(--font-helvetica-now), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #111111;
+  --primary-hover: #000000;
+  --primary-active: #000000;
+  --primary-foreground: #ffffff;
+  --link: #111111;
+  --muted: #f5f5f5;
+  --muted-foreground: #6b6b6b;
+  --subtle: #9a9a9a;
+  --accent: #f5f5f5;
+  --accent-strong: #ececec;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #111111;
+  --focus: rgb(17 17 17 / 0.4);
+  --destructive: #c62828;
+  --destructive-text: #c62828;
+  --success: #2e7d32;
+  --success-text: #2e7d32;
+  --btn-bg: #ffffff;
+  --btn-bg-hover: #f5f5f5;
+  --btn-bg-active: #ececec;
+  --btn-gradient: none;
+  --btn-shadow: inset 0 0 0 1px #e5e5e5;
+  --btn-shadow-active: inset 0 0 0 1px #d4d4d4;
+  --btn-icon: currentColor;
+  --btn-intent-gradient: none;
+  --btn-intent-shadow: none;
+  --btn-intent-shadow-active: none;
+  --input-bg: #ffffff;
+  --input-shadow: inset 0 0 0 1px #e5e5e5;
+  --input-placeholder: #9a9a9a;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  font-family: var(--ui-font);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dark .brand {
+  --background: #000000;
+  --foreground: #f2f2f2;
+  --card: #0b0b0b;
+  --card-foreground: #f2f2f2;
+  --popover: #0b0b0b;
+  --popover-foreground: #f2f2f2;
+  --primary: #ffffff;
+  --primary-hover: #e5e5e5;
+  --primary-active: #d4d4d4;
+  --primary-foreground: #000000;
+  --link: #f2f2f2;
+  --muted: #111111;
+  --muted-foreground: #a3a3a3;
+  --accent: #161616;
+  --accent-strong: #1f1f1f;
+  --border: #262626;
+  --input: #262626;
+  --ring: #ffffff;
+  --focus: rgb(255 255 255 / 0.4);
+  --destructive: #f87171;
+  --destructive-text: #f87171;
+  --success: #6fbf73;
+  --success-text: #6fbf73;
+  --btn-bg: #000000;
+  --btn-bg-hover: #111111;
+  --btn-bg-active: #161616;
+  --btn-shadow: inset 0 0 0 1px #262626;
+  --btn-shadow-active: inset 0 0 0 1px #333333;
+  --input-bg: #000000;
+  --input-shadow: inset 0 0 0 1px #262626;
+  --input-placeholder: #6b6b6b;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-canvas: var(--canvas);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-link: var(--link);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-selected: var(--selected);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-destructive-active: var(--destructive-active);
+  --color-destructive-text: var(--destructive-text);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-text: var(--warning-text);
+  --color-highlight: var(--highlight);
+  --color-rail: var(--rail);
+  --color-rail-foreground: var(--rail-foreground);
+  --color-rail-hover: var(--rail-hover);
+  --color-rail-active: var(--rail-active);
+  --color-node-header: var(--node-header);
+  --color-node-customer: var(--node-customer);
+  --color-node-site: var(--node-site);
+  --color-node-location: var(--node-location);
+  --color-node-device: var(--node-device);
+  --color-edge: var(--edge);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
+  --font-sans: var(--ui-font);
+  --font-display: var(--ui-font);
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --text-ui-lg: 1rem;
+  --text-ui-lg--line-height: 1.25rem;
+  --text-ui: 0.875rem;
+  --text-ui--line-height: 1.125rem;
+  --text-ui-sm: 0.75rem;
+  --text-ui-sm--line-height: 1rem;
+  --text-ui-xs: 0.6875rem;
+  --text-ui-xs--line-height: 0.875rem;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 6px;
+  --shadow-elevation-0: var(--elevation-0);
+  --shadow-elevation-1: var(--elevation-1);
+  --shadow-elevation-2: var(--elevation-2);
+  --shadow-elevation-3: var(--elevation-3);
+  --shadow-elevation-4: var(--elevation-4);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-page font-sans text-ui text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground;
+  }
+
+  .brand h1,
+  .brand h2 {
+    @apply font-normal tracking-tight;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(125 188 255 / 0.6);
+  }
+
+  ::placeholder {
+    color: var(--input-placeholder);
+    opacity: 1;
+  }
+}
+
+@utility text-gradient-heading {
+  background-image: var(--gradient-heading);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Thin scrollbars inside the workspace panels. */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(92 112 128 / 0.35) transparent;
+}
+
+/* Blueprint button surfaces (see components/ui/button.tsx). */
+@utility surface-button {
+  background-color: var(--btn-bg);
+  background-image: var(--btn-gradient);
+  box-shadow: var(--btn-shadow);
+  color: var(--foreground);
+}
+
+@utility surface-input {
+  background-color: var(--input-bg);
+  box-shadow: var(--input-shadow);
+}
+
+/* React Flow's attribution link: readable on the canvas (WCAG AA). */
+.react-flow .react-flow__attribution a {
+  color: var(--muted-foreground);
+}
+
+/* On touch screens a text link outside a sentence is a 44 px target: values in
+   detail lists (dd) and links marked .touch-link (card footers, short lists). */
+@media (pointer: coarse) {
+  dd a,
+  .touch-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

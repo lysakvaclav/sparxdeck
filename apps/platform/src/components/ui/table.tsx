@@ -1,0 +1,129 @@
+import * as React from "react";
+import Link from "next/link";
+import { CaretDownIcon, CaretUpIcon, DoubleCaretVerticalIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
+
+/*
+ * Blueprint HTML table, condensed and bordered: bold header on a light band,
+ * hairline grid, row hover. A row links to a detail page through `RowLink` (a
+ * stretched link in the first cell), so the whole row is clickable and accessible.
+ */
+
+function Table({ className, ...props }: React.ComponentProps<"table">) {
+  return (
+    <div className="w-full scrollbar-thin overflow-x-auto">
+      <table
+        className={cn("w-full border-separate border-spacing-0 text-ui", className)}
+        {...props}
+      />
+    </div>
+  );
+}
+
+function TableHead({ className, ...props }: React.ComponentProps<"thead">) {
+  return <thead className={cn("bg-muted", className)} {...props} />;
+}
+
+function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+  return <tbody className={className} {...props} />;
+}
+
+function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+  return (
+    <tr
+      className={cn(
+        "relative transition-colors [&:has([data-row-link]:focus-visible)]:bg-selected [&:has([data-row-link]:hover)]:bg-[rgb(191_204_214/0.3)]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+const cellBorders =
+  "shadow-[inset_0_-1px_0_var(--border)] [&:not(:first-child)]:shadow-[inset_1px_0_0_var(--border),inset_0_-1px_0_var(--border)]";
+
+function TableHeaderCell({ className, ...props }: React.ComponentProps<"th">) {
+  return (
+    <th
+      scope="col"
+      className={cn(
+        "h-[30px] px-2.5 text-start align-middle text-ui font-semibold whitespace-nowrap",
+        cellBorders,
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** Column header that sorts the list (a link that sets ?sort=). */
+function SortableHeader({
+  href,
+  active,
+  direction,
+  children,
+  className,
+}: {
+  href: string;
+  active: boolean;
+  direction: "asc" | "desc";
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const Caret = active
+    ? direction === "asc"
+      ? CaretUpIcon
+      : CaretDownIcon
+    : DoubleCaretVerticalIcon;
+  return (
+    <TableHeaderCell
+      className={className}
+      aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : undefined}
+    >
+      <Link href={href} className="inline-flex items-center gap-1 rounded-sm hover:text-link">
+        {children}
+        <Caret className={cn(active ? "text-link" : "text-subtle")} />
+      </Link>
+    </TableHeaderCell>
+  );
+}
+
+function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+  return (
+    <td
+      className={cn(
+        "h-[34px] px-2.5 align-middle pointer-coarse:h-12",
+        cellBorders,
+        "[tr:last-child>&]:shadow-none [tr:last-child>&:not(:first-child)]:shadow-[inset_1px_0_0_var(--border)]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** The row's main link; its hit area covers the whole row. */
+function RowLink({ className, ...props }: React.ComponentProps<typeof Link>) {
+  return (
+    <Link
+      data-row-link=""
+      className={cn(
+        "text-link outline-none after:absolute after:inset-0 after:content-[''] hover:underline",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  SortableHeader,
+  TableCell,
+  RowLink,
+};

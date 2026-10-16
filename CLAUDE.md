@@ -1,0 +1,110 @@
+# SparxDeck
+
+Webová a mobilní aplikace (SaaS, měsíční předplatné) pro servisní firmy, které dělají pravidelné revize požárně bezpečnostních zařízení: hasicí přístroje, hydranty, nouzové osvětlení, požární klapky a dveře. Nahrazuje papírové zápisy a Excel.
+
+- **Zákazník:** servisní firmy se 3 až 30 lidmi. **Uživatelé:** technici v terénu (telefon), kancelář (počítač), později správci budov (portál).
+- **Problém:** technik zapisuje na papír a večer přepisuje do protokolu; termíny se hlídají v Excelu nebo z hlavy.
+- **Jádro:** evidence (zákazníci, budovy, zařízení) → QR štítky → kontrola na telefonu (checklist, fotka) → automatický PDF protokol → hlídání termínů → závady do vyřešení.
+- **Odlišení:** jednoduchost, rychlé skenování telefonem, protokol hned na místě, zaučení za pár minut.
+- **Trhy:** nejdřív Česko, později Arménie, Gruzie, případně Saúdská Arábie (mění se jazyk a šablony protokolů).
+- **Stav:** poptávka není ověřená. Stavět jen to, co je v plánu; spolehlivost základního toku je důležitější než počet funkcí.
+
+## Dokumenty
+
+| Soubor | Obsah |
+|---|---|
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Pořadí práce: části 1–12, stav každé části. **Pracuje se vždy jen na jedné části.** |
+| [docs/CHECKLIST.md](docs/CHECKLIST.md) | Všechny funkce s prioritou P1/P2/P3. Odškrtávat až po otestování, s odkazem na commit. |
+| [docs/SPEC.md](docs/SPEC.md) | Datový model, role, pravidla pro termíny, bezpečnost. |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Spuštění: účty, produkční Supabase, Vercel, Resend, Sentry, zálohy, vydávání změn. |
+
+## Repozitář
+
+| Aplikace | Cesta | Adresa |
+|---|---|---|
+| Landing page | `apps/landingpage` | sparxdeck.com (16 jazyků, hotová) |
+| Platforma | `apps/platform` | app.sparxdeck.com |
+
+Každá aplikace má vlastní `node_modules` a `package-lock.json` (instalace uvnitř složky aplikace). Pracovní větev: `sparxdeck`.
+
+Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3001). Skript nejdřív ukončí zbylé dev servery tohoto repa i s podřízenými procesy (`scripts/stop-dev.mjs`, na Windows po Ctrl+C v turbu často zůstávají běžet) a ověří, že porty 3000 a 3001 jsou volné; port obsazený cizím programem jen ohlásí (PID a příkaz) a turbo nespustí. Ručně `npm run dev:stop`. Obě aplikace mají pevný port (landing by jinak při obsazeném 3000 tiše přešel na 3001 platformy).
+
+## Platforma: technologie a odchylky od specifikace
+
+- Next.js 16.3 (App Router, `src/proxy.ts` místo middleware), React 19, TypeScript strict s `noUncheckedIndexedAccess`.
+- Supabase (Postgres, Auth, Storage), hostovaný vývojový projekt `zclhipzzqvhmpqxxaust` v EU (eu-west-1, Irsko). Migrace v `apps/platform/supabase/migrations`, nahrávají se přes `npm run db:push` (connection string `SUPABASE_DB_URL` v `.env.local`, bez Dockeru). Typy v `src/lib/supabase/database.types.ts` se zatím píší ručně (generování vyžaduje `supabase login`).
+- Tailwind 4, komponenty ve stylu shadcn/ui psané ručně v `src/components/ui` (radix-ui).
+- next-intl **bez jazyka v URL**: jazyk z cookie `NEXT_LOCALE`. QR odkazy `/d/<token>` se tak nikdy nemění. Texty v `messages/cs.json` (zdroj) a `messages/en.json`; test hlídá shodu klíčů.
+- React Hook Form + Zod; stejná schémata (`src/lib/validation.ts`) validují v prohlížeči i na serveru. Chyby jsou kódy (`src/lib/errors.ts`) překládané v UI.
+- Vitest 4 (ne 5: npm 11.2 padá na jeho peer závislostech; proto se instaluje s `--legacy-peer-deps`). Platforma nemá vlastní `.npmrc`: npm ho při spuštění skriptů ve workspace ignoruje a při každém příkazu varuje.
+- Instalace balíčků do platformy: `npm install --prefix . --save-exact --legacy-peer-deps <balíček>` ve složce `apps/platform`. Bez `--prefix .` npm pracuje s kořenovým workspace a jeho zastaralým `package-lock.json` (a npm 10 i 11 tam padá na chybě `edgesOut`). Platí `apps/platform/package-lock.json`.
+- Termíny jsou kalendářní dny (typ `date`): sloupce `installed_on`, `last_inspection_on` a `next_due_on` místo `_at` ze SPEC (čas ani pásmo k termínu nepatří). `next_due_on` počítá trigger (poslední revize + interval typu, konec měsíce se zarovná: 31. 1. + 1 měsíc = 28./29. 2.; změna intervalu termíny posune). Stejný výpočet je v `src/lib/due.ts` a testy hlídají shodu s databází. „Dnes“ = `todayInTimeZone(organization.timezone)`, stav `dueState()` s hranicí `organizations.due_soon_days`, filtry přes `dueWindow()`. Data zobrazovat přes `calendarDate()` + `CALENDAR_FORMAT`, nikdy `new Date("YYYY-MM-DD")` v místním čase.
+- Čísla štítků přiděluje databáze z čítače `organization_counters` (zámek řádku: bez duplicit při souběhu, hromadné přidání dostane čísla za sebou, smazané číslo se nevrací); stejně se budou číslovat protokoly. `label_number`, `public_token` (QR, 12 znaků base32), `next_due_on` a `site_id` klient nezapisuje (práva sloupců).
+- Mapa vazeb: React Flow (`@xyflow/react`). Výpočet grafu (zákazník → budova → lokace → zařízení; zařízení bez lokace visí na budově), velikostí uzlů (styl Pruhy a Karty), rozložení, výběru, souhrnu termínů nahoru po stromu a barev (podle typu, zákazníka, termínu) je v `src/lib/graph.ts` (čisté funkce s testy), plátno, panely, spodní panel a menu v `src/app/(app)/graph`. Menu Soubor/Zobrazení/Nápověda se kreslí portálem do řádku `[data-page-menus]` v hlavičce. Export PNG přes `html-to-image` 1.11.11.
+- QR štítky: kód obsahuje jen `NEXT_PUBLIC_APP_URL/d/<token>` (`src/lib/qr.ts`, knihovna `uqr`, úroveň Q). Trasa `/d/[token]` přesměruje na zařízení vlastní firmy, jinak vždy stejné neutrální „nenalezeno“. **Ostré štítky tisknout jen z produkční adresy**, jinak v QR zůstane `localhost`. Archy štítků jsou v milimetrech v `src/lib/labels.ts` (formáty A4, vlastní rozměr, rozložení obsahu štítku); náhled v prohlížeči i PDF kreslí ze stejných čísel.
+- Revize: tabulky `inspections`, `inspection_items` (kontrola jednoho zařízení), `inspection_answers`, `inspection_photos` (místo obecných `attachments` ze SPEC). Zápis jen přes funkce v migraci `20261013090000_inspections.sql` (`start_inspection`, `open_device_check`, `save_answer`, `finish_device_check`, `complete_inspection` …). Kontrolu drží jeden technik (`editing_by`, 10 min bez aktivity, převzetí). Vyplňování kontroly volá funkce přímo z prohlížeče (`device-check.tsx`, klient `src/lib/supabase/client.ts`), ne přes serverové akce: změna jde nejdřív do telefonu (`src/lib/client/check-drafts.ts`, fotky do IndexedDB `photo-queue.ts`), pak se odesílá ve frontě; bez signálu čeká. Pravidla kontroly (povinné, výsledek, čtení skenu) v `src/lib/inspections.ts` odpovídají databázi.
+- Závady:
+  - Tabulky `defects` (číslo z `organization_counters`), `defect_events` (historie: kdo, co, kdy) a `defect_photos`.
+  - Zápis jen přes funkce v migracích `20261014090000_defects.sql` a `20261014100000_defects_repeated.sql`: `create_defect`, `change_defect_status`, `change_defect_severity`, `edit_defect_description`, `comment_defect`, `add_defect_photo`.
+  - Závady z revize vznikají až v `complete_inspection`: z nevyhovující ano/ne položky s `fail_creates_defect` nebo se zvolenou závažností (`inspection_answers.defect_severity`, posílá `save_answer`).
+  - Otevřená závada stejné položky (shoda textu otázky) na zařízení dostane místo nové událost `observed`. Náhled `defectPreview()` v `src/lib/inspection-data.ts` počítá totéž.
+  - Závady řeší každý člen (i technik). Vyřešení vyžaduje poznámku.
+  - Na telefonu jsou ve spodní liště Přehled, Revize, Závady a Zařízení, ostatní pod „Více“.
+- PDF: `@react-pdf/renderer` na serveru (`serverExternalPackages` v `next.config.ts`), písmo Noto Sans (OFL) v `src/assets/fonts` (`src/lib/pdf/fonts.ts`) s `outputFileTracingIncludes`, aby se dostalo i do nasazení. Dělení slov je vypnuté. Past: `lineHeight` na `Page` skryje dynamický text (`render`, číslo strany); výšku řádku nenastavovat.
+- Protokoly:
+  - Tabulky `protocols` (číslo `ROK-NNNN` po firmě a roce z `organization_counters`, jazyk firmy, `pdf_path`) a `protocol_emails`.
+  - Číslo přidělí `complete_inspection` (`assign_protocol`) ve stejné transakci. Starší revize si ho vyžádají přes `ensure_protocol`.
+  - Obsah sestaví `buildProtocol` (`src/lib/protocol.ts`, čisté funkce s testy), rozvržení je v `src/lib/pdf/protocol.tsx`, načtení dat, uložení a e-mail v `src/lib/protocols.ts`.
+  - PDF je v soukromém bucketu `protocols` (`<org>/<rok>/<id>.pdf`), který zapisuje jen server přes service role (`createAdminClient`). Uložený protokol se nemění.
+  - Stažení přes `/inspections/[id]/protocol` (podepsaný odkaz 60 s, `?inline` pro tisk). Logo WebP se pro PDF převádí přes `sharp`.
+  - Texty jsou v `protocol.pdf` a `protocol.email`, jazyk dodá `getTranslations({ locale })` (request config explicitní jazyk respektuje).
+- Přehled termínů na úvodní stránce:
+  - Co propadá za 30/60/90 dní po budovách: `src/lib/due-plan.ts` (`duePlan`, `horizonWindow`, testy hranic), `src/app/(app)/due-overview.tsx`.
+  - Filtr zákazníka a budovy je v adrese (`overview-filters.tsx`).
+  - Seznam zařízení má `due=30d|60d|90d` (od dneška do dneška + N; prošlé termíny mají vlastní filtr).
+- Týdenní souhrn:
+  - Obsah a pondělí týdne v `src/lib/digest.ts` (testy), načtení a rozeslání v `src/lib/digests.ts`.
+  - Úloha `GET /api/cron/weekly-summary` (`Authorization: Bearer CRON_SECRET`, bez klíče 404, `?dry` jen hlásí) běží podle `vercel.json` v pondělí 5:00 UTC.
+  - Týden si nejdřív zabere v `organization_digests` (unikátní pro firmu a týden), takže se nepošle dvakrát. Vypínač je `organizations.weekly_digest`, v Nastavení je i náhled.
+- Hledání: `src/components/app/omnibar.tsx` (Ctrl+K, „/“, lupa v liště), serverová akce `src/app/(app)/search-actions.ts`, rozpoznání štítku, závady a protokolu v `src/lib/global-search.ts` (testy). Text jen přes `ilikeAny`.
+- Export CSV:
+  - `src/lib/csv.ts`: BOM, `;` v češtině, buňky začínající `= + - @` dostanou apostrof.
+  - `/devices/export` sdílí s `/devices` čtení filtrů a dotaz (`src/lib/device-list.ts`: pevný seznam sloupců; obecný generický `select` TypeScript nezvládne). `/inspections/export` exportuje po kontrolách.
+- Začínáme a ukázková data:
+  - Průvodce `src/app/(app)/getting-started.tsx` (kroky z dat, `organizations.labels_printed_at` zapisuje tisk štítků, `guide_dismissed_at`).
+  - Ukázka je zákazník `is_sample` (nastaví jen `create_sample_data`, trigger hlídá změny), smaže ji `remove_sample_data` (vrátí soubory ke smazání, smaže je server).
+  - Zařízení, závady a protokoly v budovách ukázky číslují vlastní čítače `sample_*` od 900001 (`is_sample_site`, `next_counter`), takže skutečná čísla nemají mezery.
+- E-maily přes Resend (HTTP API, `src/lib/email.ts`: přílohy, `reply_to`, jméno odesílatele); bez `RESEND_API_KEY` se odkaz pozvánky ukáže v UI, protokol nejde poslat (dialog to řekne) a týdenní souhrn se neposílá. `renderEmail` umí odrážky (`items`). Šablony auth e-mailů v `supabase/templates` (generuje `scripts/build-email-templates.mjs`).
+- Přihlášení heslem běží v prohlížeči (ne v serverové akci), aby limit pokusů Supabase platil pro IP uživatele. Proxy obnovuje session cookie.
+- Ověřování UI: headless Edge přes DevTools Protocol (`apps/platform/e2e`, `npm run e2e`, snímky do `.e2e-output/`; poslední sada `e2e/a11y.mjs` je audit přístupnosti axe-core a dotykových ploch 44 px). Hlavní tok v Playwright: `playwright/main-flow.spec.ts`, `npm run test:flow` (lokálně Edge proti `npm start`, v CI Chromium); testovací uživatelé se zakládají přes admin API jako potvrzení, aby Supabase neposílal e-maily na neexistující adresy. Sady nikdy nespouštět souběžně: Supabase omezuje počet přihlášení z jedné IP a souběh pak končí vypršením přihlášení. Ovladač má časové limity (spojení 15 s, příkaz 30 s, celá sada 10 min), vybírá jen volný ladicí port (jinak by se druhý prohlížeč připojil k prvnímu a sdílel jeho přihlášení) a selhaný krok ukončí sadu s chybou. `page.send` posílá přímé příkazy DevTools (např. vypnutí sítě). Ovladač zapisuje i hlášení prohlížeče o porušení CSP.
+- Bezpečnost a provoz:
+  - CSP s nonce na každý požadavek vytváří proxy (`src/proxy.ts`, pravidla v `src/lib/security-headers.ts`). Next.js nonce doplní sám, inline skript tématu ho dostane přes `x-nonce`. Nové externí zdroje (skripty, obrázky, spojení) je nutné do CSP přidat.
+  - Ostatní hlavičky jsou v `next.config.ts` → `headers()`. Sentry (`src/instrumentation*.ts`, `withSentryConfig`, tunel `/monitoring`) je vypnuté bez `NEXT_PUBLIC_SENTRY_DSN`.
+  - Chybové stránky: `(app)/error.tsx` a `global-error.tsx`. `/api/health` ověřuje databázi.
+- PWA: `src/app/manifest.ts`, ikony z `src/assets/brand/mark.png` generuje `scripts/generate-app-icons.mjs`.
+- Prostředí:
+  - Vývoj používá `.env.local`, produkce `.env.production.local`. Do produkce se nahrává přes `npm run db:push:production` (s potvrzením).
+  - Soubory se zálohují a obnovují přes `scripts/backup-storage.mjs` a `restore-storage.mjs`. CI je v `.github/workflows/platform.yml`.
+
+## Pravidla
+
+- **Multi-tenancy:** každá tabulka firmy má `organization_id` a Row Level Security. Ke každé nové tabulce politika a test v `apps/platform/tests/rls.test.ts`, že cizí firma nic nevidí. Zápisy přes více tabulek jen přes `SECURITY DEFINER` funkce s kontrolami.
+- **Soubory:** soukromý bucket `org-assets` (obrázky), protokoly v bucketu `protocols` (jen PDF, zapisuje jen server); cesta vždy `<organization_id>/...` (politiky v migraci podle první složky). Typ souboru ověřit z obsahu (`sniffImage` v `src/lib/storage.ts`), zobrazovat jen přes krátkodobé podepsané odkazy (`signedUrl`).
+- **Formuláře:** schéma v `src/lib/validation.ts`, serverová akce vrací `ActionResult` s `fieldErrors`, v klientu `useActionForm` + `useFieldError` (`src/hooks/use-action-form.ts`), pole přes `Field`.
+- **Serverové akce:** oprávnění přes `requireManager()` (`src/lib/auth.ts`), chyby validace přes `zodFieldErrors` (`src/lib/errors.ts`), id z klienta ověřit `idSchema`. Úpravy a měkké mazání s `.is("deleted_at", null).select("id")`, prázdný výsledek = `notFound`.
+- **Seznamy a detaily:** hledání, řazení, filtry a stránka jsou v adrese (`SearchInput`, `Pagination`, `ilikeAny` a `pageParam` v `src/lib/search.ts`, nikdy nevkládat vstup do filtru ručně; id z adresy ověřit `idSchema`). Detaily načítat přes `src/lib/records.ts`, víc než 1000 řádků přes `fetchAll` (`src/lib/supabase/fetch-all.ts`). Společné komponenty v `src/components/app`: `Breadcrumbs`, `EmptyState`, `DetailList`, `DeleteButton` (potvrzení před smazáním).
+- **Šablony kontrol jsou verzované:** nikdy je neupravovat na místě. Změna jde jen přes `save_checklist_template` (nová aktivní verze, starší zůstávají); revize v části 7 budou odkazovat na konkrétní verzi (`template_id`). Výchozí typ a vzorová šablona se zakládají funkcí `seed_organization_defaults` při vytvoření firmy a zůstávají označené jako vzorové, dokud je vlastník nebo administrátor nepotvrdí.
+- **Žádná tajemství v kódu.** Klíče jen v `.env.local` (ignorováno gitem), názvy v `.env.example`.
+- **Nevymýšlet předpisy ani právní texty.** Intervaly revizí a kontrolní seznamy jsou data v databázi. Žádná čísla zákonů v aplikaci.
+- **Design platformy (pracovní prostředí):** věrně podle Palantir Foundry / Blueprint 3 (předloha od majitele): systémové písmo 14 px, paleta Blueprint 3 (modrá `#137CBD`, plátno `#EBF1F5`, lišta `#293742`), tlačítka 30 px s jemným přechodem a vnitřním okrajem, ikony **Blueprint** (open source, Apache-2.0) v `src/components/icons.tsx` generované skriptem `scripts/generate-icons.mjs` (nové ikony přidat tam a skript spustit; lucide jen na přihlašovacích stránkách). Žádné podtitulky ani dlaždice pod ikonami. Každá stránka: `PageHeader` (ikona aplikace, drobečková cesta, tučný název, akce) + `PageBody`; seznamy přes `Table`, panely přes `Card`/`CardFooter`, potvrzení přes `ConfirmDialog`, oznámení přes `useToast`. Barvy typů objektů a ikony v `src/components/app/object-types.ts`, barvy aplikací v `nav-items.ts`. Stav termínu: po termínu červeně, brzy oranžově, „v pořádku“ v seznamech bez barvy (zelená jen v souhrnech), `DueCell` a `StatusBadge` v `src/components/app/device-badges.tsx`. Na telefonu hlavička ukazuje z drobečkové cesty jen nadřazený objekt. Na dotykových zařízeních prvky alespoň 44 px (`pointer-coarse:`).
+- **Přihlašovací obrazovky** si nechávají vzhled landing page (třída `.brand` v `(auth)/layout.tsx` přepíná tokeny). Logické CSS vlastnosti (`ps-`, `pe-`, `start-`, `end-`) kvůli zobrazení zprava doleva.
+- **Známé pasti:** žádný `loading.tsx` ve skupině `(app)` (Next 16.3.8: přesměrování ze serverové akce pak skončí prázdnou stránkou). V React Flow kontejner `overflow: clip` (jinak fokus uzlu posune plátno a klik mine) a výběr kliknutím řeší `onNodeClick`. Položka menu s `asChild` (odkaz) nesmí mít `shortcut`: Radix Slot potřebuje jediné dítě. Diskovou cache Turbopacku pro `next dev` má platforma vypnutou (`turbopackFileSystemCacheForDev: false`): po násilném ukončení na Windows se poškodí a další start padá na „restoring failed“ (a narostla na 3,4 GB). Výpis `⨯ turbopackFileSystemCacheForDev` při startu je jen oznámení. Kořenový `node_modules/landingpage` musí být odkaz na `apps/landingpage` tohoto repa (oprava: `rmdir` a `mklink /J`, nikdy ne mazáním s `/s`).
+- **Telefon na prvním místě:** dotykové prvky alespoň 44 px (`pointer-coarse:min-h-11` nebo `size-11`, textové odkazy mimo větu třídou `.touch-link`), ověřit na úzké obrazovce; `e2e/a11y.mjs` to měří.
+- **Barvy a kontrast:** text musí mít kontrast aspoň 4,5:1 (WCAG AA). Barevné tokeny v `globals.css` jsou upravené (např. `--warning-text`, `--subtle`); bílý text na oranžové jen na `#a66321`.
+- **Po každé části:** lint, typy, testy, build, projití v prohlížeči (světlý/tmavý režim, telefon/počítač, cs/en), odškrtnutí v checklistu, commit, shrnutí pro majitele (co je hotové, co otestovat ručně, co rozhodnout, co je další).
+
+## Příkazy (v `apps/platform`)
+
+`npm run dev` (port 3001) · `npm run build` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run db:push` · `npm run db:types`
+
+Pozor: `npx eslint` z kořene repa najde starý ESLint 8; použij `npm run lint` nebo `./node_modules/.bin/eslint`.

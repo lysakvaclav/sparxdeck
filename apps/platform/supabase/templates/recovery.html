@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <body
+    style="
+      margin: 0;
+      background: #f5f5f5;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #111111;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="padding: 32px 16px"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 520px;
+              background: #ffffff;
+              border: 1px solid #e5e5e5;
+              border-radius: 12px;
+            "
+          >
+            <tr>
+              <td style="padding: 32px 32px 8px; font-size: 20px; letter-spacing: -0.02em">
+                SparxDeck
+              </td>
+            </tr>
+            {{ if eq .Data.locale "en" }}
+            <tr>
+              <td
+                style="
+                  padding: 16px 32px 0;
+                  font-size: 24px;
+                  line-height: 1.25;
+                  letter-spacing: -0.02em;
+                  color: #111111;
+                "
+              >
+                Reset your password
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 32px 0; font-size: 15px; line-height: 1.6; color: #333333">
+                Someone asked to set a new password for your SparxDeck account.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 32px">
+                <a
+                  href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
+                  style="
+                    display: inline-block;
+                    background: #111111;
+                    color: #ffffff;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 600;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                  "
+                  >Set a new password</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 32px 32px; font-size: 13px; line-height: 1.5; color: #6b6b6b">
+                If you didn't ask for this, ignore this email. Your password stays the same.
+              </td>
+            </tr>
+            {{ else }}
+            <tr>
+              <td
+                style="
+                  padding: 16px 32px 0;
+                  font-size: 24px;
+                  line-height: 1.25;
+                  letter-spacing: -0.02em;
+                  color: #111111;
+                "
+              >
+                Obnova hesla
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 32px 0; font-size: 15px; line-height: 1.6; color: #333333">
+                Někdo požádal o nastavení nového hesla k vašemu účtu ve SparxDecku.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 32px">
+                <a
+                  href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
+                  style="
+                    display: inline-block;
+                    background: #111111;
+                    color: #ffffff;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 600;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                  "
+                  >Nastavit nové heslo</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 32px 32px; font-size: 13px; line-height: 1.5; color: #6b6b6b">
+                Pokud jste o obnovu nežádali, tento e-mail ignorujte. Vaše heslo zůstane beze změny.
+              </td>
+            </tr>
+            {{ end }}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

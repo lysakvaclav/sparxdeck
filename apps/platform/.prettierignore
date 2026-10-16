@@ -1,0 +1,6 @@
+.next
+node_modules
+src/lib/supabase/database.types.ts
+supabase/.temp
+next-env.d.ts
+.e2e-output
