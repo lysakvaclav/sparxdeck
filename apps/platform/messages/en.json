@@ -286,7 +286,13 @@
     "sampleExists": "The sample data is already there.",
     "noDeviceType": "The company has no device type. Add one under Settings → Device types.",
     "planUnreadable": "The file couldn't be read. Try another image or PDF.",
-    "floorPlansMismatch": "The floor plans changed in the meantime. Reload the page and try again."
+    "floorPlansMismatch": "The floor plans changed in the meantime. Reload the page and try again.",
+    "importEmpty": "There are no rows to import in the file.",
+    "importTooLarge": "One import takes 5,000 rows at most. Split the file into smaller parts.",
+    "importUnknownType": "Unknown device type. Use a type name from the app (Types and templates).",
+    "importInvalid": "The import data isn't valid. Upload the file again.",
+    "importInUse": "The import can't be undone anymore: its records are in use (inspections, defects, floor plans or new devices).",
+    "importUndone": "The import has already been undone."
   },
   "email": {
     "invite": {
@@ -623,6 +629,193 @@
       "noResultsTitle": "Nothing found",
       "noResultsBody": "Try another plan, building or customer name.",
       "count": "{count, plural, one {# plan} other {# plans}}"
+    }
+  },
+  "import": {
+    "title": "Import from Excel",
+    "action": "Import from Excel",
+    "description": "Upload customers, buildings and devices from your Excel or CSV. One row is one device with its customer and building.",
+    "steps": {
+      "file": "File",
+      "columns": "Columns",
+      "check": "Check",
+      "done": "Done"
+    },
+    "file": {
+      "title": "Choose a file",
+      "hint": "Excel (.xlsx) or CSV. The header row (Customer, Building, Serial number…) can be anywhere near the top of the sheet.",
+      "choose": "Choose file",
+      "drop": "or drop the file here",
+      "reading": "Reading the file…",
+      "template": "Download template",
+      "templateHint": "The template has every column the import knows. Fill in the ones you have.",
+      "sheet": "Sheet",
+      "rows": "{count, plural, one {# row} other {# rows}}",
+      "tip1": "Only Customer and Building are required. A row without device details adds just the customer and building.",
+      "tip2": "Existing customers (by company ID or name), buildings and locations are reused. A device whose serial number is already in the building is skipped. Devices without a serial number are added again on every import.",
+      "tip3": "Without a device type, Fire extinguisher is used. A Quantity column adds several units at once."
+    },
+    "fileErrors": {
+      "fileTooLarge": "The file is too large (15 MB at most).",
+      "importFileType": "Upload an Excel (.xlsx) or CSV file.",
+      "importOldExcel": "The old Excel format (.xls) can't be read. Save it as .xlsx or CSV in Excel.",
+      "importUnreadable": "The file couldn't be read."
+    },
+    "columns": {
+      "title": "Which column holds what",
+      "hint": "We recognized the columns by their headers. Check them and change what's needed.",
+      "none": "— don't use —",
+      "example": "e.g. {value}",
+      "required": "required",
+      "unused": "Unused columns: {columns}",
+      "missing": "Choose a column: {field}.",
+      "noDevice": "Without device columns, only customers and buildings are added.",
+      "groups": {
+        "customer": "Customer",
+        "site": "Building and location",
+        "device": "Device"
+      },
+      "next": "Continue to the check",
+      "back": "Back"
+    },
+    "fields": {
+      "customerName": "Customer (name)",
+      "companyId": "Company ID",
+      "contactPerson": "Contact person",
+      "email": "E-mail",
+      "phone": "Phone",
+      "customerAddress": "Customer address",
+      "siteName": "Building (name)",
+      "siteAddress": "Building address",
+      "accessNotes": "Building access",
+      "locationName": "Location (floor, room)",
+      "deviceType": "Device type",
+      "serialNumber": "Serial number",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "manufactureYear": "Year of manufacture",
+      "installedOn": "Installed on",
+      "lastInspectionOn": "Last inspection",
+      "agent": "Extinguishing agent",
+      "size": "Size / charge",
+      "quantity": "Quantity",
+      "notes": "Notes"
+    },
+    "check": {
+      "title": "What will be imported",
+      "customers": "Customers",
+      "sites": "Buildings",
+      "locations": "Locations",
+      "devices": "Devices",
+      "created": "new: {count}",
+      "existing": "existing: {count}",
+      "skipped": "{count, plural, one {# device is skipped} other {# devices are skipped}}: the serial number is already in the building.",
+      "errors": "{count, plural, one {# row has an error and won't be imported} other {# rows have errors and won't be imported}}.",
+      "errorsHint": "Fix them in Excel and upload just the fixed rows again. Devices with a serial number wouldn't be doubled, devices without one would.",
+      "warnings": "{count, plural, one {# row has a warning} other {# rows have warnings}}: a value we couldn't read is left out, the rest of the row is imported.",
+      "tabs": {
+        "all": "All",
+        "errors": "Errors",
+        "warnings": "Warnings"
+      },
+      "table": {
+        "line": "Row",
+        "customer": "Customer",
+        "site": "Building",
+        "device": "Device",
+        "status": "Status"
+      },
+      "ok": "OK",
+      "duplicate": "Skipped",
+      "noDevice": "no device",
+      "quantity": "{count} pcs",
+      "more": "… and {count, plural, one {# more row} other {# more rows}}",
+      "issue": "{field}: {message}",
+      "dropped": "{field} left out: {message}",
+      "submit": "Import",
+      "importing": "Importing…",
+      "nothing": "Nothing to import. Fix the errors in the file and upload it again.",
+      "empty": "There are no rows under the header.",
+      "back": "Back to columns"
+    },
+    "done": {
+      "title": "Import done",
+      "summary": "Imported: {customers, plural, one {# customer} other {# customers}}, {sites, plural, one {# building} other {# buildings}}, {locations, plural, one {# location} other {# locations}}, {devices, plural, one {# device} other {# devices}}.",
+      "skipped": "{count, plural, one {# device skipped} other {# devices skipped}}, already there.",
+      "buildings": "Buildings of the import",
+      "devicesCount": "{count, plural, one {# device} other {# devices}} from the import",
+      "open": "Open building",
+      "labels": "Print labels",
+      "another": "Import another file"
+    },
+    "history": {
+      "title": "Import history",
+      "empty": "No imports yet.",
+      "table": {
+        "date": "When",
+        "file": "File",
+        "by": "Who",
+        "result": "Added",
+        "status": ""
+      },
+      "result": "{customers} cust. · {sites} bldg. · {devices} dev.",
+      "undone": "Undone {date}",
+      "undo": "Undo",
+      "undoTitle": "Undo the import?",
+      "undoBody": "The customers, buildings, locations and devices the import “{file}” added are deleted. This works only while nobody has worked with them (inspections, defects, floor plans, new devices).",
+      "undoConfirm": "Undo import",
+      "undoDone": "The import “{file}” has been undone."
+    },
+    "template": {
+      "file": "import-template",
+      "rows": [
+        [
+          "Linden Housing Co-op",
+          "",
+          "Jane Smith",
+          "jane@example.com",
+          "+44 20 7946 0000",
+          "12 Linden Street",
+          "12 Linden Street",
+          "12 Linden Street",
+          "Keys with the caretaker",
+          "Basement",
+          "Fire extinguisher",
+          "FE-2019-001",
+          "Maker",
+          "P6",
+          "2019",
+          "2019-03-01",
+          "2026-03-01",
+          "ABC powder",
+          "6 kg",
+          "",
+          ""
+        ],
+        [
+          "Linden Housing Co-op",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "12 Linden Street",
+          "",
+          "",
+          "First floor",
+          "Fire extinguisher",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "CO2",
+          "5 kg",
+          "2",
+          "In the corridor by the lift"
+        ]
+      ]
     }
   },
   "graph": {
@@ -1557,8 +1750,9 @@
       },
       "customer": {
         "title": "Add your first customer",
-        "body": "The company or property manager you inspect for.",
-        "action": "Add customer"
+        "body": "The company or manager you do inspections for. Have a list in Excel? Import it with buildings and devices.",
+        "action": "Add customer",
+        "import": "Import from Excel"
       },
       "site": {
         "title": "Add a building",

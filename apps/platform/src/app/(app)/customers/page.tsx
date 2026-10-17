@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { AddIcon, DataLineageIcon, SearchIcon } from "@/components/icons";
+import { AddIcon, DataLineageIcon, SearchIcon, UploadIcon } from "@/components/icons";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
@@ -56,6 +56,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
   const tGuide = await getTranslations("guide");
   const tCommon = await getTranslations("common");
   const tNav = await getTranslations("nav");
+  const tImport = await getTranslations("import");
   const format = await getFormatter();
   const manager = isManager(membership.role);
 
@@ -105,6 +106,15 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
     </Button>
   );
 
+  const importButton = manager && (
+    <Button asChild variant="outline">
+      <Link href="/import">
+        <UploadIcon />
+        {tImport("action")}
+      </Link>
+    </Button>
+  );
+
   const nothingYet = total === 0 && !q;
   const app = appIcon("customers");
   const CustomerIcon = OBJECT_TYPES.customer.icon;
@@ -126,6 +136,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
                 </Link>
               </Button>
             )}
+            {importButton}
             {newButton}
           </>
         }
@@ -137,7 +148,14 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
               icon={CustomerIcon}
               title={t("emptyTitle")}
               description={manager ? t("emptyBody") : t("emptyBodyReadOnly")}
-              action={newButton}
+              action={
+                manager && (
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {newButton}
+                    {importButton}
+                  </div>
+                )
+              }
             />
           ) : (
             <>

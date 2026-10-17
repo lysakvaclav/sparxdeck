@@ -426,3 +426,53 @@ export const placementSchema = z.object({
 export type FloorPlanInput = z.input<typeof floorPlanSchema>;
 export type FloorPlanValues = z.output<typeof floorPlanSchema>;
 export type PlacementInput = z.input<typeof placementSchema>;
+
+// ---------------------------------------------------------------------------
+// Import
+// ---------------------------------------------------------------------------
+
+/** Most rows one import takes (the database checks the same limit). */
+export const IMPORT_MAX_ROWS = 5000;
+/** Most devices one row makes ("Počet" column). */
+export const IMPORT_MAX_QUANTITY = 100;
+
+/** One imported row, after the browser read and cleaned it: what the database gets. */
+export const importRecordSchema = z.object({
+  customer: z.object({
+    name: name(200),
+    companyId: companyDetailsSchema.shape.companyId,
+    contactPerson: optional(z.string().max(120, "tooLong")),
+    email: companyDetailsSchema.shape.email,
+    phone: companyDetailsSchema.shape.phone,
+    billingAddress: optional(z.string().max(500, "tooLong")),
+  }),
+  site: z.object({
+    name: name(200),
+    address: optional(z.string().max(500, "tooLong")),
+    accessNotes: optional(z.string().max(2000, "tooLong")),
+  }),
+  location: optional(z.string().max(200, "tooLong")),
+  device: z
+    .object({
+      deviceTypeId: requiredId,
+      serialNumber,
+      manufacturer: deviceFields.manufacturer,
+      model: deviceFields.model,
+      manufactureYear: deviceFields.manufactureYear,
+      agent: deviceFields.agent,
+      size: deviceFields.size,
+      installedOn: deviceFields.installedOn,
+      lastInspectionOn: deviceFields.lastInspectionOn,
+      notes: deviceFields.notes,
+    })
+    .nullable(),
+});
+
+export const importSchema = z.object({
+  fileName: z.string().trim().min(1, "required").max(255, "tooLong"),
+  records: z.array(importRecordSchema).min(1, "importEmpty").max(IMPORT_MAX_ROWS, "importTooLarge"),
+});
+
+export type ImportRecordInput = z.input<typeof importRecordSchema>;
+export type ImportRecord = z.output<typeof importRecordSchema>;
+export type ImportInput = z.input<typeof importSchema>;

@@ -96,7 +96,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Automatické číslování štítků v rámci organizace (část 5: trigger s čítačem `organization_counters`, bez duplicit i při souběžném přidávání, číslo se po smazání znovu nepoužije; test v `tests/rls.test.ts`)
 - [x] P1 Hromadné přidání více zařízení najednou (část 5: až 100 najednou se společnými údaji a volitelnými výrobními čísly, štítky jdou za sebou; `src/app/(app)/devices/bulk`)
 - [x] P1 Výpočet stavu termínu: v pořádku, brzy, po termínu, bez revize (část 5: `src/lib/due.ts`, příští termín počítá databáze stejně jako aplikace, „dnes“ podle časového pásma firmy; testy `tests/due.test.ts`)
-- [ ] P2 Import zařízení z CSV s kontrolou chyb po řádcích
+- [x] P2 Import zařízení z CSV s kontrolou chyb po řádcích (část 14: Excel i CSV, chyby a upozornění po řádcích v náhledu)
 - [ ] P2 Přesun zařízení do jiné budovy nebo lokace s historií
 - [ ] P2 Hromadné úpravy (změna lokace, stavu u vybraných)
 - [ ] P2 Fotografie zařízení
@@ -252,7 +252,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 ## R. Import a export
 
 - [x] P1 Export zařízení a revizí do CSV (část 11: `/devices/export` se stejnými filtry jako seznam, `/inspections/export` po kontrolách s číslem protokolu a nevyhovujícími položkami; UTF-8 s BOM, středník v češtině, ochrana proti vzorcům, `src/lib/csv.ts` s testy)
-- [ ] P2 Import zákazníků, budov a zařízení z CSV nebo Excelu s náhledem a chybami
+- [x] P2 Import zákazníků, budov a zařízení z CSV nebo Excelu s náhledem a chybami (část 14: rozpoznání sloupců, náhled co vznikne a co existuje, import v jedné transakci, opakovaný import bez duplicit podle výrobního čísla, vrácení importu, vzor ke stažení)
 - [ ] P2 Úplný export všech dat organizace při odchodu zákazníka
 - [ ] P3 Veřejné API a webhooky
 - [ ] P3 Napojení na účetnictví a fakturaci

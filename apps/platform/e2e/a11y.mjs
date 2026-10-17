@@ -135,6 +135,7 @@ try {
     ["account", "/account"],
     ["graph", "/graph"],
     ["plans", "/plans"],
+    ["import", "/import"],
     ["plan", `/sites/${plan.site_id}/plans/${plan.id}`],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
@@ -176,6 +177,7 @@ try {
     ["phone customer", "/customers/" + customer.id],
     ["phone settings", "/settings"],
     ["phone plans", "/plans"],
+    ["phone import", "/import"],
     ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],
   ]) {
     await visit(page, label, path);

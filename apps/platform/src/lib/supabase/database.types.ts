@@ -143,6 +143,8 @@ export type Database = {
           deleted_at: string | null;
           /** Sample data (create_sample_data); removed with remove_sample_data. */
           is_sample: boolean;
+          /** The import that created it (import_records), if any. */
+          import_id: string | null;
         } & Timestamps;
         Insert: {
           organization_id: string;
@@ -180,6 +182,7 @@ export type Database = {
           notes: string | null;
           created_by: string | null;
           deleted_at: string | null;
+          import_id: string | null;
         } & Timestamps;
         Insert: {
           organization_id: string;
@@ -214,6 +217,7 @@ export type Database = {
           site_id: string;
           name: string;
           sort_order: number;
+          import_id: string | null;
         } & Timestamps;
         Insert: { organization_id: string; site_id: string; name: string; sort_order?: number };
         Update: Partial<{ name: string; sort_order: number }>;
@@ -309,6 +313,7 @@ export type Database = {
           notes: string | null;
           created_by: string | null;
           deleted_at: string | null;
+          import_id: string | null;
         } & Timestamps;
         // label_number, public_token and next_due_on come from the database.
         Insert: {
@@ -364,6 +369,26 @@ export type Database = {
             referencedColumns: ["id", "organization_id"];
           },
         ];
+      };
+      imports: {
+        Row: {
+          id: string;
+          organization_id: string;
+          file_name: string;
+          customers_created: number;
+          sites_created: number;
+          locations_created: number;
+          devices_created: number;
+          devices_skipped: number;
+          created_by: string | null;
+          created_at: string;
+          undone_at: string | null;
+          undone_by: string | null;
+        };
+        // Written only by import_records and undo_import.
+        Insert: never;
+        Update: never;
+        Relationships: [];
       };
       floor_plans: {
         Row: {
@@ -750,6 +775,11 @@ export type Database = {
       transfer_ownership: { Args: { p_membership: string }; Returns: undefined };
       reorder_locations: { Args: { p_site: string; p_ordered: string[] }; Returns: undefined };
       reorder_floor_plans: { Args: { p_site: string; p_ordered: string[] }; Returns: undefined };
+      import_records: {
+        Args: { p_org: string; p_file_name: string; p_rows: Json };
+        Returns: Json;
+      };
+      undo_import: { Args: { p_import: string }; Returns: undefined };
       place_device: {
         Args: { p_device: string; p_plan: string; p_x: number; p_y: number };
         Returns: undefined;

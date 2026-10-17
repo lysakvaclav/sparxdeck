@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "db:push": "node --env-file=.env.local scripts/db-push.mjs",
     "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts",
-    "e2e": "node --env-file=.env.local e2e/part1.mjs .e2e-output && node --env-file=.env.local e2e/part2.mjs .e2e-output && node --env-file=.env.local e2e/part3.mjs .e2e-output && node --env-file=.env.local e2e/graph.mjs .e2e-output && node --env-file=.env.local e2e/part4.mjs .e2e-output && node --env-file=.env.local e2e/part5.mjs .e2e-output && node --env-file=.env.local e2e/part6.mjs .e2e-output && node --env-file=.env.local e2e/part7.mjs .e2e-output && node --env-file=.env.local e2e/part8.mjs .e2e-output && node --env-file=.env.local e2e/part9.mjs .e2e-output && node --env-file=.env.local e2e/part10.mjs .e2e-output && node --env-file=.env.local e2e/part11.mjs .e2e-output && node --env-file=.env.local e2e/part13.mjs .e2e-output && node --env-file=.env.local e2e/mobile.mjs .e2e-output && node --env-file=.env.local e2e/a11y.mjs .e2e-output",
+    "e2e": "node --env-file=.env.local e2e/part1.mjs .e2e-output && node --env-file=.env.local e2e/part2.mjs .e2e-output && node --env-file=.env.local e2e/part3.mjs .e2e-output && node --env-file=.env.local e2e/graph.mjs .e2e-output && node --env-file=.env.local e2e/part4.mjs .e2e-output && node --env-file=.env.local e2e/part5.mjs .e2e-output && node --env-file=.env.local e2e/part6.mjs .e2e-output && node --env-file=.env.local e2e/part7.mjs .e2e-output && node --env-file=.env.local e2e/part8.mjs .e2e-output && node --env-file=.env.local e2e/part9.mjs .e2e-output && node --env-file=.env.local e2e/part10.mjs .e2e-output && node --env-file=.env.local e2e/part11.mjs .e2e-output && node --env-file=.env.local e2e/part13.mjs .e2e-output && node --env-file=.env.local e2e/part14.mjs .e2e-output && node --env-file=.env.local e2e/mobile.mjs .e2e-output && node --env-file=.env.local e2e/a11y.mjs .e2e-output",
     "test:flow": "playwright test",
     "db:push:production": "node --env-file=.env.prod.local scripts/db-push.mjs --production"
   },
@@ -39,6 +39,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "7.89.0",
+    "read-excel-file": "9.3.10",
     "server-only": "0.0.1",
     "sharp": "0.35.5",
     "tailwind-merge": "3.7.0",

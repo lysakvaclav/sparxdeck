@@ -19,8 +19,9 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
   experimental: {
-    // Logos and floor plans are capped at 2 MB; leave headroom for multipart overhead.
-    serverActions: { bodySizeLimit: "3mb" },
+    // Logos and floor plans are capped at 2 MB; an import of 5,000 rows is about
+    // 3 MB of JSON. Headroom for the encoding.
+    serverActions: { bodySizeLimit: "6mb" },
     // No on-disk cache for `next dev`: on Windows a dev server stopped by force
     // (turbo, Ctrl+C) leaves it damaged and the next start crashes with a
     // Turbopack panic ("restoring failed"); it also grew to gigabytes.

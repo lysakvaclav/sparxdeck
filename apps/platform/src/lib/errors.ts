@@ -74,6 +74,12 @@ export type ErrorCode =
   | "noDeviceType"
   | "planUnreadable"
   | "floorPlansMismatch"
+  | "importEmpty"
+  | "importTooLarge"
+  | "importUnknownType"
+  | "importInvalid"
+  | "importInUse"
+  | "importUndone"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -127,6 +133,11 @@ export function databaseErrorCode(
   if (message.includes("site_deleted")) return "siteDeleted";
   if (message.includes("locations_mismatch")) return "locationsMismatch";
   if (message.includes("floor_plans_mismatch")) return "floorPlansMismatch";
+  if (message.includes("import_empty")) return "importEmpty";
+  if (message.includes("import_too_large")) return "importTooLarge";
+  if (message.includes("import_invalid")) return "importInvalid";
+  if (message.includes("import_in_use")) return "importInUse";
+  if (message.includes("import_undone")) return "importUndone";
   if (message.includes("invalid_template")) return "templateInvalid";
   if (message.includes("checks_unfinished")) return "checksUnfinished";
   if (message.includes("inspection_closed")) return "inspectionClosed";

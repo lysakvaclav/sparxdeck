@@ -286,7 +286,13 @@
     "sampleExists": "Ukázková data už ve firmě jsou.",
     "noDeviceType": "Firma nemá žádný typ zařízení. Přidejte ho v Nastavení → Typy zařízení.",
     "planUnreadable": "Soubor se nepodařilo přečíst. Zkuste jiný obrázek nebo PDF.",
-    "floorPlansMismatch": "Půdorysy se mezitím změnily. Obnovte stránku a zkuste to znovu."
+    "floorPlansMismatch": "Půdorysy se mezitím změnily. Obnovte stránku a zkuste to znovu.",
+    "importEmpty": "V souboru nejsou žádné řádky k importu.",
+    "importTooLarge": "Najednou jde naimportovat nejvýš 5 000 řádků. Rozdělte soubor na menší části.",
+    "importUnknownType": "Neznámý typ zařízení. Použijte název typu z aplikace (Typy a šablony).",
+    "importInvalid": "Data importu nejsou platná. Nahrajte soubor znovu.",
+    "importInUse": "Import už nejde vrátit: s jeho záznamy se už pracovalo (revize, závady, půdorysy nebo nová zařízení).",
+    "importUndone": "Import už je vrácený."
   },
   "email": {
     "invite": {
@@ -623,6 +629,193 @@
       "noResultsTitle": "Nic nenalezeno",
       "noResultsBody": "Zkuste jiný název plánu, budovy nebo zákazníka.",
       "count": "{count, plural, one {# plán} few {# plány} other {# plánů}}"
+    }
+  },
+  "import": {
+    "title": "Import z Excelu",
+    "action": "Import z Excelu",
+    "description": "Nahrajte zákazníky, budovy a zařízení ze svého Excelu nebo CSV. Jeden řádek je jedno zařízení s jeho zákazníkem a budovou.",
+    "steps": {
+      "file": "Soubor",
+      "columns": "Sloupce",
+      "check": "Kontrola",
+      "done": "Hotovo"
+    },
+    "file": {
+      "title": "Vyberte soubor",
+      "hint": "Excel (.xlsx) nebo CSV. Řádek se záhlavím (Zákazník, Budova, Výrobní číslo…) může být kdekoli v horní části listu.",
+      "choose": "Vybrat soubor",
+      "drop": "nebo sem soubor přetáhněte",
+      "reading": "Čtu soubor…",
+      "template": "Stáhnout vzor",
+      "templateHint": "Vzor má všechny sloupce, které import zná. Stačí vyplnit ty, které máte.",
+      "sheet": "List",
+      "rows": "{count, plural, one {# řádek} few {# řádky} other {# řádků}}",
+      "tip1": "Povinné jsou jen Zákazník a Budova. Řádek bez údajů o zařízení založí jen zákazníka a budovu.",
+      "tip2": "Existující zákazníci (podle IČO nebo názvu), budovy a lokace se použijí znovu. Zařízení s výrobním číslem, které už v budově je, se přeskočí. Zařízení bez výrobního čísla se při každém importu založí znovu.",
+      "tip3": "Bez typu zařízení se použije Hasicí přístroj. Sloupec Počet založí víc kusů najednou."
+    },
+    "fileErrors": {
+      "fileTooLarge": "Soubor je příliš velký (nejvýš 15 MB).",
+      "importFileType": "Nahrajte soubor Excel (.xlsx) nebo CSV.",
+      "importOldExcel": "Starý formát Excelu (.xls) neumíme přečíst. V Excelu ho uložte jako .xlsx nebo CSV.",
+      "importUnreadable": "Soubor se nepodařilo přečíst."
+    },
+    "columns": {
+      "title": "Které sloupce co obsahují",
+      "hint": "Sloupce jsme rozpoznali podle záhlaví. Zkontrolujte je a případně upravte.",
+      "none": "— nepoužít —",
+      "example": "např. {value}",
+      "required": "povinné",
+      "unused": "Nepoužité sloupce: {columns}",
+      "missing": "Vyberte sloupec: {field}.",
+      "noDevice": "Bez sloupců zařízení se založí jen zákazníci a budovy.",
+      "groups": {
+        "customer": "Zákazník",
+        "site": "Budova a lokace",
+        "device": "Zařízení"
+      },
+      "next": "Pokračovat ke kontrole",
+      "back": "Zpět"
+    },
+    "fields": {
+      "customerName": "Zákazník (název)",
+      "companyId": "IČO",
+      "contactPerson": "Kontaktní osoba",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "customerAddress": "Adresa zákazníka",
+      "siteName": "Budova (název)",
+      "siteAddress": "Adresa budovy",
+      "accessNotes": "Přístup do budovy",
+      "locationName": "Lokace (patro, místnost)",
+      "deviceType": "Typ zařízení",
+      "serialNumber": "Výrobní číslo",
+      "manufacturer": "Výrobce",
+      "model": "Model",
+      "manufactureYear": "Rok výroby",
+      "installedOn": "Datum instalace",
+      "lastInspectionOn": "Poslední revize",
+      "agent": "Hasivo",
+      "size": "Velikost / náplň",
+      "quantity": "Počet kusů",
+      "notes": "Poznámka"
+    },
+    "check": {
+      "title": "Co se naimportuje",
+      "customers": "Zákazníci",
+      "sites": "Budovy",
+      "locations": "Lokace",
+      "devices": "Zařízení",
+      "created": "nové: {count}",
+      "existing": "už existuje: {count}",
+      "skipped": "{count, plural, one {# zařízení se přeskočí} few {# zařízení se přeskočí} other {# zařízení se přeskočí}}: výrobní číslo už v budově je.",
+      "errors": "{count, plural, one {# řádek má chybu a nenaimportuje se} few {# řádky mají chybu a nenaimportují se} other {# řádků má chybu a nenaimportuje se}}.",
+      "errorsHint": "Opravte je v Excelu a nahrajte znovu jen opravené řádky. Zařízení s výrobním číslem by se nezdvojila, zařízení bez něj ano.",
+      "warnings": "{count, plural, one {# řádek má upozornění} few {# řádky mají upozornění} other {# řádků má upozornění}}: hodnota, které jsme nerozuměli, se neuloží, zbytek řádku ano.",
+      "tabs": {
+        "all": "Vše",
+        "errors": "Chyby",
+        "warnings": "Upozornění"
+      },
+      "table": {
+        "line": "Řádek",
+        "customer": "Zákazník",
+        "site": "Budova",
+        "device": "Zařízení",
+        "status": "Stav"
+      },
+      "ok": "V pořádku",
+      "duplicate": "Přeskočí se",
+      "noDevice": "bez zařízení",
+      "quantity": "{count} ks",
+      "more": "… a {count, plural, one {další # řádek} few {další # řádky} other {dalších # řádků}}",
+      "issue": "{field}: {message}",
+      "dropped": "{field} se neuloží: {message}",
+      "submit": "Importovat",
+      "importing": "Importuji…",
+      "nothing": "Není co importovat. Opravte chyby v souboru a nahrajte ho znovu.",
+      "empty": "Pod záhlavím nejsou žádné řádky.",
+      "back": "Zpět ke sloupcům"
+    },
+    "done": {
+      "title": "Import je hotový",
+      "summary": "Naimportováno: {customers, plural, one {# zákazník} few {# zákazníci} other {# zákazníků}}, {sites, plural, one {# budova} few {# budovy} other {# budov}}, {locations, plural, one {# lokace} few {# lokace} other {# lokací}}, {devices, plural, one {# zařízení} few {# zařízení} other {# zařízení}}.",
+      "skipped": "{count, plural, one {# zařízení přeskočeno} few {# zařízení přeskočena} other {# zařízení přeskočeno}}, už existovala.",
+      "buildings": "Budovy z importu",
+      "devicesCount": "{count, plural, one {# zařízení} few {# zařízení} other {# zařízení}} z importu",
+      "open": "Otevřít budovu",
+      "labels": "Tisk štítků",
+      "another": "Importovat další soubor"
+    },
+    "history": {
+      "title": "Historie importů",
+      "empty": "Zatím žádný import.",
+      "table": {
+        "date": "Kdy",
+        "file": "Soubor",
+        "by": "Kdo",
+        "result": "Založeno",
+        "status": ""
+      },
+      "result": "{customers} zák. · {sites} bud. · {devices} zař.",
+      "undone": "Vráceno {date}",
+      "undo": "Vrátit",
+      "undoTitle": "Vrátit import?",
+      "undoBody": "Smažou se zákazníci, budovy, lokace a zařízení, které import „{file}“ založil. Jde to, jen dokud se s nimi nepracovalo (revize, závady, půdorysy, nová zařízení).",
+      "undoConfirm": "Vrátit import",
+      "undoDone": "Import „{file}“ je vrácený."
+    },
+    "template": {
+      "file": "vzor-importu",
+      "rows": [
+        [
+          "Bytové družstvo Lipová",
+          "27082440",
+          "Jana Nováková",
+          "jana@example.com",
+          "+420 777 123 456",
+          "Lipová 12, 120 00 Praha 2",
+          "Lipová 12",
+          "Lipová 12, Praha 2",
+          "Klíče u správce",
+          "Suterén",
+          "Hasicí přístroj",
+          "HP-2019-001",
+          "Výrobce",
+          "P6",
+          "2019",
+          "1. 3. 2019",
+          "1. 3. 2026",
+          "prášek ABC",
+          "6 kg",
+          "",
+          ""
+        ],
+        [
+          "Bytové družstvo Lipová",
+          "27082440",
+          "",
+          "",
+          "",
+          "",
+          "Lipová 12",
+          "",
+          "",
+          "1. patro",
+          "Hasicí přístroj",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "CO2",
+          "5 kg",
+          "2",
+          "Na chodbě u výtahu"
+        ]
+      ]
     }
   },
   "graph": {
@@ -1557,8 +1750,9 @@
       },
       "customer": {
         "title": "Přidejte prvního zákazníka",
-        "body": "Firmu nebo správce, pro kterého revize děláte.",
-        "action": "Přidat zákazníka"
+        "body": "Firmu nebo správce, pro kterého revize děláte. Máte seznam v Excelu? Naimportujte ho i s budovami a zařízeními.",
+        "action": "Přidat zákazníka",
+        "import": "Import z Excelu"
       },
       "site": {
         "title": "Přidejte budovu",

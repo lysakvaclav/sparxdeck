@@ -432,6 +432,39 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 **Od tebe:** vyzkoušet nahrání skutečného plánu (PDF nebo fotky výkresu) a rozmístění na počítači i na telefonu.
 
+### Část 14: Import z Excelu
+
+**Stav (2026-10-17): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Kde:** tlačítko „Import z Excelu“ u seznamu zákazníků (i v prázdném stavu), u seznamu zařízení a v průvodci Začínáme. Jen pro vlastníka a administrátora.
+- **Soubor:**
+  - Excel (.xlsx) i CSV (oddělovač středník, čárka i tabulátor; kódování UTF-8 i Windows-1250 z českého Excelu). Starý .xls aplikace slušně odmítne.
+  - Záhlaví může být pod nadpisem; více listů jde přepínat.
+  - Vzor ke stažení má všechny sloupce v jazyce uživatele a dva vzorové řádky.
+- **Sloupce:**
+  - Pozná česká i anglická záhlaví (Zákazník/Odběratel, IČO, Budova/Objekt, Lokace/Umístění, Druh/Typ, Výr. č., Datum revize, Hasivo, Počet…).
+  - V náhledu jde každý sloupec přiřadit ručně, s ukázkou hodnoty.
+- **Kontrola:**
+  - Co vznikne nově a co už existuje: zákazník podle IČO, jinak názvu; budovy a lokace podle názvu.
+  - Chyby po řádcích zablokují jen svůj řádek: chybí zákazník nebo budova, neplatné nebo budoucí datum poslední revize, neznámý typ, výrobní číslo u více kusů.
+  - Upozornění (neplatné IČO, e-mail, telefon, rok výroby, datum instalace) hodnotu jen vynechají.
+  - Data: buňka data z Excelu, „1. 3. 2024“, „1.3.24“, ISO, „03/2024“ (první den měsíce, bezpečnější pro termíny).
+  - IČO, kterému Excel smazal úvodní nulu, se doplní. Bez typu se použije hasicí přístroj. „Počet“ založí víc kusů.
+- **Import:**
+  - Jedna databázová transakce (`import_records`). Proběhne celý, nebo nic.
+  - Zařízení s výrobním číslem, které už v budově je, se přeskočí.
+  - Výsledek ukáže budovy s odkazem na tisk štítků.
+- **Historie a vrácení:**
+  - Každý import má záznam.
+  - Vrátit ho jde, dokud se s jeho daty nepracovalo: revize, závady, půdorysy, nová zařízení v jeho budovách. Pak zablokuje `undo_import`.
+- **Ověření:**
+  - 21 jednotkových testů (`tests/import.test.ts`).
+  - 5 testů zabezpečení (technik ani cizí firma nesmí, typ cizí firmy vrátí celý import, vrácení).
+  - E2E `e2e/part14.mjs`: skutečný .xlsx, 9 kroků včetně telefonu a technika.
+  - Audit přístupnosti stránky importu.
+
+**Od tebe:** zkusit import skutečného Excelu od servisní firmy. Když se nějaký sloupec nerozpozná, pošli mi jeho záhlaví a doplním ho.
+
 ---
 
 ## Hotové navíc (P2, mimo plán)

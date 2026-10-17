@@ -9,6 +9,7 @@ import {
   OfficeIcon,
   PrintIcon,
   SearchIcon,
+  UploadIcon,
 } from "@/components/icons";
 import { DueCell, StatusBadge } from "@/components/app/device-badges";
 import { EmptyState } from "@/components/app/empty-state";
@@ -57,6 +58,7 @@ export default async function DevicesPage({ searchParams }: { searchParams: Sear
   const t = await getTranslations("devices");
   const tCommon = await getTranslations("common");
   const tLabels = await getTranslations("labels");
+  const tImport = await getTranslations("import");
   const manager = isManager(membership.role);
 
   const params = await searchParams;
@@ -160,6 +162,12 @@ export default async function DevicesPage({ searchParams }: { searchParams: Sear
   );
   const addButtons = manager && !noSites && (
     <>
+      <Button asChild variant="outline">
+        <Link href="/import">
+          <UploadIcon />
+          {tImport("action")}
+        </Link>
+      </Button>
       <Button asChild variant="outline">
         <Link href={`/devices/bulk${siteParam}`}>
           <DuplicateIcon />

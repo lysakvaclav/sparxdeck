@@ -57,6 +57,12 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - Převod souboru v prohlížeči `src/lib/client/plan-image.ts` (pdf.js 6.3, legacy build, worker z vlastního původu). Serverové akce `src/app/(app)/sites/plan-actions.ts`, načítání `src/lib/floor-plans-data.ts` (podepsané odkazy obrázků se znovu používají, dokud platí, jinak prohlížeč plán po každé změně stahuje znovu).
   - Stránka všech plánů `/plans` (položka v liště; detail plánu pod `/sites/[id]/plans/[planId]` se k ní hlásí přes `match` v `nav-items.ts`), dlaždice `src/components/app/plan-tile.tsx`.
   - PDF `src/lib/pdf/floor-plan.tsx` přes `/sites/[id]/plans/[planId]/pdf`. Ukázkový plán `src/assets/sample/floor-plan.webp` generuje `scripts/generate-sample-plan.mjs` ze SVG.
+- Import z Excelu (část 14):
+  - Stránka `/import` (jen vlastník a admin): `import-wizard.tsx` (soubor, sloupce, kontrola, hotovo) a `import-history.tsx` (vrácení).
+  - Soubor čte prohlížeč: `.xlsx` přes `read-excel-file` 9.3.10 (načte se až při výběru), CSV vlastní funkcí (`src/lib/client/import-file.ts`).
+  - Rozpoznání záhlaví, převod buněk (data, roky, IČO), kontrola řádků (stejné schéma `importRecordSchema` jako server, měkká pole jen s upozorněním) a náhled `planImport` jsou v `src/lib/import.ts` s testy.
+  - Zápis jen přes `import_records` (security definer, jedna transakce, max 5000 řádků) a `undo_import`. Sloupec `import_id` u zákazníků, budov, lokací a zařízení, historie v `imports`. Migrace `20261019090000_imports.sql`.
+  - Vzor `/import/template` (CSV z textů `import.fields` a `import.template.rows`; test hlídá, že se záhlaví vzoru rozpozná). Import sundá apostrof, kterým naše CSV exporty chrání buňky před vzorci.
 - PDF: `@react-pdf/renderer` na serveru (`serverExternalPackages` v `next.config.ts`), písmo Noto Sans (OFL) v `src/assets/fonts` (`src/lib/pdf/fonts.ts`) s `outputFileTracingIncludes`, aby se dostalo i do nasazení. Dělení slov je vypnuté. Past: `lineHeight` na `Page` skryje dynamický text (`render`, číslo strany); výšku řádku nenastavovat.
 - Protokoly:
   - Tabulky `protocols` (číslo `ROK-NNNN` po firmě a roce z `organization_counters`, jazyk firmy, `pdf_path`) a `protocol_emails`.

@@ -6,7 +6,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { generateToken, hashToken } from "@/lib/tokens";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -2414,6 +2414,252 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
         image_height: 10,
       });
       expect(error?.message).toMatch(/site_deleted/);
+    });
+  });
+
+  describe("imports", () => {
+    let typeA: string;
+    let typeB: string;
+    const row = (
+      customer: string,
+      site: string,
+      device: Json,
+      extra: { [key: string]: Json } = {},
+    ): Json => ({
+      customer: {
+        name: customer,
+        company_id: null,
+        contact_person: null,
+        email: null,
+        phone: null,
+        billing_address: null,
+      },
+      site: { name: site, address: null, access_notes: null },
+      location: null,
+      device,
+      ...extra,
+    });
+    const device = (serial: string | null, extra: { [key: string]: Json } = {}): Json => ({
+      device_type_id: typeA,
+      serial_number: serial,
+      manufacturer: null,
+      model: null,
+      manufacture_year: null,
+      installed_on: null,
+      last_inspection_on: null,
+      notes: null,
+      attributes: {},
+      ...extra,
+    });
+    const imported = async (id: string) => {
+      const [customers, sites, devices] = await Promise.all([
+        admin.from("customers").select("id, deleted_at").eq("import_id", id),
+        admin.from("sites").select("id, deleted_at").eq("import_id", id),
+        admin.from("devices").select("id, deleted_at, label_number").eq("import_id", id),
+      ]);
+      return {
+        customers: customers.data ?? [],
+        sites: sites.data ?? [],
+        devices: devices.data ?? [],
+      };
+    };
+    let first: { import_id: string; site_ids: string[] };
+
+    beforeAll(async () => {
+      const { data: a } = await alice.client.from("device_types").select("id").limit(1).single();
+      const { data: b } = await bob.client.from("device_types").select("id").limit(1).single();
+      typeA = a!.id;
+      typeB = b!.id;
+    });
+
+    it("an owner imports customers, buildings, locations and devices in one go", async () => {
+      const { data, error } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "soupis.xlsx",
+        p_rows: [
+          row(
+            "Import družstvo",
+            "Import 1",
+            device("IMP-1", { last_inspection_on: "2025-05-01" }),
+            {
+              customer: {
+                name: "Import družstvo",
+                company_id: "27082440",
+                contact_person: "Jana",
+                email: "Jana@Example.com",
+                phone: "+420 777 000 111",
+                billing_address: "Praha",
+              },
+              location: "Suterén",
+            },
+          ),
+          row("import DRUŽSTVO", "import 1", device("IMP-2"), { location: "suterén" }),
+          row("Import družstvo", "Import 2", null),
+        ],
+      });
+      expect(error).toBeNull();
+      const result = data as {
+        import_id: string;
+        customers: number;
+        sites: number;
+        locations: number;
+        devices: number;
+        skipped: number;
+        site_ids: string[];
+      };
+      expect(result).toMatchObject({
+        customers: 1,
+        sites: 2,
+        locations: 1,
+        devices: 2,
+        skipped: 0,
+      });
+      expect(result.site_ids).toHaveLength(2);
+      first = result;
+
+      const records = await imported(result.import_id);
+      expect(records.customers).toHaveLength(1);
+      expect(records.devices.every((d) => d.label_number > 0)).toBe(true);
+      const { data: customer } = await alice.client
+        .from("customers")
+        .select("email, company_id")
+        .eq("id", records.customers[0]!.id)
+        .single();
+      expect(customer).toEqual({ email: "jana@example.com", company_id: "27082440" });
+      const { data: due } = await alice.client
+        .from("devices")
+        .select("next_due_on")
+        .eq("serial_number", "IMP-1")
+        .single();
+      expect(due?.next_due_on).not.toBeNull();
+      const { data: history } = await alice.client
+        .from("imports")
+        .select("file_name, customers_created, sites_created, devices_created, created_by")
+        .eq("id", result.import_id)
+        .single();
+      expect(history).toEqual({
+        file_name: "soupis.xlsx",
+        customers_created: 1,
+        sites_created: 2,
+        devices_created: 2,
+        created_by: alice.id,
+      });
+    });
+
+    it("importing again reuses what exists and skips known serial numbers", async () => {
+      const { data, error } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "soupis.xlsx",
+        p_rows: [
+          // Same company ID under another name: the same customer.
+          row("Družstvo (nový název)", "Import 1", device("imp-1"), {
+            customer: { name: "Družstvo (nový název)", company_id: "27082440" },
+          }),
+          row("Import družstvo", "Import 1", device("IMP-3")),
+        ],
+      });
+      expect(error).toBeNull();
+      expect(data).toMatchObject({ customers: 0, sites: 0, devices: 1, skipped: 1 });
+    });
+
+    it("technicians and other organizations can't import or see the history", async () => {
+      const { error: technician } = await carol.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "x.csv",
+        p_rows: [row("T", "T", null)],
+      });
+      expect(technician?.message).toMatch(/forbidden/);
+      const { data: seen } = await carol.client.from("imports").select("id");
+      expect(seen).toEqual([]);
+      const { error: other } = await bob.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "x.csv",
+        p_rows: [row("B", "B", null)],
+      });
+      expect(other?.message).toMatch(/forbidden/);
+      const { data: foreign } = await bob.client
+        .from("imports")
+        .select("id")
+        .eq("id", first.import_id);
+      expect(foreign).toEqual([]);
+      const { error: undo } = await bob.client.rpc("undo_import", { p_import: first.import_id });
+      expect(undo?.message).toMatch(/not_found/);
+      const { error: write } = await alice.client
+        .from("imports")
+        .update({ file_name: "renamed" } as never)
+        .eq("id", first.import_id);
+      expect(write).not.toBeNull();
+    });
+
+    it("a type of another organization or a bad row rolls the whole import back", async () => {
+      const before = (await admin.from("imports").select("id").eq("organization_id", orgA)).data!
+        .length;
+      const { error } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "bad.csv",
+        p_rows: [
+          row("Rollback s.r.o.", "R", device("R-1")),
+          row("Rollback s.r.o.", "R", device("R-2", { device_type_id: typeB })),
+        ],
+      });
+      expect(error?.message).toMatch(/import_invalid_type/);
+      const { error: empty } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "bad.csv",
+        p_rows: [],
+      });
+      expect(empty?.message).toMatch(/import_empty/);
+      const { error: noName } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "bad.csv",
+        p_rows: [row("", "R", null)],
+      });
+      expect(noName?.message).toMatch(/import_invalid_row/);
+      const after = (await admin.from("imports").select("id").eq("organization_id", orgA)).data!
+        .length;
+      expect(after).toBe(before);
+      const { data: customers } = await admin
+        .from("customers")
+        .select("id")
+        .eq("name", "Rollback s.r.o.");
+      expect(customers).toEqual([]);
+    });
+
+    it("an import in use can't be undone; an unused one is undone completely", async () => {
+      // Something added by hand to an imported building: in use.
+      await alice.client
+        .from("devices")
+        .insert({ organization_id: orgA, site_id: first.site_ids[0]!, device_type_id: typeA });
+      const { error: inUse } = await alice.client.rpc("undo_import", { p_import: first.import_id });
+      expect(inUse?.message).toMatch(/import_in_use/);
+
+      const { data } = await alice.client.rpc("import_records", {
+        p_org: orgA,
+        p_file_name: "omyl.csv",
+        p_rows: [row("Omyl a.s.", "Omyl", device("O-1"), { location: "Hala" })],
+      });
+      const mistake = (data as { import_id: string }).import_id;
+      const { error: technician } = await carol.client.rpc("undo_import", { p_import: mistake });
+      expect(technician?.message).toMatch(/not_found/);
+      const { error } = await alice.client.rpc("undo_import", { p_import: mistake });
+      expect(error).toBeNull();
+      const records = await imported(mistake);
+      expect(
+        [...records.customers, ...records.sites, ...records.devices].every((r) => r.deleted_at),
+      ).toBe(true);
+      const { data: locations } = await admin
+        .from("locations")
+        .select("id")
+        .eq("import_id", mistake);
+      expect(locations).toEqual([]);
+      const { data: history } = await alice.client
+        .from("imports")
+        .select("undone_at")
+        .eq("id", mistake)
+        .single();
+      expect(history?.undone_at).not.toBeNull();
+      const { error: again } = await alice.client.rpc("undo_import", { p_import: mistake });
+      expect(again?.message).toMatch(/import_undone/);
     });
   });
 

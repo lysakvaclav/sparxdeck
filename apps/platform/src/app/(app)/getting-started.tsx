@@ -168,14 +168,16 @@ export async function GettingStarted({ organization }: { organization: Organizat
             {done[step] ? (
               <span className="ps-[30px] text-ui-sm text-success-text sm:ps-0">{t("done")}</span>
             ) : (
-              <Button
-                asChild
-                size="sm"
-                variant={step === next ? "primary" : "outline"}
-                className="ms-[30px] self-start sm:ms-0 sm:self-auto"
-              >
-                <Link href={href[step]}>{t(`steps.${step}.action`)}</Link>
-              </Button>
+              <div className="ms-[30px] flex flex-wrap gap-1.5 self-start sm:ms-0 sm:self-auto">
+                {step === "customer" && (
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/import">{t("steps.customer.import")}</Link>
+                  </Button>
+                )}
+                <Button asChild size="sm" variant={step === next ? "primary" : "outline"}>
+                  <Link href={href[step]}>{t(`steps.${step}.action`)}</Link>
+                </Button>
+              </div>
             )}
           </li>
         ))}
