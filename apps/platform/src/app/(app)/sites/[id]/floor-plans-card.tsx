@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LayersIcon } from "@/components/icons";
+import { PlanTile, planNote } from "@/components/app/plan-tile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { sitePlans } from "@/lib/floor-plans-data";
 import { PlanOrderMenu, UploadPlanButton } from "./plans/plan-controls";
@@ -38,47 +38,17 @@ export async function SiteFloorPlansCard({
         ) : (
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
             {plans.map((plan, index) => (
-              <li
+              <PlanTile
                 key={plan.id}
-                className="group relative overflow-hidden rounded-md bg-background shadow-[inset_0_0_0_1px_var(--border)]"
+                href={`/sites/${siteId}/plans/${plan.id}`}
+                name={plan.name}
+                note={planNote(plan, t("devicesCount", { count: plan.placed }))}
+                imageUrl={plan.imageUrl}
               >
-                <Link
-                  href={`/sites/${siteId}/plans/${plan.id}`}
-                  className="block outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring)]"
-                >
-                  <span className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-white p-1.5">
-                    {plan.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL
-                      <img
-                        src={plan.imageUrl}
-                        alt=""
-                        loading="lazy"
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    ) : (
-                      <LayersIcon size={20} className="text-subtle" />
-                    )}
-                  </span>
-                  <span className="block px-2.5 py-2 shadow-[inset_0_1px_0_var(--border)]">
-                    <span className="block truncate pe-8 font-semibold text-link group-hover:underline">
-                      {plan.name}
-                    </span>
-                    <span className="block truncate text-ui-sm text-muted-foreground">
-                      {[
-                        plan.locationName !== plan.name ? plan.locationName : null,
-                        t("devicesCount", { count: plan.placed }),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </span>
-                </Link>
                 {manager && plans.length > 1 && (
-                  <div className="absolute end-1 bottom-1.5">
-                    <PlanOrderMenu siteId={siteId} order={order} index={index} name={plan.name} />
-                  </div>
+                  <PlanOrderMenu siteId={siteId} order={order} index={index} name={plan.name} />
                 )}
-              </li>
+              </PlanTile>
             ))}
           </ul>
         )}

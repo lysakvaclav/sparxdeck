@@ -119,6 +119,7 @@
     "collapseRail": "Sbalit panel",
     "deviceTypes": "Typy a šablony",
     "devices": "Zařízení",
+    "plans": "Půdorysy",
     "inspections": "Revize",
     "more": "Více",
     "defects": "Závady",
@@ -613,6 +614,15 @@
         "nextDue": "Příští revize",
         "state": "Stav"
       }
+    },
+    "list": {
+      "searchPlaceholder": "Hledat plán, budovu nebo zákazníka",
+      "emptyTitle": "Zatím žádné půdorysy",
+      "emptyBody": "Půdorys nahrajete na stránce budovy, v kartě Půdorysy.",
+      "emptyAction": "Vybrat budovu",
+      "noResultsTitle": "Nic nenalezeno",
+      "noResultsBody": "Zkuste jiný název plánu, budovy nebo zákazníka.",
+      "count": "{count, plural, one {# plán} few {# plány} other {# plánů}}"
     }
   },
   "graph": {

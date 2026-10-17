@@ -168,8 +168,8 @@ export function AppShell({
               >
                 <ul className="mx-auto flex max-w-lg">
                   {NAV_ITEMS.filter((item) => item.phone === "tab").map(
-                    ({ href, label, icon: Icon, also }) => {
-                      const active = isActive(pathname, { href, also });
+                    ({ href, label, icon: Icon, also, match }) => {
+                      const active = isActive(pathname, { href, also, match });
                       return (
                         <li key={href} className="flex-1">
                           <Link

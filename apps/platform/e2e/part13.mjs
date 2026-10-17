@@ -144,6 +144,20 @@ try {
     await page.screenshot(`${OUT}/p13-01-site-plans.png`);
   });
 
+  await step("the sidebar leads to all floor plans; the search narrows them", async () => {
+    await page.click('a[href="/plans"]');
+    await page.waitForUrl("/plans");
+    await page.waitForText("2 plány");
+    await page.waitForText("Ukázka – Bytové družstvo Lipová");
+    await page.goto(`${APP}/plans?q=patro`);
+    await page.waitForText("1 plán");
+    await page.goto(`${APP}/plans?q=nic-takoveho`);
+    await page.waitForText("Nic nenalezeno");
+    await page.goto(`${APP}/plans`);
+    await page.waitForText("2 plány");
+    await page.screenshot(`${OUT}/p13-01b-all-plans.png`);
+  });
+
   await step("a plan shows its devices; the panel lists what isn't placed", async () => {
     await page.click(`a[href="/sites/${siteId}/plans/${plans[0].id}"]`);
     await page.waitForUrl(`/plans/${plans[0].id}`);

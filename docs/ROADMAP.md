@@ -412,6 +412,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
   - Přesun tažením nebo šipkami (Shift = větší krok), přesun na jiný plán budovy, odebrání z plánu.
   - Změny se ukážou hned a ukládají se na pozadí. Technik plány jen prohlíží.
 - **Napojení:**
+  - Položka Půdorysy v levé liště (na telefonu pod Více): všechny plány firmy po budovách, s hledáním podle plánu, budovy i zákazníka.
   - Karta Půdorysy na budově.
   - Umístění na detailu zařízení (malý plán, nebo odkazy „Umístit“).
   - V revizi přepínač Seznam / Půdorys: barvy podle stavu kontroly, klepnutí na značku otevře kontrolu, volba se pamatuje v telefonu.

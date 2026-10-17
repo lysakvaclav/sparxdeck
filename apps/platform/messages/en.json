@@ -119,6 +119,7 @@
     "collapseRail": "Collapse sidebar",
     "deviceTypes": "Types & templates",
     "devices": "Devices",
+    "plans": "Floor plans",
     "inspections": "Inspections",
     "more": "More",
     "defects": "Defects",
@@ -613,6 +614,15 @@
         "nextDue": "Next inspection",
         "state": "State"
       }
+    },
+    "list": {
+      "searchPlaceholder": "Search plan, building or customer",
+      "emptyTitle": "No floor plans yet",
+      "emptyBody": "Upload a floor plan on a building's page, in its Floor plans card.",
+      "emptyAction": "Choose a building",
+      "noResultsTitle": "Nothing found",
+      "noResultsBody": "Try another plan, building or customer name.",
+      "count": "{count, plural, one {# plan} other {# plans}}"
     }
   },
   "graph": {

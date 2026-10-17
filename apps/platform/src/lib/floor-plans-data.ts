@@ -208,3 +208,64 @@ export async function sitePlacements(
     rows.map((row) => [row.device_id, { planId: row.floor_plan_id, x: row.x, y: row.y }]),
   );
 }
+
+export type PlanListItem = PlanSummary & {
+  siteId: string;
+  siteName: string;
+  customerId: string;
+  customerName: string;
+};
+
+/** All floor plans of the organization (deleted buildings and customers left out). */
+export async function organizationPlans(): Promise<PlanListItem[]> {
+  const supabase = await createClient();
+  const [plans, placements] = await Promise.all([
+    fetchAll((from, to) =>
+      supabase
+        .from("floor_plans")
+        .select(
+          "id, name, location_id, image_path, image_width, image_height, sort_order, location:locations(name), site:sites!inner(id, name, deleted_at, customer:customers!inner(id, name, deleted_at))",
+        )
+        .is("site.deleted_at", null)
+        .is("site.customer.deleted_at", null)
+        .order("id")
+        .range(from, to),
+    ),
+    fetchAll((from, to) =>
+      supabase
+        .from("device_placements")
+        .select("floor_plan_id, device:devices!inner(status, deleted_at)")
+        .is("device.deleted_at", null)
+        .eq("device.status", "active")
+        .order("device_id")
+        .range(from, to),
+    ),
+  ]);
+  const urls = await planImageUrls(plans.map((plan) => plan.image_path));
+  const order = new Map(plans.map((plan) => [plan.id, plan.sort_order]));
+  const counts = new Map<string, number>();
+  for (const row of placements)
+    counts.set(row.floor_plan_id, (counts.get(row.floor_plan_id) ?? 0) + 1);
+  return plans
+    .filter((plan) => plan.site?.customer)
+    .map((plan) => ({
+      id: plan.id,
+      name: plan.name,
+      locationId: plan.location_id,
+      locationName: plan.location?.name ?? null,
+      width: plan.image_width,
+      height: plan.image_height,
+      imageUrl: urls.get(plan.image_path) ?? null,
+      placed: counts.get(plan.id) ?? 0,
+      siteId: plan.site!.id,
+      siteName: plan.site!.name,
+      customerId: plan.site!.customer!.id,
+      customerName: plan.site!.customer!.name,
+    }))
+    .sort(
+      (a, b) =>
+        a.customerName.localeCompare(b.customerName) ||
+        a.siteName.localeCompare(b.siteName) ||
+        (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+    );
+}

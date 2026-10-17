@@ -7,6 +7,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev tools badge sits on the account menu at the bottom of the rail
+  // (errors still show in the overlay).
+  devIndicators: false,
   // PDFs are rendered in Node with react-pdf; its fonts are read from disk.
   serverExternalPackages: ["@react-pdf/renderer"],
   // Labels and protocols are rendered from several routes and server actions;

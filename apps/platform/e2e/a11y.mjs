@@ -110,6 +110,10 @@ try {
     `organization_id=eq.${org}&select=id&order=label_number&limit=1`,
   );
   const [defect] = await selectRows("defects", `organization_id=eq.${org}&select=id`);
+  const [plan] = await selectRows(
+    "floor_plans",
+    `organization_id=eq.${org}&select=id,site_id&order=sort_order&limit=1`,
+  );
 
   const pages = [
     ["dashboard", "/"],
@@ -130,6 +134,8 @@ try {
     ["settings", "/settings"],
     ["account", "/account"],
     ["graph", "/graph"],
+    ["plans", "/plans"],
+    ["plan", `/sites/${plan.site_id}/plans/${plan.id}`],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -169,6 +175,8 @@ try {
     ["phone defect-new", "/defects/new"],
     ["phone customer", "/customers/" + customer.id],
     ["phone settings", "/settings"],
+    ["phone plans", "/plans"],
+    ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],
   ]) {
     await visit(page, label, path);
     await touchTargets(page, label);

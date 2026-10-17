@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { DownloadIcon, LayersIcon } from "@/components/icons";
+import { DownloadIcon } from "@/components/icons";
 import { DeleteButton } from "@/components/app/delete-button";
+import { appIcon } from "@/components/app/nav-items";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,8 @@ export default async function FloorPlanPage({ params, searchParams }: Props) {
   const plan = await getFloorPlan(site.id, planId);
   if (!plan) notFound();
   const t = await getTranslations("plans");
-  const tCustomers = await getTranslations("customers");
+  const tNav = await getTranslations("nav");
+  const app = appIcon("plans");
   const manager = isManager(membership.role);
 
   const supabase = await createClient();
@@ -58,14 +60,14 @@ export default async function FloorPlanPage({ params, searchParams }: Props) {
   return (
     <>
       <PageHeader
-        icon={LayersIcon}
-        iconClassName="text-node-location"
+        icon={app.icon}
+        iconClassName={app.tone}
         title={plan.name}
         meta={
           plan.location && plan.location.name !== plan.name && <Badge>{plan.location.name}</Badge>
         }
         breadcrumbs={[
-          { label: tCustomers("title"), href: "/customers" },
+          { label: tNav("plans"), href: "/plans" },
           ...(site.customer
             ? [{ label: site.customer.name, href: `/customers/${site.customer.id}` }]
             : []),

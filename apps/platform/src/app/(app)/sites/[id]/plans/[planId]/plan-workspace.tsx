@@ -235,22 +235,28 @@ export function PlanWorkspace({
           }[device.due],
         )}
       />
-      <span className="min-w-0 flex-1">
-        {device.placement?.planId === plan.id ? (
-          <button
-            type="button"
-            onClick={() => select(device.id)}
-            className="block font-mono font-semibold tabular-nums hover:underline"
-          >
+      {device.placement?.planId === plan.id ? (
+        // The whole row text picks the device on the plan (a big target on a phone).
+        <button
+          type="button"
+          onClick={() => select(device.id)}
+          className="group/row min-h-11 min-w-0 flex-1 py-0.5 text-start"
+        >
+          <span className="block font-mono font-semibold tabular-nums group-hover/row:underline">
             {device.number}
-          </button>
-        ) : (
+          </span>
+          <span className="block truncate text-ui-sm text-muted-foreground">
+            {[device.typeName, note ?? device.locationName].filter(Boolean).join(" · ")}
+          </span>
+        </button>
+      ) : (
+        <span className="min-w-0 flex-1">
           <span className="block font-mono font-semibold tabular-nums">{device.number}</span>
-        )}
-        <span className="block truncate text-ui-sm text-muted-foreground">
-          {[device.typeName, note ?? device.locationName].filter(Boolean).join(" · ")}
+          <span className="block truncate text-ui-sm text-muted-foreground">
+            {[device.typeName, note ?? device.locationName].filter(Boolean).join(" · ")}
+          </span>
         </span>
-      </span>
+      )}
       {action}
     </li>
   );
