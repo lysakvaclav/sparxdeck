@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   ConfirmIcon,
   CrossIcon,
+  DisableIcon,
   DotIcon,
   KeyIcon,
   SearchIcon,
@@ -22,6 +23,7 @@ import {
   type PlanMarker,
 } from "@/components/app/plan-viewer";
 import { QrScanner } from "@/components/app/qr-scanner";
+import { AddDeviceButton, type FieldDeviceType, type FieldLocation } from "./add-device-dialog";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,11 +38,12 @@ import { cn } from "@/lib/utils";
 
 type Tab = "remaining" | "done" | "all";
 type ViewMode = "list" | "plan";
-type RunState = "passed" | "failed" | "open" | "remaining";
+type RunState = "passed" | "failed" | "skipped" | "open" | "remaining";
 
 const RUN_TONE: Record<RunState, MarkerTone> = {
   passed: "success",
   failed: "danger",
+  skipped: "muted",
   open: "warning",
   remaining: "neutral",
 };
@@ -83,6 +86,7 @@ export function InspectionRun({
   appUrl,
   plans,
   placements,
+  addDevice,
 }: {
   inspectionId: string;
   accessNotes: string | null;
@@ -92,6 +96,8 @@ export function InspectionRun({
   /** The building's floor plans and where devices are on them. */
   plans: PlanSummary[];
   placements: Record<string, { planId: string; x: number; y: number }>;
+  /** Device types and locations for adding a device found in the building. */
+  addDevice: { types: FieldDeviceType[]; locations: FieldLocation[] };
 }) {
   const t = useTranslations("inspections");
   const tSites = useTranslations("sites.detail");
@@ -125,13 +131,15 @@ export function InspectionRun({
   }, [router]);
 
   const checkUrl = (deviceId: string) => `/inspections/${inspectionId}/check/${deviceId}`;
+  // Handled: checked, or left out with a reason.
   const finished = (id: string) => {
-    const outcome = checks[id]?.outcome;
-    return outcome === "passed" || outcome === "failed";
+    const check = checks[id];
+    return check?.outcome === "passed" || check?.outcome === "failed" || !!check?.skipReason;
   };
   const done = devices.filter((device) => finished(device.id));
   const passed = done.filter((device) => checks[device.id]?.outcome === "passed").length;
-  const failed = done.length - passed;
+  const failed = done.filter((device) => checks[device.id]?.outcome === "failed").length;
+  const skipped = done.length - passed - failed;
 
   const onScan = useCallback(
     (text: string) => {
@@ -177,6 +185,12 @@ export function InspectionRun({
       return { icon: TickIcon, tone: "text-success-text", text: t("outcome.passed") };
     if (check?.outcome === "failed")
       return { icon: CrossIcon, tone: "text-destructive-text", text: t("outcome.failed") };
+    if (check?.skipReason)
+      return {
+        icon: DisableIcon,
+        tone: "text-muted-foreground",
+        text: t(`outcome.${check.skipReason}`),
+      };
     if (check?.heldBy)
       return {
         icon: DotIcon,
@@ -191,6 +205,7 @@ export function InspectionRun({
   const runState = (device: RunDevice): RunState => {
     const check = checks[device.id];
     if (check?.outcome === "passed" || check?.outcome === "failed") return check.outcome;
+    if (check?.skipReason) return "skipped";
     return check ? "open" : "remaining";
   };
   const planMarkers: PlanMarker[] = plan
@@ -213,7 +228,13 @@ export function InspectionRun({
         ];
       })
     : [];
-  const onPlanCounts: Record<RunState, number> = { remaining: 0, open: 0, passed: 0, failed: 0 };
+  const onPlanCounts: Record<RunState, number> = {
+    remaining: 0,
+    open: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+  };
   for (const device of devices)
     if (placements[device.id]?.planId === plan?.id) onPlanCounts[runState(device)]++;
   const notOnPlan = devices.filter((device) => !placements[device.id]).length;
@@ -244,6 +265,9 @@ export function InspectionRun({
                 {failed} × {t("outcome.failed")}
               </span>
             )}
+            {skipped > 0 && (
+              <span className="text-muted-foreground">{t("run.skipped", { count: skipped })}</span>
+            )}
           </p>
         </div>
         <div
@@ -257,6 +281,10 @@ export function InspectionRun({
           <span
             className="h-full bg-destructive"
             style={{ width: `${devices.length ? (failed / devices.length) * 100 : 0}%` }}
+          />
+          <span
+            className="h-full bg-[#a7b6c2]"
+            style={{ width: `${devices.length ? (skipped / devices.length) * 100 : 0}%` }}
           />
         </div>
         <div className="mt-[15px] grid grid-cols-1 gap-2 sm:flex">
@@ -276,6 +304,11 @@ export function InspectionRun({
               {t("run.complete")}
             </Link>
           </Button>
+          <AddDeviceButton
+            inspectionId={inspectionId}
+            types={addDevice.types}
+            locations={addDevice.locations}
+          />
         </div>
       </Card>
 
@@ -338,11 +371,13 @@ export function InspectionRun({
             />
             <div className="space-y-1.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">
               <PlanLegend
-                items={(["remaining", "open", "passed", "failed"] as const).map((id) => ({
-                  tone: RUN_TONE[id],
-                  label: t(`outcome.${id}`),
-                  count: onPlanCounts[id],
-                }))}
+                items={(["remaining", "open", "passed", "failed", "skipped"] as const).map(
+                  (id) => ({
+                    tone: RUN_TONE[id],
+                    label: t(`outcome.${id}`),
+                    count: onPlanCounts[id],
+                  }),
+                )}
               />
               {planMarkers.length === 0 && (
                 <p className="text-ui text-muted-foreground">{tPlans("run.noneOnPlan")}</p>

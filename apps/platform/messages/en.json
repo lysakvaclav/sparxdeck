@@ -292,7 +292,8 @@
     "importUnknownType": "Unknown device type. Use a type name from the app (Types and templates).",
     "importInvalid": "The import data isn't valid. Upload the file again.",
     "importInUse": "The import can't be undone anymore: its records are in use (inspections, defects, floor plans or new devices).",
-    "importUndone": "The import has already been undone."
+    "importUndone": "The import has already been undone.",
+    "deviceExists": "A device with this serial number is already in the building. Find it in the list."
   },
   "email": {
     "invite": {
@@ -1368,7 +1369,10 @@
       "failed": "Failed",
       "not_checked": "Not checked",
       "open": "In progress",
-      "remaining": "To do"
+      "remaining": "To do",
+      "inaccessible": "Inaccessible",
+      "missing": "Not found",
+      "skipped": "Left out"
     },
     "run": {
       "scan": "Scan label",
@@ -1385,7 +1389,8 @@
       "noDevices": "There are no active devices in this building.",
       "drafts": "Unsent answers are waiting in this phone for device {labels}. Open it and they will be sent.",
       "notInSite": "This label doesn't belong to a device in this building.",
-      "unknownCode": "This isn't a SparxDeck label."
+      "unknownCode": "This isn't a SparxDeck label.",
+      "skipped": "{count} × left out"
     },
     "scanner": {
       "title": "Scan label",
@@ -1449,7 +1454,8 @@
       "noDefect": "Don't record",
       "openDefects": "Open defects on this device",
       "defectExisting": "Will be added to open defect <number></number>.",
-      "defectFor": "Defect: {label}"
+      "defectFor": "Defect: {label}",
+      "dictationHint": "You can dictate the note with the microphone on your phone's keyboard."
     },
     "complete": {
       "title": "Complete inspection",
@@ -1464,7 +1470,9 @@
       "notCheckedList": "Devices not checked",
       "defectsHint": "{count, plural, one {# defect} other {# defects}} will be recorded from failed items.",
       "doneWithDefects": "Inspection completed. {count, plural, one {# defect recorded.} other {# defects recorded.}}",
-      "observedHint": "{count, plural, one {# failed item will be added to an open defect} other {# failed items will be added to open defects}}."
+      "observedHint": "{count, plural, one {# failed item will be added to an open defect} other {# failed items will be added to open defects}}.",
+      "skippedList": "Devices left out",
+      "skippedHint": "Their due dates don't move; the protocol gives the reason."
     },
     "result": {
       "summary": "Summary",
@@ -1476,11 +1484,57 @@
       "results": "Device results",
       "checkedBy": "Checked by",
       "checkedAt": "Checked at",
-      "defects": "Defects from the inspection"
+      "defects": "Defects from the inspection",
+      "added": "Added during the inspection",
+      "addedHint": "These devices have no label yet. Print it and put it on at the next visit.",
+      "printLabels": "Print labels"
     },
     "device": {
       "check": "Check",
       "inProgress": "An inspection is in progress in this building."
+    },
+    "skip": {
+      "action": "Can't check",
+      "title": "Why can't the device be checked?",
+      "reasons": {
+        "inaccessible": "Inaccessible",
+        "missing": "Not found"
+      },
+      "hints": {
+        "inaccessible": "Locked, blocked, the tenant wasn't in…",
+        "missing": "The device isn't where it should be."
+      },
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. flat 12 locked, tenant not in",
+      "submit": "Mark and continue",
+      "done": "{label}: {reason}",
+      "currentTitle": "Marked: {reason}",
+      "currentBody": "If you check the device after all, the mark is removed.",
+      "termHint": "Its due date doesn't move and the protocol gives the reason."
+    },
+    "addDevice": {
+      "action": "Add device",
+      "title": "Add a device you found",
+      "hint": "A device that's in the building but missing from the list. It gets a label number and you check it right away. The office prints its label later.",
+      "submit": "Add and check",
+      "added": "Device {label} added."
+    },
+    "cancel": {
+      "action": "Cancel inspection",
+      "title": "Cancel the inspection?",
+      "body": "The checks, answers and photos of this inspection are deleted. The devices stay. Useful when the inspection was started by mistake.",
+      "confirm": "Cancel inspection",
+      "keep": "Keep the inspection",
+      "done": "The inspection has been cancelled."
+    },
+    "resolve": {
+      "title": "The check passed",
+      "body": "The device has open defects. Have they been fixed?",
+      "note": "Resolution note",
+      "defaultNote": "Fixed, confirmed at the inspection on {date}.",
+      "submit": "Resolve selected",
+      "keep": "Keep open",
+      "done": "{count, plural, one {# defect resolved} other {# defects resolved}}."
     }
   },
   "defects": {
@@ -1610,7 +1664,9 @@
       "result": {
         "passed": "Passed",
         "failed": "Failed",
-        "not_checked": "Not checked"
+        "not_checked": "Not checked",
+        "inaccessible": "Inaccessible",
+        "missing": "Not found"
       },
       "finding": {
         "failed": "failed",

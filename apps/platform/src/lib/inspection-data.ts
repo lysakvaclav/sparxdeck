@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { formatLabel } from "@/lib/devices";
 import { HOLD_MINUTES, type Question } from "@/lib/inspections";
-import type { CheckOutcome } from "@/lib/supabase/database.types";
+import type { CheckOutcome, CheckSkipReason } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
@@ -41,6 +41,8 @@ export type RunDevice = {
 
 export type RunCheck = {
   outcome: CheckOutcome | null;
+  /** Left out (inaccessible, missing): handled, but not checked. */
+  skipReason: CheckSkipReason | null;
   /** A colleague holding the check right now (not the current user). */
   heldBy: string | null;
   checkedBy: string | null;
@@ -72,7 +74,7 @@ export async function loadInspectionRun(
     fetchAll((from, to) =>
       supabase
         .from("inspection_items")
-        .select("device_id, outcome, editing_by, editing_at, checked_by, checked_at")
+        .select("device_id, outcome, skip_reason, editing_by, editing_at, checked_by, checked_at")
         .eq("inspection_id", inspection.id)
         .order("id")
         .range(from, to),
@@ -90,6 +92,7 @@ export async function loadInspectionRun(
       Date.parse(item.editing_at) > holdLimit;
     checks[item.device_id] = {
       outcome: item.outcome,
+      skipReason: item.skip_reason,
       heldBy: held ? (names.get(item.editing_by!) ?? "?") : null,
       checkedBy: item.checked_by ? (names.get(item.checked_by) ?? null) : null,
       checkedAt: item.checked_at,

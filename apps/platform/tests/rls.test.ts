@@ -1328,6 +1328,7 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
         passed: 1,
         failed: 1,
         notChecked: 1,
+        skipped: 0,
         defects: 1,
         protocol: expect.any(String),
       });
@@ -2660,6 +2661,240 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect(history?.undone_at).not.toBeNull();
       const { error: again } = await alice.client.rpc("undo_import", { p_import: mistake });
       expect(again?.message).toMatch(/import_undone/);
+    });
+  });
+
+  describe("inspections in the field", () => {
+    let site: string;
+    let elsewhere: string;
+    let typeA: string;
+    let typeB: string;
+    let devices: string[];
+    let first: string;
+    let questions: { id: string; item_type: string; required: boolean }[];
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").limit(1).single();
+      typeA = type!.id;
+      const { data: bobType } = await bob.client
+        .from("device_types")
+        .select("id")
+        .limit(1)
+        .single();
+      typeB = bobType!.id;
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Field customer" })
+        .select("id")
+        .single();
+      const { data: sites } = await alice.client
+        .from("sites")
+        .insert([
+          { organization_id: orgA, customer_id: customer!.id, name: "Field site" },
+          { organization_id: orgA, customer_id: customer!.id, name: "Field elsewhere" },
+        ])
+        .select("id, name");
+      site = sites!.find((s) => s.name === "Field site")!.id;
+      const other = sites!.find((s) => s.name === "Field elsewhere")!.id;
+      const { data: location } = await alice.client
+        .from("locations")
+        .insert({ organization_id: orgA, site_id: other, name: "Jinde" })
+        .select("id")
+        .single();
+      elsewhere = location!.id;
+      const { data: rows } = await alice.client
+        .from("devices")
+        .insert([1, 2].map(() => ({ organization_id: orgA, site_id: site, device_type_id: typeA })))
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: template } = await alice.client
+        .from("checklist_templates")
+        .select("id, checklist_template_items(id, item_type, required, sort_order)")
+        .eq("device_type_id", typeA)
+        .eq("active", true)
+        .single();
+      questions = [...template!.checklist_template_items].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
+    });
+
+    async function open(client: Client, inspection: string, device: string) {
+      const { data, error } = await client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: device,
+      });
+      expect(error).toBeNull();
+      return (data as { item: string }).item;
+    }
+
+    async function answerAll(client: Client, item: string, pass: boolean) {
+      for (const question of questions.filter((q) => q.required)) {
+        const { error } = await client.rpc("save_answer", {
+          p_item: item,
+          p_template_item: question.id,
+          p_value_pass: question.item_type === "pass_fail" ? pass : null,
+          p_value_number: question.item_type === "number" ? 12.5 : null,
+          p_value_text: question.item_type === "text" ? "OK" : null,
+          p_defect_severity:
+            question.item_type === "pass_fail" && !pass ? ("critical" as const) : null,
+        });
+        expect(error).toBeNull();
+      }
+    }
+
+    it("a device left out counts as handled, with its reason and note", async () => {
+      const { data } = await carol.client.rpc("start_inspection", { p_site: site });
+      first = data!;
+      const item = await open(carol.client, first, devices[0]!);
+      // Answered "no" first: leaving it out must not record that as a defect.
+      await answerAll(carol.client, item, false);
+      const { error: bobError } = await bob.client.rpc("skip_device_check", {
+        p_item: item,
+        p_reason: "inaccessible",
+      });
+      expect(bobError?.message).toMatch(/not_found/);
+      const { error: notHeld } = await alice.client.rpc("skip_device_check", {
+        p_item: item,
+        p_reason: "inaccessible",
+      });
+      expect(notHeld?.message).toMatch(/check_taken_over/);
+      const { error } = await carol.client.rpc("skip_device_check", {
+        p_item: item,
+        p_reason: "inaccessible",
+        p_note: "Byt zamčený",
+      });
+      expect(error).toBeNull();
+      const { data: row } = await alice.client
+        .from("inspection_items")
+        .select("outcome, skip_reason, notes, checked_by, editing_by")
+        .eq("id", item)
+        .single();
+      expect(row).toEqual({
+        outcome: "not_checked",
+        skip_reason: "inaccessible",
+        notes: "Byt zamčený",
+        checked_by: carol.id,
+        editing_by: null,
+      });
+    });
+
+    it("answering a left-out device again reopens it without the reason", async () => {
+      const item = await open(carol.client, first, devices[1]!);
+      await carol.client.rpc("skip_device_check", { p_item: item, p_reason: "missing" });
+      await open(carol.client, first, devices[1]!);
+      await answerAll(carol.client, item, true);
+      const { data: reopened } = await alice.client
+        .from("inspection_items")
+        .select("outcome, skip_reason")
+        .eq("id", item)
+        .single();
+      expect(reopened).toEqual({ outcome: null, skip_reason: null });
+      const { data: outcome } = await carol.client.rpc("finish_device_check", { p_item: item });
+      expect(outcome).toBe("passed");
+    });
+
+    it("completing records no defect and no new date for a device left out", async () => {
+      const { data, error } = await carol.client.rpc("complete_inspection", {
+        p_inspection: first,
+      });
+      expect(error).toBeNull();
+      expect(data).toMatchObject({ passed: 1, failed: 0, notChecked: 1, skipped: 1, defects: 0 });
+      const { data: left } = await alice.client
+        .from("devices")
+        .select("last_inspection_on")
+        .eq("id", devices[0]!)
+        .single();
+      expect(left?.last_inspection_on).toBeNull();
+      const { data: defects } = await alice.client
+        .from("defects")
+        .select("id")
+        .eq("device_id", devices[0]!);
+      expect(defects).toEqual([]);
+      const { error: closed } = await alice.client.rpc("cancel_inspection", {
+        p_inspection: first,
+      });
+      expect(closed?.message).toMatch(/inspection_closed/);
+    });
+
+    it("a technician adds a device found during the inspection; others can't", async () => {
+      const { data: inspection } = await carol.client.rpc("start_inspection", { p_site: site });
+      const { data: added, error } = await carol.client.rpc("add_inspection_device", {
+        p_inspection: inspection!,
+        p_device_type: typeA,
+        p_serial_number: "FIELD-1",
+        p_attributes: { agent: "CO2" },
+      });
+      expect(error).toBeNull();
+      const { data: device } = await alice.client
+        .from("devices")
+        .select("site_id, label_number, added_in_inspection, created_by, serial_number, attributes")
+        .eq("id", added!)
+        .single();
+      expect(device).toMatchObject({
+        site_id: site,
+        added_in_inspection: inspection,
+        created_by: carol.id,
+        serial_number: "FIELD-1",
+        attributes: { agent: "CO2" },
+      });
+      expect(device!.label_number).toBeGreaterThan(0);
+
+      const attempt = (client: Client, extra: Record<string, unknown>) =>
+        client.rpc("add_inspection_device", {
+          p_inspection: inspection!,
+          p_device_type: typeA,
+          ...extra,
+        } as never);
+      expect((await attempt(carol.client, { p_serial_number: "field-1" })).error?.message).toMatch(
+        /device_exists/,
+      );
+      expect((await attempt(carol.client, { p_location: elsewhere })).error?.message).toMatch(
+        /not_found/,
+      );
+      expect((await attempt(carol.client, { p_device_type: typeB })).error?.message).toMatch(
+        /not_found/,
+      );
+      expect((await attempt(bob.client, {})).error?.message).toMatch(/not_found/);
+
+      // Whoever started it may cancel it; the device found in it stays and the
+      // photos of its checks come back for the server to delete.
+      const item = await open(carol.client, inspection!, added!);
+      const photo = `${orgA}/inspections/${inspection}/${item}/cancelled.jpg`;
+      await admin.from("inspection_photos").insert({
+        organization_id: orgA,
+        item_id: item,
+        storage_path: photo,
+        content_type: "image/jpeg",
+        size_bytes: 1000,
+      } as never);
+      const { data: paths, error: cancelError } = await carol.client.rpc("cancel_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(cancelError).toBeNull();
+      expect(paths).toEqual([{ path: photo }]);
+      const { data: kept } = await alice.client
+        .from("devices")
+        .select("added_in_inspection, deleted_at")
+        .eq("id", added!)
+        .single();
+      expect(kept).toEqual({ added_in_inspection: null, deleted_at: null });
+      const { data: gone } = await admin.from("inspections").select("id").eq("id", inspection!);
+      expect(gone).toEqual([]);
+    });
+
+    it("only whoever started an inspection, or an owner or admin, cancels it", async () => {
+      const { data: inspection } = await alice.client.rpc("start_inspection", { p_site: site });
+      const { error: technician } = await carol.client.rpc("cancel_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(technician?.message).toMatch(/forbidden/);
+      const { error: other } = await bob.client.rpc("cancel_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(other?.message).toMatch(/not_found/);
+      const { error } = await alice.client.rpc("cancel_inspection", { p_inspection: inspection! });
+      expect(error).toBeNull();
     });
   });
 

@@ -292,7 +292,8 @@
     "importUnknownType": "Neznámý typ zařízení. Použijte název typu z aplikace (Typy a šablony).",
     "importInvalid": "Data importu nejsou platná. Nahrajte soubor znovu.",
     "importInUse": "Import už nejde vrátit: s jeho záznamy se už pracovalo (revize, závady, půdorysy nebo nová zařízení).",
-    "importUndone": "Import už je vrácený."
+    "importUndone": "Import už je vrácený.",
+    "deviceExists": "Zařízení s tímto výrobním číslem už v budově je. Najděte ho v seznamu."
   },
   "email": {
     "invite": {
@@ -1368,7 +1369,10 @@
       "failed": "Nevyhovuje",
       "not_checked": "Nezkontrolováno",
       "open": "Rozpracováno",
-      "remaining": "Zbývá"
+      "remaining": "Zbývá",
+      "inaccessible": "Nepřístupné",
+      "missing": "Nenalezeno",
+      "skipped": "Vynecháno"
     },
     "run": {
       "scan": "Skenovat štítek",
@@ -1385,7 +1389,8 @@
       "noDevices": "V budově nejsou žádná aktivní zařízení.",
       "drafts": "V telefonu jsou neodeslané odpovědi u zařízení {labels}. Otevřete ho a odešlou se.",
       "notInSite": "Tento štítek nepatří k zařízení této budovy.",
-      "unknownCode": "Tohle není štítek SparxDeck."
+      "unknownCode": "Tohle není štítek SparxDeck.",
+      "skipped": "{count} × vynecháno"
     },
     "scanner": {
       "title": "Skenovat štítek",
@@ -1449,7 +1454,8 @@
       "noDefect": "Nezapisovat",
       "openDefects": "Otevřené závady zařízení",
       "defectExisting": "Připíše se k otevřené závadě <number></number>.",
-      "defectFor": "Závada: {label}"
+      "defectFor": "Závada: {label}",
+      "dictationHint": "Poznámku můžete nadiktovat mikrofonem na klávesnici telefonu."
     },
     "complete": {
       "title": "Dokončit revizi",
@@ -1464,7 +1470,9 @@
       "notCheckedList": "Nezkontrolovaná zařízení",
       "defectsHint": "{count, plural, one {Vznikne # závada} few {Vzniknou # závady} other {Vznikne # závad}} z nevyhovujících položek.",
       "doneWithDefects": "Revize dokončena. {count, plural, one {Vznikla # závada.} few {Vznikly # závady.} other {Vzniklo # závad.}}",
-      "observedHint": "{count, plural, one {# nevyhovující položka se připíše k otevřené závadě} few {# nevyhovující položky se připíšou k otevřeným závadám} other {# nevyhovujících položek se připíše k otevřeným závadám}}."
+      "observedHint": "{count, plural, one {# nevyhovující položka se připíše k otevřené závadě} few {# nevyhovující položky se připíšou k otevřeným závadám} other {# nevyhovujících položek se připíše k otevřeným závadám}}.",
+      "skippedList": "Vynechaná zařízení",
+      "skippedHint": "Termín se jim neposune, v protokolu budou s důvodem."
     },
     "result": {
       "summary": "Souhrn",
@@ -1476,11 +1484,57 @@
       "results": "Výsledky zařízení",
       "checkedBy": "Zkontroloval",
       "checkedAt": "Čas kontroly",
-      "defects": "Závady z revize"
+      "defects": "Závady z revize",
+      "added": "Přidáno při revizi",
+      "addedHint": "Tato zařízení zatím nemají štítek. Vytiskněte ho a nalepte při příští návštěvě.",
+      "printLabels": "Tisk štítků"
     },
     "device": {
       "check": "Zkontrolovat",
       "inProgress": "V budově probíhá revize."
+    },
+    "skip": {
+      "action": "Nelze zkontrolovat",
+      "title": "Proč zařízení nejde zkontrolovat?",
+      "reasons": {
+        "inaccessible": "Nepřístupné",
+        "missing": "Nenalezeno"
+      },
+      "hints": {
+        "inaccessible": "Zamčeno, zastavěno, nájemník nebyl doma…",
+        "missing": "Zařízení na svém místě není."
+      },
+      "note": "Poznámka (nepovinná)",
+      "notePlaceholder": "např. byt 12 zamčený, nájemník nebyl doma",
+      "submit": "Označit a pokračovat",
+      "done": "{label}: {reason}",
+      "currentTitle": "Označeno: {reason}",
+      "currentBody": "Když zařízení přesto zkontrolujete, označení se zruší.",
+      "termHint": "Termín se mu neposune a v protokolu bude s důvodem."
+    },
+    "addDevice": {
+      "action": "Přidat zařízení",
+      "title": "Přidat nalezené zařízení",
+      "hint": "Zařízení, které v budově je, ale chybí v seznamu. Dostane číslo štítku a hned ho zkontrolujete. Štítek pak vytiskne kancelář.",
+      "submit": "Přidat a zkontrolovat",
+      "added": "Zařízení {label} přidáno."
+    },
+    "cancel": {
+      "action": "Zrušit revizi",
+      "title": "Zrušit revizi?",
+      "body": "Rozdělané kontroly, odpovědi a fotky této revize se smažou. Zařízení zůstanou. Hodí se, když byla revize zahájena omylem.",
+      "confirm": "Zrušit revizi",
+      "keep": "Pokračovat v revizi",
+      "done": "Revize je zrušená."
+    },
+    "resolve": {
+      "title": "Kontrola vyhověla",
+      "body": "Zařízení má otevřené závady. Jsou odstraněné?",
+      "note": "Poznámka k vyřešení",
+      "defaultNote": "Odstraněno, ověřeno při revizi {date}.",
+      "submit": "Uzavřít vybrané",
+      "keep": "Ponechat otevřené",
+      "done": "{count, plural, one {# závada uzavřena} few {# závady uzavřeny} other {# závad uzavřeno}}."
     }
   },
   "defects": {
@@ -1610,7 +1664,9 @@
       "result": {
         "passed": "Vyhovuje",
         "failed": "Nevyhovuje",
-        "not_checked": "Nezkontrolováno"
+        "not_checked": "Nezkontrolováno",
+        "inaccessible": "Nepřístupné",
+        "missing": "Nenalezeno"
       },
       "finding": {
         "failed": "nevyhovuje",

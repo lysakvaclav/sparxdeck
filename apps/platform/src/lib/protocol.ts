@@ -3,6 +3,7 @@ import { defectNumber } from "@/lib/defects";
 import { CALENDAR_FORMAT, calendarDate } from "@/lib/due";
 import type {
   CheckOutcome,
+  CheckSkipReason,
   ChecklistItemType,
   DefectSeverity,
 } from "@/lib/supabase/database.types";
@@ -36,6 +37,8 @@ export type ProtocolCheck = {
   locationOrder: number | null;
   serialNumber: string | null;
   outcome: CheckOutcome;
+  /** Left out (inaccessible, missing): the result says why. */
+  skipReason?: CheckSkipReason | null;
   nextDueOn: string | null;
   checkedBy: string | null;
   note: string | null;
@@ -235,7 +238,7 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
       type: check.typeName,
       location: check.locationName ?? dash,
       serial: check.serialNumber ?? dash,
-      result: t(`result.${check.outcome}`),
+      result: check.skipReason ? t(`result.${check.skipReason}`) : t(`result.${check.outcome}`),
       failed: check.outcome === "failed",
       // A new date only where the check passed; elsewhere it didn't move.
       nextDue:

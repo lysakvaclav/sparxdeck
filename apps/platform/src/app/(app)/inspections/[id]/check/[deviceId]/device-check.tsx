@@ -9,6 +9,7 @@ import {
   CameraIcon,
   ChevronLeftIcon,
   CrossIcon,
+  DisableIcon,
   IssueIcon,
   OfflineIcon,
   SmallCrossIcon,
@@ -46,9 +47,11 @@ import {
   type AnswerDraft,
   type Question,
 } from "@/lib/inspections";
-import type { DefectSeverity } from "@/lib/supabase/database.types";
+import type { CheckSkipReason, DefectSeverity } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { ResolveDialog } from "./resolve-dialog";
+import { SkipDialog } from "./skip-dialog";
 
 export type CheckPhoto = {
   /** Local key: the photo's database id, or the queue id while it waits. */
@@ -116,6 +119,7 @@ export function DeviceCheck({
   initialPhotos,
   openDefects,
   overviewHref,
+  initialSkip,
 }: {
   inspectionId: string;
   deviceId: string;
@@ -127,8 +131,12 @@ export function DeviceCheck({
   initialPhotos: CheckPhoto[];
   openDefects: OpenDefect[];
   overviewHref: string;
+  /** The device was left out (inaccessible, missing) and is opened again. */
+  initialSkip: { reason: CheckSkipReason; note: string | null } | null;
 }) {
   const t = useTranslations("inspections.check");
+  const tSkip = useTranslations("inspections.skip");
+  const tResolve = useTranslations("inspections.resolve");
   const tErr = useTranslations("errors");
   const router = useRouter();
   const toast = useToast();
@@ -152,6 +160,11 @@ export function DeviceCheck({
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [skipOpen, setSkipOpen] = useState(false);
+  const [skipping, setSkipping] = useState(false);
+  // After a passed check: the open defects to offer for resolving.
+  const [resolving, setResolving] = useState<OpenDefect[] | null>(null);
+  const [resolvingPending, setResolvingPending] = useState(false);
   // Sending runs one pass at a time; a call during a pass waits for it and runs
   // another, so "Done" never sees answers that are merely still in flight.
   const answersQueue = useRef<Promise<void>>(Promise.resolve());
@@ -481,8 +494,67 @@ export function DeviceCheck({
       data === "failed" ? t("finishedFailed", { label }) : t("finishedPassed", { label }),
       data === "failed" ? "danger" : "success",
     );
+    // A passed device with open defects: were they fixed?
+    if (data === "passed" && openDefects.length > 0) {
+      setResolving(openDefects);
+      setFinishing(false);
+      return;
+    }
+    backToOverview();
+  }
+
+  function backToOverview() {
     router.push(overviewHref);
     router.refresh();
+  }
+
+  /** Leaves the device out: everything waiting in the phone is sent first. */
+  async function skip(reason: CheckSkipReason, note: string) {
+    if (!item) return;
+    setSkipping(true);
+    setNotice(null);
+    await flush();
+    await uploadPending();
+    if (readDraft(key) || (await queuedPhotos(inspectionId, deviceId)).length > 0) {
+      setSkipOpen(false);
+      setSkipping(false);
+      setNotice(t("pendingBeforeFinish"));
+      return;
+    }
+    const { error } = await supabase.rpc("skip_device_check", {
+      p_item: item,
+      p_reason: reason,
+      p_note: note.trim() || null,
+    });
+    setSkipping(false);
+    if (error) {
+      setSkipOpen(false);
+      failed(error);
+      return;
+    }
+    toast(tSkip("done", { label, reason: tSkip(`reasons.${reason}`) }), "none");
+    backToOverview();
+  }
+
+  async function resolveDefects(ids: string[], note: string) {
+    setResolvingPending(true);
+    let resolved = 0;
+    for (const id of ids) {
+      const { error } = await supabase.rpc("change_defect_status", {
+        p_defect: id,
+        p_status: "resolved",
+        p_note: note,
+      });
+      if (error) {
+        toast(tErr(databaseErrorCode(error)), "danger");
+        break;
+      }
+      resolved++;
+    }
+    setResolvingPending(false);
+    if (resolved) toast(tResolve("done", { count: resolved }), "success");
+    setResolving(null);
+    backToOverview();
   }
 
   function leave() {
@@ -595,6 +667,18 @@ export function DeviceCheck({
       {offline && (
         <Alert variant="warning" icon={OfflineIcon}>
           {t("offlineHint")}
+        </Alert>
+      )}
+      {initialSkip && (
+        <Alert
+          variant="neutral"
+          icon={DisableIcon}
+          title={tSkip("currentTitle", { reason: tSkip(`reasons.${initialSkip.reason}`) })}
+        >
+          {initialSkip.note && (
+            <p className="break-words whitespace-pre-line">{initialSkip.note}</p>
+          )}
+          <p>{tSkip("currentBody")}</p>
         </Alert>
       )}
       {openDefects.length > 0 && (
@@ -730,6 +814,7 @@ export function DeviceCheck({
               {noteOpen && (
                 <Textarea
                   rows={2}
+                  autoCapitalize="sentences"
                   aria-label={t("note", { label: question.label })}
                   value={answer.note}
                   onChange={(event) => edit(question, { note: event.target.value })}
@@ -757,17 +842,56 @@ export function DeviceCheck({
           <p className="text-ui-lg font-medium">{t("deviceSection")}</p>
           <Textarea
             rows={2}
+            autoCapitalize="sentences"
             aria-label={t("deviceNotes")}
+            aria-describedby="dictation-hint"
             placeholder={t("deviceNotes")}
             value={notes}
             onChange={(event) => updateDraft(key, (d) => ({ ...d, notes: event.target.value }))}
           />
+          {/* Phones dictate into any text field; the keyboard's microphone does it. */}
+          <p
+            id="dictation-hint"
+            className="hidden text-ui-sm text-muted-foreground pointer-coarse:block"
+          >
+            {t("dictationHint")}
+          </p>
           {photoStrip(null)}
           <div className="-ms-2.5">{photoInput(null, t("devicePhoto"))}</div>
         </Card>
       </fieldset>
 
+      <div className="flex justify-center">
+        <Button
+          variant="ghost"
+          onClick={() => setSkipOpen(true)}
+          disabled={!item || skipping || finishing}
+          className="text-muted-foreground"
+        >
+          <DisableIcon />
+          {tSkip("action")}
+        </Button>
+      </div>
+
       {notice && <Alert variant="error">{notice}</Alert>}
+
+      <SkipDialog
+        open={skipOpen}
+        onOpenChange={setSkipOpen}
+        pending={skipping}
+        onSkip={(reason, note) => void skip(reason, note)}
+      />
+      {resolving && (
+        <ResolveDialog
+          defects={resolving}
+          pending={resolvingPending}
+          onResolve={(ids, note) => void resolveDefects(ids, note)}
+          onKeep={() => {
+            setResolving(null);
+            backToOverview();
+          }}
+        />
+      )}
 
       <div className="sticky bottom-0 z-10 -mx-2.5 -mb-8 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 bg-background px-2.5 py-2 shadow-[0_-1px_0_var(--border)] sm:-mx-[15px] sm:px-[15px] lg:-mx-5 lg:px-5">
         <Button asChild variant="outline" size="lg" onClick={leave}>

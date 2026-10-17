@@ -36,6 +36,7 @@ export default async function CompleteInspectionPage({ params }: Props) {
   const passed = byOutcome((d) => checks[d]?.outcome === "passed");
   const failed = byOutcome((d) => checks[d]?.outcome === "failed");
   const open = byOutcome((d) => !!checks[d] && checks[d].outcome === null);
+  const skipped = byOutcome((d) => !!checks[d]?.skipReason);
   const notChecked = byOutcome((d) => !checks[d]);
   const app = appIcon("inspections");
   const checkHref = (deviceId: string) => `/inspections/${id}/check/${deviceId}`;
@@ -72,7 +73,7 @@ export default async function CompleteInspectionPage({ params }: Props) {
               [
                 ["passed", passed.length, "text-success-text"],
                 ["failed", failed.length, "text-destructive-text"],
-                ["not_checked", notChecked.length, ""],
+                ["not_checked", notChecked.length + skipped.length, ""],
               ] as const
             ).map(([outcome, count, tone]) => (
               <Card key={outcome} className="p-2.5 text-center">
@@ -108,6 +109,31 @@ export default async function CompleteInspectionPage({ params }: Props) {
                 <p>{t("complete.observedHint", { count: defects.observed })}</p>
               )}
             </Alert>
+          )}
+          {skipped.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("complete.skippedList")}</CardTitle>
+              </CardHeader>
+              <p className="px-[15px] pt-2.5 text-ui-sm text-muted-foreground">
+                {t("complete.skippedHint")}
+              </p>
+              <ul className="flex flex-wrap gap-1.5 px-[15px] py-2.5">
+                {skipped.map((device) => (
+                  <li key={device.id}>
+                    <Link
+                      href={checkHref(device.id)}
+                      className="inline-flex min-h-[30px] items-center gap-1.5 rounded-md surface-button px-2 hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
+                    >
+                      <span className="font-mono tabular-nums">{device.number}</span>
+                      <span className="text-ui-sm text-muted-foreground">
+                        {t(`outcome.${checks[device.id]!.skipReason!}`)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
           )}
           {notChecked.length > 0 && (
             <Card>

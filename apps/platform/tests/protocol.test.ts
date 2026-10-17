@@ -173,6 +173,34 @@ describe("protocol content", () => {
     );
   });
 
+  it("a device left out gives its reason and the technician's note", () => {
+    const left = buildProtocol(
+      {
+        ...input,
+        checks: [
+          check({
+            labelNumber: 8,
+            outcome: "not_checked",
+            skipReason: "inaccessible",
+            note: "Byt 12 zamčený",
+            nextDueOn: "2026-11-01",
+          }),
+          check({ labelNumber: 9, outcome: "not_checked", skipReason: "missing", note: null }),
+        ],
+      },
+      translate("cs"),
+    );
+    expect(left.devices[0]).toMatchObject({
+      result: "Nepřístupné",
+      nextDue: "—",
+      details: ["Poznámka: Byt 12 zamčený"],
+    });
+    expect(left.devices[1]).toMatchObject({ result: "Nenalezeno" });
+    expect(left.summary).toBe(
+      "Zařízení celkem: 2. Vyhovuje: 0, nevyhovuje: 0, nezkontrolováno: 2.",
+    );
+  });
+
   it("lists the defects, notes, signatures and the footer", () => {
     expect(model.defects).toEqual([
       {

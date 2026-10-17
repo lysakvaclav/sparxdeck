@@ -91,3 +91,19 @@ export function updateDraft(key: string, change: (draft: CheckDraft) => CheckDra
   writeDraft(key, change(readDraft(key) ?? { answers: {} }));
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
+
+/** Drops this phone's unsent answers of an inspection (it was cancelled). */
+export function clearInspectionDrafts(inspectionId: string) {
+  const prefix = `${PREFIX}${inspectionId}.`;
+  try {
+    const keys: string[] = [];
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(prefix)) keys.push(key);
+    }
+    for (const key of keys) localStorage.removeItem(key);
+  } catch {
+    // No storage: nothing kept.
+  }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}

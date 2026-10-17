@@ -52,7 +52,7 @@ export default async function DeviceCheckPage({ params }: Props) {
       .maybeSingle(),
     supabase
       .from("inspection_items")
-      .select("id, template_id, outcome, notes, checked_by, checked_at")
+      .select("id, template_id, outcome, skip_reason, notes, checked_by, checked_at")
       .eq("inspection_id", id)
       .eq("device_id", deviceId)
       .maybeSingle(),
@@ -153,7 +153,7 @@ export default async function DeviceCheckPage({ params }: Props) {
                   : "default"
             }
           >
-            {t(`outcome.${item.outcome}`)}
+            {item.skip_reason ? t(`outcome.${item.skip_reason}`) : t(`outcome.${item.outcome}`)}
           </Badge>
         )
       }
@@ -185,6 +185,7 @@ export default async function DeviceCheckPage({ params }: Props) {
             initialPhotos={photos}
             openDefects={openDefects}
             overviewHref={overviewHref}
+            initialSkip={item?.skip_reason ? { reason: item.skip_reason, note: item.notes } : null}
           />
         </PageBody>
       </>

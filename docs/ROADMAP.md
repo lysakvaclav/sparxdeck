@@ -360,7 +360,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 |---|---|---|---|
 | 13 | Půdorysy budov | D: půdorys patra (P2), zařízení na půdorysu (P3) | ukázkový plán (obrázek nebo PDF), který firmy běžně dostávají |
 | 14 | Import z Excelu | R: import zákazníků, budov a zařízení; F: import zařízení | vzorový Excel od servisní firmy, pokud nějaký seženeš |
-| 15 | Revize v terénu 2 | H: nepřístupné/nenalezeno s důvodem, nové zařízení během revize, zrušení rozdělané revize, oprava dokončené revize se záznamem, diktování; I: nabídka uzavření závady po úspěšné kontrole | nic |
+| 15 | Revize v terénu 2 | H: nepřístupné/nenalezeno s důvodem, nové zařízení během revize, zrušení rozdělané revize, diktování; I: nabídka uzavření závady po úspěšné kontrole (oprava dokončené revize je v části 18) | nic |
 | 16 | Offline naplno | M: stažení budovy předem, kontrola bez signálu od začátku, konflikty, smazání dat po odhlášení, testy výpadku | nic |
 | 17 | Zařízení a šablony 2 | E: vlastní typy, vlastní údaje podle typu, kopie šablony, výběr z možností, povinná fotka; F: fotky zařízení, rok výroby a konec životnosti, přesun s historií, hromadné úpravy | položky šablon pro další typy jen od revizního technika |
 | 18 | Protokol 2 a podpis | N: podpis zákazníka prstem, jméno a čas; J: fotky závad v protokolu, nová verze po opravě, souhrnný protokol; Q: formát číslování | ověřit s technikem, co má podpis v protokolu obsahovat |
@@ -464,6 +464,36 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
   - Audit přístupnosti stránky importu.
 
 **Od tebe:** zkusit import skutečného Excelu od servisní firmy. Když se nějaký sloupec nerozpozná, pošli mi jeho záhlaví a doplním ho.
+
+### Část 15: Revize v terénu 2
+
+**Stav (2026-10-17): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Nelze zkontrolovat:**
+  - Tlačítko pod kontrolou: důvod „Nepřístupné“ nebo „Nenalezeno“ a nepovinná poznámka (např. byt zamčený).
+  - Zařízení se počítá jako vyřízené. V přehledu revize je šedé s důvodem a v pruhu postupu má vlastní barvu.
+  - Termín se mu neposune, odpovědi vyplněné předtím nevytvoří závadu.
+  - Když ho technik přece jen zkontroluje, označení se zruší (hlídá databáze).
+  - Souhrn před dokončením, výsledek revize, protokol PDF i historie zařízení ukazují důvod a poznámku.
+- **Přidat zařízení během revize:**
+  - Zařízení, které v budově je, ale chybí v evidenci. Smí každý člen, i technik.
+  - Typ, lokace, výrobní číslo, výrobce, rok výroby a údaje podle typu (hasivo, velikost).
+  - Dostane další číslo štítku a hned se otevře jeho kontrola. Stejné výrobní číslo v budově aplikace odmítne.
+  - Výsledek revize má kartu „Přidáno při revizi“ s tiskem štítků jen pro tato zařízení.
+- **Uzavření závady po úspěšné kontrole:** když zařízení vyhoví a má otevřené závady, aplikace se zeptá, jestli jsou odstraněné. Vybrané uzavře s předvyplněnou poznámkou „Odstraněno, ověřeno při revizi …“; zápis je v historii závady.
+- **Zrušení rozdělané revize:**
+  - Pro revizi zahájenou omylem. Smí ten, kdo ji zahájil, vlastník a administrátor.
+  - Smaže kontroly, odpovědi a fotky, zařízení zůstanou (i ta přidaná). Smaže i neodeslané odpovědi v telefonu.
+  - Dokončenou revizi zrušit nejde.
+- **Diktování:** poznámky začínají velkým písmenem a na dotykovém telefonu je nápověda „nadiktujte mikrofonem na klávesnici“. Vlastní rozpoznávání řeči záměrně ne: klávesnice telefonu umí česky a spolehlivěji.
+- **Databáze:** migrace `20261020090000_inspections_field.sql` (`skip_device_check`, `add_inspection_device`, `cancel_inspection`, `complete_inspection` nevytváří závady z vynechaných zařízení).
+- **Ověření:**
+  - 5 testů zabezpečení v `tests/rls.test.ts` (cizí firma, technik, převzatá kontrola, výrobní číslo, lokace z jiné budovy, uzavřená revize).
+  - Jednotkový test protokolu s důvodem.
+  - E2E `e2e/part15.mjs`: 8 kroků na telefonu i počítači, tmavý režim a angličtina. Audit přístupnosti i pro nové dialogy.
+- **Odloženo:** úprava dokončené revize se záznamem patří k verzím protokolu v části 18.
+
+**Od tebe:** projít revizi na telefonu: vynechat zařízení, přidat nalezené, uzavřít závadu po úspěšné kontrole a zrušit zkušební revizi.
 
 ---
 

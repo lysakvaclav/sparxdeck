@@ -476,3 +476,32 @@ export const importSchema = z.object({
 export type ImportRecordInput = z.input<typeof importRecordSchema>;
 export type ImportRecord = z.output<typeof importRecordSchema>;
 export type ImportInput = z.input<typeof importSchema>;
+
+// ---------------------------------------------------------------------------
+// In the field: a device found during an inspection, a device left out
+// ---------------------------------------------------------------------------
+
+/** A device added during an inspection: no dates (it's being checked right now). */
+export const inspectionDeviceSchema = z.object({
+  deviceTypeId: deviceFields.deviceTypeId,
+  locationId: deviceFields.locationId,
+  serialNumber,
+  manufacturer: deviceFields.manufacturer,
+  model: deviceFields.model,
+  manufactureYear: deviceFields.manufactureYear,
+  agent: deviceFields.agent,
+  size: deviceFields.size,
+  notes: optional(z.string().max(2000, "tooLong")),
+});
+
+export const CHECK_SKIP_REASONS = ["inaccessible", "missing"] as const;
+
+export const skipCheckSchema = z.object({
+  reason: z.enum(CHECK_SKIP_REASONS, { message: "required" }),
+  note: optional(z.string().max(2000, "tooLong")),
+});
+
+export type InspectionDeviceInput = z.input<typeof inspectionDeviceSchema>;
+export type InspectionDeviceValues = z.output<typeof inspectionDeviceSchema>;
+export type SkipCheckInput = z.input<typeof skipCheckSchema>;
+export type SkipCheckValues = z.output<typeof skipCheckSchema>;

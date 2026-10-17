@@ -7,7 +7,9 @@ import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
 import { DetailList } from "@/components/app/detail-list";
 import { PageBody, PageHeader } from "@/components/app/page-header";
+import { PrintIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   RowLink,
@@ -18,7 +20,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { requireMembership } from "@/lib/auth";
+import { isManager, requireMembership } from "@/lib/auth";
 import { formatLabel } from "@/lib/devices";
 import { serverEnv } from "@/lib/env";
 import { sitePlacements, sitePlans } from "@/lib/floor-plans-data";
@@ -26,6 +28,7 @@ import { getInspection, loadInspectionRun, memberNames } from "@/lib/inspection-
 import type { CheckOutcome } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
+import { CancelInspectionButton } from "./cancel-button";
 import { InspectionRun } from "./inspection-run";
 import { ProtocolCard } from "./protocol-card";
 
@@ -53,8 +56,11 @@ export default async function InspectionPage({ params }: Props) {
   const site = inspection.site;
   const completed = inspection.status === "completed";
 
+  const canCancel =
+    !completed && (inspection.started_by === membership.user_id || isManager(membership.role));
   const header = (
     <PageHeader
+      actions={canCancel && <CancelInspectionButton inspectionId={inspection.id} />}
       icon={app.icon}
       iconClassName={app.tone}
       title={site?.name ?? t("title")}
@@ -73,10 +79,23 @@ export default async function InspectionPage({ params }: Props) {
   );
 
   if (!completed) {
-    const [run, plans, placements] = await Promise.all([
+    const supabase = await createClient();
+    const [run, plans, placements, { data: types }, { data: locations }] = await Promise.all([
       loadInspectionRun(inspection, membership.user_id),
       sitePlans(inspection.site_id),
       sitePlacements(inspection.site_id),
+      supabase
+        .from("device_types")
+        .select("id, name, code")
+        .eq("organization_id", inspection.organization_id)
+        .eq("active", true)
+        .order("created_at"),
+      supabase
+        .from("locations")
+        .select("id, name")
+        .eq("site_id", inspection.site_id)
+        .order("sort_order")
+        .order("created_at"),
     ]);
     return (
       <>
@@ -90,6 +109,7 @@ export default async function InspectionPage({ params }: Props) {
             appUrl={serverEnv().NEXT_PUBLIC_APP_URL}
             plans={plans}
             placements={placements}
+            addDevice={{ types: types ?? [], locations: locations ?? [] }}
           />
         </PageBody>
       </>
@@ -103,12 +123,12 @@ export default async function InspectionPage({ params }: Props) {
   const supabase = await createClient();
   const defectColumns =
     "id, number, description, severity, status, device:devices(label_number, type:device_types(name))";
-  const [items, names, { data: created }, { data: observed }] = await Promise.all([
+  const [items, names, { data: created }, { data: observed }, { data: added }] = await Promise.all([
     fetchAll((from, to) =>
       supabase
         .from("inspection_items")
         .select(
-          "id, device_id, outcome, checked_by, checked_at, notes, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
+          "id, device_id, outcome, skip_reason, checked_by, checked_at, notes, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
         )
         .eq("inspection_id", inspection.id)
         .order("id")
@@ -125,6 +145,12 @@ export default async function InspectionPage({ params }: Props) {
       .select(`defect:defects(${defectColumns})`)
       .eq("inspection_id", inspection.id)
       .eq("kind", "observed"),
+    supabase
+      .from("devices")
+      .select("id, label_number, type:device_types(name)")
+      .eq("added_in_inspection", inspection.id)
+      .is("deleted_at", null)
+      .order("label_number"),
   ]);
   // Defects found by this inspection: new ones, then open ones it found again.
   const defects = [
@@ -187,6 +213,12 @@ export default async function InspectionPage({ params }: Props) {
                             <span className="block truncate text-ui-sm text-muted-foreground sm:hidden">
                               {item.device?.type?.name}
                             </span>
+                            {/* Why a device was left out: the office reads it here. */}
+                            {item.skip_reason && item.notes && (
+                              <span className="block text-ui-sm break-words whitespace-pre-line text-muted-foreground sm:max-w-72">
+                                {item.notes}
+                              </span>
+                            )}
                           </span>
                         </span>
                       </TableCell>
@@ -199,7 +231,9 @@ export default async function InspectionPage({ params }: Props) {
                       <TableCell className="text-end whitespace-nowrap">
                         {item.outcome && (
                           <Badge variant={OUTCOME_BADGE[item.outcome]}>
-                            {t(`outcome.${item.outcome}`)}
+                            {item.skip_reason
+                              ? t(`outcome.${item.skip_reason}`)
+                              : t(`outcome.${item.outcome}`)}
                           </Badge>
                         )}
                         {item.checked_at && (
@@ -344,6 +378,47 @@ export default async function InspectionPage({ params }: Props) {
                 </CardHeader>
                 <CardContent>
                   <p className="break-words whitespace-pre-line">{inspection.notes}</p>
+                </CardContent>
+              </Card>
+            )}
+            {added && added.length > 0 && site && (
+              <Card>
+                <CardHeader
+                  actions={
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={`/devices/labels?site=${site.id}&${added.map((device) => `device=${device.id}`).join("&")}`}
+                      >
+                        <PrintIcon />
+                        {t("result.printLabels")}
+                      </Link>
+                    </Button>
+                  }
+                >
+                  <CardTitle>
+                    {t("result.added")}{" "}
+                    <span className="font-normal text-muted-foreground">({added.length})</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-ui-sm text-muted-foreground">{t("result.addedHint")}</p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {added.map((device) => (
+                      <li key={device.id}>
+                        <Link
+                          href={`/devices/${device.id}`}
+                          className="inline-flex min-h-[30px] items-center gap-1.5 rounded-md surface-button px-2 hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
+                        >
+                          <span className="font-mono tabular-nums">
+                            {formatLabel(device.label_number)}
+                          </span>
+                          <span className="text-ui-sm text-muted-foreground">
+                            {device.type?.name}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             )}

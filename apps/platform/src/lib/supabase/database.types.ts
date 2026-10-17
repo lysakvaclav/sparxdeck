@@ -13,6 +13,9 @@ export type InspectionStatus = "in_progress" | "completed";
 
 export type CheckOutcome = "passed" | "failed" | "not_checked";
 
+/** Why a device was left out of an inspection (outcome not_checked). */
+export type CheckSkipReason = "inaccessible" | "missing";
+
 export type DefectSeverity = "minor" | "major" | "critical";
 
 export type DefectStatus = "open" | "in_progress" | "resolved";
@@ -314,6 +317,8 @@ export type Database = {
           created_by: string | null;
           deleted_at: string | null;
           import_id: string | null;
+          /** The inspection it was added in (add_inspection_device), if any. */
+          added_in_inspection: string | null;
         } & Timestamps;
         // label_number, public_token and next_due_on come from the database.
         Insert: {
@@ -515,6 +520,7 @@ export type Database = {
           device_id: string;
           template_id: string | null;
           outcome: CheckOutcome | null;
+          skip_reason: CheckSkipReason | null;
           notes: string | null;
           checked_by: string | null;
           checked_at: string | null;
@@ -780,6 +786,25 @@ export type Database = {
         Returns: Json;
       };
       undo_import: { Args: { p_import: string }; Returns: undefined };
+      skip_device_check: {
+        Args: { p_item: string; p_reason: CheckSkipReason; p_note?: string | null };
+        Returns: undefined;
+      };
+      add_inspection_device: {
+        Args: {
+          p_inspection: string;
+          p_device_type: string;
+          p_location?: string | null;
+          p_serial_number?: string | null;
+          p_manufacturer?: string | null;
+          p_model?: string | null;
+          p_manufacture_year?: number | null;
+          p_attributes?: Json;
+          p_notes?: string | null;
+        };
+        Returns: string;
+      };
+      cancel_inspection: { Args: { p_inspection: string }; Returns: { path: string }[] };
       place_device: {
         Args: { p_device: string; p_plan: string; p_x: number; p_y: number };
         Returns: undefined;

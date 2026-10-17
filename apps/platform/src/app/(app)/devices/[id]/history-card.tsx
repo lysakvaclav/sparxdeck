@@ -39,7 +39,7 @@ export async function DeviceHistoryCard({
     supabase
       .from("inspection_items")
       .select(
-        "id, outcome, checked_by, checked_at, inspection:inspections!inner(id, status, started_at, completed_at)",
+        "id, outcome, skip_reason, checked_by, checked_at, inspection:inspections!inner(id, status, started_at, completed_at)",
         { count: "exact" },
       )
       .eq("device_id", deviceId)
@@ -88,7 +88,9 @@ export async function DeviceHistoryCard({
                 <TableCell className="whitespace-nowrap">
                   {check.outcome && (
                     <Badge variant={OUTCOME_BADGE[check.outcome]}>
-                      {tInspections(`outcome.${check.outcome}`)}
+                      {check.skip_reason
+                        ? tInspections(`outcome.${check.skip_reason}`)
+                        : tInspections(`outcome.${check.outcome}`)}
                     </Badge>
                   )}
                 </TableCell>

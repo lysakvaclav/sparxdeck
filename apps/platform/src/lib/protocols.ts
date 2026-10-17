@@ -82,7 +82,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
           supabase
             .from("inspection_items")
             .select(
-              "id, outcome, notes, checked_by, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
+              "id, outcome, skip_reason, notes, checked_by, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
             )
             .eq("inspection_id", inspectionId)
             .order("id")
@@ -147,6 +147,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
               locationOrder: item.device.location?.sort_order ?? null,
               serialNumber: item.device.serial_number,
               outcome: item.outcome,
+              skipReason: item.skip_reason,
               nextDueOn: item.device.next_due_on,
               checkedBy: name(item.checked_by),
               note: item.notes,

@@ -136,11 +136,11 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Neúspěšná kontrola nenastaví termín jako splněný a vytvoří závadu (část 7: termín se nemění; část 8: závada vznikne při dokončení revize, `complete_inspection`, ověřeno v `tests/rls.test.ts` a `e2e/part8.mjs`)
 - [x] P1 Ochrana proti souběžné úpravě stejné kontroly dvěma techniky (část 7: kontrolu drží jeden technik, kolega vidí kdo a může ji převzít, první se to dozví; testy a e2e se dvěma prohlížeči)
 - [x] P1 Obnovení rozdělané revize po zavření stránky (část 7: odpovědi v localStorage, fotky v IndexedDB, odešlou se po návratu)
-- [ ] P2 Označení zařízení "nepřístupné" nebo "nenalezeno" s důvodem
-- [ ] P2 Přidání nového zařízení přímo během revize (naskenování dosud nezaevidovaného štítku)
-- [ ] P2 Úprava dokončené revize se záznamem změny
-- [ ] P2 Zrušení rozdělané revize
-- [ ] P2 Hlasová diktovačka poznámek (využít funkci telefonu)
+- [x] P2 Označení zařízení "nepřístupné" nebo "nenalezeno" s důvodem (část 15: „Nelze zkontrolovat“ s důvodem a poznámkou, `skip_device_check`; termín se neposune, odpovědi nevytvoří závadu, v protokolu a výsledku revize s důvodem; když se zařízení přece jen zkontroluje, označení se zruší)
+- [x] P2 Přidání nového zařízení přímo během revize (naskenování dosud nezaevidovaného štítku) (část 15: „Přidat zařízení“ v revizi i pro technika, `add_inspection_device`; dostane číslo štítku a hned se kontroluje, stejné výrobní číslo v budově odmítne; štítky se tisknou až k založenému zařízení, proto výsledek revize nabídne tisk štítků přidaných zařízení)
+- [ ] P2 Úprava dokončené revize se záznamem změny (přesunuto do části 18: oprava vytvoří novou verzi protokolu)
+- [x] P2 Zrušení rozdělané revize (část 15: `cancel_inspection` smí ten, kdo revizi zahájil, vlastník a administrátor; smaže kontroly, odpovědi a fotky, zařízení zůstanou)
+- [x] P2 Hlasová diktovačka poznámek (využít funkci telefonu) (část 15: poznámky mají velké písmeno na začátku věty a na dotykovém telefonu nápovědu k mikrofonu na klávesnici; vlastní rozpoznávání řeči záměrně ne, klávesnice telefonu to umí spolehlivěji a česky)
 - [ ] P3 Svítilna a ovládání přiblížení u skeneru
 - [ ] P3 Opakované kontroly podle plánu (technik dostane úkol na dnes)
 
@@ -155,7 +155,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Uzavření závady s poznámkou o řešení (část 8: poznámka povinná, hlídá i databáze)
 - [ ] P2 Přiřazení závady konkrétnímu člověku
 - [ ] P2 Termín na odstranění závady a upozornění
-- [ ] P2 Návaznost: další úspěšná kontrola zařízení nabídne uzavření závady
+- [x] P2 Návaznost: další úspěšná kontrola zařízení nabídne uzavření závady (část 15: po vyhovující kontrole dialog s otevřenými závadami zařízení a předvyplněnou poznámkou, uzavře vybrané; zapíše se do historie závady)
 - [ ] P3 Nabídka nebo objednávka opravy pro zákazníka
 
 ## J. Protokoly (PDF)

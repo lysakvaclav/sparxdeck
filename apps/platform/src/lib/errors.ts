@@ -80,6 +80,7 @@ export type ErrorCode =
   | "importInvalid"
   | "importInUse"
   | "importUndone"
+  | "deviceExists"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -138,6 +139,7 @@ export function databaseErrorCode(
   if (message.includes("import_invalid")) return "importInvalid";
   if (message.includes("import_in_use")) return "importInUse";
   if (message.includes("import_undone")) return "importUndone";
+  if (message.includes("device_exists")) return "deviceExists";
   if (message.includes("invalid_template")) return "templateInvalid";
   if (message.includes("checks_unfinished")) return "checksUnfinished";
   if (message.includes("inspection_closed")) return "inspectionClosed";

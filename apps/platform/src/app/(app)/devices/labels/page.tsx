@@ -26,7 +26,8 @@ function first(value: string | string[] | undefined) {
 
 /**
  * Printing labels for one building: its devices in route order (removed ones
- * left out), all selected, or only ?device= when coming from a device.
+ * left out), all selected, or only the ?device= ones (one from a device page,
+ * several from an inspection that added them).
  */
 export default async function LabelsPage({ searchParams }: Props) {
   const { organization } = await requireMembership();
@@ -68,10 +69,9 @@ export default async function LabelsPage({ searchParams }: Props) {
         url: labelUrl(appUrl, row.public_token),
       }));
   }
-  const only = first(params.device);
-  const preselected = devices.some((device) => device.id === only)
-    ? [only!]
-    : devices.map((device) => device.id);
+  const wanted = new Set([params.device ?? []].flat());
+  const only = devices.filter((device) => wanted.has(device.id)).map((device) => device.id);
+  const preselected = only.length ? only : devices.map((device) => device.id);
 
   const app = appIcon("devices");
   return (
@@ -88,7 +88,7 @@ export default async function LabelsPage({ searchParams }: Props) {
       <PageBody>
         <LabelPrinter
           // A new building (or device) starts a fresh selection.
-          key={`${site?.id ?? ""}:${only ?? ""}`}
+          key={`${site?.id ?? ""}:${only.join(",")}`}
           sites={sites.map(({ id, name, customerId, customerName }) => ({
             id,
             name,
