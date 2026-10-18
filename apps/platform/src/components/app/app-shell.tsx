@@ -16,6 +16,7 @@ import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS, RAIL_COOKIE, isActive } from "./nav-items";
 import { MobileSearchButton, OmnibarProvider, RailSearchButton } from "./omnibar";
+import { TextLogo } from "./text-logo";
 import { UserMenu } from "./user-menu";
 
 const tabClass =
@@ -103,17 +104,16 @@ export function AppShell({
                 expanded ? "w-[220px]" : "w-11",
               )}
             >
-              <div className="flex h-[50px] shrink-0 items-center gap-2 px-1.5">
-                <RailToggle
-                  expanded={expanded}
-                  label={expanded ? t("collapseRail") : t("expandRail")}
-                  onClick={toggleRail}
-                />
-                {expanded && (
+              {/* The brand on top in both widths (the mark alone when collapsed). */}
+              <div
+                className={cn(
+                  "flex h-[50px] shrink-0 items-center",
+                  expanded ? "ps-[13px] pe-2.5" : "justify-center",
+                )}
+              >
+                {expanded ? (
                   <div className="min-w-0">
-                    <p className="truncate text-ui leading-tight font-semibold text-white">
-                      SparxDeck
-                    </p>
+                    <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
                     <p
                       className="truncate text-ui-xs text-rail-foreground"
                       title={organizationName}
@@ -121,6 +121,8 @@ export function AppShell({
                       {organizationName}
                     </p>
                   </div>
+                ) : (
+                  <TextLogo label="SparxDeck" className="aspect-square h-[18px] text-white" />
                 )}
               </div>
 
@@ -133,6 +135,13 @@ export function AppShell({
                 <ul className="space-y-0.5">{apps.map(railItem)}</ul>
               </nav>
 
+              <div className="shrink-0 px-1.5 pb-1.5">
+                <RailToggle
+                  expanded={expanded}
+                  label={expanded ? t("collapseRail") : t("expandRail")}
+                  onClick={toggleRail}
+                />
+              </div>
               <div className="shrink-0 p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]">
                 <UserMenu
                   name={userName}
@@ -146,9 +155,7 @@ export function AppShell({
               {/* Mobile top bar */}
               <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
                 <Link href="/" className="flex min-h-12 min-w-0 flex-col justify-center">
-                  <span className="truncate text-ui leading-tight font-semibold text-white">
-                    SparxDeck
-                  </span>
+                  <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
                   <span className="truncate text-ui-xs text-rail-foreground">
                     {organizationName}
                   </span>
@@ -245,9 +252,7 @@ function RailToggle({
       <Icon />
     </button>
   );
-  return expanded ? (
-    button
-  ) : (
+  return (
     <Tooltip label={label} side="right">
       {button}
     </Tooltip>

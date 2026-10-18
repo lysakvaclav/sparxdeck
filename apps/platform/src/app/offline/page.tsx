@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { TextLogo } from "@/components/app/text-logo";
 import { OfflineIcon } from "@/components/icons";
 import { OfflineList } from "./offline-list";
 
@@ -18,7 +19,7 @@ export default async function OfflinePage() {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <header className="flex h-[50px] shrink-0 items-center gap-2.5 bg-[#293742] px-[15px] text-white">
-        <span className="text-ui-lg font-semibold">SparxDeck</span>
+        <TextLogo label="SparxDeck" className="h-4" />
       </header>
       <main className="mx-auto w-full max-w-xl flex-1 space-y-[15px] p-2.5 sm:p-5">
         <div className="flex items-start gap-2.5">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { TextLogo } from "@/components/ui/text-logo";
 import { TextScramble } from "@/components/ui/text-scramble";
 import type { HeaderDictionary, Locale } from "@/i18n/dictionary";
 import { SITE } from "@/config/site";
@@ -24,11 +25,14 @@ export function Header({ locale, dict }: HeaderProps) {
           className="rounded-lg bg-background/60 shadow-sm backdrop-blur-2xl backdrop-saturate-150"
           onMouseLeave={() => setIsCompanyOpen(false)}
         >
-          <div className="flex h-14 items-center justify-between px-5 md:h-16 md:px-8 lg:px-10">
-            <a href={`/${locale}#hero`} className="flex items-center" aria-label={`${SITE.name} home`}>
-              <span className="display-font text-xl leading-none tracking-tight text-[var(--color-text-strong)] md:text-2xl">
-                {SITE.name}
-              </span>
+          <div className="flex h-14 items-center justify-between gap-2 px-5 md:h-16 md:px-8 lg:px-10">
+            <a
+              href={`/${locale}#hero`}
+              className="flex items-center text-[var(--color-text-strong)]"
+              aria-label={`${SITE.name} home`}
+            >
+              {/* The narrowest phones get only the mark, so the menu still fits beside it. */}
+              <TextLogo className="h-[17px] max-[374px]:aspect-square sm:h-6 md:h-7" />
             </a>
 
             <nav className="hidden items-center gap-4 md:flex">
