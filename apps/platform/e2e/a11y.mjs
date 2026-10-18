@@ -137,6 +137,7 @@ try {
     ["plans", "/plans"],
     ["import", "/import"],
     ["plan", `/sites/${plan.site_id}/plans/${plan.id}`],
+    ["offline", "/offline"],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -194,6 +195,7 @@ try {
     ["phone plans", "/plans"],
     ["phone import", "/import"],
     ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],
+    ["phone offline", "/offline"],
   ]) {
     await visit(page, label, path);
     await touchTargets(page, label);

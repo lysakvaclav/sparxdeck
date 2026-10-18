@@ -2,19 +2,21 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   AnnotationIcon,
   CameraIcon,
   ChevronLeftIcon,
   CrossIcon,
   DisableIcon,
+  ErrorIcon,
   IssueIcon,
+  MediaIcon,
   OfflineIcon,
   SmallCrossIcon,
   TickCircleIcon,
   TickIcon,
+  WarningSignIcon,
 } from "@/components/icons";
 import { DefectRef, SeverityBadge } from "@/components/app/defect-badges";
 import { SeverityPicker } from "@/components/app/severity-picker";
@@ -29,17 +31,40 @@ import { useToast } from "@/components/ui/toast";
 import {
   draftKey,
   draftSnapshot,
+  queueOps,
   readDraft,
+  removeDraft,
   subscribeDrafts,
   updateDraft,
-  type CheckDraft,
 } from "@/lib/client/check-drafts";
+import {
+  claimCheck,
+  failureOf,
+  requestTimeout,
+  settleDraft,
+  submitCheck,
+  uploadQueuedPhotos,
+  type Failure,
+} from "@/lib/client/field-sync";
 import { compressImage } from "@/lib/client/image";
-import { queuePhoto, queuedPhotos, removePhoto } from "@/lib/client/photo-queue";
-import { databaseErrorCode, type ErrorCode } from "@/lib/errors";
+import {
+  queuePhoto,
+  queuedPhotos,
+  removePhoto,
+  removeQueuedPhotos,
+} from "@/lib/client/photo-queue";
+import type { ErrorCode } from "@/lib/errors";
+import {
+  draftPending,
+  fullAnswers,
+  type CheckConflict,
+  type CheckDraft,
+  type FieldItem,
+  type OpenDefect,
+  type SyncedCheck,
+} from "@/lib/field";
 import {
   EMPTY_ANSWER,
-  answerPayload,
   defectSeverityOf,
   missingRequired,
   outcomeOf,
@@ -47,11 +72,13 @@ import {
   type AnswerDraft,
   type Question,
 } from "@/lib/inspections";
-import type { CheckSkipReason, DefectSeverity } from "@/lib/supabase/database.types";
+import type { CheckSkipReason } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ResolveDialog } from "./resolve-dialog";
 import { SkipDialog } from "./skip-dialog";
+
+export type { OpenDefect } from "@/lib/field";
 
 export type CheckPhoto = {
   /** Local key: the photo's database id, or the queue id while it waits. */
@@ -63,94 +90,104 @@ export type CheckPhoto = {
   path?: string;
 };
 
-/** An unresolved defect of the device; a "no" to its question is added to it. */
-export type OpenDefect = {
-  id: string;
-  number: number;
-  description: string;
-  severity: DefectSeverity;
-  question: string | null;
-};
-
 type Hold =
   | { state: "opening" }
   | { state: "held"; item: string }
+  | { state: "offline" }
   | { state: "blocked"; item: string; name: string }
+  | { state: "conflict"; item: string; conflict: CheckConflict }
   | { state: "lost"; item: string }
   | { state: "error"; error: ErrorCode };
 
 const NOTES = "__device";
+/** The most photos a check takes (as the database allows). */
+const MAX_PHOTOS = 20;
+/** The longest answer, note or device note the database takes. */
+const MAX_TEXT = 2000;
+/** How long "Done" waits for the server before it leaves the check to the phone's queue. */
+const SEND_WAIT_MS = 8000;
 
-/** A failed request that never reached the server (no signal, airplane mode). */
-function isNetworkError(error: { message?: string; code?: string } | null) {
-  if (!error) return false;
-  if (typeof navigator !== "undefined" && !navigator.onLine) return true;
-  return !error.code && /fetch|network|load failed|timed? ?out|abort/i.test(error.message ?? "");
+function within<T>(promise: Promise<T>, ms: number): Promise<T | "timeout"> {
+  return Promise.race([
+    promise,
+    new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), ms)),
+  ]);
 }
-
-function without<T>(record: Record<string, T>, key: string): Record<string, T> {
-  const copy = { ...record };
-  delete copy[key];
-  return copy;
-}
-
-const sameAnswer = (a: AnswerDraft | undefined, b: AnswerDraft) =>
-  !!a &&
-  a.pass === b.pass &&
-  a.number === b.number &&
-  a.text === b.text &&
-  a.note === b.note &&
-  (a.severity ?? null) === (b.severity ?? null);
 
 /**
- * One device's check on the phone. Every change is written to the phone first
- * (a draft in localStorage, photos in IndexedDB) and then sent; without a signal
- * nothing is lost and it is sent when the connection returns. The check is held
- * by one person: a colleague can take it over, and the first person is told.
+ * One device's check on the phone. It works without a signal from the start:
+ * every change is written to the phone first (a draft in localStorage, photos in
+ * IndexedDB) and sent when there is a connection; "Done" without one keeps the
+ * whole check with the time it was done, to be sent later. Online, the check is
+ * held by one person: a colleague can take it over, and the first person is
+ * told. A colleague's check made meanwhile is a conflict the technician decides.
  */
 export function DeviceCheck({
   inspectionId,
   deviceId,
   organizationId,
   label,
+  templateId,
   questions,
-  initialAnswers,
-  initialNotes,
-  initialPhotos,
+  item,
   openDefects,
-  overviewHref,
-  initialSkip,
+  onTemplate,
+  onStale,
+  onDone,
+  onSent,
+  onBack,
 }: {
   inspectionId: string;
   deviceId: string;
   organizationId: string;
   label: string;
+  /** The checklist version shown. */
+  templateId: string;
   questions: Question[];
-  initialAnswers: Record<string, AnswerDraft>;
-  initialNotes: string;
-  initialPhotos: CheckPhoto[];
+  /** The server's state of the check in the phone's pack (null: not started). */
+  item: FieldItem | null;
   openDefects: OpenDefect[];
-  overviewHref: string;
-  /** The device was left out (inaccessible, missing) and is opened again. */
-  initialSkip: { reason: CheckSkipReason; note: string | null } | null;
+  /** The server uses another checklist version for this check: show that one. */
+  onTemplate: (templateId: string) => void;
+  /** The pack is behind the server (a colleague's check): fetch a new one. */
+  onStale: () => void;
+  /** Done or left out: sent (with the server's answer) or kept in the phone. */
+  onDone: (synced: SyncedCheck | null) => void;
+  /** Sent after "Done" stopped waiting for the server (onDone had null). */
+  onSent: (synced: SyncedCheck) => void;
+  onBack: () => void;
 }) {
   const t = useTranslations("inspections.check");
   const tSkip = useTranslations("inspections.skip");
   const tResolve = useTranslations("inspections.resolve");
+  const tOutcome = useTranslations("inspections.outcome");
   const tErr = useTranslations("errors");
-  const router = useRouter();
+  const format = useFormatter();
   const toast = useToast();
   const supabase = useMemo(() => createClient(), []);
   const key = draftKey(inspectionId, deviceId);
+  const overviewHref = `/inspections/${inspectionId}`;
 
   const [hold, setHold] = useState<Hold>({ state: "opening" });
-  const [base, setBase] = useState(initialAnswers);
-  const [baseNotes, setBaseNotes] = useState(initialNotes);
-  const [photos, setPhotos] = useState<CheckPhoto[]>(initialPhotos);
+  const [base, setBase] = useState<Record<string, AnswerDraft>>(() => item?.answers ?? {});
+  const [baseNotes, setBaseNotes] = useState(item?.notes ?? "");
+  // The check's checked_at as this phone knows it: a later one is a colleague's.
+  const [seen, setSeen] = useState<string | null>(item?.checkedAt ?? null);
+  const [photos, setPhotos] = useState<CheckPhoto[]>(() =>
+    (item?.photos ?? []).map((photo) => ({
+      key: photo.id,
+      photoId: photo.id,
+      path: photo.path,
+      questionId: photo.questionId,
+      url: photo.url,
+      status: "uploaded",
+    })),
+  );
+  const [brokenPhotos, setBrokenPhotos] = useState<ReadonlySet<string>>(new Set());
   const [openNotes, setOpenNotes] = useState<ReadonlySet<string>>(
     () =>
       new Set(
-        Object.entries(initialAnswers)
+        Object.entries(item?.answers ?? {})
           .filter(([, answer]) => answer.note)
           .map(([id]) => id),
       ),
@@ -163,7 +200,10 @@ export function DeviceCheck({
   const [skipOpen, setSkipOpen] = useState(false);
   const [skipping, setSkipping] = useState(false);
   // After a passed check: the open defects to offer for resolving.
-  const [resolving, setResolving] = useState<OpenDefect[] | null>(null);
+  const [resolving, setResolving] = useState<{
+    defects: OpenDefect[];
+    synced: SyncedCheck | null;
+  } | null>(null);
   const [resolvingPending, setResolvingPending] = useState(false);
   // Sending runs one pass at a time; a call during a pass waits for it and runs
   // another, so "Done" never sees answers that are merely still in flight.
@@ -180,181 +220,201 @@ export function DeviceCheck({
   const notes = draft?.notes ?? baseNotes;
   const waitingPhotos = photos.filter((photo) => photo.status !== "uploaded").length;
   const pending = Object.keys(draft?.answers ?? {}).length + (draft?.notes !== undefined ? 1 : 0);
-  const item = hold.state === "held" ? hold.item : null;
-  const editable = hold.state === "opening" || hold.state === "held";
+  const heldItem = hold.state === "held" ? hold.item : null;
+  const editable = hold.state === "opening" || hold.state === "held" || hold.state === "offline";
+  const conflict = hold.state === "conflict" ? hold.conflict : (draft?.conflict ?? null);
 
   // ---------------------------------------------------------------------------
   // Holding the check
   // ---------------------------------------------------------------------------
 
-  const open = useCallback(
-    async (takeOver: boolean) => {
-      const { data, error } = await supabase.rpc("open_device_check", {
-        p_inspection: inspectionId,
-        p_device: deviceId,
-        p_take_over: takeOver,
-      });
-      if (error) {
-        if (isNetworkError(error)) {
-          setOffline(true);
-          return;
-        }
-        setHold({ state: "error", error: databaseErrorCode(error) });
+  const handleFailure = useCallback(
+    (failure: Failure) => {
+      if (failure.kind === "offline" || failure.kind === "retry" || failure.kind === "auth") {
+        setOffline(true);
         return;
       }
-      const result = data as { item: string; heldBy?: string };
-      setOffline(false);
-      setHold(
-        result.heldBy
-          ? { state: "blocked", item: result.item, name: result.heldBy }
-          : { state: "held", item: result.item },
-      );
+      if (failure.kind !== "error") return;
+      if (failure.error === "checkTakenOver" && heldItem)
+        setHold({ state: "lost", item: heldItem });
+      else if (failure.error === "inspectionClosed")
+        setHold({ state: "error", error: failure.error });
+      else setNotice(tErr(failure.error));
     },
-    [supabase, inspectionId, deviceId],
+    [heldItem, tErr],
+  );
+
+  // The parent's callbacks and what the phone saw, read when needed: claiming
+  // the check again on every render would take it back from a colleague.
+  const latest = useRef({ seen, onStale, onTemplate });
+  useEffect(() => {
+    latest.current = { seen, onStale, onTemplate };
+  }, [seen, onStale, onTemplate]);
+
+  const open = useCallback(
+    async (takeOver: boolean, knownSeen?: string | null) => {
+      const current = readDraft(key);
+      const answered = !!current && (Object.keys(current.answers).length > 0 || !!current.action);
+      let lastSeen =
+        knownSeen !== undefined
+          ? knownSeen
+          : current && "seen" in current
+            ? (current.seen ?? null)
+            : latest.current.seen;
+      let claim = await claimCheck(supabase, {
+        inspectionId,
+        deviceId,
+        templateId: answered ? (current?.templateId ?? templateId) : null,
+        seen: lastSeen,
+        takeOver: takeOver || !!current?.force,
+      });
+      if (claim.kind === "conflict" && !draftPending(current)) {
+        // Nothing of ours to lose: show the colleague's check and carry on with it.
+        lastSeen = claim.conflict.checkedAt;
+        setSeen(lastSeen);
+        latest.current.onStale();
+        claim = await claimCheck(supabase, {
+          inspectionId,
+          deviceId,
+          templateId: null,
+          seen: lastSeen,
+          takeOver: false,
+        });
+      }
+      switch (claim.kind) {
+        case "offline":
+        case "retry":
+        case "auth":
+          setOffline(true);
+          setHold((previous) => (previous.state === "opening" ? { state: "offline" } : previous));
+          return;
+        case "error":
+          setHold({ state: "error", error: claim.error });
+          return;
+        case "busy":
+          setOffline(false);
+          setHold({ state: "blocked", item: claim.item, name: claim.name });
+          return;
+        case "conflict": {
+          setOffline(false);
+          const { conflict } = claim;
+          updateDraft(key, (d) => ({ ...d, conflict }));
+          setHold({ state: "conflict", item: claim.item, conflict });
+          return;
+        }
+        case "held":
+          setOffline(false);
+          if (current?.force) updateDraft(key, (d) => ({ ...d, conflict: undefined }));
+          if (!answered && claim.template && claim.template !== templateId) {
+            latest.current.onTemplate(claim.template);
+            return;
+          }
+          setHold({ state: "held", item: claim.item });
+      }
+    },
+    [supabase, inspectionId, deviceId, key, templateId],
   );
 
   useEffect(() => {
     const first = setTimeout(() => void open(false), 0);
-    // Back from the lock screen: make sure the check is still ours.
+    // Back from the lock screen or a lost signal: make sure the check is still ours.
     const onVisible = () => {
       if (document.visibilityState === "visible") void open(false);
     };
+    const onOnline = () => void open(false);
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
     return () => {
       clearTimeout(first);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
     };
   }, [open]);
 
-  const failed = useCallback(
-    (error: { message?: string; code?: string }) => {
-      if (isNetworkError(error)) {
-        setOffline(true);
+  // ---------------------------------------------------------------------------
+  // Sending changes while the check is open (all at once; the draft keeps the rest)
+  // ---------------------------------------------------------------------------
+
+  const sendChanges = useCallback(async () => {
+    if (!heldItem) return;
+    const current = readDraft(key);
+    // Done or left out: "Done" itself sends it.
+    if (!current || current.action || !draftPending(current)) return;
+    setSaving(true);
+    try {
+      const result = await submitCheck(supabase, {
+        item: heldItem,
+        questions,
+        draft: current,
+        release: false,
+      });
+      if (result.kind !== "ok") {
+        handleFailure(result);
         return;
       }
-      const code = databaseErrorCode(error);
-      if (code === "checkTakenOver" && item) setHold({ state: "lost", item });
-      else if (code === "inspectionClosed") setHold({ state: "error", error: code });
-      else setNotice(tErr(code));
-    },
-    [item, tErr],
-  );
-
-  // ---------------------------------------------------------------------------
-  // Sending answers (one at a time, oldest first; the draft keeps the rest)
-  // ---------------------------------------------------------------------------
-
-  const sendAnswers = useCallback(async () => {
-    if (!item) return;
-    try {
-      for (;;) {
-        const current: CheckDraft | null = readDraft(key);
-        if (!current) break;
-        const entry = Object.entries(current.answers).find(([id, answer]) => {
+      setOffline(false);
+      settleDraft(key, current, questions);
+      setBase((previous) => {
+        const next = { ...previous };
+        for (const [id, answer] of Object.entries(current.answers)) {
           const question = questions.find((q) => q.id === id);
-          return !(question?.type === "number" && Number.isNaN(parseNumber(answer.number)));
-        });
-        if (entry) {
-          const [id, answer] = entry;
-          const question = questions.find((q) => q.id === id);
-          if (!question) {
-            updateDraft(key, (d) => ({ ...d, answers: without(d.answers, id) }));
-            continue;
-          }
-          setSaving(true);
-          const { error } = await supabase.rpc("save_answer", {
-            p_item: item,
-            p_template_item: id,
-            ...answerPayload(question, answer),
-          });
-          if (error) {
-            failed(error);
-            break;
-          }
-          setOffline(false);
-          setBase((previous) => ({ ...previous, [id]: answer }));
-          updateDraft(key, (d) =>
-            sameAnswer(d.answers[id], answer) ? { ...d, answers: without(d.answers, id) } : d,
-          );
-          continue;
+          if (question?.type === "number" && Number.isNaN(parseNumber(answer.number))) continue;
+          next[id] = answer;
         }
-        if (current.notes !== undefined) {
-          const sent = current.notes;
-          setSaving(true);
-          const { error } = await supabase.rpc("save_check_note", { p_item: item, p_notes: sent });
-          if (error) {
-            failed(error);
-            break;
-          }
-          setOffline(false);
-          setBaseNotes(sent);
-          updateDraft(key, (d) => (d.notes === sent ? { ...d, notes: undefined } : d));
-          continue;
-        }
-        break;
-      }
+        return next;
+      });
+      if (current.notes !== undefined) setBaseNotes(current.notes);
     } finally {
       setSaving(false);
     }
-  }, [item, key, questions, supabase, failed]);
+  }, [heldItem, key, questions, supabase, handleFailure]);
 
   const flush = useCallback(() => {
     // Runs even if the previous pass failed, so the queue never stalls.
-    answersQueue.current = answersQueue.current.then(sendAnswers, sendAnswers);
+    answersQueue.current = answersQueue.current.then(sendChanges, sendChanges);
     return answersQueue.current;
-  }, [sendAnswers]);
+  }, [sendChanges]);
 
   // ---------------------------------------------------------------------------
   // Photos: compressed in the phone, queued in IndexedDB, then uploaded
   // ---------------------------------------------------------------------------
 
   const sendPhotos = useCallback(async () => {
-    if (!item) return;
+    if (!heldItem) return;
+    // Only an upload that went through says the signal is back.
+    let uploaded = false;
     try {
-      for (const photo of await queuedPhotos(inspectionId, deviceId)) {
-        setPhotos((list) =>
-          list.map((p) => (p.key === photo.id ? { ...p, status: "uploading" } : p)),
-        );
-        const path = `${organizationId}/inspections/${inspectionId}/${item}/${photo.id}.jpg`;
-        const upload = await supabase.storage
-          .from("org-assets")
-          .upload(path, photo.blob, { contentType: "image/jpeg", upsert: false });
-        // Uploaded before but not registered (signal lost in between): carry on.
-        if (upload.error && !/exist|duplicate/i.test(upload.error.message)) {
+      const result = await uploadQueuedPhotos(supabase, {
+        organizationId,
+        inspectionId,
+        deviceId,
+        item: heldItem,
+        onUploading: (id) =>
+          setPhotos((list) => list.map((p) => (p.key === id ? { ...p, status: "uploading" } : p))),
+        onWaiting: (id) =>
+          setPhotos((list) => list.map((p) => (p.key === id ? { ...p, status: "waiting" } : p))),
+        onUploaded: (id, stored) => {
+          uploaded = true;
           setPhotos((list) =>
-            list.map((p) => (p.key === photo.id ? { ...p, status: "waiting" } : p)),
+            list.map((p) =>
+              p.key === id
+                ? {
+                    ...p,
+                    status: "uploaded",
+                    photoId: stored.photoId ?? undefined,
+                    path: stored.path,
+                  }
+                : p,
+            ),
           );
-          failed(upload.error);
-          break;
-        }
-        const { data: photoId, error } = await supabase.rpc("add_inspection_photo", {
-          p_item: item,
-          p_template_item: photo.questionId,
-          p_path: path,
-          p_content_type: "image/jpeg",
-          p_size: photo.blob.size,
-        });
-        if (error && error.code !== "23505") {
-          setPhotos((list) =>
-            list.map((p) => (p.key === photo.id ? { ...p, status: "waiting" } : p)),
-          );
-          failed(error);
-          break;
-        }
-        await removePhoto(photo.id);
-        setOffline(false);
-        setPhotos((list) =>
-          list.map((p) =>
-            p.key === photo.id
-              ? { ...p, status: "uploaded", photoId: photoId ?? undefined, path }
-              : p,
-          ),
-        );
-      }
+        },
+      });
+      if (result.kind !== "ok") handleFailure(result);
+      else if (uploaded) setOffline(false);
     } catch {
       // IndexedDB or the network failed mid-way: the photos stay queued for the next pass.
     }
-  }, [item, inspectionId, deviceId, organizationId, supabase, failed]);
+  }, [heldItem, inspectionId, deviceId, organizationId, supabase, handleFailure]);
 
   const uploadPending = useCallback(() => {
     photosQueue.current = photosQueue.current.then(sendPhotos, sendPhotos);
@@ -385,37 +445,45 @@ export function DeviceCheck({
 
   // Send whatever waits: shortly after a change, when the signal returns, and every few seconds.
   useEffect(() => {
-    if (!item) return;
+    if (!heldItem) return;
     const timer = setTimeout(() => {
       void flush();
       void uploadPending();
     }, 350);
     return () => clearTimeout(timer);
-  }, [item, draft, photos.length, flush, uploadPending]);
+  }, [heldItem, draft, photos.length, flush, uploadPending]);
 
   useEffect(() => {
-    if (!item) return;
     const retry = () => {
-      void flush();
-      void uploadPending();
+      if (heldItem) {
+        void flush();
+        void uploadPending();
+      } else if (hold.state === "offline") void open(false);
     };
-    window.addEventListener("online", retry);
     const interval = setInterval(() => {
-      if (readDraft(key) || offline) retry();
+      if (readDraft(key) || offline || hold.state === "offline") retry();
     }, 10_000);
-    return () => {
-      window.removeEventListener("online", retry);
-      clearInterval(interval);
-    };
-  }, [item, key, offline, flush, uploadPending]);
+    return () => clearInterval(interval);
+  }, [heldItem, hold.state, key, offline, flush, uploadPending, open]);
 
   // ---------------------------------------------------------------------------
   // Editing
   // ---------------------------------------------------------------------------
 
+  /** A change to the draft; the first one notes the version and what the phone saw. */
+  function change(patch: (draft: CheckDraft) => CheckDraft) {
+    updateDraft(key, (d) =>
+      patch({
+        ...d,
+        seen: "seen" in d ? d.seen : seen,
+        templateId: d.templateId ?? templateId,
+      }),
+    );
+  }
+
   function edit(question: Question, patch: Partial<AnswerDraft>) {
     const next = { ...EMPTY_ANSWER, ...answers[question.id], ...patch };
-    updateDraft(key, (d) => ({ ...d, answers: { ...d.answers, [question.id]: next } }));
+    change((d) => ({ ...d, answers: { ...d.answers, [question.id]: next } }));
     if (missing.has(question.id)) {
       setMissing((current) => {
         const copy = new Set(current);
@@ -427,6 +495,10 @@ export function DeviceCheck({
 
   async function addPhoto(questionId: string | null, file: File | undefined) {
     if (!file) return;
+    if (photos.length >= MAX_PHOTOS) {
+      toast(tErr("tooManyPhotos"), "danger");
+      return;
+    }
     let blob: Blob;
     try {
       blob = await compressImage(file);
@@ -438,14 +510,12 @@ export function DeviceCheck({
     const url = URL.createObjectURL(blob);
     objectUrls.current.push(url);
     setPhotos((list) => [...list, { key: id, questionId, url, status: "waiting" }]);
-    const stored = await queuePhoto({
-      id,
-      inspectionId,
-      deviceId,
-      questionId,
-      blob,
-    });
-    if (!stored) toast(tErr("photoFailed"), "danger");
+    const stored = await queuePhoto({ id, inspectionId, deviceId, questionId, blob });
+    if (!stored) {
+      // Not in the phone's queue (storage full or blocked): it would never be sent.
+      setPhotos((list) => list.filter((photo) => photo.key !== id));
+      toast(tErr("photoFailed"), "danger");
+    }
   }
 
   async function deletePhoto(photo: CheckPhoto) {
@@ -455,15 +525,74 @@ export function DeviceCheck({
       return;
     }
     if (!photo.photoId) return;
-    const { data: path, error } = await supabase.rpc("delete_inspection_photo", {
-      p_photo: photo.photoId,
-    });
+    const { data: path, error } = await supabase
+      .rpc("delete_inspection_photo", { p_photo: photo.photoId })
+      .abortSignal(requestTimeout());
     if (error) {
-      failed(error);
+      handleFailure(failureOf(error));
       return;
     }
     await supabase.storage.from("org-assets").remove([path ?? photo.path ?? ""]);
     setPhotos((list) => list.filter((p) => p.key !== photo.key));
+  }
+
+  /**
+   * Sends the finished (or left out) check now, if the phone holds it and the
+   * server answers soon enough; otherwise it stays in the phone's queue.
+   */
+  async function sendNow(): Promise<SyncedCheck | "queued" | "failed"> {
+    if (!heldItem) return "queued";
+    // Set once "Done" stops waiting: the technician has moved on by then.
+    let gaveUp = false;
+    const attempt = (async (): Promise<SyncedCheck | "queued" | "failed"> => {
+      await uploadPending();
+      const current = readDraft(key);
+      if (!current) return "queued";
+      const result = await submitCheck(supabase, {
+        item: heldItem,
+        questions,
+        draft: current,
+        release: true,
+      });
+      if (result.kind !== "ok") {
+        // A late refusal stays with the queue, which shows it in the list.
+        if (gaveUp) return "queued";
+        if (result.kind === "error") {
+          // Refused: the technician fixes it here; the check isn't done yet.
+          updateDraft(key, (d) => ({ ...d, action: undefined, checkedAt: undefined }));
+          handleFailure(result);
+          return "failed";
+        }
+        handleFailure(result);
+        return "queued";
+      }
+      settleDraft(key, current, questions);
+      const synced: SyncedCheck = {
+        item: heldItem,
+        template: templateId,
+        sent: current,
+        outcome: result.outcome,
+        checkedAt: result.checkedAt,
+      };
+      if (gaveUp) onSent(synced);
+      return synced;
+    })();
+    const result = await within(attempt, SEND_WAIT_MS);
+    if (result !== "timeout") return result;
+    gaveUp = true;
+    return "queued";
+  }
+
+  /** Marks the check done (or left out) in the phone, with the whole check and its time. */
+  function markDone(action: NonNullable<CheckDraft["action"]>, skipNote?: string) {
+    const complete = fullAnswers(questions, base, draft?.answers ?? {});
+    change((d) => ({
+      ...d,
+      answers: action.type === "finish" ? complete : d.answers,
+      notes: skipNote ? skipNote : d.notes,
+      action,
+      checkedAt: new Date().toISOString(),
+    }));
   }
 
   async function finish() {
@@ -475,92 +604,107 @@ export function DeviceCheck({
       document.getElementById(`question-${gaps[0]!.id}`)?.scrollIntoView({ block: "center" });
       return;
     }
-    if (!item) return;
     setFinishing(true);
-    await flush();
-    await uploadPending();
-    if (readDraft(key) || (await queuedPhotos(inspectionId, deviceId)).length > 0) {
-      setNotice(t("pendingBeforeFinish"));
-      setFinishing(false);
-      return;
-    }
-    const { data, error } = await supabase.rpc("finish_device_check", { p_item: item });
-    if (error) {
-      failed(error);
-      setFinishing(false);
-      return;
-    }
-    toast(
-      data === "failed" ? t("finishedFailed", { label }) : t("finishedPassed", { label }),
-      data === "failed" ? "danger" : "success",
-    );
+    markDone({ type: "finish" });
+    const result = await sendNow();
+    setFinishing(false);
+    if (result === "failed") return;
+    const outcome = result === "queued" ? outcomeOf(questions, answers) : result.outcome;
+    const synced = result === "queued" ? null : result;
+    if (synced)
+      toast(
+        outcome === "failed" ? t("finishedFailed", { label }) : t("finishedPassed", { label }),
+        outcome === "failed" ? "danger" : "success",
+      );
+    else
+      toast(
+        t("savedInPhone", { label, outcome: tOutcome(outcome ?? "passed") }),
+        outcome === "failed" ? "danger" : "none",
+      );
     // A passed device with open defects: were they fixed?
-    if (data === "passed" && openDefects.length > 0) {
-      setResolving(openDefects);
-      setFinishing(false);
+    if (outcome === "passed" && openDefects.length > 0) {
+      setResolving({ defects: openDefects, synced });
       return;
     }
-    backToOverview();
+    onDone(synced);
   }
 
-  function backToOverview() {
-    router.push(overviewHref);
-    router.refresh();
-  }
-
-  /** Leaves the device out: everything waiting in the phone is sent first. */
+  /** Leaves the device out: everything waiting in the phone goes with it. */
   async function skip(reason: CheckSkipReason, note: string) {
-    if (!item) return;
     setSkipping(true);
     setNotice(null);
-    await flush();
-    await uploadPending();
-    if (readDraft(key) || (await queuedPhotos(inspectionId, deviceId)).length > 0) {
-      setSkipOpen(false);
-      setSkipping(false);
-      setNotice(t("pendingBeforeFinish"));
-      return;
-    }
-    const { error } = await supabase.rpc("skip_device_check", {
-      p_item: item,
-      p_reason: reason,
-      p_note: note.trim() || null,
-    });
+    markDone({ type: "skip", reason }, note.trim() || undefined);
+    const result = await sendNow();
     setSkipping(false);
-    if (error) {
-      setSkipOpen(false);
-      failed(error);
-      return;
-    }
-    toast(tSkip("done", { label, reason: tSkip(`reasons.${reason}`) }), "none");
-    backToOverview();
+    setSkipOpen(false);
+    if (result === "failed") return;
+    const text = tSkip("done", { label, reason: tSkip(`reasons.${reason}`) });
+    toast(result === "queued" ? `${text}. ${t("queuedSuffix")}` : text, "none");
+    onDone(result === "queued" ? null : result);
   }
 
-  async function resolveDefects(ids: string[], note: string) {
+  async function resolveDefects(ids: string[], note: string, synced: SyncedCheck | null) {
     setResolvingPending(true);
     let resolved = 0;
+    const left: string[] = [];
     for (const id of ids) {
-      const { error } = await supabase.rpc("change_defect_status", {
-        p_defect: id,
-        p_status: "resolved",
-        p_note: note,
-      });
-      if (error) {
-        toast(tErr(databaseErrorCode(error)), "danger");
-        break;
+      const { error } = await supabase
+        .rpc("change_defect_status", { p_defect: id, p_status: "resolved", p_note: note })
+        .abortSignal(requestTimeout());
+      if (!error) {
+        resolved++;
+        continue;
       }
-      resolved++;
+      const failure = failureOf(error);
+      if (failure.kind === "error") {
+        toast(tErr(failure.error), "danger");
+        continue;
+      }
+      left.push(id);
     }
+    // Without a signal they wait in the phone with the check.
+    if (left.length)
+      queueOps(
+        inspectionId,
+        left.map((defectId) => ({ id: crypto.randomUUID(), type: "resolve", defectId, note })),
+      );
     setResolvingPending(false);
     if (resolved) toast(tResolve("done", { count: resolved }), "success");
+    if (left.length) toast(tResolve("queued", { count: left.length }), "none");
     setResolving(null);
-    backToOverview();
+    onDone(synced);
   }
 
   function leave() {
     // Free the check for colleagues, unless something still waits to be sent.
-    if (item && !readDraft(key) && waitingPhotos === 0)
-      void supabase.rpc("release_device_check", { p_item: item });
+    if (heldItem && !readDraft(key) && waitingPhotos === 0)
+      void supabase.rpc("release_device_check", { p_item: heldItem });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Conflicts and refusals
+  // ---------------------------------------------------------------------------
+
+  async function keepMine() {
+    updateDraft(key, (d) => ({ ...d, force: true, conflict: undefined }));
+    // A finished check goes with the phone's queue (it replaces the colleague's);
+    // an unfinished one is taken over here and carries on.
+    if (readDraft(key)?.action) {
+      onDone(null);
+      return;
+    }
+    setHold({ state: "opening" });
+    await open(true);
+  }
+
+  async function discardMine(knownSeen: string | null) {
+    removeDraft(key);
+    await removeQueuedPhotos(inspectionId, deviceId);
+    setPhotos((list) => list.filter((photo) => photo.status === "uploaded"));
+    toast(t("discarded"), "none");
+    setSeen(knownSeen);
+    onStale();
+    await open(false, knownSeen);
   }
 
   // ---------------------------------------------------------------------------
@@ -568,11 +712,12 @@ export function DeviceCheck({
   // ---------------------------------------------------------------------------
 
   const outcome = outcomeOf(questions, answers);
+  const canAddPhoto = editable && photos.length < MAX_PHOTOS;
   const photoInput = (questionId: string | null, labelText: string) => (
     <label
       className={cn(
         "inline-flex min-h-[30px] cursor-pointer items-center gap-[7px] rounded-md px-2.5 text-ui text-muted-foreground hover:bg-accent pointer-coarse:min-h-11",
-        !editable && "pointer-events-none opacity-50",
+        !canAddPhoto && "pointer-events-none opacity-50",
       )}
     >
       <CameraIcon className="text-[var(--btn-icon)]" />
@@ -583,7 +728,7 @@ export function DeviceCheck({
         capture="environment"
         className="sr-only"
         aria-label={labelText}
-        disabled={!editable}
+        disabled={!canAddPhoto}
         data-testid={`photo-${questionId ?? NOTES}`}
         onChange={(event) => {
           void addPhoto(questionId, event.target.files?.[0]);
@@ -599,20 +744,33 @@ export function DeviceCheck({
       <ul className="flex flex-wrap gap-2">
         {list.map((photo, index) => (
           <li key={photo.key} className="relative">
-            <a href={photo.url} target="_blank" rel="noreferrer" className="block">
-              {/* eslint-disable-next-line @next/next/no-img-element -- local and signed URLs */}
-              <img
-                src={photo.url}
-                alt={t("photoAlt", { number: index + 1 })}
-                className="size-20 rounded-md object-cover shadow-[0_0_0_1px_var(--border)]"
-              />
-            </a>
+            {brokenPhotos.has(photo.key) ? (
+              // A photo on the server, its link out of reach without a signal.
+              <span
+                role="img"
+                aria-label={t("photoAlt", { number: index + 1 })}
+                className="flex size-20 flex-col items-center justify-center gap-1 rounded-md bg-muted text-center text-[10px] leading-tight text-muted-foreground shadow-[0_0_0_1px_var(--border)]"
+              >
+                <MediaIcon />
+                {t("photoOnServer")}
+              </span>
+            ) : (
+              <a href={photo.url} target="_blank" rel="noreferrer" className="block">
+                {/* eslint-disable-next-line @next/next/no-img-element -- local and signed URLs */}
+                <img
+                  src={photo.url}
+                  alt={t("photoAlt", { number: index + 1 })}
+                  onError={() => setBrokenPhotos((current) => new Set(current).add(photo.key))}
+                  className="size-20 rounded-md object-cover shadow-[0_0_0_1px_var(--border)]"
+                />
+              </a>
+            )}
             {photo.status !== "uploaded" && (
               <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 rounded-b-md bg-[rgb(16_22_26/0.7)] py-0.5 text-[10px] text-white">
                 {photo.status === "uploading" ? t("uploading") : t("photoWaiting")}
               </span>
             )}
-            {editable && (
+            {editable && (photo.status !== "uploaded" || heldItem) && (
               <button
                 type="button"
                 aria-label={t("removePhoto", { number: index + 1 })}
@@ -627,6 +785,12 @@ export function DeviceCheck({
       </ul>
     );
   };
+  const theirs = (value: CheckConflict) =>
+    value.skipReason
+      ? tOutcome(value.skipReason)
+      : value.outcome
+        ? tOutcome(value.outcome)
+        : tOutcome("open");
 
   return (
     <div className="space-y-2.5 pb-2 sm:space-y-[15px]">
@@ -638,7 +802,15 @@ export function DeviceCheck({
               {t("takeOver")}
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={overviewHref}>{t("back")}</Link>
+              <Link
+                href={overviewHref}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onBack();
+                }}
+              >
+                {t("back")}
+              </Link>
             </Button>
           </div>
         </Alert>
@@ -651,33 +823,83 @@ export function DeviceCheck({
               {t("takeBack")}
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={overviewHref}>{t("back")}</Link>
+              <Link
+                href={overviewHref}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onBack();
+                }}
+              >
+                {t("back")}
+              </Link>
             </Button>
           </div>
+        </Alert>
+      )}
+      {conflict && (
+        <Alert
+          variant="warning"
+          icon={WarningSignIcon}
+          title={t("conflictTitle", { name: conflict.name })}
+        >
+          <p>
+            {t("conflictBody", {
+              outcome: theirs(conflict),
+              time: conflict.checkedAt
+                ? format.dateTime(new Date(conflict.checkedAt), {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })
+                : "—",
+            })}
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => void keepMine()}>
+              {t("keepMine")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void discardMine(conflict.checkedAt)}
+            >
+              {t("keepTheirs")}
+            </Button>
+          </div>
+        </Alert>
+      )}
+      {draft?.error && (
+        <Alert variant="error" icon={ErrorIcon} title={t("refusedTitle")}>
+          <p>{tErr(draft.error as ErrorCode)}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-2.5"
+            onClick={() => void discardMine(seen)}
+          >
+            {t("discard")}
+          </Button>
         </Alert>
       )}
       {hold.state === "error" && (
         <Alert variant="error">
           <p>{tErr(hold.error)}</p>
-          <Button asChild size="sm" variant="outline" className="mt-2.5">
-            <Link href={overviewHref}>{t("back")}</Link>
+          <Button size="sm" variant="outline" className="mt-2.5" onClick={onBack}>
+            {t("back")}
           </Button>
         </Alert>
       )}
-      {offline && (
+      {(offline || hold.state === "offline") && (
         <Alert variant="warning" icon={OfflineIcon}>
           {t("offlineHint")}
         </Alert>
       )}
-      {initialSkip && (
+      {item?.skipReason && !draft?.action && (
         <Alert
           variant="neutral"
           icon={DisableIcon}
-          title={tSkip("currentTitle", { reason: tSkip(`reasons.${initialSkip.reason}`) })}
+          title={tSkip("currentTitle", { reason: tSkip(`reasons.${item.skipReason}`) })}
         >
-          {initialSkip.note && (
-            <p className="break-words whitespace-pre-line">{initialSkip.note}</p>
-          )}
+          {item.notes && <p className="break-words whitespace-pre-line">{item.notes}</p>}
           <p>{tSkip("currentBody")}</p>
         </Alert>
       )}
@@ -700,7 +922,7 @@ export function DeviceCheck({
         </Alert>
       )}
 
-      <fieldset disabled={!editable} className="space-y-2.5 sm:space-y-[15px]">
+      <fieldset disabled={!editable || !!conflict} className="space-y-2.5 sm:space-y-[15px]">
         {questions.map((question, index) => {
           const answer = answers[question.id] ?? EMPTY_ANSWER;
           const isMissing = missing.has(question.id);
@@ -797,6 +1019,7 @@ export function DeviceCheck({
               {question.type === "text" && (
                 <Textarea
                   rows={2}
+                  maxLength={MAX_TEXT}
                   aria-label={question.label}
                   aria-invalid={isMissing || undefined}
                   placeholder={t("textPlaceholder")}
@@ -814,6 +1037,7 @@ export function DeviceCheck({
               {noteOpen && (
                 <Textarea
                   rows={2}
+                  maxLength={MAX_TEXT}
                   autoCapitalize="sentences"
                   aria-label={t("note", { label: question.label })}
                   value={answer.note}
@@ -842,12 +1066,13 @@ export function DeviceCheck({
           <p className="text-ui-lg font-medium">{t("deviceSection")}</p>
           <Textarea
             rows={2}
+            maxLength={MAX_TEXT}
             autoCapitalize="sentences"
             aria-label={t("deviceNotes")}
             aria-describedby="dictation-hint"
             placeholder={t("deviceNotes")}
             value={notes}
-            onChange={(event) => updateDraft(key, (d) => ({ ...d, notes: event.target.value }))}
+            onChange={(event) => change((d) => ({ ...d, notes: event.target.value }))}
           />
           {/* Phones dictate into any text field; the keyboard's microphone does it. */}
           <p
@@ -865,7 +1090,7 @@ export function DeviceCheck({
         <Button
           variant="ghost"
           onClick={() => setSkipOpen(true)}
-          disabled={!item || skipping || finishing}
+          disabled={!editable || !!conflict || skipping || finishing}
           className="text-muted-foreground"
         >
           <DisableIcon />
@@ -883,33 +1108,51 @@ export function DeviceCheck({
       />
       {resolving && (
         <ResolveDialog
-          defects={resolving}
+          defects={resolving.defects}
           pending={resolvingPending}
-          onResolve={(ids, note) => void resolveDefects(ids, note)}
+          onResolve={(ids, note) => void resolveDefects(ids, note, resolving.synced)}
           onKeep={() => {
+            const synced = resolving.synced;
             setResolving(null);
-            backToOverview();
+            onDone(synced);
           }}
         />
       )}
 
       <div className="sticky bottom-0 z-10 -mx-2.5 -mb-8 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 bg-background px-2.5 py-2 shadow-[0_-1px_0_var(--border)] sm:-mx-[15px] sm:px-[15px] lg:-mx-5 lg:px-5">
-        <Button asChild variant="outline" size="lg" onClick={leave}>
-          <Link href={overviewHref}>
+        <Button asChild variant="outline" size="lg">
+          <Link
+            href={overviewHref}
+            onClick={(event) => {
+              event.preventDefault();
+              leave();
+              onBack();
+            }}
+          >
             <ChevronLeftIcon className="rtl:rotate-180" />
             {/* Icon only on the phone; screen readers always hear the label. */}
             <span className="sr-only sm:not-sr-only">{t("back")}</span>
           </Link>
         </Button>
         <div className="min-w-0 flex-1 text-ui-sm" aria-live="polite">
-          {hold.state === "opening" ? (
+          {conflict || draft?.error ? (
+            <span className="inline-flex items-center gap-1.5 text-warning-text">
+              <WarningSignIcon />
+              {t("decideFooter")}
+            </span>
+          ) : hold.state === "opening" ? (
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
               <Spinner size={14} /> {t("opening")}
             </span>
-          ) : offline || pending + waitingPhotos > 0 ? (
+          ) : offline || hold.state === "offline" ? (
             <span className="inline-flex items-center gap-1.5 text-warning-text">
-              {offline ? <OfflineIcon /> : <Spinner size={14} />}
-              {offline ? t("offline", { count: pending + waitingPhotos }) : t("saving")}
+              <OfflineIcon />
+              {t("offline", { count: pending + waitingPhotos })}
+            </span>
+          ) : pending + waitingPhotos > 0 ? (
+            <span className="inline-flex items-center gap-1.5 text-warning-text">
+              <Spinner size={14} />
+              {t("saving")}
             </span>
           ) : saving ? (
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
@@ -927,7 +1170,11 @@ export function DeviceCheck({
             {outcome === "failed" ? t("willFail") : t("willPass")}
           </Badge>
         </div>
-        <Button size="lg" onClick={() => void finish()} disabled={!editable || finishing}>
+        <Button
+          size="lg"
+          onClick={() => void finish()}
+          disabled={!editable || !!conflict || finishing}
+        >
           {finishing ? <Spinner size={16} /> : <TickIcon />}
           {t("finish")}
         </Button>

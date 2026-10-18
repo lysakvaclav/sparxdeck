@@ -20,16 +20,16 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { isManager, requireMembership } from "@/lib/auth";
+import { requireMembership } from "@/lib/auth";
 import { formatLabel } from "@/lib/devices";
 import { serverEnv } from "@/lib/env";
-import { sitePlacements, sitePlans } from "@/lib/floor-plans-data";
-import { getInspection, loadInspectionRun, memberNames } from "@/lib/inspection-data";
+import { loadFieldPack } from "@/lib/field-pack";
+import { getInspection, memberNames } from "@/lib/inspection-data";
 import type { CheckOutcome } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
-import { CancelInspectionButton } from "./cancel-button";
-import { InspectionRun } from "./inspection-run";
+import { FieldApp } from "./field-app";
+import { ForgetOffline } from "./forget-offline";
 import { ProtocolCard } from "./protocol-card";
 
 type Props = { params: Promise<{ id: string }> };
@@ -56,11 +56,19 @@ export default async function InspectionPage({ params }: Props) {
   const site = inspection.site;
   const completed = inspection.status === "completed";
 
-  const canCancel =
-    !completed && (inspection.started_by === membership.user_id || isManager(membership.role));
+  // In progress: the field app (works without a signal, see FieldApp).
+  if (!completed) {
+    const pack = await loadFieldPack(inspection, {
+      userId: membership.user_id,
+      role: membership.role,
+    });
+    return (
+      <FieldApp initialPack={pack} initialDevice={null} appUrl={serverEnv().NEXT_PUBLIC_APP_URL} />
+    );
+  }
+
   const header = (
     <PageHeader
-      actions={canCancel && <CancelInspectionButton inspectionId={inspection.id} />}
       icon={app.icon}
       iconClassName={app.tone}
       title={site?.name ?? t("title")}
@@ -77,44 +85,6 @@ export default async function InspectionPage({ params }: Props) {
       ]}
     />
   );
-
-  if (!completed) {
-    const supabase = await createClient();
-    const [run, plans, placements, { data: types }, { data: locations }] = await Promise.all([
-      loadInspectionRun(inspection, membership.user_id),
-      sitePlans(inspection.site_id),
-      sitePlacements(inspection.site_id),
-      supabase
-        .from("device_types")
-        .select("id, name, code")
-        .eq("organization_id", inspection.organization_id)
-        .eq("active", true)
-        .order("created_at"),
-      supabase
-        .from("locations")
-        .select("id, name")
-        .eq("site_id", inspection.site_id)
-        .order("sort_order")
-        .order("created_at"),
-    ]);
-    return (
-      <>
-        {header}
-        <PageBody width="medium">
-          <InspectionRun
-            inspectionId={inspection.id}
-            accessNotes={site?.access_notes ?? null}
-            devices={run.devices}
-            checks={run.checks}
-            appUrl={serverEnv().NEXT_PUBLIC_APP_URL}
-            plans={plans}
-            placements={placements}
-            addDevice={{ types: types ?? [], locations: locations ?? [] }}
-          />
-        </PageBody>
-      </>
-    );
-  }
 
   // Completed: the record of what was found, device by device.
   const format = await getFormatter();
@@ -175,6 +145,7 @@ export default async function InspectionPage({ params }: Props) {
     <>
       {header}
       <PageBody>
+        <ForgetOffline inspectionId={inspection.id} />
         <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="contents lg:block lg:space-y-[15px]">
             <Card>

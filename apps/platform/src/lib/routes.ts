@@ -10,6 +10,9 @@ export const PUBLIC_PATHS = [
   "/api/cron",
   // Error reports from the browser (also from the sign-in pages).
   "/monitoring",
+  // The service worker and the page it shows without a signal (data only from the phone).
+  "/sw.js",
+  "/offline",
 ];
 
 /** Signed-in users are sent away from these (to the app). */

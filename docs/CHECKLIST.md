@@ -203,13 +203,13 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 
 ## M. Offline režim
 
-- [ ] P2 Stažení dat budovy do telefonu před vstupem (zařízení, šablony)
-- [ ] P2 Provádění kontrol bez signálu
-- [ ] P2 Fronta změn a fotek, odeslání po obnovení spojení
-- [ ] P2 Viditelný indikátor, že jsi offline a co čeká na odeslání
-- [ ] P2 Řešení konfliktů, když dva technici upraví totéž
-- [ ] P2 Bezpečné uložení offline dat (smazání po odhlášení)
-- [ ] P2 Testy na přerušení spojení uprostřed kontroly
+- [x] P2 Stažení dat budovy do telefonu před vstupem (zařízení, šablony) (část 16: otevřením revize s připojením se celá uloží do telefonu: zařízení, stav kontrol, šablony, otevřené závady, půdorysy, stránka i soubory aplikace přes service worker; karta v revizi ukazuje „uložená v telefonu, data z …“)
+- [x] P2 Provádění kontrol bez signálu (část 16: stránka revize se otevře bez signálu i po zavření prohlížeče, funguje skener štítků, kontrola s fotkami, vynechání i uzavření závady; dokončení revize a přidání zařízení potřebují připojení a řeknou to)
+- [x] P2 Fronta změn a fotek, odeslání po obnovení spojení (část 16: kontrola se odešle celá najednou funkcí `submit_device_check` s časem, kdy byla hotová; fotky z IndexedDB, uzavření závad; při výpadku, vypršení přihlášení i chybě serveru čeká a zkouší znovu; každý požadavek má časový limit, takže slabý signál odesílání nezastaví)
+- [x] P2 Viditelný indikátor, že jsi offline a co čeká na odeslání (část 16: karta stavu v revizi (bez signálu, odesílám, co čeká, čeká na rozhodnutí, vše odesláno), u zařízení „čeká na odeslání“, patička kontroly; stránka `/offline` se seznamem revizí v telefonu)
+- [x] P2 Řešení konfliktů, když dva technici upraví totéž (část 16: online drží kontrolu jeden technik; kontrola kolegy mezitím je konflikt, technik vidí jeho výsledek a zvolí „Platí moje“ (nahradí ji) nebo „Ponechat kolegovu“; totéž u jiné verze šablony; funkce `claim_device_check`)
+- [x] P2 Bezpečné uložení offline dat (smazání po odhlášení) (část 16: odhlášení smaže koncepty, fotky, balíčky i uložené stránky, s varováním, když něco čeká; přihlášení jiného účtu na stejném telefonu data předchozího smaže)
+- [x] P2 Testy na přerušení spojení uprostřed kontroly (část 16: `e2e/part16.mjs` vypne síť stránce i service workeru: otevření bez signálu, sken, kontrola s fotkou, vynechání, uzavření závady, obnovení stránky, offline stránka, odeslání s časem kontroly, odstraněné zařízení, slabý signál, konflikt, odhlášení; `e2e/part7.mjs` výpadek uprostřed kontroly)
 - [x] P1 Do doby, než offline přijde: srozumitelná hláška při výpadku spojení a nic se neztratí (rozdělané odpovědi zůstanou ve zařízení) (část 7: e2e vypne síť, odpoví, zapne síť a ověří odeslání)
 
 ## N. Podpisy a potvrzení

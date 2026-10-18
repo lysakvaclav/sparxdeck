@@ -1,6 +1,7 @@
 import type { Viewport } from "next";
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/app/app-shell";
+import { OfflineSupport } from "@/components/app/offline-support";
 import { RAIL_COOKIE } from "@/components/app/nav-items";
 import { requireMembership } from "@/lib/auth";
 
@@ -12,13 +13,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const railExpanded = (await cookies()).get(RAIL_COOKIE)?.value === "1";
 
   return (
-    <AppShell
-      organizationName={organization.name}
-      userName={membership.display_name}
-      userEmail={membership.email}
-      railExpanded={railExpanded}
-    >
-      {children}
-    </AppShell>
+    <>
+      <OfflineSupport userId={membership.user_id} />
+      <AppShell
+        organizationName={organization.name}
+        userName={membership.display_name}
+        userEmail={membership.email}
+        railExpanded={railExpanded}
+      >
+        {children}
+      </AppShell>
+    </>
   );
 }

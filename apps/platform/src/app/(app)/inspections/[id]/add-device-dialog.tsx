@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,29 +21,33 @@ import {
   type InspectionDeviceInput,
   type InspectionDeviceValues,
 } from "@/lib/validation";
+import type { FieldDeviceType, FieldLocation } from "@/lib/field";
 import { addInspectionDevice } from "../actions";
 
-export type FieldDeviceType = { id: string; name: string; code: string };
-export type FieldLocation = { id: string; name: string };
+export type { FieldDeviceType, FieldLocation } from "@/lib/field";
 
 /**
  * A device the technician finds in the building but not on the list: added to
  * the building (with the next label number) and opened for its check at once.
+ * It needs a connection (the database gives the number).
  */
 export function AddDeviceButton({
   inspectionId,
   types,
   locations,
+  offline,
+  onAdded,
 }: {
   inspectionId: string;
   types: FieldDeviceType[];
   locations: FieldLocation[];
+  offline: boolean;
+  onAdded: (deviceId: string) => void;
 }) {
   const t = useTranslations("inspections.addDevice");
   const tForm = useTranslations("devices.form");
   const tCommon = useTranslations("common");
   const tErr = useTranslations("errors");
-  const router = useRouter();
   const toast = useToast();
   const fieldError = useFieldError();
   const [open, setOpen] = useState(false);
@@ -86,14 +89,20 @@ export function AddDeviceButton({
         const device = created as { id: string; labelNumber: number } | null;
         if (!device) return;
         toast(t("added", { label: formatLabel(device.labelNumber) }), "success");
-        router.push(`/inspections/${inspectionId}/check/${device.id}`);
+        onAdded(device.id);
       },
     );
   }
 
   return (
     <>
-      <Button size="lg" variant="outline" onClick={() => setOpen(true)} disabled={!types.length}>
+      <Button
+        size="lg"
+        variant="outline"
+        onClick={() => setOpen(true)}
+        disabled={!types.length || offline}
+        title={offline ? t("offline") : undefined}
+      >
         <AddIcon />
         {t("action")}
       </Button>

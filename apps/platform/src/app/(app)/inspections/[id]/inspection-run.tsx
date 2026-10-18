@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import {
   CameraIcon,
@@ -11,9 +9,11 @@ import {
   CrossIcon,
   DisableIcon,
   DotIcon,
+  ErrorIcon,
   KeyIcon,
   SearchIcon,
   TickIcon,
+  WarningSignIcon,
   type IconComponent,
 } from "@/components/icons";
 import {
@@ -23,28 +23,33 @@ import {
   type PlanMarker,
 } from "@/components/app/plan-viewer";
 import { QrScanner } from "@/components/app/qr-scanner";
-import { AddDeviceButton, type FieldDeviceType, type FieldLocation } from "./add-device-dialog";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { devicesWithDrafts, subscribeDrafts } from "@/lib/client/check-drafts";
 import { labelQuery } from "@/lib/devices";
-import type { PlanSummary } from "@/lib/floor-plans-data";
-import type { RunCheck, RunDevice } from "@/lib/inspection-data";
+import {
+  isHandled,
+  type DeviceView,
+  type FieldDevice,
+  type FieldDeviceType,
+  type FieldLocation,
+  type FieldState,
+} from "@/lib/field";
 import { readScan } from "@/lib/inspections";
 import { cn } from "@/lib/utils";
+import { AddDeviceButton } from "./add-device-dialog";
 
 type Tab = "remaining" | "done" | "all";
 type ViewMode = "list" | "plan";
-type RunState = "passed" | "failed" | "skipped" | "open" | "remaining";
 
-const RUN_TONE: Record<RunState, MarkerTone> = {
+const RUN_TONE: Record<FieldState, MarkerTone> = {
   passed: "success",
   failed: "danger",
   skipped: "muted",
   open: "warning",
+  held: "warning",
   remaining: "neutral",
 };
 
@@ -64,50 +69,60 @@ function subscribeView(onChange: () => void) {
   return () => window.removeEventListener("storage", onChange);
 }
 
-/** Unsent drafts live in localStorage; read them without a hydration mismatch. */
-function useDrafts(inspectionId: string) {
-  const snapshot = useSyncExternalStore(
-    subscribeDrafts,
-    () => devicesWithDrafts(inspectionId).sort().join(","),
-    () => "",
-  );
-  return snapshot ? snapshot.split(",") : [];
-}
+export type RunPlan = {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  /** The phone's copy of the image, or the signed link while it downloads. */
+  imageUrl: string | null;
+};
 
 /**
  * The inspection on the phone: progress, the scanner and the building's devices
- * in route order. Colleagues' progress appears when the page comes back into view.
+ * in route order, each with its state in the phone (also what waits to be sent).
+ * Opening a device, scanning and the plan work without a signal.
  */
 export function InspectionRun({
   inspectionId,
   accessNotes,
   devices,
-  checks,
+  views,
   appUrl,
   plans,
   placements,
   addDevice,
+  offline,
+  status,
+  onOpen,
+  onComplete,
+  onAdded,
+  onReloadPlan,
 }: {
   inspectionId: string;
   accessNotes: string | null;
-  devices: RunDevice[];
-  checks: Record<string, RunCheck>;
+  devices: FieldDevice[];
+  views: Record<string, DeviceView>;
   appUrl: string;
-  /** The building's floor plans and where devices are on them. */
-  plans: PlanSummary[];
+  plans: RunPlan[];
   placements: Record<string, { planId: string; x: number; y: number }>;
   /** Device types and locations for adding a device found in the building. */
   addDevice: { types: FieldDeviceType[]; locations: FieldLocation[] };
+  offline: boolean;
+  /** The connection and sending card, under the progress. */
+  status: React.ReactNode;
+  onOpen: (deviceId: string) => void;
+  onComplete: () => void;
+  onAdded: (deviceId: string) => void;
+  onReloadPlan: () => void;
 }) {
   const t = useTranslations("inspections");
   const tSites = useTranslations("sites.detail");
   const tPlans = useTranslations("plans");
-  const router = useRouter();
   const [tab, setTab] = useState<Tab>("remaining");
   const [query, setQuery] = useState("");
   const [scanning, setScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
-  const drafts = useDrafts(inspectionId);
   const remembered = useSyncExternalStore(subscribeView, storedView, () => "list" as const);
   const [chosen, setChosen] = useState<ViewMode | null>(null);
   const mode: ViewMode = plans.length ? (chosen ?? remembered) : "list";
@@ -122,23 +137,21 @@ export function InspectionRun({
     }
   }
 
-  useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState === "visible") router.refresh();
-    };
-    document.addEventListener("visibilitychange", refresh);
-    return () => document.removeEventListener("visibilitychange", refresh);
-  }, [router]);
-
   const checkUrl = (deviceId: string) => `/inspections/${inspectionId}/check/${deviceId}`;
-  // Handled: checked, or left out with a reason.
-  const finished = (id: string) => {
-    const check = checks[id];
-    return check?.outcome === "passed" || check?.outcome === "failed" || !!check?.skipReason;
-  };
+  const viewOf = (id: string): DeviceView =>
+    views[id] ?? {
+      state: "remaining",
+      skipReason: null,
+      pending: false,
+      conflict: null,
+      error: null,
+      heldBy: null,
+      checkedBy: null,
+    };
+  const finished = (id: string) => isHandled(viewOf(id));
   const done = devices.filter((device) => finished(device.id));
-  const passed = done.filter((device) => checks[device.id]?.outcome === "passed").length;
-  const failed = done.filter((device) => checks[device.id]?.outcome === "failed").length;
+  const passed = done.filter((device) => viewOf(device.id).state === "passed").length;
+  const failed = done.filter((device) => viewOf(device.id).state === "failed").length;
   const skipped = done.length - passed - failed;
 
   const onScan = useCallback(
@@ -152,12 +165,12 @@ export function InspectionRun({
       if (device) {
         setScanMessage(null);
         setScanning(false);
-        router.push(`/inspections/${inspectionId}/check/${device.id}`);
+        onOpen(device.id);
         return;
       }
       setScanMessage(result ? t("run.notInSite") : t("run.unknownCode"));
     },
-    [appUrl, devices, inspectionId, router, t],
+    [appUrl, devices, onOpen, t],
   );
 
   const number = labelQuery(query);
@@ -168,46 +181,58 @@ export function InspectionRun({
     if (tab === "done") return finished(device.id);
     return true;
   });
-  const groups: { key: string; name: string | null; rows: RunDevice[] }[] = [];
+  const groups: { key: string; name: string | null; rows: FieldDevice[] }[] = [];
   for (const device of shown) {
     const key = device.locationName ?? "";
     const group = groups.at(-1);
     if (group?.key === key) group.rows.push(device);
     else groups.push({ key, name: device.locationName, rows: [device] });
   }
-  const draftLabels = devices
-    .filter((device) => drafts.includes(device.id))
-    .map((device) => device.number);
 
-  const state = (device: RunDevice): { icon: IconComponent; tone: string; text: string } => {
-    const check = checks[device.id];
-    if (check?.outcome === "passed")
-      return { icon: TickIcon, tone: "text-success-text", text: t("outcome.passed") };
-    if (check?.outcome === "failed")
-      return { icon: CrossIcon, tone: "text-destructive-text", text: t("outcome.failed") };
-    if (check?.skipReason)
-      return {
-        icon: DisableIcon,
-        tone: "text-muted-foreground",
-        text: t(`outcome.${check.skipReason}`),
-      };
-    if (check?.heldBy)
-      return {
-        icon: DotIcon,
-        tone: "text-warning-text",
-        text: t("run.heldBy", { name: check.heldBy }),
-      };
-    if (check) return { icon: DotIcon, tone: "text-warning-text", text: t("outcome.open") };
-    return { icon: DotIcon, tone: "text-subtle", text: t("outcome.remaining") };
+  const state = (device: FieldDevice): { icon: IconComponent; tone: string; text: string } => {
+    const view = viewOf(device.id);
+    if (view.conflict)
+      return { icon: WarningSignIcon, tone: "text-warning-text", text: t("field.conflict") };
+    if (view.error)
+      return { icon: ErrorIcon, tone: "text-destructive-text", text: t("field.refused") };
+    const pending = view.pending ? ` · ${t("field.waiting")}` : "";
+    switch (view.state) {
+      case "passed":
+        return {
+          icon: TickIcon,
+          tone: "text-success-text",
+          text: t("outcome.passed") + pending,
+        };
+      case "failed":
+        return {
+          icon: CrossIcon,
+          tone: "text-destructive-text",
+          text: t("outcome.failed") + pending,
+        };
+      case "skipped":
+        return {
+          icon: DisableIcon,
+          tone: "text-muted-foreground",
+          text: t(`outcome.${view.skipReason ?? "skipped"}`) + pending,
+        };
+      case "held":
+        return {
+          icon: DotIcon,
+          tone: "text-warning-text",
+          text: t("run.heldBy", { name: view.heldBy ?? "?" }),
+        };
+      case "open":
+        return {
+          icon: DotIcon,
+          tone: "text-warning-text",
+          text: view.pending ? t("field.openInPhone") : t("outcome.open"),
+        };
+      default:
+        return { icon: DotIcon, tone: "text-subtle", text: t("outcome.remaining") };
+    }
   };
 
   const plan = plans.find((item) => item.id === planId) ?? plans[0] ?? null;
-  const runState = (device: RunDevice): RunState => {
-    const check = checks[device.id];
-    if (check?.outcome === "passed" || check?.outcome === "failed") return check.outcome;
-    if (check?.skipReason) return "skipped";
-    return check ? "open" : "remaining";
-  };
   const planMarkers: PlanMarker[] = plan
     ? devices.flatMap((device) => {
         const spot = placements[device.id];
@@ -218,7 +243,7 @@ export function InspectionRun({
             x: spot.x,
             y: spot.y,
             label: device.number,
-            tone: RUN_TONE[runState(device)],
+            tone: RUN_TONE[viewOf(device.id).state],
             description: tPlans("viewer.marker", {
               label: device.number,
               type: device.typeName,
@@ -228,7 +253,8 @@ export function InspectionRun({
         ];
       })
     : [];
-  const onPlanCounts: Record<RunState, number> = {
+  const legend = ["remaining", "open", "passed", "failed", "skipped"] as const;
+  const onPlanCounts: Record<(typeof legend)[number], number> = {
     remaining: 0,
     open: 0,
     passed: 0,
@@ -236,7 +262,10 @@ export function InspectionRun({
     skipped: 0,
   };
   for (const device of devices)
-    if (placements[device.id]?.planId === plan?.id) onPlanCounts[runState(device)]++;
+    if (placements[device.id]?.planId === plan?.id) {
+      const current = viewOf(device.id).state;
+      onPlanCounts[current === "held" ? "open" : current]++;
+    }
   const notOnPlan = devices.filter((device) => !placements[device.id]).length;
   const showPlan = mode === "plan" && plan !== null;
 
@@ -246,9 +275,6 @@ export function InspectionRun({
         <Alert variant="info" icon={KeyIcon} title={tSites("access")}>
           <p className="break-words whitespace-pre-line">{accessNotes}</p>
         </Alert>
-      )}
-      {draftLabels.length > 0 && (
-        <Alert variant="warning">{t("run.drafts", { labels: draftLabels.join(", ") })}</Alert>
       )}
 
       <Card className="p-[15px]">
@@ -299,17 +325,27 @@ export function InspectionRun({
             {t("run.scan")}
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href={`/inspections/${inspectionId}/complete`}>
+            {/* Completing needs the server: the page checks the signal and what waits first. */}
+            <a
+              href={`/inspections/${inspectionId}/complete`}
+              onClick={(event) => {
+                event.preventDefault();
+                onComplete();
+              }}
+            >
               <ConfirmIcon />
               {t("run.complete")}
-            </Link>
+            </a>
           </Button>
           <AddDeviceButton
             inspectionId={inspectionId}
             types={addDevice.types}
             locations={addDevice.locations}
+            offline={offline}
+            onAdded={onAdded}
           />
         </div>
+        {status}
       </Card>
 
       <Card>
@@ -364,20 +400,18 @@ export function InspectionRun({
               imageUrl={plan.imageUrl}
               size={{ width: plan.width, height: plan.height }}
               markers={planMarkers}
-              onSelect={(id) => id && router.push(checkUrl(id))}
-              onReload={() => router.refresh()}
+              onSelect={(id) => id && onOpen(id)}
+              onReload={onReloadPlan}
               fitShape
               className="max-h-[65dvh] min-h-[260px] w-full"
             />
             <div className="space-y-1.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">
               <PlanLegend
-                items={(["remaining", "open", "passed", "failed", "skipped"] as const).map(
-                  (id) => ({
-                    tone: RUN_TONE[id],
-                    label: t(`outcome.${id}`),
-                    count: onPlanCounts[id],
-                  }),
-                )}
+                items={legend.map((id) => ({
+                  tone: RUN_TONE[id],
+                  label: t(`outcome.${id}`),
+                  count: onPlanCounts[id],
+                }))}
               />
               {planMarkers.length === 0 && (
                 <p className="text-ui text-muted-foreground">{tPlans("run.noneOnPlan")}</p>
@@ -457,8 +491,20 @@ export function InspectionRun({
                         const status = state(device);
                         return (
                           <li key={device.id}>
-                            <Link
+                            {/* A real link (new tab works); here it opens without the server. */}
+                            <a
                               href={checkUrl(device.id)}
+                              onClick={(event) => {
+                                if (
+                                  event.metaKey ||
+                                  event.ctrlKey ||
+                                  event.shiftKey ||
+                                  event.altKey
+                                )
+                                  return;
+                                event.preventDefault();
+                                onOpen(device.id);
+                              }}
                               className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-[rgb(191_204_214/0.3)]"
                             >
                               <status.icon size={20} className={cn("shrink-0", status.tone)} />
@@ -472,11 +518,11 @@ export function InspectionRun({
                                     .join(" · ")}
                                 </span>
                               </span>
-                              <span className={cn("shrink-0 text-ui-sm", status.tone)}>
+                              <span className={cn("shrink-0 text-end text-ui-sm", status.tone)}>
                                 {status.text}
                               </span>
                               <ChevronRightIcon className="shrink-0 text-subtle rtl:rotate-180" />
-                            </Link>
+                            </a>
                           </li>
                         );
                       })}

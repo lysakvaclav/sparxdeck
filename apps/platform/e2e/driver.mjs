@@ -61,6 +61,8 @@ export async function launch({ width = 1440, height = 900, dark = false, mobile 
   }
   if (!target) {
     proc.kill();
+    await sleep(1000);
+    fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
     throw new Error(`Edge DevTools not reachable on port ${port}`);
   }
   const ws = new WebSocket(target.webSocketDebuggerUrl);
@@ -276,10 +278,93 @@ export async function launch({ width = 1440, height = 900, dark = false, mobile 
       const shot = await send("Page.captureScreenshot", { format: "png" });
       fs.writeFileSync(path, Buffer.from(shot.result.data, "base64"));
     },
+    /**
+     * No network for the page and for its service worker too (the worker fetches
+     * on its own, so the page's emulation alone would let it reach the server).
+     * The worker's session stays open while offline: closing it ends the emulation.
+     */
+    async setOffline(offline) {
+      await page.setNetwork({ offline });
+    },
+    /** Network conditions for the page and its service worker, e.g. a weak signal: { latency: 20000 }. */
+    async setNetwork({ offline = false, latency = 0 } = {}) {
+      const conditions = { offline, latency, downloadThroughput: -1, uploadThroughput: -1 };
+      const normal = !offline && latency === 0;
+      await send("Network.enable");
+      await send("Network.emulateNetworkConditions", conditions);
+      if (!normal && !workers) workers = await connectWorkers(port, conditions);
+      else if (workers) await workers.apply(conditions);
+      if (normal && workers) {
+        workers.close();
+        workers = null;
+      }
+    },
     async close() {
+      workers?.close();
       ws.close();
+      // The throwaway profile goes too (each is tens of MB; they filled the disk once).
+      const exited = new Promise((resolve) => {
+        if (proc.exitCode !== null) resolve();
+        else proc.once("exit", resolve);
+      });
       proc.kill();
+      await Promise.race([exited, sleep(5000)]);
+      try {
+        fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+      } catch {
+        // Still locked by a closing browser: TEMP keeps it.
+      }
     },
   };
+  let workers = null;
   return page;
+}
+
+/** Attaches to the browser's service workers and emulates the network for them. */
+async function connectWorkers(port, conditions) {
+  const { webSocketDebuggerUrl } = await (
+    await fetch(`http://127.0.0.1:${port}/json/version`)
+  ).json();
+  const socket = new WebSocket(webSocketDebuggerUrl);
+  await new Promise((resolve, reject) => {
+    socket.addEventListener("open", resolve);
+    socket.addEventListener("error", () => reject(new Error("browser connection failed")));
+  });
+  let id = 0;
+  const pending = new Map();
+  socket.addEventListener("message", (event) => {
+    const message = JSON.parse(event.data);
+    if (message.id && pending.has(message.id)) {
+      pending.get(message.id)(message);
+      pending.delete(message.id);
+    }
+  });
+  const call = (method, params = {}, sessionId) =>
+    new Promise((resolve, reject) => {
+      const i = ++id;
+      const timer = setTimeout(() => reject(new Error(`timed out: ${method}`)), COMMAND_TIMEOUT);
+      pending.set(i, (message) => {
+        clearTimeout(timer);
+        if (message.error) reject(new Error(message.error.message));
+        else resolve(message.result);
+      });
+      socket.send(JSON.stringify({ id: i, method, params, ...(sessionId ? { sessionId } : {}) }));
+    });
+  const sessions = [];
+  const { targetInfos } = await call("Target.getTargets");
+  for (const target of targetInfos.filter((t) => t.type === "service_worker")) {
+    const { sessionId } = await call("Target.attachToTarget", {
+      targetId: target.targetId,
+      flatten: true,
+    });
+    sessions.push(sessionId);
+  }
+  const apply = async (next) => {
+    for (const sessionId of sessions) {
+      await call("Network.enable", {}, sessionId);
+      await call("Network.emulateNetworkConditions", next, sessionId);
+    }
+  };
+  await apply(conditions);
+  return { apply, close: () => socket.close(), count: sessions.length };
 }

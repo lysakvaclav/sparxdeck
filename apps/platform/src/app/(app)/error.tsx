@@ -5,7 +5,7 @@ import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 import { useTranslations } from "next-intl";
 import { ErrorIcon, RefreshIcon } from "@/components/icons";
-import { PageBody } from "@/components/app/page-header";
+import { PageBody } from "@/components/app/page-header-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 

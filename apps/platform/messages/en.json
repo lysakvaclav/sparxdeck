@@ -78,7 +78,12 @@
       "subtitle": "Choose a new password for your account.",
       "submit": "Save password"
     },
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signOutPending": {
+      "title": "Sign out?",
+      "body": "{count, plural, one {# unsent change waits} other {# unsent changes wait}} in this phone. Signing out deletes everything the inspections left in the phone.",
+      "confirm": "Sign out and delete"
+    }
   },
   "onboarding": {
     "title": "Set up your company",
@@ -1387,7 +1392,6 @@
       "emptyDone": "Nothing done yet.",
       "emptySearch": "No device matches.",
       "noDevices": "There are no active devices in this building.",
-      "drafts": "Unsent answers are waiting in this phone for device {labels}. Open it and they will be sent.",
       "notInSite": "This label doesn't belong to a device in this building.",
       "unknownCode": "This isn't a SparxDeck label.",
       "skipped": "{count} × left out"
@@ -1455,7 +1459,18 @@
       "openDefects": "Open defects on this device",
       "defectExisting": "Will be added to open defect <number></number>.",
       "defectFor": "Defect: {label}",
-      "dictationHint": "You can dictate the note with the microphone on your phone's keyboard."
+      "dictationHint": "You can dictate the note with the microphone on your phone's keyboard.",
+      "savedInPhone": "{label}: {outcome}. Saved in the phone, sent once there's a signal.",
+      "queuedSuffix": "Sent once there's a signal.",
+      "discarded": "The phone's changes are discarded.",
+      "photoOnServer": "Stored on the server",
+      "conflictTitle": "{name} checked this device meanwhile",
+      "conflictBody": "Their result: {outcome} ({time}). Your check from this phone isn't sent yet. Which one counts?",
+      "keepMine": "Mine counts",
+      "keepTheirs": "Keep theirs",
+      "refusedTitle": "The server refused the changes",
+      "discard": "Discard the phone's changes",
+      "decideFooter": "Waiting for your decision"
     },
     "complete": {
       "title": "Complete inspection",
@@ -1517,7 +1532,8 @@
       "title": "Add a device you found",
       "hint": "A device that's in the building but missing from the list. It gets a label number and you check it right away. The office prints its label later.",
       "submit": "Add and check",
-      "added": "Device {label} added."
+      "added": "Device {label} added.",
+      "offline": "Adding a device needs a connection."
     },
     "cancel": {
       "action": "Cancel inspection",
@@ -1534,7 +1550,47 @@
       "defaultNote": "Fixed, confirmed at the inspection on {date}.",
       "submit": "Resolve selected",
       "keep": "Keep open",
-      "done": "{count, plural, one {# defect resolved} other {# defects resolved}}."
+      "done": "{count, plural, one {# defect resolved} other {# defects resolved}}.",
+      "queued": "{count, plural, one {Resolving # defect is sent once there's a signal.} other {Resolving # defects is sent once there's a signal.}}"
+    },
+    "field": {
+      "conflict": "Conflict",
+      "refused": "Refused",
+      "waiting": "waiting to be sent",
+      "openInPhone": "In progress on this phone",
+      "offline": "No signal",
+      "sending": "Sending…",
+      "synced": "Everything is sent",
+      "retry": "Sending failed, trying again",
+      "auth": "Your sign-in has expired",
+      "signIn": "Sign in",
+      "sendNow": "Send now",
+      "pending": "Waiting in this phone: {what}. Sent as soon as there's a signal.",
+      "checks": "{count, plural, one {# check} other {# checks}}",
+      "photos": "{count, plural, one {# photo} other {# photos}}",
+      "ops": "{count, plural, one {# defect to resolve} other {# defects to resolve}}",
+      "ready": "The inspection is saved in this phone and works without a signal. Data from {time}.",
+      "preparing": "Saving the inspection in this phone…",
+      "completeOffline": "Completing the inspection needs a connection. Checks are saved in the phone meanwhile.",
+      "completePending": "What waits in the phone ({count}) has to be sent first. Trying now.",
+      "completeDecide": "First decide what to do with the changes to devices {labels}.",
+      "closedCompleted": "The inspection has been completed meanwhile",
+      "closedMissing": "The inspection has been cancelled meanwhile",
+      "closedPending": "Unsent changes of devices {labels} can't be saved any more.",
+      "closedSomething": "from this phone",
+      "discardAll": "Discard unsent changes",
+      "leftInPhone": "Unsent changes of this inspection are left in the phone ({count}). The inspection is completed, they can't be saved any more.",
+      "conflictsTitle": "A colleague checked the same devices meanwhile",
+      "conflictsBody": "Open devices {labels} and decide whose check counts.",
+      "refusedTitle": "The server refused some changes",
+      "refusedBody": "Open devices {labels} to see why.",
+      "goneTitle": "Device no longer in the inspection",
+      "goneBody": "Changes to devices {labels} can't be saved: they were removed, decommissioned or moved to another building meanwhile.",
+      "goneDiscard": "Discard these changes",
+      "notInInspection": "This device isn't in the inspection (it may have been removed meanwhile).",
+      "opsRefused": "{count, plural, one {The server refused to resolve # defect.} other {The server refused to resolve # defects.}}",
+      "decide": "Waiting for your decision",
+      "decideBody": "{count, plural, one {# check isn't sent until you decide what to do with it.} other {# checks aren't sent until you decide what to do with them.}}"
     }
   },
   "defects": {
@@ -1853,5 +1909,16 @@
     "code": "Error code: {code}",
     "retry": "Try again",
     "home": "To the overview"
+  },
+  "offline": {
+    "metaTitle": "Offline",
+    "title": "No connection",
+    "body": "Inspections saved in this phone work without a signal. What you do is sent as soon as there's a connection.",
+    "list": "Inspections in this phone",
+    "none": "No inspection is saved in this phone. An inspection is saved by itself when you open it with a connection.",
+    "savedAt": "data from {time}",
+    "waiting": "{count, plural, one {# change waits} other {# changes wait}} to be sent",
+    "retry": "Try again",
+    "home": "Go to the overview"
   }
 }

@@ -78,7 +78,12 @@
       "subtitle": "Zvolte nové heslo ke svému účtu.",
       "submit": "Uložit heslo"
     },
-    "signOut": "Odhlásit se"
+    "signOut": "Odhlásit se",
+    "signOutPending": {
+      "title": "Odhlásit se?",
+      "body": "V telefonu čeká {count, plural, one {# neodeslaná změna} few {# neodeslané změny} other {# neodeslaných změn}}. Po odhlášení se z telefonu smaže vše, co v něm z revizí zůstalo.",
+      "confirm": "Odhlásit a smazat"
+    }
   },
   "onboarding": {
     "title": "Nastavení firmy",
@@ -1387,7 +1392,6 @@
       "emptyDone": "Zatím nic hotového.",
       "emptySearch": "Žádné zařízení neodpovídá.",
       "noDevices": "V budově nejsou žádná aktivní zařízení.",
-      "drafts": "V telefonu jsou neodeslané odpovědi u zařízení {labels}. Otevřete ho a odešlou se.",
       "notInSite": "Tento štítek nepatří k zařízení této budovy.",
       "unknownCode": "Tohle není štítek SparxDeck.",
       "skipped": "{count} × vynecháno"
@@ -1455,7 +1459,18 @@
       "openDefects": "Otevřené závady zařízení",
       "defectExisting": "Připíše se k otevřené závadě <number></number>.",
       "defectFor": "Závada: {label}",
-      "dictationHint": "Poznámku můžete nadiktovat mikrofonem na klávesnici telefonu."
+      "dictationHint": "Poznámku můžete nadiktovat mikrofonem na klávesnici telefonu.",
+      "savedInPhone": "{label}: {outcome}. Uloženo v telefonu, odešle se po připojení.",
+      "queuedSuffix": "Odešle se po připojení.",
+      "discarded": "Změny z telefonu jsou zahozené.",
+      "photoOnServer": "Uloženo na serveru",
+      "conflictTitle": "{name} mezitím zkontroloval(a) toto zařízení",
+      "conflictBody": "Výsledek kolegy: {outcome} ({time}). Vaše kontrola z telefonu zatím odeslaná není. Která platí?",
+      "keepMine": "Platí moje",
+      "keepTheirs": "Ponechat kolegovu",
+      "refusedTitle": "Server změny odmítl",
+      "discard": "Zahodit změny z telefonu",
+      "decideFooter": "Čeká na vaše rozhodnutí"
     },
     "complete": {
       "title": "Dokončit revizi",
@@ -1517,7 +1532,8 @@
       "title": "Přidat nalezené zařízení",
       "hint": "Zařízení, které v budově je, ale chybí v seznamu. Dostane číslo štítku a hned ho zkontrolujete. Štítek pak vytiskne kancelář.",
       "submit": "Přidat a zkontrolovat",
-      "added": "Zařízení {label} přidáno."
+      "added": "Zařízení {label} přidáno.",
+      "offline": "Přidat zařízení jde jen s připojením."
     },
     "cancel": {
       "action": "Zrušit revizi",
@@ -1534,7 +1550,47 @@
       "defaultNote": "Odstraněno, ověřeno při revizi {date}.",
       "submit": "Uzavřít vybrané",
       "keep": "Ponechat otevřené",
-      "done": "{count, plural, one {# závada uzavřena} few {# závady uzavřeny} other {# závad uzavřeno}}."
+      "done": "{count, plural, one {# závada uzavřena} few {# závady uzavřeny} other {# závad uzavřeno}}.",
+      "queued": "{count, plural, one {Uzavření # závady se odešle po připojení.} other {Uzavření # závad se odešle po připojení.}}"
+    },
+    "field": {
+      "conflict": "Konflikt",
+      "refused": "Odmítnuto",
+      "waiting": "čeká na odeslání",
+      "openInPhone": "Rozpracováno v telefonu",
+      "offline": "Bez signálu",
+      "sending": "Odesílám…",
+      "synced": "Vše je odeslané",
+      "retry": "Odeslání se nepovedlo, zkusím to znovu",
+      "auth": "Přihlášení vypršelo",
+      "signIn": "Přihlásit se",
+      "sendNow": "Odeslat teď",
+      "pending": "V telefonu čeká: {what}. Odešle se, jakmile bude signál.",
+      "checks": "{count, plural, one {# kontrola} few {# kontroly} other {# kontrol}}",
+      "photos": "{count, plural, one {# fotka} few {# fotky} other {# fotek}}",
+      "ops": "{count, plural, one {# uzavření závady} other {# uzavření závad}}",
+      "ready": "Revize je uložená v telefonu, jde dělat i bez signálu. Data z {time}.",
+      "preparing": "Ukládám revizi do telefonu…",
+      "completeOffline": "Dokončení revize potřebuje připojení. Kontroly se zatím ukládají do telefonu.",
+      "completePending": "Nejdřív se musí odeslat, co čeká v telefonu ({count}). Zkouším to.",
+      "completeDecide": "Nejdřív rozhodněte, co se změnami u zařízení {labels}.",
+      "closedCompleted": "Revize byla mezitím dokončena",
+      "closedMissing": "Revize byla mezitím zrušena",
+      "closedPending": "Neodeslané změny u zařízení {labels} už nejde uložit.",
+      "closedSomething": "z tohoto telefonu",
+      "discardAll": "Zahodit neodeslané změny",
+      "leftInPhone": "V telefonu zůstaly neodeslané změny této revize ({count}). Revize je dokončená, uložit už nejdou.",
+      "conflictsTitle": "Kolega mezitím zkontroloval stejná zařízení",
+      "conflictsBody": "Otevřete zařízení {labels} a rozhodněte, čí kontrola platí.",
+      "refusedTitle": "Server některé změny odmítl",
+      "refusedBody": "Otevřete zařízení {labels} a podívejte se proč.",
+      "goneTitle": "Zařízení už v revizi není",
+      "goneBody": "Změny u zařízení {labels} nejde uložit: zařízení bylo mezitím odstraněno, vyřazeno nebo přesunuto do jiné budovy.",
+      "goneDiscard": "Zahodit tyto změny",
+      "notInInspection": "Toto zařízení v revizi není (možná bylo mezitím odstraněno).",
+      "opsRefused": "{count, plural, one {Uzavření # závady server odmítl.} other {Uzavření # závad server odmítl.}}",
+      "decide": "Čeká na vaše rozhodnutí",
+      "decideBody": "{count, plural, one {# kontrola se neodešle, dokud nerozhodnete, co s ní.} few {# kontroly se neodešlou, dokud nerozhodnete, co s nimi.} other {# kontrol se neodešle, dokud nerozhodnete, co s nimi.}}"
     }
   },
   "defects": {
@@ -1853,5 +1909,16 @@
     "code": "Kód chyby: {code}",
     "retry": "Zkusit znovu",
     "home": "Na přehled"
+  },
+  "offline": {
+    "metaTitle": "Bez připojení",
+    "title": "Bez připojení",
+    "body": "Revize uložené v telefonu můžete dělat i bez signálu. Co uděláte, odešle se, jakmile bude spojení.",
+    "list": "Revize v telefonu",
+    "none": "V telefonu není žádná uložená revize. Revize se uloží sama, když ji otevřete s připojením.",
+    "savedAt": "data z {time}",
+    "waiting": "{count, plural, one {# změna čeká} few {# změny čekají} other {# změn čeká}} na odeslání",
+    "retry": "Zkusit znovu",
+    "home": "Přejít na přehled"
   }
 }

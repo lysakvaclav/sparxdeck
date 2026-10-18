@@ -2898,6 +2898,329 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("inspections without a signal", () => {
+    let site: string;
+    let inspection: string;
+    let startedAt: string;
+    let typeA: string;
+    let templateA: string;
+    let devices: string[];
+    let questions: { id: string; item_type: string; required: boolean }[];
+    let aliceName: string;
+
+    beforeAll(async () => {
+      const { data: type } = await alice.client.from("device_types").select("id").limit(1).single();
+      typeA = type!.id;
+      const { data: customer } = await alice.client
+        .from("customers")
+        .insert({ organization_id: orgA, name: "Offline customer" })
+        .select("id")
+        .single();
+      const { data: siteRow } = await alice.client
+        .from("sites")
+        .insert({ organization_id: orgA, customer_id: customer!.id, name: "Offline site" })
+        .select("id")
+        .single();
+      site = siteRow!.id;
+      const { data: rows } = await alice.client
+        .from("devices")
+        .insert(
+          [1, 2, 3, 4, 5].map(() => ({
+            organization_id: orgA,
+            site_id: site,
+            device_type_id: typeA,
+          })),
+        )
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: template } = await alice.client
+        .from("checklist_templates")
+        .select("id, checklist_template_items(id, item_type, required, sort_order)")
+        .eq("device_type_id", typeA)
+        .eq("active", true)
+        .single();
+      templateA = template!.id;
+      questions = [...template!.checklist_template_items].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
+      const { data: started } = await carol.client.rpc("start_inspection", { p_site: site });
+      inspection = started!;
+      const { data: row } = await admin
+        .from("inspections")
+        .select("started_at")
+        .eq("id", inspection)
+        .single();
+      startedAt = row!.started_at;
+      const { data: member } = await admin
+        .from("memberships")
+        .select("display_name")
+        .eq("user_id", alice.id)
+        .eq("organization_id", orgA)
+        .single();
+      aliceName = member!.display_name;
+    });
+
+    /** Every required answer, as the phone sends it. */
+    const allAnswers = (pass: boolean) =>
+      Object.fromEntries(
+        questions
+          .filter((q) => q.required)
+          .map((q) => [
+            q.id,
+            {
+              pass: q.item_type === "pass_fail" ? pass : null,
+              number: q.item_type === "number" ? 12.5 : null,
+              text: q.item_type === "text" ? "OK" : null,
+              note: null,
+              severity: q.item_type === "pass_fail" && !pass ? "minor" : null,
+            },
+          ]),
+      );
+
+    async function claim(client: Client, device: string, extra: Record<string, unknown> = {}) {
+      const { data, error } = await client.rpc("claim_device_check", {
+        p_inspection: inspection,
+        p_device: device,
+        ...extra,
+      } as never);
+      expect(error).toBeNull();
+      return data as {
+        item: string;
+        template?: string;
+        heldBy?: string;
+        conflict?: { name: string; outcome: string | null; checkedAt: string | null };
+      };
+    }
+
+    it("a check done without a signal arrives whole, dated when it was done", async () => {
+      const { item, template } = await claim(carol.client, devices[0]!, {
+        p_template: templateA,
+      });
+      expect(template).toBe(templateA);
+      // Done yesterday, before the inspection started: kept at the start.
+      const { data, error } = await carol.client.rpc("submit_device_check", {
+        p_item: item,
+        p_answers: allAnswers(true),
+        p_notes: "Zkontrolováno bez signálu",
+        p_set_notes: true,
+        p_action: "finish",
+        p_checked_at: new Date(Date.parse(startedAt) - 86_400_000).toISOString(),
+      });
+      expect(error).toBeNull();
+      expect(data).toMatchObject({ outcome: "passed" });
+      const { data: row } = await alice.client
+        .from("inspection_items")
+        .select("outcome, notes, checked_by, checked_at, editing_by")
+        .eq("id", item)
+        .single();
+      expect(row).toMatchObject({
+        outcome: "passed",
+        notes: "Zkontrolováno bez signálu",
+        checked_by: carol.id,
+        editing_by: null,
+      });
+      expect(Date.parse(row!.checked_at!)).toBe(Date.parse(startedAt));
+      const { count } = await admin
+        .from("inspection_answers")
+        .select("id", { count: "exact", head: true })
+        .eq("item_id", item);
+      expect(count).toBe(questions.filter((q) => q.required).length);
+
+      // A time in the future (a phone's wrong clock) is kept at now.
+      const { item: next } = await claim(carol.client, devices[4]!);
+      await carol.client.rpc("submit_device_check", {
+        p_item: next,
+        p_action: "skip",
+        p_skip_reason: "missing",
+        p_checked_at: new Date(Date.now() + 86_400_000).toISOString(),
+      });
+      const { data: skipped } = await admin
+        .from("inspection_items")
+        .select("outcome, skip_reason, checked_at")
+        .eq("id", next)
+        .single();
+      expect(skipped).toMatchObject({ outcome: "not_checked", skip_reason: "missing" });
+      expect(Date.parse(skipped!.checked_at!)).toBeLessThanOrEqual(Date.now() + 5000);
+    });
+
+    it("a colleague's check in the meantime is a conflict the technician decides", async () => {
+      const { item } = await claim(alice.client, devices[1]!);
+      await alice.client.rpc("submit_device_check", {
+        p_item: item,
+        p_answers: allAnswers(true),
+        p_action: "finish",
+      });
+      const { data: done } = await admin
+        .from("inspection_items")
+        .select("checked_at")
+        .eq("id", item)
+        .single();
+
+      // Carol checked it offline, not knowing: her phone saw no check.
+      const conflict = await claim(carol.client, devices[1]!, { p_template: templateA });
+      expect(conflict.conflict).toEqual({
+        name: aliceName,
+        outcome: "passed",
+        skipReason: null,
+        checkedAt: done!.checked_at,
+      });
+      // Nothing changed hands.
+      const { data: untouched } = await admin
+        .from("inspection_items")
+        .select("outcome, editing_by")
+        .eq("id", item)
+        .single();
+      expect(untouched).toEqual({ outcome: "passed", editing_by: null });
+      // A phone that had seen Alice's check may change it: no conflict.
+      const seen = await claim(carol.client, devices[1]!, { p_seen: done!.checked_at });
+      expect(seen.conflict).toBeUndefined();
+
+      // Carol keeps hers: it replaces Alice's answers.
+      const { item: taken } = await claim(carol.client, devices[1]!, {
+        p_template: templateA,
+        p_take_over: true,
+      });
+      const failing = allAnswers(false);
+      const { data } = await carol.client.rpc("submit_device_check", {
+        p_item: taken,
+        p_answers: failing,
+        p_action: "finish",
+        p_replace: true,
+      });
+      expect(data).toMatchObject({ outcome: "failed" });
+      const { data: answers } = await admin
+        .from("inspection_answers")
+        .select("answered_by")
+        .eq("item_id", taken);
+      expect(new Set(answers!.map((a) => a.answered_by))).toEqual(new Set([carol.id]));
+      expect(answers).toHaveLength(Object.keys(failing).length);
+    });
+
+    it("a colleague filling it in right now is reported, and can be taken over", async () => {
+      await claim(alice.client, devices[2]!);
+      const held = await claim(carol.client, devices[2]!);
+      expect(held.heldBy).toBe(aliceName);
+      // Not holding it, Carol can't write to it.
+      const { error } = await carol.client.rpc("submit_device_check", {
+        p_item: held.item,
+        p_action: "save",
+      });
+      expect(error?.message).toMatch(/check_taken_over/);
+      const taken = await claim(carol.client, devices[2]!, { p_take_over: true });
+      expect(taken.heldBy).toBeUndefined();
+      // Saving keeps it open; p_release lets go of it.
+      const { data: saved } = await carol.client.rpc("submit_device_check", {
+        p_item: taken.item,
+        p_answers: { [questions[0]!.id]: allAnswers(true)[questions[0]!.id] ?? {} },
+        p_action: "save",
+        p_release: true,
+      });
+      expect(saved).toEqual({ outcome: null, checkedAt: null });
+      const { data: row } = await admin
+        .from("inspection_items")
+        .select("outcome, editing_by")
+        .eq("id", taken.item)
+        .single();
+      expect(row).toEqual({ outcome: null, editing_by: null });
+    });
+
+    it("answers on another checklist version conflict; taking over switches the version", async () => {
+      const { data: other } = await admin
+        .from("checklist_templates")
+        .insert({
+          organization_id: orgA,
+          device_type_id: typeA,
+          version: 900,
+          name: "Older version",
+          is_sample: false,
+          active: false,
+        } as never)
+        .select("id")
+        .single();
+      const otherTemplate = (other as { id: string }).id;
+      await admin.from("checklist_template_items").insert({
+        organization_id: orgA,
+        template_id: otherTemplate,
+        sort_order: 1,
+        label: "Starší otázka",
+        item_type: "pass_fail",
+        required: true,
+        fail_creates_defect: false,
+      } as never);
+      const { item } = await claim(alice.client, devices[3]!);
+      await alice.client.rpc("submit_device_check", {
+        p_item: item,
+        p_answers: { [questions[0]!.id]: allAnswers(true)[questions[0]!.id] ?? {} },
+        p_action: "save",
+        p_release: true,
+      });
+      const conflict = await claim(carol.client, devices[3]!, { p_template: otherTemplate });
+      expect(conflict.conflict?.name).toBe(aliceName);
+      const taken = await claim(carol.client, devices[3]!, {
+        p_template: otherTemplate,
+        p_take_over: true,
+      });
+      expect(taken.template).toBe(otherTemplate);
+      const { count } = await admin
+        .from("inspection_answers")
+        .select("id", { count: "exact", head: true })
+        .eq("item_id", item);
+      expect(count).toBe(0);
+      // A version of another type is refused.
+      const { data: types } = await admin
+        .from("checklist_templates")
+        .select("id, device_type_id")
+        .eq("organization_id", orgA)
+        .neq("device_type_id", typeA)
+        .limit(1);
+      if (types?.[0]) {
+        const { error } = await carol.client.rpc("claim_device_check", {
+          p_inspection: inspection,
+          p_device: devices[3]!,
+          p_template: types[0].id,
+        });
+        expect(error?.message).toMatch(/not_found/);
+      }
+    });
+
+    it("another company can't claim or submit; bad requests are refused", async () => {
+      const { error: claimError } = await bob.client.rpc("claim_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+      });
+      expect(claimError?.message).toMatch(/not_found/);
+      const { item } = await claim(carol.client, devices[3]!);
+      const { error: submitError } = await bob.client.rpc("submit_device_check", {
+        p_item: item,
+        p_action: "finish",
+      });
+      expect(submitError?.message).toMatch(/not_found/);
+      const refused = async (args: Record<string, unknown>, pattern: RegExp) => {
+        const { error } = await carol.client.rpc("submit_device_check", {
+          p_item: item,
+          ...args,
+        } as never);
+        expect(error?.message).toMatch(pattern);
+      };
+      await refused({ p_action: "delete" }, /invalid_answer/);
+      await refused({ p_action: "skip" }, /invalid_answer/);
+      await refused({ p_action: "finish" }, /check_incomplete/);
+      await refused({ p_answers: [] }, /invalid_answer/);
+
+      // Completed in the office meanwhile (its open checks aside).
+      await admin
+        .from("inspections")
+        .update({ status: "completed", completed_at: new Date().toISOString() } as never)
+        .eq("id", inspection);
+      const { error: closed } = await carol.client.rpc("claim_device_check", {
+        p_inspection: inspection,
+        p_device: devices[3]!,
+      });
+      expect(closed?.message).toMatch(/inspection_closed/);
+    });
+  });
+
   describe("member management", () => {
     async function membershipOf(user: TestUser) {
       const { data } = await admin

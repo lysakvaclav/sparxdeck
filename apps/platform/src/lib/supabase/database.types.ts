@@ -814,6 +814,30 @@ export type Database = {
         Args: { p_inspection: string; p_device: string; p_take_over?: boolean };
         Returns: Json;
       };
+      claim_device_check: {
+        Args: {
+          p_inspection: string;
+          p_device: string;
+          p_template?: string | null;
+          p_seen?: string | null;
+          p_take_over?: boolean;
+        };
+        Returns: Json;
+      };
+      submit_device_check: {
+        Args: {
+          p_item: string;
+          p_answers?: Json;
+          p_notes?: string | null;
+          p_set_notes?: boolean;
+          p_action?: "save" | "finish" | "skip";
+          p_skip_reason?: CheckSkipReason | null;
+          p_checked_at?: string | null;
+          p_replace?: boolean;
+          p_release?: boolean;
+        };
+        Returns: Json;
+      };
       release_device_check: { Args: { p_item: string }; Returns: undefined };
       save_answer: {
         Args: {

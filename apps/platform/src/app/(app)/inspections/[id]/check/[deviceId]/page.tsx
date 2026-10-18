@@ -7,14 +7,17 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { requireMembership } from "@/lib/auth";
-import { deviceName, formatLabel } from "@/lib/devices";
+import { deviceName } from "@/lib/devices";
 import { CALENDAR_FORMAT, calendarDate } from "@/lib/due";
+import { serverEnv } from "@/lib/env";
+import { loadFieldPack } from "@/lib/field-pack";
 import { getInspection, loadQuestions, memberNames } from "@/lib/inspection-data";
 import { EMPTY_ANSWER, type AnswerDraft } from "@/lib/inspections";
 import { ORG_ASSETS_BUCKET, SIGNED_URL_SECONDS } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
-import { DeviceCheck, type CheckPhoto, type OpenDefect } from "./device-check";
+import { FieldApp } from "../../field-app";
+import type { CheckPhoto } from "./device-check";
 
 type Props = { params: Promise<{ id: string; deviceId: string }> };
 
@@ -30,18 +33,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: data ? deviceName(data.type?.name ?? "", data.label_number) : undefined };
 }
 
-/** One device's check within an inspection: the form while in progress, the record after. */
+/**
+ * One device's check within an inspection: in progress, the field app showing
+ * that device (it works without a signal, see FieldApp); completed, the record.
+ */
 export default async function DeviceCheckPage({ params }: Props) {
   const { id, deviceId } = await params;
-  const { organization } = await requireMembership();
+  const { membership } = await requireMembership();
   const inspection = await getInspection(id);
   if (!inspection || !idSchema.safeParse(deviceId).success) notFound();
+  if (inspection.status === "in_progress") {
+    const pack = await loadFieldPack(inspection, {
+      userId: membership.user_id,
+      role: membership.role,
+    });
+    return (
+      <FieldApp
+        initialPack={pack}
+        initialDevice={deviceId}
+        appUrl={serverEnv().NEXT_PUBLIC_APP_URL}
+      />
+    );
+  }
   const t = await getTranslations("inspections");
   const format = await getFormatter();
   const locale = await getLocale();
   const supabase = await createClient();
 
-  const [{ data: device }, { data: item }, { data: defectRows }] = await Promise.all([
+  const [{ data: device }, { data: item }] = await Promise.all([
     supabase
       .from("devices")
       .select(
@@ -56,33 +75,10 @@ export default async function DeviceCheckPage({ params }: Props) {
       .eq("inspection_id", id)
       .eq("device_id", deviceId)
       .maybeSingle(),
-    supabase
-      .from("defects")
-      .select("id, number, description, severity, question:checklist_template_items(label)")
-      .eq("device_id", deviceId)
-      .neq("status", "resolved")
-      .order("created_at"),
   ]);
   if (!device) notFound();
-  const openDefects: OpenDefect[] = (defectRows ?? []).map((defect) => ({
-    id: defect.id,
-    number: defect.number,
-    description: defect.description,
-    severity: defect.severity,
-    question: defect.question?.label ?? null,
-  }));
 
-  // The version this check uses, or the type's current checklist for a new check.
-  let templateId = item?.template_id ?? null;
-  if (!templateId && inspection.status === "in_progress") {
-    const { data: template } = await supabase
-      .from("checklist_templates")
-      .select("id")
-      .eq("device_type_id", device.device_type_id)
-      .eq("active", true)
-      .maybeSingle();
-    templateId = template?.id ?? null;
-  }
+  const templateId = item?.template_id ?? null;
   const questions = templateId ? await loadQuestions(templateId) : [];
 
   const [{ data: answerRows }, { data: photoRows }] = item
@@ -127,7 +123,6 @@ export default async function DeviceCheckPage({ params }: Props) {
     status: "uploaded",
   }));
 
-  const label = formatLabel(device.label_number);
   const title = deviceName(device.type?.name ?? "", device.label_number);
   const overviewHref = `/inspections/${id}`;
   const facts = [
@@ -166,31 +161,6 @@ export default async function DeviceCheckPage({ params }: Props) {
   const factsLine = facts.length > 0 && (
     <p className="mb-2.5 text-ui text-muted-foreground sm:mb-[15px]">{facts.join(" · ")}</p>
   );
-
-  if (inspection.status === "in_progress") {
-    return (
-      <>
-        {header}
-        <PageBody width="narrow">
-          {factsLine}
-          <DeviceCheck
-            key={item?.id ?? "new"}
-            inspectionId={id}
-            deviceId={deviceId}
-            organizationId={organization.id}
-            label={label}
-            questions={questions}
-            initialAnswers={answers}
-            initialNotes={item?.notes ?? ""}
-            initialPhotos={photos}
-            openDefects={openDefects}
-            overviewHref={overviewHref}
-            initialSkip={item?.skip_reason ? { reason: item.skip_reason, note: item.notes } : null}
-          />
-        </PageBody>
-      </>
-    );
-  }
 
   // Completed inspection: what was answered, read-only.
   const names = await memberNames(inspection.organization_id);

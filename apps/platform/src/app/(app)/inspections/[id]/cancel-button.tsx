@@ -8,10 +8,19 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
 import { clearInspectionDrafts } from "@/lib/client/check-drafts";
+import { forgetInspection } from "@/lib/client/offline-store";
+import { removeQueuedPhotos } from "@/lib/client/photo-queue";
 import { cancelInspection } from "../actions";
 
 /** "Cancel inspection" for one started by mistake (whoever started it, owners, admins). */
-export function CancelInspectionButton({ inspectionId }: { inspectionId: string }) {
+export function CancelInspectionButton({
+  inspectionId,
+  disabled = false,
+}: {
+  inspectionId: string;
+  /** Without a signal: cancelling needs the server. */
+  disabled?: boolean;
+}) {
   const t = useTranslations("inspections.cancel");
   const tErr = useTranslations("errors");
   const router = useRouter();
@@ -27,8 +36,10 @@ export function CancelInspectionButton({ inspectionId }: { inspectionId: string 
         toast(tErr(result.error), "danger");
         return;
       }
-      // Unsent answers of this phone belong to the cancelled inspection.
+      // What this phone kept for the cancelled inspection goes with it.
       clearInspectionDrafts(inspectionId);
+      await removeQueuedPhotos(inspectionId);
+      await forgetInspection(inspectionId);
       toast(t("done"), "success");
       router.push(`/sites/${result.data.siteId}`);
     });
@@ -36,7 +47,7 @@ export function CancelInspectionButton({ inspectionId }: { inspectionId: string 
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
+      <Button variant="outline" onClick={() => setOpen(true)} disabled={disabled}>
         <CrossIcon />
         {t("action")}
       </Button>

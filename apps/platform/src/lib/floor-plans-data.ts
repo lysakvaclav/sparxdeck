@@ -44,6 +44,8 @@ export type PlanSummary = {
   locationName: string | null;
   width: number;
   height: number;
+  /** The image in storage (the phone keeps a copy under this key). */
+  imagePath: string;
   /** Short-lived signed URL of the image (null if it couldn't be signed). */
   imageUrl: string | null;
   /** Active devices placed on the plan. */
@@ -98,6 +100,7 @@ export const sitePlans = cache(async (siteId: string): Promise<PlanSummary[]> =>
     locationName: plan.location?.name ?? null,
     width: plan.image_width,
     height: plan.image_height,
+    imagePath: plan.image_path,
     imageUrl: urls.get(plan.image_path) ?? null,
     placed: counts.get(plan.id) ?? 0,
   }));
@@ -255,6 +258,7 @@ export async function organizationPlans(): Promise<PlanListItem[]> {
       locationName: plan.location?.name ?? null,
       width: plan.image_width,
       height: plan.image_height,
+      imagePath: plan.image_path,
       imageUrl: urls.get(plan.image_path) ?? null,
       placed: counts.get(plan.id) ?? 0,
       siteId: plan.site!.id,

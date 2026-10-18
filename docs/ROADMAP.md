@@ -376,7 +376,6 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 **P2 hotové v kódu, odškrtnou se po ověření** (v rámci nejbližší části, která se jich týká):
 - Přihlášení odkazem v e-mailu (část 1) ✉.
 - Ruční zadání čísla štítku při revizi (část 7).
-- Fronta změn a fotek v telefonu a hláška „bez spojení, N změn čeká“ (část 7), základ části 16.
 - Export seznamu termínů do CSV: export zařízení s filtrem termínu (části 10 a 11).
 - Stránkování všech seznamů a indexy na časté dotazy (části 3–11).
 - Tmavý režim a kontrast WCAG AA (část 12), spodní lišta na telefonu (část 8), rychlé akce na úvodní stránce (část 10).
@@ -494,6 +493,45 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 - **Odloženo:** úprava dokončené revize se záznamem patří k verzím protokolu v části 18.
 
 **Od tebe:** projít revizi na telefonu: vynechat zařízení, přidat nalezené, uzavřít závadu po úspěšné kontrole a zrušit zkušební revizi.
+
+### Část 16: Offline naplno
+
+**Stav (2026-10-18): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Uložení do telefonu:**
+  - Stačí revizi otevřít s připojením. Uloží se celá: zařízení v pořadí trasy, stav kontrol, šablony, otevřené závady, půdorysy (obrázky), stránka i soubory aplikace.
+  - Karta v revizi ukazuje „Revize je uložená v telefonu, data z …“. Revizi jde tedy zahájit ráno v kanceláři a do sklepa jít bez signálu.
+- **Bez signálu:**
+  - Stránka revize se otevře i po zavření prohlížeče nebo restartu telefonu. Jiná stránka bez signálu ukáže seznam revizí v telefonu (`/offline`).
+  - Funguje skener štítků, kontrola s fotkami, „Nelze zkontrolovat“ i uzavření závady po vyhovující kontrole. Přepínání mezi seznamem a kontrolou se serveru neptá.
+  - Dokončení revize a přidání nového zařízení potřebují připojení a řeknou to.
+- **Odeslání:**
+  - Každá kontrola se odešle celá najednou, i s časem, kdy ji technik dokončil (ne kdy se vrátil signál). Datum poslední revize je tak správné.
+  - Pak fotky a uzavřené závady. Při výpadku, vypršení přihlášení nebo chybě serveru se nic neztratí a odešle se později.
+- **Slabý signál** (ve sklepě častější než žádný):
+  - Uložená stránka revize se ukáže nejpozději do 4 sekund, i když síť neodpovídá.
+  - Odesílání má u každého požadavku časový limit, takže ho zaseknuté spojení nezastaví. Chyba u jednoho zařízení nezdrží ostatní.
+- **Co čeká:**
+  - Karta stavu: bez signálu / odesílám / „V telefonu čeká: 3 kontroly, 1 fotka“ / čeká na vaše rozhodnutí / vše odesláno.
+  - U zařízení „Nevyhovuje · čeká na odeslání“.
+- **Konflikty:**
+  - S připojením drží kontrolu jeden technik (jako dosud, i s převzetím).
+  - Když kolega zařízení mezitím zkontroloval, technik uvidí jeho výsledek a čas a vybere „Platí moje“ (nahradí jeho kontrolu) nebo „Ponechat kolegovu“ (jeho změny z telefonu se zahodí). Totéž, když kolega odpovídal podle jiné verze šablony.
+  - Revize dokončená nebo zrušená mezitím: telefon řekne, které změny už nejde uložit, a nabídne je zahodit.
+  - Zařízení mezitím odstraněné, vyřazené nebo přesunuté do jiné budovy: telefon změny zkusí odeslat. Když je server odmítne, revize ukáže, u kterých zařízení, a nabídne je zahodit. Do té doby revize nejde dokončit.
+- **Bezpečnost:** odhlášení smaže z telefonu všechno, co v něm z revizí zůstalo (s varováním, když něco čeká). Přihlášení jiného účtu na stejném telefonu smaže data předchozího.
+- **Technicky:**
+  - Migrace `20261021090000_inspections_offline.sql`: `claim_device_check`, `submit_device_check`.
+  - Balíček revize `/inspections/<id>/pack`, service worker `public/sw.js`, klientská aplikace revize `field-app.tsx`.
+- **Ověření:**
+  - 5 testů zabezpečení: čas kontroly, konflikt, převzetí, jiná verze šablony, cizí firma, uzavřená revize.
+  - 16 jednotkových testů (`tests/field.test.ts`).
+  - E2E `e2e/part16.mjs`: 10 kroků, síť vypnutá stránce i service workeru, odstraněné zařízení, slabý signál (zpoždění 20 s), tmavý režim a angličtina. Test slabého signálu bez časového limitu prokazatelně selže (20,4 s).
+  - Celá sada e2e (části 1–16) a audit přístupnosti včetně stránky `/offline`.
+
+**Od tebe:** vyzkoušet.
+- **Na počítači (localhost):** otevřít revizi, vypnout Wi-Fi, udělat pár kontrol, stránku zavřít a znovu otevřít, Wi-Fi zapnout a sledovat kartu stavu.
+- **Na telefonu po nasazení:** service worker potřebuje HTTPS, na adrese z místní sítě nefunguje. Stejný postup s režimem letadlo, včetně zavření a znovuotevření aplikace.
 
 ---
 
