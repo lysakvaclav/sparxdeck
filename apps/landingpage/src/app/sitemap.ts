@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { locales } from '@/i18n/dictionary';
+import { defaultLocale, locales } from '@/i18n/dictionary';
 import { SITE } from '@/config/site';
 
 type Entry = {
@@ -10,7 +10,7 @@ type Entry = {
 
 const pages: Entry[] = [
   // Home
-  { path: '', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '', changeFrequency: 'weekly', priority: 1 },
 
   // Product pages
   { path: '/equipment-register', changeFrequency: 'monthly', priority: 0.6 },
@@ -32,18 +32,27 @@ const pages: Entry[] = [
   { path: '/cookies', changeFrequency: 'yearly', priority: 0.2 },
 ];
 
+/** Every language's URL of one page, for that page's hreflang cluster (reciprocal, with x-default). */
+function languagesOf(path: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const locale of locales) languages[locale] = `${SITE.url}/${locale}${path}`;
+  // "/" redirects here, so it's the address search results should show for an
+  // unmatched language rather than any one locale's own page.
+  languages['x-default'] = `${SITE.url}/${defaultLocale}${path}`;
+  return languages;
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  return [
-    { url: `${SITE.url}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    ...locales.flatMap((locale) =>
-      pages.map((page) => ({
-        url: `${SITE.url}/${locale}${page.path}`,
-        lastModified: now,
-        changeFrequency: page.changeFrequency,
-        priority: page.priority,
-      })),
-    ),
-  ];
+  return pages.flatMap((page) => {
+    const languages = languagesOf(page.path);
+    return locales.map((locale) => ({
+      url: languages[locale]!,
+      lastModified: now,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+      alternates: { languages },
+    }));
+  });
 }
