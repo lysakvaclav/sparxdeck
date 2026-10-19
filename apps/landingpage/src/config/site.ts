@@ -7,13 +7,13 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.sparxdeck.com";
 export const SITE = {
   name: "SparxDeck",
   url: siteUrl,
-  email: "hello@sparxdeck.com",
+  email: "info@sparxdeck.com",
   /** The SparxDeck web app. */
   appUrl,
   loginUrl: `${appUrl}/login`,
   signupUrl: `${appUrl}/signup`,
   /** Where "book a demo" CTAs point (swap for a cal.com link once it exists). */
-  bookingUrl: "mailto:hello@sparxdeck.com?subject=SparxDeck%20demo",
+  bookingUrl: "mailto:info@sparxdeck.com?subject=SparxDeck%20demo",
   /** Social profiles; leave null to hide the button. */
   social: {
     linkedin: null as string | null,
