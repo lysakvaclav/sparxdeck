@@ -23,7 +23,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
     <div className="relative flex min-h-screen flex-col">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-48 bg-gradient-to-b from-[var(--background)] via-[var(--background)] to-transparent md:h-64" />
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-6 pb-16 pt-10 md:px-8 lg:px-12 md:pt-12 lg:pt-12">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <Link
             href={`/${locale}`}
             aria-label={dict.common.backToHome}
