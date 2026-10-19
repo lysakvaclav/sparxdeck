@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { locales, shortLabel, type FooterDictionary, type Locale } from "@/i18n/dictionary";
 import { FooterThemeToggle } from "@/components/layout/FooterThemeToggle";
+import { LocaleFlag } from "@/components/layout/LocaleFlag";
 import { SITE } from "@/config/site";
 
 const footerLocales = locales;
@@ -63,8 +64,9 @@ export function Footer({ locale, dict }: { locale: Locale; dict: FooterDictionar
                   key={code}
                   type="button"
                   onClick={() => handleLocaleClick(code)}
-                  className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
                 >
+                  <LocaleFlag code={code} />
                   {shortLabel(code)}
                 </button>
               ))}

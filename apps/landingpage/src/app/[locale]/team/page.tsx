@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { TeamSection } from "@/components/sections/TeamSection";
 import { getDictionary, locales, shortLabel, type Locale } from "@/i18n/dictionary";
 import { FooterThemeToggle } from "@/components/layout/FooterThemeToggle";
+import { LocaleFlag } from "@/components/layout/LocaleFlag";
 import { SITE } from "@/config/site";
 
 const footerLocales = locales;
@@ -36,8 +37,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
               <Link
                 key={code}
                 href={`/${code}/team`}
-                className="button-font text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
+                className="button-font inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
               >
+                <LocaleFlag code={code} />
                 {shortLabel(code)}
               </Link>
             ))}
