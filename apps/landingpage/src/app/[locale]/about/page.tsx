@@ -52,7 +52,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
     <div className="relative flex min-h-screen flex-col">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-48 bg-gradient-to-b from-[var(--background)] via-[var(--background)] to-transparent md:h-64" />
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-6 pb-16 pt-10 md:px-8 lg:px-12 md:pt-12 lg:pt-12">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <Link
             href={`/${locale}`}
             aria-label={dict.common.backToHome}
@@ -60,12 +60,12 @@ export default async function AboutPage({ params }: AboutPageProps) {
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
           </Link>
-          <div className="flex flex-wrap items-center gap-3 text-xs md:gap-4">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs">
             {footerLocales.map((code) => (
               <Link
                 key={code}
                 href={`/${code}/about`}
-                className="button-font inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
+                className="button-font inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
               >
                 <LocaleFlag code={code} />
                 {shortLabel(code)}

@@ -58,13 +58,13 @@ export function Footer({ locale, dict }: { locale: Locale; dict: FooterDictionar
                 {dict.cookiesSettings}
               </Link>
             </div>
-            <div className="mt-2 flex flex-wrap gap-3 text-xs">
+            <div className="mt-2 flex flex-wrap gap-x-2.5 gap-y-1 text-xs">
               {footerLocales.map((code) => (
                 <button
                   key={code}
                   type="button"
                   onClick={() => handleLocaleClick(code)}
-                  className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.1em] text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
                 >
                   <LocaleFlag code={code} />
                   {shortLabel(code)}
