@@ -1036,6 +1036,130 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
         .eq("organization_id", org);
       expect(count).toBe(0);
     });
+
+    // Its own organization (not orgA): other blocks assume orgA keeps exactly
+    // the one seeded device type, and first's building is soft-deleted by now.
+    describe("custom types and device photos (a fresh organization)", () => {
+      let frank: TestUser;
+      let org: string;
+      let site: string;
+      let device: string;
+
+      beforeAll(async () => {
+        frank = await createUser("frank");
+        org = await createOrg(frank, `RLS custom ${run}`);
+        const { data: customer } = await frank.client
+          .from("customers")
+          .insert({ organization_id: org, name: "C" })
+          .select("id")
+          .single();
+        const { data: s } = await frank.client
+          .from("sites")
+          .insert({ organization_id: org, customer_id: customer!.id, name: "S" })
+          .select("id")
+          .single();
+        site = s!.id;
+        const { data: type } = await frank.client.from("device_types").select("id").single();
+        const { data: d } = await frank.client
+          .from("devices")
+          .insert({ organization_id: org, site_id: site, device_type_id: type!.id })
+          .select("id")
+          .single();
+        device = d!.id;
+      });
+
+      it("the owner adds a custom type with its own fields; another company can't see or change it", async () => {
+        const { data: created, error } = await frank.client
+          .from("device_types")
+          .insert({
+            organization_id: org,
+            code: `hydrant_${run}`,
+            name: "Hydrant",
+            inspection_interval_months: 12,
+            custom_fields: [{ key: "diameter", label: "Průměr" }],
+          })
+          .select("id, custom_fields")
+          .single();
+        expect(error).toBeNull();
+        expect(created?.custom_fields).toEqual([{ key: "diameter", label: "Průměr" }]);
+
+        // Not a member of this organization at all (owner/admin-only is already
+        // covered by customers_insert's and sites_insert's own tests).
+        const { error: bobInsert } = await bob.client.from("device_types").insert({
+          organization_id: org,
+          code: `planted_${run}`,
+          name: "Planted",
+          inspection_interval_months: 12,
+        });
+        expect(bobInsert).not.toBeNull();
+
+        const { data: bobsView } = await bob.client
+          .from("device_types")
+          .select("id")
+          .eq("id", created!.id);
+        expect(bobsView).toEqual([]);
+        const { data: bobWrite } = await bob.client
+          .from("device_types")
+          .update({ custom_fields: [] } as never)
+          .eq("id", created!.id)
+          .select("id");
+        expect(bobWrite).toEqual([]);
+      });
+
+      it("device photos go to the device's own folder of its own company", async () => {
+        const png = Uint8Array.from(
+          atob(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+          ),
+          (c) => c.charCodeAt(0),
+        );
+        const path = `${org}/devices/${device}/photo-${run}.png`;
+        const { error: upload } = await frank.client.storage
+          .from("org-assets")
+          .upload(path, png, { contentType: "image/png" });
+        expect(upload).toBeNull();
+        const { data: photoId, error } = await frank.client.rpc("add_device_photo", {
+          p_device: device,
+          p_path: path,
+          p_content_type: "image/png",
+          p_size: png.length,
+        });
+        expect(error).toBeNull();
+
+        // Another company's device, or a path outside this device's own folder.
+        const { error: bobUpload } = await bob.client.storage
+          .from("org-assets")
+          .upload(`${org}/devices/${device}/bob-${run}.png`, png, { contentType: "image/png" });
+        expect(bobUpload).not.toBeNull();
+        const { error: elsewhere } = await frank.client.rpc("add_device_photo", {
+          p_device: device,
+          p_path: `${org}/devices/${bob.id}/photo-${run}.png`,
+          p_content_type: "image/png",
+          p_size: png.length,
+        });
+        expect(elsewhere?.message).toMatch(/not_found/);
+        const { error: foreignDevice } = await bob.client.rpc("add_device_photo", {
+          p_device: device,
+          p_path: `${org}/devices/${device}/bob2-${run}.png`,
+          p_content_type: "image/png",
+          p_size: png.length,
+        });
+        expect(foreignDevice?.message).toMatch(/not_found/);
+        const { data: bobsPhotos } = await bob.client
+          .from("device_photos")
+          .select("id")
+          .eq("device_id", device);
+        expect(bobsPhotos).toEqual([]);
+
+        const { data: deletedPath, error: deleteError } = await frank.client.rpc(
+          "delete_device_photo",
+          { p_photo: photoId! },
+        );
+        expect(deleteError).toBeNull();
+        expect(deletedPath).toBe(path);
+        await frank.client.storage.from("org-assets").remove([path]);
+      });
+    });
   });
 
   describe("inspections", () => {

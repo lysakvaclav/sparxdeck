@@ -109,6 +109,10 @@ try {
     "devices",
     `organization_id=eq.${org}&select=id&order=label_number&limit=1`,
   );
+  const [type] = await selectRows(
+    "device_types",
+    `organization_id=eq.${org}&select=id&order=created_at&limit=1`,
+  );
   const [defect] = await selectRows("defects", `organization_id=eq.${org}&select=id`);
   const [plan] = await selectRows(
     "floor_plans",
@@ -130,6 +134,9 @@ try {
     ["defect-new", "/defects/new"],
     ["inspections", "/inspections"],
     ["device-types", "/device-types"],
+    ["device-type", `/device-types/${type.id}`],
+    ["device-type-new", "/device-types/new"],
+    ["device-type-edit", `/device-types/${type.id}/edit`],
     ["team", "/team"],
     ["settings", "/settings"],
     ["account", "/account"],

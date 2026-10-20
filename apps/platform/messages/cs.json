@@ -298,7 +298,10 @@
     "importInvalid": "Data importu nejsou platná. Nahrajte soubor znovu.",
     "importInUse": "Import už nejde vrátit: s jeho záznamy se už pracovalo (revize, závady, půdorysy nebo nová zařízení).",
     "importUndone": "Import už je vrácený.",
-    "deviceExists": "Zařízení s tímto výrobním číslem už v budově je. Najděte ho v seznamu."
+    "deviceExists": "Zařízení s tímto výrobním číslem už v budově je. Najděte ho v seznamu.",
+    "fieldKeyInvalid": "Neplatný klíč pole.",
+    "fieldsTooMany": "Nejvýš 8 vlastních polí.",
+    "fieldKeyDuplicate": "Dvě pole nemohou mít stejný klíč."
   },
   "email": {
     "invite": {
@@ -1111,7 +1114,14 @@
       "name": "Název typu",
       "interval": "Interval revize",
       "intervalSuffix": "měsíců",
-      "intervalHint": "Jak často se zařízení tohoto typu kontroluje. Použije se pro výpočet termínů; ověřte hodnotu podle předpisů a praxe."
+      "intervalHint": "Jak často se zařízení tohoto typu kontroluje. Použije se pro výpočet termínů; ověřte hodnotu podle předpisů a praxe.",
+      "newTitle": "Nový typ zařízení",
+      "fields": "Vlastní pole",
+      "fieldsHint": "Údaje specifické pro tento typ zařízení (např. hasivo, velikost). Zobrazí se ve formuláři zařízení a na jeho stránce.",
+      "addField": "Přidat pole",
+      "fieldLabel": "Název pole",
+      "fieldLabelPlaceholder": "např. Hasivo",
+      "removeField": "Odebrat pole: {name}"
     },
     "editor": {
       "title": "Upravit šablonu kontroly",
@@ -1138,7 +1148,8 @@
       "save": "Uložit jako verzi {version}",
       "savedVersion": "Šablona uložena jako verze {version}.",
       "unchanged": "Beze změn, aktivní zůstává verze {version}."
-    }
+    },
+    "newType": "Nový typ"
   },
   "devices": {
     "title": "Zařízení",
@@ -1214,10 +1225,6 @@
       "manufacturer": "Výrobce",
       "model": "Model",
       "manufactureYear": "Rok výroby",
-      "agent": "Hasivo",
-      "agentPlaceholder": "např. prášek",
-      "size": "Velikost / náplň",
-      "sizePlaceholder": "např. 6 kg",
       "installedOn": "Datum instalace",
       "inspection": "Revize",
       "lastInspectionOn": "Poslední revize",
@@ -1237,7 +1244,9 @@
       "sharedHint": "Vyplněné údaje dostanou všechna přidaná zařízení. Jednotlivě je upravíte později.",
       "bulkCreate": "Přidat {count} zařízení",
       "created": "Zařízení přidáno se štítkem {label}.",
-      "bulkCreated": "Přidáno zařízení: {count}. Štítky {from}–{to}."
+      "bulkCreated": "Přidáno zařízení: {count}. Štítky {from}–{to}.",
+      "endOfLifeOn": "Konec životnosti",
+      "endOfLifeHint": "Kdy zařízení doporučit vyměnit."
     },
     "detail": {
       "properties": "Vlastnosti",
@@ -1264,7 +1273,16 @@
       "notes": "Poznámky",
       "added": "Přidáno",
       "deleteTitle": "Smazat zařízení?",
-      "deleteBody": "Zařízení zmizí ze seznamů. Jeho číslo štítku se už znovu nepoužije."
+      "deleteBody": "Zařízení zmizí ze seznamů. Jeho číslo štítku se už znovu nepoužije.",
+      "photos": "Fotky",
+      "addPhoto": "Přidat fotku",
+      "noPhotos": "Zatím žádné fotky.",
+      "photoAlt": "Fotka {number}",
+      "removePhoto": "Odebrat fotku {number}",
+      "endOfLifeOn": "Konec životnosti",
+      "endOfLifeSoonTitle": "Blíží se konec životnosti",
+      "endOfLifeOverdueTitle": "Po konci životnosti",
+      "endOfLifeBody": "Zařízení doporučujeme vyměnit do {date}."
     },
     "siteCard": {
       "add": "Přidat zařízení",
@@ -1279,6 +1297,16 @@
       "result": "Výsledek",
       "checkedBy": "Zkontroloval",
       "empty": "Zatím žádná dokončená revize."
+    },
+    "bulkEdit": {
+      "selected": "Vybráno {count}",
+      "selectAll": "Vybrat vše",
+      "selectOne": "Vybrat: {label}",
+      "keepLocation": "Lokace beze změny",
+      "keepStatus": "Stav beze změny",
+      "apply": "Použít",
+      "clear": "Zrušit výběr",
+      "done": "{count, plural, one {Upraveno # zařízení} few {Upraveny # zařízení} other {Upraveno # zařízení}}"
     }
   },
   "labels": {
@@ -1818,7 +1846,8 @@
       "nextDue": "Příští revize",
       "due": "Termín",
       "notes": "Poznámky",
-      "qr": "Odkaz v QR kódu"
+      "qr": "Odkaz v QR kódu",
+      "endOfLife": "Konec životnosti"
     },
     "inspections": {
       "completed": "Dokončeno",

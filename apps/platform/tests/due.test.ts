@@ -15,9 +15,12 @@ import {
 import {
   buildAttributes,
   deviceName,
+  deviceTypeFields,
   formatLabel,
   labelQuery,
   readAttributes,
+  slugifyCode,
+  type DeviceTypeField,
 } from "@/lib/devices";
 import { bulkDevicesSchema, deviceEditSchema, deviceSchema } from "@/lib/validation";
 import { NEXT_DUE_CASES } from "./fixtures/due-cases";
@@ -164,16 +167,41 @@ describe("device helpers", () => {
       expect(labelQuery(bad), bad).toBeNull();
   });
 
+  const fireFields: DeviceTypeField[] = [
+    { key: "agent", label: "Hasivo" },
+    { key: "size", label: "Velikost" },
+  ];
+
   it("keeps only the attributes of the device's type", () => {
     expect(
-      buildAttributes("fire_extinguisher", { agent: " prášek ", size: "", model: "x" } as never),
+      buildAttributes(fireFields, { agent: " prášek ", size: "", model: "x" } as never),
     ).toEqual({
       agent: "prášek",
     });
-    expect(buildAttributes("hydrant", { agent: "prášek" })).toEqual({});
-    expect(readAttributes({ agent: "CO2", size: 6, extra: "x" })).toEqual({ agent: "CO2" });
-    expect(readAttributes(null)).toEqual({});
-    expect(readAttributes(["agent"])).toEqual({});
+    expect(buildAttributes([], { agent: "prášek" })).toEqual({});
+    expect(readAttributes({ agent: "CO2", size: 6, extra: "x" }, fireFields)).toEqual({
+      agent: "CO2",
+    });
+    expect(readAttributes(null, fireFields)).toEqual({});
+    expect(readAttributes(["agent"], fireFields)).toEqual({});
+  });
+
+  it("reads a type's own fields, dropping anything malformed", () => {
+    expect(deviceTypeFields(fireFields)).toEqual(fireFields);
+    expect(deviceTypeFields(null)).toEqual([]);
+    expect(deviceTypeFields("agent")).toEqual([]);
+    expect(deviceTypeFields([{ key: "ok", label: "Ok" }, { key: "Bad Key", label: "x" }, "junk", { label: "no key" }])).toEqual([
+      { key: "ok", label: "Ok" },
+    ]);
+  });
+
+  it("derives a technical code from a type's name", () => {
+    expect(slugifyCode("Hydrant")).toBe("hydrant");
+    expect(slugifyCode("Nouzové osvětlení")).toBe("nouzove_osvetleni");
+    expect(slugifyCode("  ")).toBe("t_");
+    expect(slugifyCode("123")).toBe("t_123");
+    expect(slugifyCode("A")).toBe("a0");
+    expect(/^[a-z][a-z0-9_]{1,40}$/.test(slugifyCode("!@#"))).toBe(true);
   });
 });
 
@@ -187,10 +215,10 @@ describe("device validation", () => {
     manufacturer: "",
     model: "",
     manufactureYear: "",
-    agent: "",
-    size: "",
+    customFields: {},
     installedOn: "",
     lastInspectionOn: "",
+    endOfLifeOn: "",
     notes: "",
   };
 

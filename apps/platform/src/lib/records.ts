@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { deviceTypeFields, type DeviceTypeField } from "@/lib/devices";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
@@ -44,7 +45,7 @@ export const getDevice = cache(async (id: string) => {
   const { data } = await supabase
     .from("devices")
     .select(
-      "*, site:sites(id, name, customer:customers(id, name)), location:locations(id, name), type:device_types(id, code, name, inspection_interval_months)",
+      "*, site:sites(id, name, customer:customers(id, name)), location:locations(id, name), type:device_types(id, code, name, inspection_interval_months, custom_fields)",
     )
     .eq("id", id)
     .is("deleted_at", null)
@@ -65,6 +66,7 @@ export type DeviceTypeOption = {
   code: string;
   name: string;
   intervalMonths: number;
+  customFields: DeviceTypeField[];
 };
 
 const collator = new Intl.Collator("cs", { sensitivity: "base", numeric: true });
@@ -84,7 +86,7 @@ export const getDeviceFormOptions = cache(async (organizationId: string) => {
     ),
     supabase
       .from("device_types")
-      .select("id, code, name, inspection_interval_months")
+      .select("id, code, name, inspection_interval_months, custom_fields")
       .eq("organization_id", organizationId)
       .eq("active", true)
       .order("name"),
@@ -109,6 +111,7 @@ export const getDeviceFormOptions = cache(async (organizationId: string) => {
     code: type.code,
     name: type.name,
     intervalMonths: type.inspection_interval_months,
+    customFields: deviceTypeFields(type.custom_fields),
   }));
   return { sites: siteOptions, types: typeOptions };
 });

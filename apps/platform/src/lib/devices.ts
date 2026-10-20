@@ -36,39 +36,70 @@ export function labelQuery(input: string): number | null {
   return value > 0 ? value : null;
 }
 
-// Type-specific details kept in devices.attributes. Which fields a type has is a
-// form layout, not a rule: the values are free text.
-export const DEVICE_ATTRIBUTES = ["agent", "size"] as const;
-export type DeviceAttribute = (typeof DEVICE_ATTRIBUTES)[number];
+// Type-specific details kept in devices.attributes (fire extinguisher: agent,
+// size; a firm's own type: whatever it defines). Which fields a type has is
+// data on the type (device_types.custom_fields), not a hardcoded lookup by
+// code: any type, seeded or custom, works the same way.
 
-const ATTRIBUTES_BY_TYPE: Record<string, readonly DeviceAttribute[]> = {
-  fire_extinguisher: ["agent", "size"],
-};
+/** One custom field a device type defines: a key into attributes and its label. */
+export type DeviceTypeField = { key: string; label: string };
 
-export function attributeFields(typeCode: string | null | undefined): readonly DeviceAttribute[] {
-  return (typeCode && ATTRIBUTES_BY_TYPE[typeCode]) || [];
-}
+/** A field's key: short, lowercase, stable (the column it writes doesn't change). */
+export const FIELD_KEY = /^[a-z][a-z0-9_]{1,40}$/;
+export const MAX_DEVICE_TYPE_FIELDS = 8;
+export const FIELD_LABEL_MAX = 60;
 
-/** The known attributes of a device as strings (anything else is ignored). */
-export function readAttributes(value: Json): Partial<Record<DeviceAttribute, string>> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  const result: Partial<Record<DeviceAttribute, string>> = {};
-  for (const key of DEVICE_ATTRIBUTES) {
-    const entry = value[key];
-    if (typeof entry === "string" && entry.trim()) result[key] = entry;
+/** The type's fields from its stored JSON, dropping anything malformed. */
+export function deviceTypeFields(value: Json): DeviceTypeField[] {
+  if (!Array.isArray(value)) return [];
+  const result: DeviceTypeField[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const key = entry.key;
+    const label = entry.label;
+    if (typeof key === "string" && typeof label === "string" && FIELD_KEY.test(key))
+      result.push({ key, label });
   }
   return result;
 }
 
+/** The device's values for the type's own fields, by key (anything else is ignored). */
+export function readAttributes(
+  value: Json,
+  fields: readonly DeviceTypeField[],
+): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result: Record<string, string> = {};
+  for (const field of fields) {
+    const entry = value[field.key];
+    if (typeof entry === "string" && entry.trim()) result[field.key] = entry;
+  }
+  return result;
+}
+
+/** A device type's technical code, derived from its name ("Hydrant" → "hydrant"). */
+export function slugifyCode(name: string): string {
+  const ascii = name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // diacritics
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  const prefixed = /^[a-z]/.test(ascii) ? ascii : `t_${ascii}`;
+  const base = (prefixed || "type").slice(0, 40);
+  // The database requires a letter plus at least one more character.
+  return base.length >= 2 ? base : `${base}0`;
+}
+
 /** Attributes to store for a type: only its own fields, empty ones left out. */
 export function buildAttributes(
-  typeCode: string,
-  values: Partial<Record<DeviceAttribute, string | null>>,
+  fields: readonly DeviceTypeField[],
+  values: Readonly<Record<string, string | null | undefined>>,
 ): Record<string, string> {
   const result: Record<string, string> = {};
-  for (const key of attributeFields(typeCode)) {
-    const entry = values[key]?.trim();
-    if (entry) result[key] = entry;
+  for (const field of fields) {
+    const entry = values[field.key]?.trim();
+    if (entry) result[field.key] = entry;
   }
   return result;
 }

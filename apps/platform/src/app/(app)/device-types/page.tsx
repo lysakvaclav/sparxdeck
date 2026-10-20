@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { CubeIcon } from "@/components/icons";
+import { AddIcon, CubeIcon } from "@/components/icons";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   RowLink,
@@ -48,6 +50,16 @@ export default async function DeviceTypesPage() {
         iconClassName={app.tone}
         title={t("title")}
         breadcrumbs={[{ label: organization.name, href: "/" }]}
+        actions={
+          manager && (
+            <Button asChild>
+              <Link href="/device-types/new">
+                <AddIcon />
+                {t("newType")}
+              </Link>
+            </Button>
+          )
+        }
       />
       <PageBody>
         {!manager && <Alert className="mb-[15px]">{t("readOnly")}</Alert>}

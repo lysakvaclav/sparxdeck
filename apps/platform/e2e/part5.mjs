@@ -117,8 +117,8 @@ try {
     await page.waitForText("Zadejte celé číslo od 1 do 100.");
     await setValue("#count", "20");
     await page.type("#manufacturer", "Hasco");
-    await page.type("#agent", "prášek");
-    await page.type("#size", "6 kg");
+    await page.type("#field-agent", "prášek");
+    await page.type("#field-size", "6 kg");
     // Inspected on paper 12 months minus 10 days ago: due in about 10 days.
     await setValue("#lastInspectionOn", addDays(addMonths(today, -12), 10));
     await page.waitForText("Příští revize:");

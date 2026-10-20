@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { DEFECT_SEVERITIES } from "@/lib/defects";
-import { BULK_MAX, DEVICE_STATUSES } from "@/lib/devices";
+import { BULK_MAX, DEVICE_STATUSES, FIELD_KEY, FIELD_LABEL_MAX, MAX_DEVICE_TYPE_FIELDS } from "@/lib/devices";
 import { addDays, isIsoDate, todayInTimeZone } from "@/lib/due";
 import {
   CUSTOM_LIMITS,
@@ -190,6 +190,20 @@ export const idListSchema = z.array(idSchema).max(500);
 
 export const INTERVAL_MONTHS = { min: 1, max: 120 } as const;
 
+export const deviceTypeFieldSchema = z.object({
+  key: z.string().regex(FIELD_KEY, "fieldKeyInvalid"),
+  label: name(FIELD_LABEL_MAX),
+});
+
+const deviceTypeFields = z
+  .array(deviceTypeFieldSchema)
+  .max(MAX_DEVICE_TYPE_FIELDS, "fieldsTooMany")
+  .refine(
+    (fields) => new Set(fields.map((field) => field.key)).size === fields.length,
+    "fieldKeyDuplicate",
+  );
+
+/** Name, interval and type-specific fields; also used to create a custom type. */
 export const deviceTypeSchema = z.object({
   name: name(120),
   interval: z.coerce
@@ -197,6 +211,7 @@ export const deviceTypeSchema = z.object({
     .int("intervalInvalid")
     .min(INTERVAL_MONTHS.min, "intervalInvalid")
     .max(INTERVAL_MONTHS.max, "intervalInvalid"),
+  fields: deviceTypeFields,
 });
 
 export const CHECKLIST_ITEM_TYPES = ["pass_fail", "number", "text"] as const;
@@ -243,6 +258,15 @@ const pastDate = (earliest: string) =>
       .refine(notInFuture, "dateInFuture"),
   );
 
+/** Optional calendar date with no "not in the future" limit (end of life: ahead, not behind). */
+const anyDate = (earliest: string) =>
+  optional(
+    z
+      .string()
+      .refine(isIsoDate, { message: "dateInvalid", abort: true })
+      .refine((value) => value >= earliest, { message: "dateInvalid", abort: true }),
+  );
+
 const manufactureYear = optional(
   z
     .string()
@@ -253,16 +277,19 @@ const manufactureYear = optional(
 
 const requiredId = z.string().min(1, "required").pipe(z.uuid("required"));
 
+/** The type's own fields, by key; unknown keys are the server's problem to drop. */
+const customFields = z.record(z.string(), z.string().max(200, "tooLong")).optional();
+
 const deviceFields = {
   deviceTypeId: requiredId,
   locationId: optional(z.uuid("notFound")),
   manufacturer: optional(z.string().max(120, "tooLong")),
   model: optional(z.string().max(120, "tooLong")),
   manufactureYear,
-  agent: optional(z.string().max(60, "tooLong")),
-  size: optional(z.string().max(40, "tooLong")),
+  customFields,
   installedOn: pastDate("1950-01-01"),
   lastInspectionOn: pastDate("1990-01-01"),
+  endOfLifeOn: anyDate("1950-01-01"),
   notes: optional(z.string().max(5000, "tooLong")),
 };
 
@@ -306,9 +333,24 @@ export const bulkDevicesSchema = z
     { message: "serialCountMismatch", path: ["serialNumbers"] },
   );
 
+/** Moving several devices to another location, or changing their status, at once. */
+export const bulkEditDevicesSchema = z
+  .object({
+    deviceIds: idListSchema.min(1, "required").max(BULK_MAX, "countInvalid"),
+    // Explicit presence, not just a non-empty string: "" means "no location" for
+    // locationId, but absence means "don't touch this field" for the bulk edit.
+    locationId: z.uuid("notFound").nullable().optional(),
+    status: z.enum(DEVICE_STATUSES).optional(),
+  })
+  .refine((values) => values.locationId !== undefined || values.status !== undefined, {
+    message: "required",
+    path: ["status"],
+  });
+
 export type DeviceInput = z.input<typeof deviceSchema>;
 export type DeviceEditInput = z.input<typeof deviceEditSchema>;
 export type BulkDevicesInput = z.input<typeof bulkDevicesSchema>;
+export type BulkEditDevicesInput = z.input<typeof bulkEditDevicesSchema>;
 
 // ---------------------------------------------------------------------------
 // Label printing
@@ -459,8 +501,7 @@ export const importRecordSchema = z.object({
       manufacturer: deviceFields.manufacturer,
       model: deviceFields.model,
       manufactureYear: deviceFields.manufactureYear,
-      agent: deviceFields.agent,
-      size: deviceFields.size,
+      customFields: deviceFields.customFields,
       installedOn: deviceFields.installedOn,
       lastInspectionOn: deviceFields.lastInspectionOn,
       notes: deviceFields.notes,
@@ -489,8 +530,7 @@ export const inspectionDeviceSchema = z.object({
   manufacturer: deviceFields.manufacturer,
   model: deviceFields.model,
   manufactureYear: deviceFields.manufactureYear,
-  agent: deviceFields.agent,
-  size: deviceFields.size,
+  customFields: deviceFields.customFields,
   notes: optional(z.string().max(2000, "tooLong")),
 });
 

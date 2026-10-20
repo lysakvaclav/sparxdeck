@@ -1,3 +1,4 @@
+import type { DeviceTypeField } from "@/lib/devices";
 import {
   answerPayload,
   isAnswered,
@@ -70,7 +71,12 @@ export type FieldPlan = {
   imageUrl: string;
 };
 
-export type FieldDeviceType = { id: string; name: string; code: string };
+export type FieldDeviceType = {
+  id: string;
+  name: string;
+  code: string;
+  customFields: DeviceTypeField[];
+};
 export type FieldLocation = { id: string; name: string };
 
 /** A device that left the inspection while the phone had work for it (see mergePack). */

@@ -2,15 +2,66 @@
 
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/auth";
+import { slugifyCode } from "@/lib/devices";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 import { checklistTemplateSchema, deviceTypeSchema, idSchema } from "@/lib/validation";
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 function revalidateTypes() {
   revalidatePath("/device-types", "layout");
 }
 
-/** Name and inspection interval. Saving also confirms the seeded sample interval. */
+/** Up to 20 tries at a free code before giving up (astronomically unlikely). */
+async function insertWithUniqueCode(
+  supabase: Supabase,
+  organizationId: string,
+  base: string,
+  row: { name: string; inspection_interval_months: number; custom_fields: Json },
+) {
+  for (let attempt = 1; attempt <= 20; attempt++) {
+    const code = attempt === 1 ? base : `${base}_${attempt}`.slice(0, 40);
+    const { data, error } = await supabase
+      .from("device_types")
+      .insert({ organization_id: organizationId, code, ...row })
+      .select("id")
+      .single();
+    if (!error) return { data, error: null };
+    if (error.code !== "23505") return { data: null, error };
+  }
+  return { data: null, error: { code: "23505", message: "code taken" } };
+}
+
+/** A device type the organization adds itself, with its own fields. */
+export async function createDeviceType(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const active = await requireManager();
+  if (!active) return { ok: false, error: "forbidden" };
+  const parsed = deviceTypeSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+
+  const supabase = await createClient();
+  const { data, error } = await insertWithUniqueCode(
+    supabase,
+    active.organization.id,
+    slugifyCode(parsed.data.name),
+    {
+      name: parsed.data.name,
+      inspection_interval_months: parsed.data.interval,
+      custom_fields: parsed.data.fields,
+    },
+  );
+  if (error) return { ok: false, error: databaseErrorCode(error) };
+  if (!data) return { ok: false, error: "unexpected" };
+
+  revalidateTypes();
+  return { ok: true, data: { id: data.id } };
+}
+
+/** Name, interval and fields. Saving also confirms the seeded sample interval. */
 export async function updateDeviceType(id: string, input: unknown): Promise<ActionResult> {
   const active = await requireManager();
   if (!active) return { ok: false, error: "forbidden" };
@@ -24,6 +75,7 @@ export async function updateDeviceType(id: string, input: unknown): Promise<Acti
     .update({
       name: parsed.data.name,
       inspection_interval_months: parsed.data.interval,
+      custom_fields: parsed.data.fields,
       is_sample: false,
     })
     .eq("id", id)

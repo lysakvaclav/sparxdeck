@@ -243,9 +243,22 @@ export type Database = {
           inspection_interval_months: number;
           is_sample: boolean;
           active: boolean;
+          /** {key, label}[]: which fields devices.attributes holds for this type. */
+          custom_fields: Json;
         } & Timestamps;
-        Insert: never;
-        Update: Partial<{ name: string; inspection_interval_months: number; is_sample: boolean }>;
+        Insert: {
+          organization_id: string;
+          code: string;
+          name: string;
+          inspection_interval_months: number;
+          custom_fields?: Json;
+        };
+        Update: Partial<{
+          name: string;
+          inspection_interval_months: number;
+          is_sample: boolean;
+          custom_fields: Json;
+        }>;
         Relationships: [];
       };
       checklist_templates: {
@@ -314,6 +327,8 @@ export type Database = {
           last_inspection_on: string | null;
           next_due_on: string | null;
           notes: string | null;
+          /** A date to plan replacement around; warned about the same way as a due date. */
+          end_of_life_on: string | null;
           created_by: string | null;
           deleted_at: string | null;
           import_id: string | null;
@@ -335,6 +350,7 @@ export type Database = {
           status?: DeviceStatus;
           last_inspection_on?: string | null;
           notes?: string | null;
+          end_of_life_on?: string | null;
           created_by?: string | null;
         };
         Update: Partial<{
@@ -349,6 +365,7 @@ export type Database = {
           status: DeviceStatus;
           last_inspection_on: string | null;
           notes: string | null;
+          end_of_life_on: string | null;
           deleted_at: string | null;
         }>;
         Relationships: [
@@ -715,6 +732,29 @@ export type Database = {
           },
         ];
       };
+      device_photos: {
+        Row: {
+          id: string;
+          organization_id: string;
+          device_id: string;
+          storage_path: string;
+          content_type: string;
+          size_bytes: number;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "device_photos_device_id_organization_id_fkey";
+            columns: ["device_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "devices";
+            referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
       protocols: {
         Row: {
           id: string;
@@ -872,6 +912,11 @@ export type Database = {
         Args: { p_defect: string; p_path: string; p_content_type: string; p_size: number };
         Returns: string;
       };
+      add_device_photo: {
+        Args: { p_device: string; p_path: string; p_content_type: string; p_size: number };
+        Returns: string;
+      };
+      delete_device_photo: { Args: { p_photo: string }; Returns: string };
       ensure_protocol: { Args: { p_inspection: string }; Returns: string };
       note_labels_printed: { Args: { p_org: string }; Returns: undefined };
       create_sample_data: { Args: { p_org: string }; Returns: string };

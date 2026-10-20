@@ -92,6 +92,16 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
     - `VERSION` mění jen cache souborů aplikace. Název cache stránek `sparxdeck-pages-v1` sdílí worker s `offline-store.ts`; jeho změna smaže revize uložené v telefonech.
   - Odhlášení (`user-menu.tsx`) smaže vše (`wipeOfflineData`). Totéž, když se na stejném telefonu přihlásí jiný účet (`checkOwner`).
   - E2E: `page.setOffline()` v ovladači vypne síť stránce i service workeru (samotná emulace stránky worker nezastaví), `page.setNetwork({ latency })` emuluje slabý signál.
+- Vlastní typy zařízení a jejich pole (část 17):
+  - Typy zařízení se zakládají stejně jako zákazníci a budovy: `device_types_insert` (RLS, vlastník/administrátor), ne funkcí. Technický kód (`code`) odvodí a při shodě rozliší server­ová akce `createDeviceType` (`slugifyCode` v `src/lib/devices.ts`).
+  - `device_types.custom_fields`: `{key, label}[]`, nejvýš 8. `key` se v `device-type-form.tsx` odvodí z `label` jen u NOVÉHO pole (`isNew`); u existujícího pole zůstává napořád stejný, aby přejmenování nerozbilo hodnoty uložené v `devices.attributes` pod starým klíčem.
+  - `devices.attributes` (ze SPEC, sloupec z části 5) teď čte/píše podle pole AKTUÁLNÍHO typu (`readAttributes`/`buildAttributes` v `src/lib/devices.ts`), ne podle pevné dvojice `agent`/`size` u kódu `fire_extinguisher`. Vzorový typ dostává tahle dvě pole jako data (`seed_organization_defaults`).
+  - CSV import (`src/lib/import.ts`) rozpozná jako sloupce jen `agent` a `size` (beze změny); další vlastní pole typu import nenaplní, doplní se ručně po dovozu.
+  - Export (`/devices/export`) sestaví sloupce jako sjednocení vlastních polí všech typů firmy (devices jiného typu mají buňku prázdnou).
+  - Fotky zařízení: `device_photos` (`<org>/devices/<id>/…` v `org-assets`, vzor `defect_photos`/`inspection_photos`), `add_device_photo`/`delete_device_photo`, smí každý člen.
+  - Konec životnosti: `devices.end_of_life_on`, upozornění stejnou funkcí `dueState()` jako termín revize.
+  - Hromadné úpravy: `src/app/(app)/devices/device-list-table.tsx` (klientská komponenta s celou tabulkou a zaškrtávátky — serverová komponenta nemůže klientské komponentě předat funkci jako `sortHref`, proto dostává `listParams` a adresu si skládá sama), akce `bulkUpdateDevices`. Lokaci lze měnit jen když je seznam filtrovaný na jednu budovu.
+  - E2E past: nový headless Edge (`--headless=new`) nepotvrzuje `beforeunload`/`confirm` dialogy sám jako starší headless — ovladač (`driver.mjs`) teď na `Page.javascriptDialogOpening` vždy odpoví potvrzením, jinak by zablokoval `Page.navigate` do vypršení limitu.
 - PDF: `@react-pdf/renderer` na serveru (`serverExternalPackages` v `next.config.ts`), písmo Noto Sans (OFL) v `src/assets/fonts` (`src/lib/pdf/fonts.ts`) s `outputFileTracingIncludes`, aby se dostalo i do nasazení. Dělení slov je vypnuté. Past: `lineHeight` na `Page` skryje dynamický text (`render`, číslo strany); výšku řádku nenastavovat.
 - Protokoly:
   - Tabulky `protocols` (číslo `ROK-NNNN` po firmě a roce z `organization_counters`, jazyk firmy, `pdf_path`) a `protocol_emails`.

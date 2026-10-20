@@ -298,7 +298,10 @@
     "importInvalid": "The import data isn't valid. Upload the file again.",
     "importInUse": "The import can't be undone anymore: its records are in use (inspections, defects, floor plans or new devices).",
     "importUndone": "The import has already been undone.",
-    "deviceExists": "A device with this serial number is already in the building. Find it in the list."
+    "deviceExists": "A device with this serial number is already in the building. Find it in the list.",
+    "fieldKeyInvalid": "Invalid field key.",
+    "fieldsTooMany": "At most 8 custom fields.",
+    "fieldKeyDuplicate": "Two fields can't share a key."
   },
   "email": {
     "invite": {
@@ -1111,7 +1114,14 @@
       "name": "Type name",
       "interval": "Inspection interval",
       "intervalSuffix": "months",
-      "intervalHint": "How often devices of this type are inspected. Used to calculate due dates; verify the value against the rules and practice."
+      "intervalHint": "How often devices of this type are inspected. Used to calculate due dates; verify the value against the rules and practice.",
+      "newTitle": "New device type",
+      "fields": "Custom fields",
+      "fieldsHint": "Details specific to this device type (e.g. agent, size). Shown on the device form and its page.",
+      "addField": "Add field",
+      "fieldLabel": "Field label",
+      "fieldLabelPlaceholder": "e.g. Extinguishing agent",
+      "removeField": "Remove field: {name}"
     },
     "editor": {
       "title": "Edit checklist",
@@ -1138,7 +1148,8 @@
       "save": "Save as version {version}",
       "savedVersion": "Checklist saved as version {version}.",
       "unchanged": "No changes; version {version} stays active."
-    }
+    },
+    "newType": "New type"
   },
   "devices": {
     "title": "Devices",
@@ -1214,10 +1225,6 @@
       "manufacturer": "Manufacturer",
       "model": "Model",
       "manufactureYear": "Year of manufacture",
-      "agent": "Extinguishing agent",
-      "agentPlaceholder": "e.g. powder",
-      "size": "Size / charge",
-      "sizePlaceholder": "e.g. 6 kg",
       "installedOn": "Installed on",
       "inspection": "Inspection",
       "lastInspectionOn": "Last inspection",
@@ -1237,7 +1244,9 @@
       "sharedHint": "Every added device gets the details you fill in. You can edit each one later.",
       "bulkCreate": "Add {count, plural, one {# device} other {# devices}}",
       "created": "Device added with label {label}.",
-      "bulkCreated": "Devices added: {count}. Labels {from}–{to}."
+      "bulkCreated": "Devices added: {count}. Labels {from}–{to}.",
+      "endOfLifeOn": "End of life",
+      "endOfLifeHint": "When to recommend replacing the device."
     },
     "detail": {
       "properties": "Properties",
@@ -1264,7 +1273,16 @@
       "notes": "Notes",
       "added": "Added",
       "deleteTitle": "Delete device?",
-      "deleteBody": "The device disappears from lists. Its label number won't be used again."
+      "deleteBody": "The device disappears from lists. Its label number won't be used again.",
+      "photos": "Photos",
+      "addPhoto": "Add photo",
+      "noPhotos": "No photos yet.",
+      "photoAlt": "Photo {number}",
+      "removePhoto": "Remove photo {number}",
+      "endOfLifeOn": "End of life",
+      "endOfLifeSoonTitle": "End of life is approaching",
+      "endOfLifeOverdueTitle": "Past its end of life",
+      "endOfLifeBody": "We recommend replacing the device by {date}."
     },
     "siteCard": {
       "add": "Add device",
@@ -1279,6 +1297,16 @@
       "result": "Result",
       "checkedBy": "Checked by",
       "empty": "No completed inspection yet."
+    },
+    "bulkEdit": {
+      "selected": "{count} selected",
+      "selectAll": "Select all",
+      "selectOne": "Select: {label}",
+      "keepLocation": "Location unchanged",
+      "keepStatus": "Status unchanged",
+      "apply": "Apply",
+      "clear": "Clear selection",
+      "done": "{count, plural, one {Updated # device} other {Updated # devices}}"
     }
   },
   "labels": {
@@ -1818,7 +1846,8 @@
       "nextDue": "Next inspection",
       "due": "Due",
       "notes": "Notes",
-      "qr": "Link in the QR code"
+      "qr": "Link in the QR code",
+      "endOfLife": "End of life"
     },
     "inspections": {
       "completed": "Completed",

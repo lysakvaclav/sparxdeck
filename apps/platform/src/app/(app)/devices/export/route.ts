@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getActiveMembership } from "@/lib/auth";
 import { csvFileName, csvSeparator, toCsv } from "@/lib/csv";
 import { deviceListQuery, readDeviceListParams } from "@/lib/device-list";
-import { DEVICE_ATTRIBUTES, formatLabel, readAttributes } from "@/lib/devices";
+import { deviceTypeFields, formatLabel, readAttributes, type DeviceTypeField } from "@/lib/devices";
 import { dueState, todayInTimeZone } from "@/lib/due";
 import { serverEnv } from "@/lib/env";
 import { labelUrl } from "@/lib/qr";
@@ -25,19 +25,32 @@ export async function GET(request: NextRequest) {
   const t = await getTranslations("export");
   const tStatus = await getTranslations("devices.status");
   const tDue = await getTranslations("devices.due");
-  const tForm = await getTranslations("devices.form");
 
   const list = readDeviceListParams(Object.fromEntries(request.nextUrl.searchParams));
   const today = todayInTimeZone(organization.timezone);
   const supabase = await createClient();
-  const devices = await fetchAll((from, to) =>
-    deviceListQuery(supabase, organization.id, list, {
-      today,
-      soonDays: organization.due_soon_days,
-    })
-      .order("id")
-      .range(from, to),
-  );
+  const [devices, { data: types }] = await Promise.all([
+    fetchAll((from, to) =>
+      deviceListQuery(supabase, organization.id, list, {
+        today,
+        soonDays: organization.due_soon_days,
+      })
+        .order("id")
+        .range(from, to),
+    ),
+    supabase.from("device_types").select("custom_fields").eq("organization_id", organization.id),
+  ]);
+
+  // Every custom field any of the company's types defines, once each (by key,
+  // first label wins): devices of other types leave that column blank.
+  const customFields: DeviceTypeField[] = [];
+  const seen = new Set<string>();
+  for (const type of types ?? [])
+    for (const field of deviceTypeFields(type.custom_fields))
+      if (!seen.has(field.key)) {
+        seen.add(field.key);
+        customFields.push(field);
+      }
 
   const appUrl = serverEnv().NEXT_PUBLIC_APP_URL;
   const header = [
@@ -50,17 +63,18 @@ export async function GET(request: NextRequest) {
     t("devices.serial"),
     t("devices.manufacturer"),
     t("devices.model"),
-    ...DEVICE_ATTRIBUTES.map((key) => tForm(key)),
+    ...customFields.map((field) => field.label),
     t("devices.year"),
     t("devices.installed"),
     t("devices.lastInspection"),
+    t("devices.endOfLife"),
     t("devices.nextDue"),
     t("devices.due"),
     t("devices.notes"),
     t("devices.qr"),
   ];
   const rows = devices.map((device) => {
-    const attributes = readAttributes(device.attributes);
+    const attributes = readAttributes(device.attributes, customFields);
     return [
       formatLabel(device.label_number),
       device.type?.name,
@@ -71,10 +85,11 @@ export async function GET(request: NextRequest) {
       device.serial_number,
       device.manufacturer,
       device.model,
-      ...DEVICE_ATTRIBUTES.map((key) => attributes[key]),
+      ...customFields.map((field) => attributes[field.key]),
       device.manufacture_year,
       device.installed_on,
       device.last_inspection_on,
+      device.end_of_life_on,
       device.next_due_on,
       device.status === "active"
         ? tDue(dueState(device.next_due_on, today, organization.due_soon_days))

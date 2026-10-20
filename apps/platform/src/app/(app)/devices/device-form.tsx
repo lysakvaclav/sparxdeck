@@ -14,7 +14,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { useActionForm, useFieldError } from "@/hooks/use-action-form";
-import { attributeFields, BULK_MAX, DEVICE_STATUSES, formatLabel } from "@/lib/devices";
+import { BULK_MAX, DEVICE_STATUSES, formatLabel } from "@/lib/devices";
 import { CALENDAR_FORMAT, calendarDate, isIsoDate, nextDueDate } from "@/lib/due";
 import type { DeviceTypeOption, SiteOption } from "@/lib/records";
 import type { DeviceStatus } from "@/lib/supabase/database.types";
@@ -30,10 +30,10 @@ export type DeviceFormValues = {
   manufacturer: string;
   model: string;
   manufactureYear: string;
-  agent: string;
-  size: string;
+  customFields: Record<string, string>;
   installedOn: string;
   lastInspectionOn: string;
+  endOfLifeOn: string;
   notes: string;
   status: DeviceStatus;
   count: string;
@@ -48,10 +48,10 @@ const EMPTY: DeviceFormValues = {
   manufacturer: "",
   model: "",
   manufactureYear: "",
-  agent: "",
-  size: "",
+  customFields: {},
   installedOn: "",
   lastInspectionOn: "",
+  endOfLifeOn: "",
   notes: "",
   status: "active",
   count: "10",
@@ -115,7 +115,7 @@ export function DeviceForm(props: DeviceFormProps) {
 
   const site = sites.find((option) => option.id === siteId);
   const type = types.find((option) => option.id === deviceTypeId);
-  const attributes = attributeFields(type?.code);
+  const fields = type?.customFields ?? [];
   const nextDue =
     type && isIsoDate(lastInspectionOn) ? nextDueDate(lastInspectionOn, type.intervalMonths) : null;
   const serialCount = serialLines(serialNumbers).length;
@@ -297,26 +297,18 @@ export function DeviceForm(props: DeviceFormProps) {
             <Input autoComplete="off" {...form.register("model")} />
           </Field>
         </div>
-        {attributes.length > 0 && (
+        {fields.length > 0 && (
           <div className={twoColumns}>
-            {attributes.includes("agent") && (
-              <Field id="agent" label={t("agent")} error={fieldError(errors.agent?.message)}>
-                <Input
-                  autoComplete="off"
-                  placeholder={t("agentPlaceholder")}
-                  {...form.register("agent")}
-                />
+            {fields.map((field) => (
+              <Field
+                key={field.key}
+                id={`field-${field.key}`}
+                label={field.label}
+                error={fieldError(errors.customFields?.[field.key]?.message)}
+              >
+                <Input autoComplete="off" {...form.register(`customFields.${field.key}`)} />
               </Field>
-            )}
-            {attributes.includes("size") && (
-              <Field id="size" label={t("size")} error={fieldError(errors.size?.message)}>
-                <Input
-                  autoComplete="off"
-                  placeholder={t("sizePlaceholder")}
-                  {...form.register("size")}
-                />
-              </Field>
-            )}
+            ))}
           </div>
         )}
         <div className={twoColumns}>
@@ -342,6 +334,14 @@ export function DeviceForm(props: DeviceFormProps) {
             <Input type="date" className="w-44" {...form.register("installedOn")} />
           </Field>
         </div>
+        <Field
+          id="endOfLifeOn"
+          label={t("endOfLifeOn")}
+          hint={t("endOfLifeHint")}
+          error={fieldError(errors.endOfLifeOn?.message)}
+        >
+          <Input type="date" className="w-44" {...form.register("endOfLifeOn")} />
+        </Field>
       </Section>
 
       <Section title={t("inspection")}>

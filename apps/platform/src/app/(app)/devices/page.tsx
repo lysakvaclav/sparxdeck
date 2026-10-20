@@ -11,7 +11,6 @@ import {
   SearchIcon,
   UploadIcon,
 } from "@/components/icons";
-import { DueCell, StatusBadge } from "@/components/app/device-badges";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
@@ -20,29 +19,15 @@ import { Pagination } from "@/components/app/pagination";
 import { SearchInput } from "@/components/app/search-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  RowLink,
-  SortableHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@/components/ui/table";
 import { isManager, requireMembership } from "@/lib/auth";
-import {
-  deviceListQuery,
-  deviceListSearch,
-  readDeviceListParams,
-  type DeviceSort,
-} from "@/lib/device-list";
+import { deviceListQuery, deviceListSearch, readDeviceListParams } from "@/lib/device-list";
 import { formatLabel } from "@/lib/devices";
 import { dueState, todayInTimeZone } from "@/lib/due";
 import { pageParam } from "@/lib/search";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { DeviceFilters } from "./device-filters";
+import { DeviceListTable, type DeviceRow } from "./device-list-table";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("devices");
@@ -130,16 +115,6 @@ export default async function DevicesPage({ searchParams }: { searchParams: Sear
   const filtered = Boolean(q) || Object.values(filters).some(Boolean);
   const nothingYet = total === 0 && !filtered;
   const noSites = sites.length === 0;
-  const sortHref = (value: DeviceSort) => {
-    const search = new URLSearchParams();
-    for (const [key, entry] of Object.entries({
-      ...listParams,
-      sort: value === "label" ? undefined : value,
-    }))
-      if (entry) search.set(key, entry);
-    const target = search.toString();
-    return target ? `/devices?${target}` : "/devices";
-  };
 
   const siteParam = filters.site ? `?site=${filters.site}` : "";
   const printButton = total > 0 && (
@@ -250,102 +225,25 @@ export default async function DevicesPage({ searchParams }: { searchParams: Sear
               </div>
 
               {devices && devices.length > 0 ? (
-                <Table>
-                  <TableHead>
-                    <tr>
-                      <SortableHeader
-                        href={sortHref("label")}
-                        active={sort === "label"}
-                        direction="asc"
-                      >
-                        {t("columns.label")}
-                      </SortableHeader>
-                      <TableHeaderCell className="hidden md:table-cell">
-                        {t("columns.type")}
-                      </TableHeaderCell>
-                      <TableHeaderCell className="hidden sm:table-cell">
-                        {t("columns.site")}
-                      </TableHeaderCell>
-                      <TableHeaderCell className="hidden xl:table-cell">
-                        {t("filters.customer")}
-                      </TableHeaderCell>
-                      <TableHeaderCell className="hidden lg:table-cell">
-                        {t("columns.location")}
-                      </TableHeaderCell>
-                      <TableHeaderCell className="hidden xl:table-cell">
-                        {t("columns.serial")}
-                      </TableHeaderCell>
-                      <SortableHeader
-                        href={sortHref("due")}
-                        active={sort === "due"}
-                        direction="asc"
-                        className="text-end sm:text-start"
-                      >
-                        {t("columns.nextDue")}
-                      </SortableHeader>
-                    </tr>
-                  </TableHead>
-                  <TableBody>
-                    {devices.map((device) => {
-                      const state = dueState(device.next_due_on, today, soonDays);
-                      const place = [device.site.name, device.location?.name]
-                        .filter(Boolean)
-                        .join(" · ");
-                      return (
-                        <TableRow key={device.id}>
-                          <TableCell className="w-full max-w-0 sm:w-auto sm:max-w-none">
-                            <span className="flex min-w-0 items-center gap-2">
-                              <DeviceIcon className={OBJECT_TYPES.device.text} />
-                              <span className="min-w-0">
-                                <span className="flex items-center gap-2">
-                                  <RowLink
-                                    href={`/devices/${device.id}`}
-                                    className="font-mono tabular-nums"
-                                  >
-                                    {formatLabel(device.label_number)}
-                                  </RowLink>
-                                  <StatusBadge status={device.status} />
-                                </span>
-                                <span className="block truncate text-ui-sm text-muted-foreground sm:hidden">
-                                  {device.type?.name} · {place}
-                                </span>
-                              </span>
-                            </span>
-                          </TableCell>
-                          <TableCell className="hidden whitespace-nowrap md:table-cell">
-                            {device.type?.name}
-                          </TableCell>
-                          <TableCell className="hidden max-w-0 sm:table-cell sm:w-[22%]">
-                            <Link
-                              href={`/sites/${device.site.id}`}
-                              className="relative z-[1] block truncate hover:underline"
-                            >
-                              {device.site.name}
-                            </Link>
-                          </TableCell>
-                          <TableCell className="hidden max-w-0 truncate text-muted-foreground xl:table-cell xl:w-[18%]">
-                            {device.site.customer?.name}
-                          </TableCell>
-                          <TableCell className="hidden max-w-0 truncate lg:table-cell">
-                            {device.location?.name ?? <span className="text-subtle">—</span>}
-                          </TableCell>
-                          <TableCell className="hidden max-w-0 truncate font-mono text-ui-sm xl:table-cell">
-                            {device.serial_number ?? (
-                              <span className="font-sans text-ui text-subtle">—</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-end sm:text-start">
-                            <DueCell
-                              status={device.status}
-                              nextDue={device.next_due_on}
-                              state={state}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <DeviceListTable
+                  devices={devices.map((device): DeviceRow => ({
+                    id: device.id,
+                    label: formatLabel(device.label_number),
+                    typeName: device.type?.name ?? null,
+                    siteId: device.site.id,
+                    siteName: device.site.name,
+                    customerName: device.site.customer?.name ?? null,
+                    locationName: device.location?.name ?? null,
+                    serialNumber: device.serial_number,
+                    status: device.status,
+                    nextDue: device.next_due_on,
+                    dueState: dueState(device.next_due_on, today, soonDays),
+                  }))}
+                  listParams={listParams}
+                  sort={sort}
+                  siteLocations={filters.site ? (locations?.data ?? []) : null}
+                  manager={manager}
+                />
               ) : (
                 <EmptyState
                   icon={SearchIcon}

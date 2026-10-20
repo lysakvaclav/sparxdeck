@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { isManager, requireMembership } from "@/lib/auth";
-import { deviceName, readAttributes } from "@/lib/devices";
+import { deviceName, deviceTypeFields, readAttributes } from "@/lib/devices";
 import { getDevice, getDeviceFormOptions } from "@/lib/records";
 import { DeviceForm } from "../../device-form";
 import { DeviceFormPage } from "../../form-page";
@@ -26,7 +26,7 @@ export default async function EditDevicePage({ params }: Props) {
   // The building doesn't change; only its own locations are offered.
   const site = sites.find((option) => option.id === device.site_id);
   if (!site) notFound();
-  const attributes = readAttributes(device.attributes);
+  const attributes = readAttributes(device.attributes, deviceTypeFields(device.type?.custom_fields));
   const customer = device.site?.customer;
 
   return (
@@ -57,10 +57,10 @@ export default async function EditDevicePage({ params }: Props) {
           manufacturer: device.manufacturer ?? "",
           model: device.model ?? "",
           manufactureYear: device.manufacture_year ? String(device.manufacture_year) : "",
-          agent: attributes.agent ?? "",
-          size: attributes.size ?? "",
+          customFields: attributes,
           installedOn: device.installed_on ?? "",
           lastInspectionOn: device.last_inspection_on ?? "",
+          endOfLifeOn: device.end_of_life_on ?? "",
           notes: device.notes ?? "",
           status: device.status,
         }}

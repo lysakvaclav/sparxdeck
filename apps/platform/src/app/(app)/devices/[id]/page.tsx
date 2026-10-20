@@ -25,13 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isManager, requireMembership } from "@/lib/auth";
-import {
-  attributeFields,
-  DEVICE_ATTRIBUTES,
-  deviceName,
-  formatLabel,
-  readAttributes,
-} from "@/lib/devices";
+import { deviceName, deviceTypeFields, formatLabel, readAttributes } from "@/lib/devices";
 import {
   CALENDAR_FORMAT,
   calendarDate,
@@ -44,9 +38,11 @@ import { serverEnv } from "@/lib/env";
 import { labelUrl } from "@/lib/qr";
 import { openInspectionOf } from "@/lib/inspection-data";
 import { getDevice } from "@/lib/records";
+import { cn } from "@/lib/utils";
 import { StartInspectionButton } from "../../inspections/start-button";
 import { deleteDevice } from "../actions";
 import { DeviceHistoryCard } from "./history-card";
+import { DevicePhotosCard } from "./photos-card";
 import { DevicePlanCard } from "./plan-card";
 
 type Props = { params: Promise<{ id: string }> };
@@ -89,7 +85,8 @@ export default async function DevicePage({ params }: Props) {
   const inactive = device.status === "active" ? null : device.status;
   const day = (value: string | null) =>
     value ? format.dateTime(calendarDate(value), CALENDAR_FORMAT) : null;
-  const attributes = readAttributes(device.attributes);
+  const typeFields = deviceTypeFields(device.type?.custom_fields);
+  const attributes = readAttributes(device.attributes, typeFields);
   const site = device.site;
   const customer = site?.customer;
   const typeName = device.type?.name ?? "";
@@ -99,6 +96,9 @@ export default async function DevicePage({ params }: Props) {
   const days = device.next_due_on ? daysBetween(today, device.next_due_on) : 0;
   const relative =
     state === "overdue" ? t("overdueBy", { days: -days }) : t("dueIn", { days: Math.max(days, 0) });
+  const lifeState = device.end_of_life_on
+    ? dueState(device.end_of_life_on, today, organization.due_soon_days)
+    : "never";
   const link = "text-link hover:underline";
 
   return (
@@ -187,6 +187,16 @@ export default async function DevicePage({ params }: Props) {
               </Alert>
             )}
 
+            {(lifeState === "overdue" || lifeState === "soon") && (
+              <Alert
+                variant={lifeState === "overdue" ? "error" : "warning"}
+                icon={WarningSignIcon}
+                title={t(`detail.endOfLife${lifeState === "overdue" ? "Overdue" : "Soon"}Title`)}
+              >
+                {t("detail.endOfLifeBody", { date: day(device.end_of_life_on)! })}
+              </Alert>
+            )}
+
             <DefectsCard scope={{ device: device.id }} label={device.label_number} />
 
             <Card>
@@ -248,18 +258,35 @@ export default async function DevicePage({ params }: Props) {
                   },
                   { label: tForm("manufacturer"), value: device.manufacturer },
                   { label: tForm("model"), value: device.model },
-                  // The type's own fields, plus anything stored under another type.
-                  ...DEVICE_ATTRIBUTES.filter(
-                    (key) => attributes[key] || attributeFields(device.type?.code).includes(key),
-                  ).map((key) => ({ label: tForm(key), value: attributes[key] })),
+                  // The type's own fields.
+                  ...typeFields.map((field) => ({
+                    label: field.label,
+                    value: attributes[field.key],
+                  })),
                   {
                     label: tForm("manufactureYear"),
                     value: device.manufacture_year && String(device.manufacture_year),
                   },
                   { label: tForm("installedOn"), value: day(device.installed_on) },
+                  {
+                    label: tForm("endOfLifeOn"),
+                    value: device.end_of_life_on && (
+                      <span
+                        className={cn(
+                          "tabular-nums",
+                          lifeState === "overdue" && "font-semibold text-destructive-text",
+                          lifeState === "soon" && "font-semibold text-warning-text",
+                        )}
+                      >
+                        {day(device.end_of_life_on)}
+                      </span>
+                    ),
+                  },
                 ]}
               />
             </Card>
+
+            <DevicePhotosCard deviceId={device.id} organizationId={organization.id} />
           </div>
 
           <div className="space-y-2.5 sm:space-y-[15px]">

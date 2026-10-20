@@ -3,37 +3,44 @@
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { requireManager } from "@/lib/auth";
-import { buildAttributes } from "@/lib/devices";
+import { buildAttributes, deviceTypeFields, type DeviceTypeField } from "@/lib/devices";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
-import { bulkDevicesSchema, deviceEditSchema, deviceSchema, idSchema } from "@/lib/validation";
+import {
+  bulkDevicesSchema,
+  bulkEditDevicesSchema,
+  deviceEditSchema,
+  deviceSchema,
+  idSchema,
+} from "@/lib/validation";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 type DetailValues = Omit<z.output<typeof deviceEditSchema>, "status" | "serialNumber">;
 
-/** Columns shared by create, bulk add and edit. Attributes follow the device type. */
-function detailColumns(input: DetailValues, typeCode: string) {
+/** Columns shared by create, bulk add and edit. Attributes follow the device type's fields. */
+function detailColumns(input: DetailValues, fields: readonly DeviceTypeField[]) {
   return {
     location_id: input.locationId,
     device_type_id: input.deviceTypeId,
     manufacturer: input.manufacturer,
     model: input.model,
     manufacture_year: input.manufactureYear,
-    attributes: buildAttributes(typeCode, { agent: input.agent, size: input.size }),
+    attributes: buildAttributes(fields, input.customFields ?? {}),
     installed_on: input.installedOn,
     last_inspection_on: input.lastInspectionOn,
+    end_of_life_on: input.endOfLifeOn,
     notes: input.notes,
   };
 }
 
-/** The type's code (RLS: only types of the user's organization are found). */
-async function typeCode(supabase: Supabase, deviceTypeId: string) {
+/** The type's own fields (RLS: only types of the user's organization are found). */
+async function typeFields(supabase: Supabase, deviceTypeId: string) {
   const { data } = await supabase
     .from("device_types")
-    .select("code")
+    .select("custom_fields")
     .eq("id", deviceTypeId)
     .maybeSingle();
-  return data?.code ?? null;
+  return data ? deviceTypeFields(data.custom_fields) : null;
 }
 
 /** A foreign key refused the location (another building) or the building itself. */
@@ -61,15 +68,15 @@ export async function createDevice(
   if (!parsed.success) return zodFieldErrors(parsed.error);
 
   const supabase = await createClient();
-  const code = await typeCode(supabase, parsed.data.deviceTypeId);
-  if (!code) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
+  const fields = await typeFields(supabase, parsed.data.deviceTypeId);
+  if (!fields) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
 
   // The label number, the QR token and the next due date come from the database;
   // a trigger refuses a deleted building (site_deleted).
   const { data, error } = await supabase
     .from("devices")
     .insert({
-      ...detailColumns(parsed.data, code),
+      ...detailColumns(parsed.data, fields),
       organization_id: active.organization.id,
       site_id: parsed.data.siteId,
       serial_number: parsed.data.serialNumber,
@@ -98,11 +105,11 @@ export async function createDevices(
   const { count, serialNumbers, siteId } = parsed.data;
 
   const supabase = await createClient();
-  const code = await typeCode(supabase, parsed.data.deviceTypeId);
-  if (!code) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
+  const fields = await typeFields(supabase, parsed.data.deviceTypeId);
+  if (!fields) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
 
   const shared = {
-    ...detailColumns(parsed.data, code),
+    ...detailColumns(parsed.data, fields),
     organization_id: active.organization.id,
     site_id: siteId,
     created_by: active.membership.user_id,
@@ -131,13 +138,13 @@ export async function updateDevice(id: string, input: unknown): Promise<ActionRe
   if (!parsed.success) return zodFieldErrors(parsed.error);
 
   const supabase = await createClient();
-  const code = await typeCode(supabase, parsed.data.deviceTypeId);
-  if (!code) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
+  const fields = await typeFields(supabase, parsed.data.deviceTypeId);
+  if (!fields) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
 
   const { data, error } = await supabase
     .from("devices")
     .update({
-      ...detailColumns(parsed.data, code),
+      ...detailColumns(parsed.data, fields),
       serial_number: parsed.data.serialNumber,
       status: parsed.data.status,
     })
@@ -149,6 +156,36 @@ export async function updateDevice(id: string, input: unknown): Promise<ActionRe
 
   revalidateDevices();
   return { ok: true };
+}
+
+/**
+ * Changes location and/or status of several devices at once. A location only
+ * takes if it belongs to every selected device's building (a foreign key error
+ * otherwise); the list page only offers it when the selection is one building.
+ */
+export async function bulkUpdateDevices(input: unknown): Promise<ActionResult<{ count: number }>> {
+  const active = await requireManager();
+  if (!active) return { ok: false, error: "forbidden" };
+  const parsed = bulkEditDevicesSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+  const { deviceIds, locationId, status } = parsed.data;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("devices")
+    .update({
+      ...(locationId !== undefined && { location_id: locationId }),
+      ...(status !== undefined && { status }),
+    })
+    .in("id", deviceIds)
+    .eq("organization_id", active.organization.id)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) return referenceError(error) ?? { ok: false, error: databaseErrorCode(error) };
+  if (!data?.length) return { ok: false, error: "notFound" };
+
+  revalidateDevices();
+  return { ok: true, data: { count: data.length } };
 }
 
 /** Soft delete; the label number is never reused. */

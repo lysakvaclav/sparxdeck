@@ -67,7 +67,7 @@ export function deviceListSearch(list: DeviceListParams): string {
 
 /** What the list and its export show of a device (one select keeps the types simple). */
 const DEVICE_LIST_COLUMNS =
-  "id, label_number, serial_number, manufacturer, model, manufacture_year, installed_on, status, last_inspection_on, next_due_on, attributes, notes, public_token, site:sites!inner(id, name, customer_id, customer:customers(name)), location:locations(name), type:device_types(name, code)";
+  "id, label_number, serial_number, manufacturer, model, manufacture_year, installed_on, status, last_inspection_on, next_due_on, end_of_life_on, attributes, notes, public_token, site:sites!inner(id, name, customer_id, customer:customers(name)), location:locations(name), type:device_types(name, code)";
 
 /** The organization's devices as the list shows them, filtered and in order. */
 export function deviceListQuery(

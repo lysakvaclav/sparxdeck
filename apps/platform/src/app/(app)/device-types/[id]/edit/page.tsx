@@ -4,8 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { CubeIcon } from "@/components/icons";
 import { appIcon } from "@/components/app/nav-items";
 import { PageBody, PageHeader } from "@/components/app/page-header";
-import { Card } from "@/components/ui/card";
 import { isManager, requireMembership } from "@/lib/auth";
+import { deviceTypeFields } from "@/lib/devices";
 import { getDeviceType } from "@/lib/records";
 import { DeviceTypeForm } from "../../device-type-form";
 
@@ -36,12 +36,12 @@ export default async function EditDeviceTypePage({ params }: Props) {
         ]}
       />
       <PageBody width="narrow">
-        <Card>
-          <DeviceTypeForm
-            id={type.id}
-            defaults={{ name: type.name, interval: type.inspection_interval_months }}
-          />
-        </Card>
+        <DeviceTypeForm
+          mode="edit"
+          id={type.id}
+          defaults={{ name: type.name, interval: type.inspection_interval_months }}
+          fields={deviceTypeFields(type.custom_fields)}
+        />
       </PageBody>
     </>
   );

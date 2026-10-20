@@ -107,6 +107,17 @@ export async function launch({ width = 1440, height = 900, dark = false, mobile 
       logs.push(
         `exception: ${(m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text).slice(0, 300)}`,
       );
+    // New headless doesn't auto-dismiss alert/confirm/beforeunload like the old one
+    // did: left open, it blocks Page.navigate (and everything after it) until the
+    // command timeout.
+    if (m.method === "Page.javascriptDialogOpening")
+      ws.send(
+        JSON.stringify({
+          id: ++id,
+          method: "Page.handleJavaScriptDialog",
+          params: { accept: true },
+        }),
+      );
   });
   // A closed connection (crashed browser) fails every pending command at once.
   ws.addEventListener("close", () => {

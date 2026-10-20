@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { useActionForm, useFieldError } from "@/hooks/use-action-form";
 import type { ActionResult } from "@/lib/errors";
-import { attributeFields, formatLabel } from "@/lib/devices";
+import { formatLabel } from "@/lib/devices";
 import {
   inspectionDeviceSchema,
   type InspectionDeviceInput,
@@ -60,8 +60,7 @@ export function AddDeviceButton({
     manufacturer: "",
     model: "",
     manufactureYear: "",
-    agent: "",
-    size: "",
+    customFields: {},
     notes: "",
   };
   const form = useForm<InspectionDeviceInput, unknown, InspectionDeviceValues>({
@@ -71,8 +70,7 @@ export function AddDeviceButton({
   const { error, pending, run } = useActionForm(form);
   const { errors } = form.formState;
   const typeId = useWatch({ control: form.control, name: "deviceTypeId" });
-  const typeCode = types.find((type) => type.id === typeId)?.code;
-  const extra = attributeFields(typeCode);
+  const extra = types.find((type) => type.id === typeId)?.customFields ?? [];
 
   function submit() {
     let created: { id: string; labelNumber: number } | null = null;
@@ -164,28 +162,16 @@ export function AddDeviceButton({
             >
               <Input inputMode="numeric" maxLength={4} {...form.register("manufactureYear")} />
             </Field>
-            {extra.includes("agent") && (
+            {extra.map((field) => (
               <Field
-                id="add-agent"
-                label={tForm("agent")}
-                error={fieldError(errors.agent?.message)}
+                key={field.key}
+                id={`add-field-${field.key}`}
+                label={field.label}
+                error={fieldError(errors.customFields?.[field.key]?.message)}
               >
-                <Input
-                  placeholder={tForm("agentPlaceholder")}
-                  maxLength={60}
-                  {...form.register("agent")}
-                />
+                <Input maxLength={200} {...form.register(`customFields.${field.key}`)} />
               </Field>
-            )}
-            {extra.includes("size") && (
-              <Field id="add-size" label={tForm("size")} error={fieldError(errors.size?.message)}>
-                <Input
-                  placeholder={tForm("sizePlaceholder")}
-                  maxLength={40}
-                  {...form.register("size")}
-                />
-              </Field>
-            )}
+            ))}
           </div>
           <Field id="add-notes" label={tForm("notes")} error={fieldError(errors.notes?.message)}>
             <Textarea rows={2} autoCapitalize="sentences" {...form.register("notes")} />

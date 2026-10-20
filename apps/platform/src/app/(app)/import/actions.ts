@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/auth";
+import { deviceTypeFields } from "@/lib/devices";
 import { databaseErrorCode, type ActionResult } from "@/lib/errors";
 import type { DeviceTypeOption, ExistingData } from "@/lib/import";
 import { fetchAll } from "@/lib/supabase/fetch-all";
@@ -58,7 +59,7 @@ export async function importContext(): Promise<ActionResult<ImportContext>> {
     ),
     supabase
       .from("device_types")
-      .select("id, name, code")
+      .select("id, name, code, custom_fields")
       .eq("organization_id", organizationId)
       .eq("active", true)
       .order("created_at"),
@@ -74,7 +75,12 @@ export async function importContext(): Promise<ActionResult<ImportContext>> {
       sites: sites.map((row) => ({ id: row.id, customerId: row.customer_id, name: row.name })),
       locations: locations.map((row) => ({ siteId: row.site_id, name: row.name })),
       serials: devices.map((row) => ({ siteId: row.site_id, serial: row.serial_number ?? "" })),
-      types: types ?? [],
+      types: (types ?? []).map((type) => ({
+        id: type.id,
+        name: type.name,
+        code: type.code,
+        customFields: deviceTypeFields(type.custom_fields),
+      })),
     },
   };
 }
@@ -107,7 +113,7 @@ function databaseRow(record: ImportRecord) {
       last_inspection_on: device.lastInspectionOn,
       notes: device.notes,
       attributes: Object.fromEntries(
-        Object.entries({ agent: device.agent, size: device.size }).filter(([, value]) => value),
+        Object.entries(device.customFields ?? {}).filter(([, value]) => value),
       ),
     },
   };

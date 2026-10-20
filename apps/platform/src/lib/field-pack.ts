@@ -1,7 +1,7 @@
 import "server-only";
 import { getLocale } from "next-intl/server";
 import { isManager } from "@/lib/auth";
-import { formatLabel } from "@/lib/devices";
+import { deviceTypeFields, formatLabel } from "@/lib/devices";
 import type { FieldItem, FieldPack, OpenDefect } from "@/lib/field";
 import { sitePlacements, sitePlans } from "@/lib/floor-plans-data";
 import { getInspection, memberNames } from "@/lib/inspection-data";
@@ -76,7 +76,7 @@ export async function loadFieldPack(
       sitePlacements(siteId),
       supabase
         .from("device_types")
-        .select("id, name, code")
+        .select("id, name, code, custom_fields")
         .eq("organization_id", inspection.organization_id)
         .eq("active", true)
         .order("created_at"),
@@ -257,7 +257,12 @@ export async function loadFieldPack(
         : [],
     ),
     placements,
-    types: types.data ?? [],
+    types: (types.data ?? []).map((type) => ({
+      id: type.id,
+      name: type.name,
+      code: type.code,
+      customFields: deviceTypeFields(type.custom_fields),
+    })),
     locations: locations.data ?? [],
   };
 }

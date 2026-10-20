@@ -21,8 +21,17 @@ const types: DeviceTypeOption[] = [
     id: "11111111-1111-4111-8111-111111111111",
     name: "Hasicí přístroj",
     code: "fire_extinguisher",
+    customFields: [
+      { key: "agent", label: "Hasivo" },
+      { key: "size", label: "Velikost" },
+    ],
   },
-  { id: "22222222-2222-4222-8222-222222222222", name: "Hydrant", code: "hydrant" },
+  {
+    id: "22222222-2222-4222-8222-222222222222",
+    name: "Hydrant",
+    code: "hydrant",
+    customFields: [],
+  },
 ];
 
 describe("columns", () => {
@@ -235,8 +244,7 @@ describe("rows", () => {
         manufacturer: null,
         model: null,
         manufactureYear: 2019,
-        agent: "prášek ABC",
-        size: null,
+        customFields: { agent: "prášek ABC" },
         installedOn: null,
         lastInspectionOn: "2024-03-01",
         notes: null,
@@ -305,7 +313,7 @@ describe("rows", () => {
 
   it("attributes the type doesn't have are left out", () => {
     const [row] = build(["A", "", "", "B", "", "Hydrant", "H1", "", "", "voda"]);
-    expect(row!.records[0]!.device!.agent).toBeNull();
+    expect(row!.records[0]!.device!.customFields).toEqual({});
   });
 });
 

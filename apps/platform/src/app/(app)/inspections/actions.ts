@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getActiveMembership } from "@/lib/auth";
-import { buildAttributes } from "@/lib/devices";
+import { buildAttributes, deviceTypeFields } from "@/lib/devices";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { generateProtocol } from "@/lib/protocols";
 import { ORG_ASSETS_BUCKET } from "@/lib/storage";
@@ -85,7 +85,7 @@ export async function addInspectionDevice(
   const supabase = await createClient();
   const { data: type } = await supabase
     .from("device_types")
-    .select("code")
+    .select("custom_fields")
     .eq("id", values.deviceTypeId)
     .maybeSingle();
   if (!type) return { ok: false, error: "notFound", fieldErrors: { deviceTypeId: "notFound" } };
@@ -97,7 +97,7 @@ export async function addInspectionDevice(
     p_manufacturer: values.manufacturer,
     p_model: values.model,
     p_manufacture_year: values.manufactureYear,
-    p_attributes: buildAttributes(type.code, { agent: values.agent, size: values.size }),
+    p_attributes: buildAttributes(deviceTypeFields(type.custom_fields), values.customFields ?? {}),
     p_notes: values.notes,
   });
   if (error?.message?.includes("device_exists"))

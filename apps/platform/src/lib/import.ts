@@ -3,7 +3,7 @@
 // a preview of what the import will create. Pure functions shared by the
 // browser and the tests; the database repeats the matching (import_records).
 
-import { attributeFields, type DeviceAttribute } from "@/lib/devices";
+import type { DeviceTypeField } from "@/lib/devices";
 import { isIsoDate, type IsoDate } from "@/lib/due";
 import type { ErrorCode } from "@/lib/errors";
 import {
@@ -425,7 +425,12 @@ export function normalizeCompanyId(text: string): string {
 // Rows
 // ---------------------------------------------------------------------------
 
-export type DeviceTypeOption = { id: string; name: string; code: string };
+export type DeviceTypeOption = {
+  id: string;
+  name: string;
+  code: string;
+  customFields: DeviceTypeField[];
+};
 
 export type FieldIssue = { field: ImportField; code: ErrorCode };
 
@@ -471,6 +476,8 @@ function resolveType(
 
 /** The field a schema issue is about, from its path in the record. */
 function fieldOfPath(path: readonly PropertyKey[]): ImportField {
+  // customFields.agent / customFields.size are the only ones with their own column.
+  if (path[1] === "customFields" && (path[2] === "agent" || path[2] === "size")) return path[2];
   const [group, key] = path.map(String);
   const byPath: Record<string, ImportField> = {
     "customer.name": "customerName",
@@ -490,8 +497,6 @@ function fieldOfPath(path: readonly PropertyKey[]): ImportField {
     "device.manufactureYear": "manufactureYear",
     "device.installedOn": "installedOn",
     "device.lastInspectionOn": "lastInspectionOn",
-    "device.agent": "agent",
-    "device.size": "size",
     "device.notes": "notes",
   };
   return byPath[`${group}.${key}`] ?? "notes";
@@ -560,11 +565,10 @@ export function buildRows(
       else type = resolved;
     }
 
-    const attributeValues: Partial<Record<DeviceAttribute, string>> = {
-      agent: text("agent"),
-      size: text("size"),
-    };
-    const typeAttributes = type ? attributeFields(type.code) : [];
+    // The spreadsheet only recognizes these two custom fields by column; a
+    // type's other fields (if it has any) are filled in after import.
+    const attributeValues: Record<string, string> = { agent: text("agent"), size: text("size") };
+    const typeKeys = (type?.customFields ?? []).map((field) => field.key);
     const input: ImportRecordInput = {
       customer: {
         name: text("customerName"),
@@ -589,8 +593,12 @@ export function buildRows(
               model: text("model"),
               manufactureYear: year,
               // Only attributes the type has (the rest would be ignored by the app).
-              agent: typeAttributes.includes("agent") ? (attributeValues.agent ?? "") : "",
-              size: typeAttributes.includes("size") ? (attributeValues.size ?? "") : "",
+              customFields: {
+                ...(typeKeys.includes("agent") &&
+                  attributeValues.agent && { agent: attributeValues.agent }),
+                ...(typeKeys.includes("size") &&
+                  attributeValues.size && { size: attributeValues.size }),
+              },
               installedOn: dates.installedOn ?? "",
               lastInspectionOn: dates.lastInspectionOn ?? "",
               notes: text("notes"),

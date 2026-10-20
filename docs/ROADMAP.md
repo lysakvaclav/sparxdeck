@@ -535,6 +535,34 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ---
 
+### Část 17: Zařízení a šablony 2
+
+**Stav (2026-10-20): částečně hotovo** (zatím jen lokálně, nenasazeno). Hotovo: vlastní typy zařízení s vlastními poli, fotky zařízení, konec životnosti, hromadné úpravy. Odloženo na později v rámci této části (viz níže): kopie šablony, výběr z možností jako typ položky, povinná fotka u položky, přesun zařízení mezi budovami s historií, vlastní pole u zákazníků.
+
+- **Vlastní typy zařízení:** firma si přidá vlastní typ (`/device-types/new`) se jménem, intervalem revize a vlastními poli — stejnou cestou jako zákazníky a budovy (práva přes RLS, ne přes funkci). Technický kód (`device_types.code`) se odvodí z názvu, při shodě se za něj přidá číslo. Po založení typu aplikace rovnou nabídne editor šablony kontroly (bez položek typ nejde použít v revizi).
+- **Vlastní pole podle typu:** `device_types.custom_fields` — pole `{klíč, název}`, nejvýš 8 na typ. Klíč se při přidávání nového pole odvodí z názvu a navždy se nemění (přejmenování pole v `/device-types/[id]/edit` tak nikdy neztratí hodnoty uložené pod starým klíčem). Hodnoty se ukládají do `devices.attributes` jako dřív (sloupec z části 5), jen podle pole typu místo pevné dvojice hasivo/velikost. Vzorový typ hasicího přístroje dostal tato dvě pole jako data při zakládání firmy (`seed_organization_defaults`) a existující firmy je dostaly zpětně.
+- **Fotky zařízení:** karta na stránce zařízení, `device_photos` (`<org>/devices/<id>/…` v `org-assets`, vzor podle fotek závad a revizí) — přidat smí každý člen firmy, `add_device_photo` a `delete_device_photo`.
+- **Konec životnosti:** `devices.end_of_life_on`, volitelné datum. Upozornění stejným pravidlem jako termín revize (`dueState()`), na stránce zařízení barevně a s hláškou.
+- **Hromadné úpravy:** zaškrtávátka v seznamu zařízení (jen pro vlastníka a administrátora), lišta s úpravou stavu a lokace se objeví po výběru. Lokaci jde měnit jen když je seznam filtrovaný na jednu budovu (lokace patří k budově, jinak by uložení selhalo); stav jde měnit vždy. `bulkUpdateDevices`.
+- **Export CSV:** sloupec pro každé vlastní pole, které má firma u některého typu (devices bez daného pole mají buňku prázdnou), a sloupec konce životnosti.
+- **Technicky:** migrace `20261022090000_device_types_custom.sql`. `src/lib/devices.ts`: `DeviceTypeField`, `deviceTypeFields()`, `slugifyCode()`, obecné `readAttributes()`/`buildAttributes()` (dřív pevně `agent`/`size`).
+- **Ověření:**
+  - RLS testy: vlastní typ s poli založí jen vlastník/administrátor své firmy; fotka zařízení jen do vlastní složky vlastního zařízení.
+  - Jednotkové testy `tests/due.test.ts` (pole typu, odvození kódu) a `tests/import.test.ts` (import s vlastními poli).
+  - E2E `e2e/part17.mjs`: nový typ s vlastním polem, zařízení s vyplněným polem a koncem životnosti, upozornění na stránce, fotka přidaná a smazaná, hromadná úprava dvou zařízení, tmavý režim a angličtina. Audit přístupnosti rozšířen o detail typu, nový typ a úpravu typu.
+  - Objevená a opravená chyba ovladače e2e testů: nový headless Edge (`--headless=new`) nemá potvrzovací dialogy (např. neuložené změny šablony) automaticky potvrzené jako starší headless režim — bez odpovědi by zablokovaly navigaci. `e2e/driver.mjs` teď dialog vždy potvrdí.
+
+**Odloženo v rámci části 17** (menší rozsah, nevyžádáno v tomto kole):
+- Kopie šablony, výběr z možností jako typ položky, povinná fotka u položky (E).
+- Dovoz vlastních polí z CSV importu kromě hasiva a velikosti (zatím se doplní ručně po importu).
+- Přesun zařízení do jiné budovy s historií (F) — hromadná úprava lokace funguje jen v rámci jedné budovy, bez historie.
+- Vlastní pole u zákazníků (C).
+- Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře — obsah musí dodat revizní technik.
+
+**Od tebe:** položky kontrolních seznamů pro další typy zařízení (hydrant, nouzové osvětlení, požární klapky a dveře), ideálně od revizního technika — pak je můžu zadat jako vzorové šablony podobně jako u hasicích přístrojů.
+
+---
+
 ## Hotové navíc (P2, mimo plán)
 
 - Přihlášení odkazem v e-mailu (magic link) je hotové v kódu v rámci části 1. Odškrtne se po ověření.

@@ -77,8 +77,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Položka, jejíž nesplnění automaticky vytvoří závadu (část 4: příznak `fail_creates_defect`, jen u ano/ne, hlídá databáze; závadu z něj vytváří dokončení revize od části 8)
 - [x] P1 Verzování šablon (nová úprava vytvoří novou verzi, staré revize zůstávají vázané na původní) (část 4: funkce `save_checklist_template`, starší verze zůstávají beze změny a jdou zobrazit; beze změn nová verze nevznikne)
 - [x] P1 Správa šablon jen pro admin a owner (část 4: RLS a práva sloupců, testy v `tests/rls.test.ts`)
-- [ ] P2 Vlastní typy zařízení (firma si přidá další)
-- [ ] P2 Vlastní atributy podle typu (např. velikost, hasivo, rok výroby)
+- [x] P2 Vlastní typy zařízení (firma si přidá další) (část 17: `/device-types/new`, stejná práva jako u zákazníků a budov — RLS, ne funkce; technický kód se odvodí z názvu)
+- [x] P2 Vlastní atributy podle typu (např. velikost, hasivo, rok výroby) (část 17: `device_types.custom_fields` — pole {klíč, název}, až 8 na typ; klíč se odvodí z názvu při založení a pak už se nemění, aby úprava názvu neztratila uložené hodnoty; `devices.attributes` zůstává stejné jako v části 5, jen podle typu místo pevného seznamu. Dovezené sloupce v CSV importu zatím jen hasivo a velikost, další vlastní pole se doplní ručně po importu)
 - [ ] P2 Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře
 - [ ] P2 Duplikování a úprava šablony
 - [ ] P2 Výběr možností (rozbalovací seznam) jako typ položky
@@ -98,9 +98,9 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Výpočet stavu termínu: v pořádku, brzy, po termínu, bez revize (část 5: `src/lib/due.ts`, příští termín počítá databáze stejně jako aplikace, „dnes“ podle časového pásma firmy; testy `tests/due.test.ts`)
 - [x] P2 Import zařízení z CSV s kontrolou chyb po řádcích (část 14: Excel i CSV, chyby a upozornění po řádcích v náhledu)
 - [ ] P2 Přesun zařízení do jiné budovy nebo lokace s historií
-- [ ] P2 Hromadné úpravy (změna lokace, stavu u vybraných)
-- [ ] P2 Fotografie zařízení
-- [ ] P2 Datum výroby a konce životnosti, upozornění na výměnu
+- [x] P2 Hromadné úpravy (změna lokace, stavu u vybraných) (část 17: zaškrtávátka v seznamu zařízení, lišta s úpravou se zobrazí po výběru; lokaci jde měnit jen když je seznam filtrovaný na jednu budovu, stav vždy; `bulkUpdateDevices`)
+- [x] P2 Fotografie zařízení (část 17: `device_photos`, `<org>/devices/<id>/…` v `org-assets`; přidat smí každý člen, podle vzoru fotek u závad a revizí; `add_device_photo`, `delete_device_photo`)
+- [x] P2 Datum výroby a konce životnosti, upozornění na výměnu (rok výroby už od části 5; konec životnosti část 17: `devices.end_of_life_on`, upozornění stejným pravidlem jako u termínu revize — `dueState()`, barva a hláška na stránce zařízení)
 - [ ] P3 Dokumenty u zařízení (návod, certifikát)
 - [ ] P3 Servisní zásahy a opravy mimo revizi (výměna náplně, tlaková zkouška)
 
