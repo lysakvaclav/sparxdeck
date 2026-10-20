@@ -63,7 +63,9 @@ Landing page je samostatný projekt Vercel (Root Directory `apps/landingpage`, d
 
 Landing page: Root Directory `apps/landingpage`, Install Command `npm ci --prefix .`, Next.js zafixovaný na 16.1.1. Adresy nastavují proměnné `NEXT_PUBLIC_SITE_URL` a `NEXT_PUBLIC_APP_URL` (výchozí `sparxdeck.com` a `portal.sparxdeck.com`); platforma odkazuje na landing page přes `NEXT_PUBLIC_MARKETING_URL`.
 
-**Současný stav (2026-10-16, bez vlastní domény):** tým Vercel `sparxdeck`, projekt `sparxdeck` (landing page) na https://sparxdeck.vercel.app, projekt `sparxdeck-app` (platforma) na https://sparxdeck-app.vercel.app, produkční Supabase `ellnjenfqupwqelsojjg`. Po koupi domény: přidat domény k projektům, změnit uvedené proměnné a Site URL v Supabase a nasadit znovu.
+**Současný stav (2026-10-20):** tým Vercel `sparxdeck`, projekt `sparxdeck` (landing page) na https://sparxdeck.com, projekt `sparxdeck-app` (platforma) na https://portal.sparxdeck.com, produkční Supabase `ellnjenfqupwqelsojjg` s migracemi do části 18. DNS u Spaceship. Projekty nemají napojený Git: nasazuje se z kořene repozitáře přes `vercel deploy --prod` (platforma s `VERCEL_PROJECT_ID` projektu `sparxdeck-app`). Chybí: Site URL a Redirect URLs v Supabase (bod 4 výše), Resend a Sentry.
+
+**Past při nahrávání migrací:** `supabase db push` posílá příkazy migrace jeden po druhém a při chybě nevrací ty už provedené. Selže-li migrace v polovině, zjistit stav (`supabase db query --db-url …`), doplnit zbytek po jednotlivých příkazech a migraci označit `supabase migration repair --status applied <verze> --db-url …`.
 
 ## 6. Kontrola po nasazení
 
