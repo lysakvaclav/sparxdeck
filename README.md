@@ -5,7 +5,7 @@ Software for fire-safety service companies: equipment register, QR labels, inspe
 | App | Path | URL | Stack |
 |---|---|---|---|
 | Landing page | [apps/landingpage](apps/landingpage) | sparxdeck.com | Next.js 16, Tailwind 4, 16 languages |
-| Platform | [apps/platform](apps/platform) | app.sparxdeck.com | Next.js 16, Supabase, next-intl |
+| Platform | [apps/platform](apps/platform) | portal.sparxdeck.com | Next.js 16, Supabase, next-intl |
 
 Each app installs its own dependencies (`npm install` inside the app folder). See [apps/platform/README.md](apps/platform/README.md) for setting up the platform.
 

@@ -1,4 +1,4 @@
-# Spuštění platformy (app.sparxdeck.com)
+# Spuštění platformy (portal.sparxdeck.com)
 
 Postup od účtů po první produkční revizi. Všechno v kódu je připravené; tady jsou kroky v administraci služeb, které musí udělat majitel účtů. Odhad: 2–3 hodiny poprvé.
 
@@ -11,7 +11,7 @@ Postup od účtů po první produkční revizi. Všechno v kódu je připravené
 | **Resend** | e-maily (pozvánky, protokoly, týdenní souhrn, přihlášení) | bezplatný plán stačí na začátek (3 000 e-mailů měsíčně) |
 | **Sentry** | hlášení chyb | bezplatný plán; při zakládání zvolit **EU** |
 | **GitHub** | kód a automatické kontroly | stávající repozitář |
-| Doména | `app.sparxdeck.com`, odesílací doména e-mailů | stávající `sparxdeck.com` |
+| Doména | `portal.sparxdeck.com`, odesílací doména e-mailů | stávající `sparxdeck.com` |
 
 Prostředí jsou dvě:
 - **Vývoj:** současný projekt Supabase `zclhipzzqvhmpqxxaust`. Používá ho lokální vývoj, náhledy na Vercelu a testy.
@@ -27,7 +27,7 @@ Prostředí jsou dvě:
    npm run db:push:production -- --dry-run   # jen vypíše, co by se nahrálo
    npm run db:push:production                # zeptá se na referenci projektu
    ```
-4. *Authentication → URL Configuration:* Site URL `https://app.sparxdeck.com`, Redirect URLs `https://app.sparxdeck.com/**`.
+4. *Authentication → URL Configuration:* Site URL `https://portal.sparxdeck.com`, Redirect URLs `https://portal.sparxdeck.com/**`.
 5. *Authentication → Email Templates:* vložte soubory ze `supabase/templates/` (předměty jsou v `subjects.json`).
 6. *Authentication → SMTP Settings:* Resend (host `smtp.resend.com`, port `465`, uživatel `resend`, heslo = Resend API klíč, odesílatel `noreply@sparxdeck.com`).
 7. *Database → Backups:* ověřte, že běží denní zálohy (plán Pro).
@@ -50,30 +50,30 @@ Založte projekt typu Next.js v **EU** regionu. Do Vercelu patří `NEXT_PUBLIC_
 
    | Proměnná | Production | Preview |
    |---|---|---|
-   | `NEXT_PUBLIC_APP_URL` | `https://app.sparxdeck.com` | adresa náhledu nebo vývojová |
+   | `NEXT_PUBLIC_APP_URL` | `https://portal.sparxdeck.com` | adresa náhledu nebo vývojová |
    | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` | produkční projekt | vývojový projekt |
    | `RESEND_API_KEY`, `EMAIL_FROM` | ano | nechat prázdné (náhledy e-maily neposílají) |
    | `CRON_SECRET` | dlouhý náhodný řetězec | nechat prázdné |
    | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | ano | volitelně |
 
-5. *Settings → Domains:* přidejte `app.sparxdeck.com` a u registrátora nastavte CNAME na `cname.vercel-dns.com`.
+5. *Settings → Domains:* přidejte `portal.sparxdeck.com` a u registrátora nastavte CNAME na `cname.vercel-dns.com`.
 6. Týdenní souhrn se naplánuje sám podle `vercel.json` (pondělí 5:00 UTC). Vercel posílá `CRON_SECRET` automaticky.
 
 Landing page je samostatný projekt Vercel (Root Directory `apps/landingpage`, doména `sparxdeck.com`).
 
-Landing page: Root Directory `apps/landingpage`, Install Command `npm ci --prefix .`, Next.js zafixovaný na 16.1.1. Adresy nastavují proměnné `NEXT_PUBLIC_SITE_URL` a `NEXT_PUBLIC_APP_URL` (výchozí `sparxdeck.com` a `app.sparxdeck.com`); platforma odkazuje na landing page přes `NEXT_PUBLIC_MARKETING_URL`.
+Landing page: Root Directory `apps/landingpage`, Install Command `npm ci --prefix .`, Next.js zafixovaný na 16.1.1. Adresy nastavují proměnné `NEXT_PUBLIC_SITE_URL` a `NEXT_PUBLIC_APP_URL` (výchozí `sparxdeck.com` a `portal.sparxdeck.com`); platforma odkazuje na landing page přes `NEXT_PUBLIC_MARKETING_URL`.
 
 **Současný stav (2026-10-16, bez vlastní domény):** tým Vercel `sparxdeck`, projekt `sparxdeck` (landing page) na https://sparxdeck.vercel.app, projekt `sparxdeck-app` (platforma) na https://sparxdeck-app.vercel.app, produkční Supabase `ellnjenfqupwqelsojjg`. Po koupi domény: přidat domény k projektům, změnit uvedené proměnné a Site URL v Supabase a nasadit znovu.
 
 ## 6. Kontrola po nasazení
 
-- [ ] `https://app.sparxdeck.com/api/health` vrátí `{"status":"ok","database":"ok"}`.
+- [ ] `https://portal.sparxdeck.com/api/health` vrátí `{"status":"ok","database":"ok"}`.
 - [ ] Registrace nového účtu: potvrzovací e-mail dorazí a odkaz funguje.
 - [ ] Založení firmy, pozvánka kolegy: e-mail dorazí.
-- [ ] Zákazník, budova, zařízení. **Tisk štítku z produkční adresy:** QR musí vést na `app.sparxdeck.com`.
+- [ ] Zákazník, budova, zařízení. **Tisk štítku z produkční adresy:** QR musí vést na `portal.sparxdeck.com`.
 - [ ] Naskenování štítku telefonem: otevře se zařízení (fotoaparát funguje jen přes HTTPS, tady poprvé naostro).
 - [ ] Revize na telefonu až po protokol, stažení PDF, odeslání protokolu e-mailem sobě.
-- [ ] Náhled týdenního souhrnu: `curl -H "Authorization: Bearer <CRON_SECRET>" "https://app.sparxdeck.com/api/cron/weekly-summary?dry"`.
+- [ ] Náhled týdenního souhrnu: `curl -H "Authorization: Bearer <CRON_SECRET>" "https://portal.sparxdeck.com/api/cron/weekly-summary?dry"`.
 - [ ] Sentry: v prohlížeči na produkci se vyvolaná chyba objeví v Sentry (volitelné).
 - [ ] Hlídání dostupnosti (např. Better Stack nebo UptimeRobot) míří na `/api/health` a upozorní e-mailem.
 - [ ] Instalace na plochu: v Chrome na Androidu „Nainstalovat aplikaci“, v Safari na iPhonu „Sdílet → Přidat na plochu“.

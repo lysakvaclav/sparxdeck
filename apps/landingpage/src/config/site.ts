@@ -2,7 +2,7 @@
 
 /** Addresses can be set per deployment (e.g. *.vercel.app before the domain exists). */
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sparxdeck.com";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.sparxdeck.com";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://portal.sparxdeck.com";
 
 export const SITE = {
   name: "SparxDeck",

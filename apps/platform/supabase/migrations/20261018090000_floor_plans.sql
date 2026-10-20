@@ -205,7 +205,7 @@ returns void
 language plpgsql
 security invoker
 set search_path = ''
-as $
+as $$
 declare
   v_plan public.floor_plans%rowtype;
 begin
@@ -218,7 +218,7 @@ begin
   on conflict (device_id) do update
     set floor_plan_id = excluded.floor_plan_id, x = excluded.x, y = excluded.y;
 end;
-$;
+$$;
 
 revoke all on function public.place_device(uuid, uuid, double precision, double precision) from public, anon;
 grant execute on function public.place_device(uuid, uuid, double precision, double precision) to authenticated;

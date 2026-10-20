@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 20
     env:
       # Public placeholders: the build reads them, nothing connects at build time.
-      NEXT_PUBLIC_APP_URL: https://app.sparxdeck.com
+      NEXT_PUBLIC_APP_URL: https://portal.sparxdeck.com
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
       NEXT_TELEMETRY_DISABLED: "1"
