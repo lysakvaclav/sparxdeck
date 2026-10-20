@@ -133,6 +133,7 @@ try {
     ["defect", `/defects/${defect.id}`],
     ["defect-new", "/defects/new"],
     ["inspections", "/inspections"],
+    ["inspections-summary", "/inspections/summary"],
     ["device-types", "/device-types"],
     ["device-type", `/device-types/${type.id}`],
     ["device-type-new", "/device-types/new"],
@@ -180,6 +181,11 @@ try {
   await touchTargets(page, "phone add device");
   await page.clickText("Zrušit", "button");
   await sleep(400);
+  // Completing, with the customer's signature pad.
+  await page.goto(`${APP}${run}/complete`);
+  await page.waitForText("Podpis zákazníka");
+  await audit(page, "phone complete");
+  await touchTargets(page, "phone complete");
   await page.goto(`${APP}${run}/check/${device.id}`);
   await page.waitForText("Uloženo");
   await page.click('header button[aria-label="Hledat"]');
@@ -199,6 +205,7 @@ try {
     ["phone defect-new", "/defects/new"],
     ["phone customer", "/customers/" + customer.id],
     ["phone settings", "/settings"],
+    ["phone summary", "/inspections/summary"],
     ["phone plans", "/plans"],
     ["phone import", "/import"],
     ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],

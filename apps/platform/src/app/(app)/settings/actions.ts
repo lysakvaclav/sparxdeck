@@ -57,7 +57,10 @@ export async function saveCompanyDetails(input: unknown): Promise<ActionResult> 
 export async function saveProtocolSettings(input: unknown): Promise<ActionResult> {
   const parsed = protocolSettingsSchema.safeParse(input);
   if (!parsed.success) return fieldErrors(parsed.error);
-  return updateOrganization({ protocol_footer_text: parsed.data.footer });
+  return updateOrganization({
+    protocol_footer_text: parsed.data.footer,
+    protocol_number_format: parsed.data.numberFormat,
+  });
 }
 
 export async function saveRegionalSettings(input: unknown): Promise<ActionResult> {

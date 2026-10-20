@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { createTranslator } from "next-intl";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import cs from "../messages/cs.json";
 import en from "../messages/en.json";
@@ -38,6 +39,7 @@ const input: ProtocolInput = {
   timeZone: "Europe/Prague",
   year: 2026,
   number: 7,
+  version: 1,
   organization: {
     name: "Revize Novák",
     legalName: "Revize Novák s.r.o.",
@@ -122,12 +124,72 @@ const input: ProtocolInput = {
     },
     { number: 4, labelNumber: 5, description: "Tlakoměr", severity: "minor", again: true },
   ],
+  customerSignature: null,
 };
 
 describe("protocol numbers", () => {
   it("are the year and a four-digit sequence", () => {
     expect(protocolNumber(2026, 7)).toBe("2026-0007");
     expect(protocolNumber(2027, 12345)).toBe("2027-12345");
+  });
+
+  it("can read number-first or with a slash, per the organization's setting", () => {
+    expect(protocolNumber(2026, 7, "number_year")).toBe("0007/2026");
+    expect(protocolNumber(2026, 7, "year_slash_number")).toBe("2026/0007");
+  });
+
+  it("a slash never ends up in the file name", () => {
+    const model = buildProtocol({ ...input, numberFormat: "number_year" }, translate("cs"));
+    expect(model.number).toBe("0007/2026");
+    expect(model.fileName).toBe("Protokol-0007-2026.pdf");
+    expect(model.page(1, 1)).toBe("Protokol 0007/2026 · strana 1 z 1");
+  });
+});
+
+describe("a reissued protocol and the customer's signature", () => {
+  it("says which issue it replaces, with the same number", () => {
+    const model = buildProtocol(
+      { ...input, version: 2, previousIssuedAt: "2026-10-13T09:30:05Z" },
+      translate("cs"),
+    );
+    expect(model.number).toBe("2026-0007");
+    expect(model.facts.at(-1)).toEqual({
+      label: "Verze",
+      value: "2, nahrazuje vydání z 13. 10. 2026",
+    });
+    const first = buildProtocol(input, translate("cs"));
+    expect(first.facts.map((fact) => fact.label)).not.toContain("Verze");
+  });
+
+  it("prints the customer's name and when they signed", () => {
+    const model = buildProtocol(
+      { ...input, customerSignature: { name: "Jana Malá", signedAt: "2026-10-13T09:31:00Z" } },
+      translate("cs"),
+    );
+    expect(model.signatures[1]).toEqual({
+      label: "Převzal(a) za zákazníka",
+      name: "Jana Malá",
+      signedAt: "13. 10. 2026",
+    });
+    const english = buildProtocol(
+      {
+        ...input,
+        locale: "en",
+        version: 3,
+        previousIssuedAt: "2026-10-14T08:00:00Z",
+        customerSignature: { name: null, signedAt: "2026-10-13T09:31:00Z" },
+      },
+      translate("en"),
+    );
+    expect(english.signatures[1]).toEqual({
+      label: "Received for the customer",
+      name: null,
+      signedAt: "Oct 13, 2026",
+    });
+    expect(english.facts.at(-1)).toEqual({
+      label: "Version",
+      value: "3, replaces the issue of Oct 14, 2026",
+    });
   });
 });
 
@@ -205,16 +267,23 @@ describe("protocol content", () => {
     expect(model.defects).toEqual([
       {
         number: "Z-0004",
+        rawNumber: 4,
         device: "0005",
         description: "Tlakoměr (zjištěno opakovaně)",
         severity: "Drobná",
       },
-      { number: "Z-0012", device: "0005", description: "Plomba: chybí", severity: "Kritická" },
+      {
+        number: "Z-0012",
+        rawNumber: 12,
+        device: "0005",
+        description: "Plomba: chybí",
+        severity: "Kritická",
+      },
     ]);
     expect(model.notes).toBe("Klíče vráceny správci.");
     expect(model.signatures).toEqual([
-      { label: "Revizi provedl(a)", name: "Tomáš Technik" },
-      { label: "Převzal(a) za zákazníka", name: null },
+      { label: "Revizi provedl(a)", name: "Tomáš Technik", signedAt: null },
+      { label: "Převzal(a) za zákazníka", name: null, signedAt: null },
     ]);
     expect(model.footer).toBe("Zapsáno v obchodním rejstříku.");
     expect(model.page(1, 2)).toBe("Protokol 2026-0007 · strana 1 z 2");
@@ -253,15 +322,39 @@ describe("protocol PDF", () => {
         check({ labelNumber: i + 1, outcome: i % 9 === 4 ? "failed" : "passed" }),
       ),
     };
-    const pdf = await renderProtocolPdf(buildProtocol(many, translate("cs")), null);
+    const pdf = await renderProtocolPdf(buildProtocol(many, translate("cs")));
     expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
     const pages = pdf.toString("latin1").match(/\/Type \/Page\b/g)?.length ?? 0;
     expect(pages).toBeGreaterThan(1);
+    // A drawn signature and defect photos are drawn into it.
+    // Two different images (the PDF stores identical ones only once).
+    const image = (background: string) =>
+      sharp({ create: { width: 90, height: 30, channels: 3, background } })
+        .png()
+        .toBuffer();
+    const [ink, photo] = await Promise.all([image("#2b3a48"), image("#8a9ba8")]);
+    const signed = buildProtocol(
+      {
+        ...input,
+        version: 2,
+        previousIssuedAt: "2026-10-13T09:30:05Z",
+        customerSignature: { name: "Jana Malá", signedAt: "2026-10-13T09:31:00Z" },
+      },
+      translate("cs"),
+    );
+    const withImages = await renderProtocolPdf(signed, {
+      signature: { data: ink, format: "png" },
+      defectPhotos: new Map([[12, [{ data: photo, format: "png" }]]]),
+    });
+    expect(withImages.subarray(0, 5).toString()).toBe("%PDF-");
+    const images = withImages.toString("latin1").match(/\/Subtype \/Image\b/g)?.length ?? 0;
+    expect(images).toBeGreaterThanOrEqual(2);
     // PROTOCOL_SAMPLE=path writes the samples for a look in a PDF viewer.
     if (process.env.PROTOCOL_SAMPLE) {
       fs.writeFileSync(process.env.PROTOCOL_SAMPLE, pdf);
-      const short = await renderProtocolPdf(buildProtocol(input, translate("cs")), null);
+      const short = await renderProtocolPdf(buildProtocol(input, translate("cs")));
       fs.writeFileSync(process.env.PROTOCOL_SAMPLE.replace(".pdf", "-short.pdf"), short);
+      fs.writeFileSync(process.env.PROTOCOL_SAMPLE.replace(".pdf", "-signed.pdf"), withImages);
     }
   });
 });

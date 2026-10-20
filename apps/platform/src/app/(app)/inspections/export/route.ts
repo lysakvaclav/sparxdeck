@@ -30,7 +30,7 @@ export async function GET() {
       supabase
         .from("inspection_items")
         .select(
-          "id, outcome, checked_by, checked_at, notes, device:devices(label_number, type:device_types(name)), inspection:inspections!inner(id, status, completed_at, site:sites(name, customer:customers(name)), protocol:protocols(year, number))",
+          "id, outcome, checked_by, checked_at, notes, device:devices(label_number, type:device_types(name)), inspection:inspections!inner(id, status, completed_at, site:sites(name, customer:customers(name)), protocol:protocols(year, number, number_format, active))",
         )
         .eq("organization_id", org)
         .eq("inspection.status", "completed")
@@ -88,10 +88,10 @@ export async function GET() {
     t("inspections.note"),
   ];
   const rows = items.map((item) => {
-    const protocol = item.inspection.protocol;
+    const protocol = item.inspection.protocol?.find((entry) => entry.active) ?? null;
     return [
       time(item.inspection.completed_at),
-      protocol ? protocolNumber(protocol.year, protocol.number) : null,
+      protocol ? protocolNumber(protocol.year, protocol.number, protocol.number_format) : null,
       item.inspection.site?.customer?.name,
       item.inspection.site?.name,
       item.device ? formatLabel(item.device.label_number) : null,

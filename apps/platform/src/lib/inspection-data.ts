@@ -153,41 +153,73 @@ export async function openInspectionOf(siteId: string): Promise<string | null> {
  */
 export async function defectPreview(
   inspectionId: string,
+  reopenedAt: string | null = null,
 ): Promise<{ created: number; observed: number }> {
   const supabase = await createClient();
   const answers = await fetchAll((from, to) =>
     supabase
       .from("inspection_answers")
       .select(
-        "id, defect_severity, item:inspection_items!inner(device_id, inspection_id), question:checklist_template_items!inner(label, item_type, fail_creates_defect)",
+        "id, defect_severity, item:inspection_items!inner(device_id, inspection_id, outcome, checked_at), question:checklist_template_items!inner(label, item_type, fail_creates_defect)",
       )
       .eq("item.inspection_id", inspectionId)
       .eq("value_pass", false)
       .order("id")
       .range(from, to),
   );
-  const failed = answers.filter((answer) => answer.question.item_type === "pass_fail");
+  // As complete_inspection: failed checks only, and after a correction only
+  // those finished again since the reopening.
+  const failed = answers.filter(
+    (answer) =>
+      answer.question.item_type === "pass_fail" &&
+      answer.item.outcome === "failed" &&
+      (reopenedAt === null ||
+        (answer.item.checked_at !== null &&
+          new Date(answer.item.checked_at) >= new Date(reopenedAt))),
+  );
   if (failed.length === 0) return { created: 0, observed: 0 };
 
   const devices = [...new Set(failed.map((answer) => answer.item.device_id))];
-  const open = new Set<string>();
+  // Open defects by device and question: "own" when this inspection recorded
+  // them or already noted them as found again (nothing new is recorded then).
+  const open = new Map<string, "own" | "other">();
+  const ownKind = (defect: { id: string; inspection_id: string | null }, observed: Set<string>) =>
+    defect.inspection_id === inspectionId || observed.has(defect.id) ? "own" : "other";
   for (let start = 0; start < devices.length; start += 100) {
     const { data } = await supabase
       .from("defects")
-      .select("device_id, question:checklist_template_items(label)")
+      .select("id, device_id, inspection_id, question:checklist_template_items(label)")
       .in("device_id", devices.slice(start, start + 100))
       .neq("status", "resolved");
-    for (const defect of data ?? [])
-      if (defect.question) open.add(`${defect.device_id}\n${defect.question.label}`);
+    const ids = (data ?? []).map((defect) => defect.id);
+    const { data: events } = ids.length
+      ? await supabase
+          .from("defect_events")
+          .select("defect_id")
+          .in("defect_id", ids)
+          .eq("inspection_id", inspectionId)
+          .eq("kind", "observed")
+      : { data: [] };
+    const observed = new Set((events ?? []).map((event) => event.defect_id));
+    for (const defect of data ?? []) {
+      if (!defect.question) continue;
+      const key = `${defect.device_id}\n${defect.question.label}`;
+      if (open.get(key) !== "own") open.set(key, ownKind(defect, observed));
+    }
   }
   let created = 0;
   let observed = 0;
   for (const answer of failed) {
     const key = `${answer.item.device_id}\n${answer.question.label}`;
-    if (open.has(key)) observed++;
-    else if (answer.question.fail_creates_defect || answer.defect_severity !== null) {
-      created++;
-      open.add(key);
+    const existing = open.get(key);
+    if (existing === "other") {
+      observed++;
+      open.set(key, "own");
+    } else if (existing === undefined) {
+      if (answer.question.fail_creates_defect || answer.defect_severity !== null) {
+        created++;
+        open.set(key, "own");
+      }
     }
   }
   return { created, observed };

@@ -223,9 +223,12 @@ export async function loadFieldPack(
       customerId: inspection.site?.customer?.id ?? null,
       customerName: inspection.site?.customer?.name ?? null,
       accessNotes: inspection.site?.access_notes ?? null,
+      // A correction can't be cancelled: that would delete the completed original.
       canCancel:
         inspection.status === "in_progress" &&
+        inspection.reopened_at === null &&
         (inspection.started_by === member.userId || isManager(member.role)),
+      correction: inspection.reopened_at !== null,
     },
     devices: ordered.map((device) => ({
       id: device.id,

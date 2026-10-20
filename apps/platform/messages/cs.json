@@ -301,7 +301,10 @@
     "deviceExists": "Zařízení s tímto výrobním číslem už v budově je. Najděte ho v seznamu.",
     "fieldKeyInvalid": "Neplatný klíč pole.",
     "fieldsTooMany": "Nejvýš 8 vlastních polí.",
-    "fieldKeyDuplicate": "Dvě pole nemohou mít stejný klíč."
+    "fieldKeyDuplicate": "Dvě pole nemohou mít stejný klíč.",
+    "anotherInspectionOpen": "Na této budově právě běží jiná revize.",
+    "correctionInProgress": "Na této budově právě probíhá oprava dokončené revize. Dokončete ji, pak můžete začít novou revizi.",
+    "correctionNotCancellable": "Opravu dokončené revize nejde zrušit, smazal by se i původní záznam. Opravu dokončete."
   },
   "email": {
     "invite": {
@@ -382,7 +385,9 @@
       "description": "Text v patičce každého protokolu, například bankovní spojení, zápis v rejstříku nebo kontakt na pohotovost.",
       "footer": "Patička protokolu",
       "footerPlaceholder": "Zapsáno v obchodním rejstříku vedeném…",
-      "footerHint": "Nejvýše 1000 znaků."
+      "footerHint": "Nejvýše 1000 znaků.",
+      "numberFormat": "Formát čísla protokolu",
+      "numberFormatHint": "Platí pro nově číslované protokoly; už vydané se nezmění."
     },
     "regional": {
       "title": "Jazyk a čas",
@@ -1515,7 +1520,13 @@
       "doneWithDefects": "Revize dokončena. {count, plural, one {Vznikla # závada.} few {Vznikly # závady.} other {Vzniklo # závad.}}",
       "observedHint": "{count, plural, one {# nevyhovující položka se připíše k otevřené závadě} few {# nevyhovující položky se připíšou k otevřeným závadám} other {# nevyhovujících položek se připíše k otevřeným závadám}}.",
       "skippedList": "Vynechaná zařízení",
-      "skippedHint": "Termín se jim neposune, v protokolu budou s důvodem."
+      "skippedHint": "Termín se jim neposune, v protokolu budou s důvodem.",
+      "correctionHint": "Toto je oprava dokončené revize. Po dokončení vznikne nová verze protokolu; ta předchozí zůstane uložená.",
+      "signatureTitle": "Podpis zákazníka",
+      "signatureHint": "Nepovinné: zákazník se může podepsat prstem nebo myší.",
+      "signatureClear": "Vymazat podpis",
+      "signerName": "Jméno podepisujícího",
+      "signatureKeptHint": "Nepovinné. Podpis z původní revize zůstane, pokud zákazník nepodepíše znovu."
     },
     "result": {
       "summary": "Souhrn",
@@ -1530,7 +1541,8 @@
       "defects": "Závady z revize",
       "added": "Přidáno při revizi",
       "addedHint": "Tato zařízení zatím nemají štítek. Vytiskněte ho a nalepte při příští návštěvě.",
-      "printLabels": "Tisk štítků"
+      "printLabels": "Tisk štítků",
+      "signedBy": "Podepsal(a) zákazník"
     },
     "device": {
       "check": "Zkontrolovat",
@@ -1619,6 +1631,42 @@
       "opsRefused": "{count, plural, one {Uzavření # závady server odmítl.} other {Uzavření # závad server odmítl.}}",
       "decide": "Čeká na vaše rozhodnutí",
       "decideBody": "{count, plural, one {# kontrola se neodešle, dokud nerozhodnete, co s ní.} few {# kontroly se neodešlou, dokud nerozhodnete, co s nimi.} other {# kontrol se neodešle, dokud nerozhodnete, co s nimi.}}"
+    },
+    "reopen": {
+      "action": "Opravit revizi",
+      "title": "Opravit dokončenou revizi",
+      "description": "Revize se znovu otevře jako rozpracovaná a termíny zařízení z ní se do dokončení opravy nepočítají. Po novém dokončení vznikne nová verze protokolu; ta stávající zůstane uložená.",
+      "reasonLabel": "Důvod opravy",
+      "reasonPlaceholder": "Co se opravuje a proč",
+      "confirm": "Otevřít k opravě",
+      "done": "Revize je znovu otevřená k opravě.",
+      "historyTitle": "Opravy revize",
+      "badge": "Oprava",
+      "openTitle": "Oprava dokončené revize",
+      "openBody": "Opravte, co je potřeba, a revizi znovu dokončete. Vznikne nová verze protokolu se stejným číslem, původní zůstane uložená. Datum revize a technik zůstávají z původní revize.",
+      "historyOpened": "Otevřeno k opravě: {when}",
+      "historyCompleted": "Oprava dokončena: {when}"
+    },
+    "summary": {
+      "title": "Souhrnný protokol",
+      "filtersLabel": "Omezit souhrn na zákazníka, budovu nebo období",
+      "customer": "Zákazník",
+      "site": "Budova",
+      "allCustomers": "Všichni zákazníci",
+      "allSites": "Všechny budovy",
+      "from": "Od",
+      "to": "Do",
+      "clear": "Zrušit",
+      "downloadPdf": "Stáhnout PDF",
+      "preview": "{buildings, plural, one {# budova} few {# budovy} other {# budov}} · {inspections, plural, one {# revize} few {# revize} other {# revizí}} · {defects, plural, one {# otevřená závada} few {# otevřené závady} other {# otevřených závad}}",
+      "emptyTitle": "Nic k zobrazení",
+      "emptyBody": "V tomto období a výběru nejsou žádné dokončené revize ani otevřené závady.",
+      "columns": {
+        "site": "Budova",
+        "customer": "Zákazník",
+        "inspections": "Revizí",
+        "openDefects": "Otevřených závad"
+      }
     }
   },
   "defects": {
@@ -1775,7 +1823,9 @@
       "signTechnician": "Revizi provedl(a)",
       "signCustomer": "Převzal(a) za zákazníka",
       "signHint": "Jméno, podpis a datum",
-      "page": "Protokol {number} · strana {page} z {pages}"
+      "page": "Protokol {number} · strana {page} z {pages}",
+      "version": "Verze",
+      "versionReplaces": "{version}, nahrazuje vydání z {date}"
     },
     "email": {
       "subject": "Protokol o revizi {number} – {site}",
@@ -1803,7 +1853,11 @@
       "legacyBody": "Tato revize byla dokončena dřív, než aplikace vytvářela protokoly.",
       "generate": "Vytvořit protokol",
       "generated": "Protokol {number} je připravený.",
-      "open": "Otevřít a vytisknout"
+      "open": "Otevřít a vytisknout",
+      "version": "verze {version}",
+      "historyList": "Předchozí verze",
+      "historyEntry": "Verze {version}",
+      "historySuperseded": "nahrazena {date}"
     },
     "list": {
       "title": "Protokoly",
@@ -1814,6 +1868,40 @@
       "results": "Výsledky",
       "download": "Stáhnout protokol {number}",
       "showAll": "Všechny revize"
+    },
+    "summaryPdf": {
+      "fileName": "Souhrnny-protokol.pdf",
+      "title": "Souhrnný protokol",
+      "period": "Období: {from} – {to}",
+      "scope": {
+        "customer": "Zákazník",
+        "site": "Budova",
+        "all": "Všichni zákazníci"
+      },
+      "summary": "Budov: {buildings}. Revizí: {inspections}. Otevřených závad: {defects}.",
+      "buildingsTitle": "Budovy",
+      "inspectionColumns": {
+        "date": "Datum",
+        "number": "Protokol",
+        "result": "Výsledek"
+      },
+      "defectColumns": {
+        "number": "Číslo",
+        "device": "Štítek",
+        "description": "Popis",
+        "severity": "Závažnost",
+        "since": "Od"
+      },
+      "noInspections": "Žádné revize v tomto období.",
+      "noDefects": "Žádné otevřené závady.",
+      "result": "Vyhovuje {passed}, nevyhovuje {failed}, nezkontrolováno {notChecked}",
+      "defectNumber": "Z-{number}",
+      "severity": {
+        "minor": "Drobná",
+        "major": "Závažná",
+        "critical": "Kritická"
+      },
+      "page": "strana {page} z {pages}"
     }
   },
   "digest": {

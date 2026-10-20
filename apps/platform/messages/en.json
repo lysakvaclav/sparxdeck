@@ -301,7 +301,10 @@
     "deviceExists": "A device with this serial number is already in the building. Find it in the list.",
     "fieldKeyInvalid": "Invalid field key.",
     "fieldsTooMany": "At most 8 custom fields.",
-    "fieldKeyDuplicate": "Two fields can't share a key."
+    "fieldKeyDuplicate": "Two fields can't share a key.",
+    "anotherInspectionOpen": "Another inspection is already in progress at this building.",
+    "correctionInProgress": "A completed inspection of this building is being corrected. Complete the correction, then start a new inspection.",
+    "correctionNotCancellable": "A correction can't be cancelled: that would delete the original inspection too. Complete the correction."
   },
   "email": {
     "invite": {
@@ -382,7 +385,9 @@
       "description": "Text in the footer of every report, such as bank details, registration details or an emergency contact.",
       "footer": "Report footer",
       "footerPlaceholder": "Registered in the Commercial Register at…",
-      "footerHint": "Up to 1,000 characters."
+      "footerHint": "Up to 1,000 characters.",
+      "numberFormat": "Report number format",
+      "numberFormatHint": "Applies to newly numbered reports; already issued ones don't change."
     },
     "regional": {
       "title": "Language and time",
@@ -1515,7 +1520,13 @@
       "doneWithDefects": "Inspection completed. {count, plural, one {# defect recorded.} other {# defects recorded.}}",
       "observedHint": "{count, plural, one {# failed item will be added to an open defect} other {# failed items will be added to open defects}}.",
       "skippedList": "Devices left out",
-      "skippedHint": "Their due dates don't move; the protocol gives the reason."
+      "skippedHint": "Their due dates don't move; the protocol gives the reason.",
+      "correctionHint": "This is a correction of a completed inspection. Completing it creates a new report version; the previous one stays saved.",
+      "signatureTitle": "Customer's signature",
+      "signatureHint": "Optional: the customer can sign with a finger or the mouse.",
+      "signatureClear": "Clear signature",
+      "signerName": "Signer's name",
+      "signatureKeptHint": "Optional. The signature from the original inspection stays unless the customer signs again."
     },
     "result": {
       "summary": "Summary",
@@ -1530,7 +1541,8 @@
       "defects": "Defects from the inspection",
       "added": "Added during the inspection",
       "addedHint": "These devices have no label yet. Print it and put it on at the next visit.",
-      "printLabels": "Print labels"
+      "printLabels": "Print labels",
+      "signedBy": "Signed by the customer"
     },
     "device": {
       "check": "Check",
@@ -1619,6 +1631,42 @@
       "opsRefused": "{count, plural, one {The server refused to resolve # defect.} other {The server refused to resolve # defects.}}",
       "decide": "Waiting for your decision",
       "decideBody": "{count, plural, one {# check isn't sent until you decide what to do with it.} other {# checks aren't sent until you decide what to do with them.}}"
+    },
+    "reopen": {
+      "action": "Correct inspection",
+      "title": "Correct a completed inspection",
+      "description": "The inspection reopens as in progress, and the devices' due dates from it don't count until the correction is completed. Completing it again creates a new report version; the current one stays saved.",
+      "reasonLabel": "Reason for the correction",
+      "reasonPlaceholder": "What is being corrected and why",
+      "confirm": "Reopen to correct",
+      "done": "The inspection is reopened for a correction.",
+      "historyTitle": "Corrections",
+      "badge": "Correction",
+      "openTitle": "Correcting a completed inspection",
+      "openBody": "Correct what's needed and complete the inspection again. A new report version with the same number is created; the original stays saved. The inspection date and technician stay from the original inspection.",
+      "historyOpened": "Reopened: {when}",
+      "historyCompleted": "Correction completed: {when}"
+    },
+    "summary": {
+      "title": "Summary report",
+      "filtersLabel": "Narrow the summary to a customer, building or period",
+      "customer": "Customer",
+      "site": "Building",
+      "allCustomers": "All customers",
+      "allSites": "All buildings",
+      "from": "From",
+      "to": "To",
+      "clear": "Clear",
+      "downloadPdf": "Download PDF",
+      "preview": "{buildings, plural, one {# building} other {# buildings}} · {inspections, plural, one {# inspection} other {# inspections}} · {defects, plural, one {# open defect} other {# open defects}}",
+      "emptyTitle": "Nothing to show",
+      "emptyBody": "No completed inspections or open defects for this period and selection.",
+      "columns": {
+        "site": "Building",
+        "customer": "Customer",
+        "inspections": "Inspections",
+        "openDefects": "Open defects"
+      }
     }
   },
   "defects": {
@@ -1775,7 +1823,9 @@
       "signTechnician": "Inspected by",
       "signCustomer": "Received for the customer",
       "signHint": "Name, signature and date",
-      "page": "Report {number} · page {page} of {pages}"
+      "page": "Report {number} · page {page} of {pages}",
+      "version": "Version",
+      "versionReplaces": "{version}, replaces the issue of {date}"
     },
     "email": {
       "subject": "Inspection report {number} – {site}",
@@ -1803,7 +1853,11 @@
       "legacyBody": "This inspection was completed before the app created reports.",
       "generate": "Create report",
       "generated": "Report {number} is ready.",
-      "open": "Open to print"
+      "open": "Open to print",
+      "version": "version {version}",
+      "historyList": "Previous versions",
+      "historyEntry": "Version {version}",
+      "historySuperseded": "superseded {date}"
     },
     "list": {
       "title": "Reports",
@@ -1814,6 +1868,40 @@
       "results": "Results",
       "download": "Download report {number}",
       "showAll": "All inspections"
+    },
+    "summaryPdf": {
+      "fileName": "Summary-report.pdf",
+      "title": "Summary report",
+      "period": "Period: {from} – {to}",
+      "scope": {
+        "customer": "Customer",
+        "site": "Building",
+        "all": "All customers"
+      },
+      "summary": "Buildings: {buildings}. Inspections: {inspections}. Open defects: {defects}.",
+      "buildingsTitle": "Buildings",
+      "inspectionColumns": {
+        "date": "Date",
+        "number": "Report",
+        "result": "Result"
+      },
+      "defectColumns": {
+        "number": "Number",
+        "device": "Label",
+        "description": "Description",
+        "severity": "Severity",
+        "since": "Since"
+      },
+      "noInspections": "No inspections in this period.",
+      "noDefects": "No open defects.",
+      "result": "Passed {passed}, failed {failed}, not checked {notChecked}",
+      "defectNumber": "D-{number}",
+      "severity": {
+        "minor": "Minor",
+        "major": "Major",
+        "critical": "Critical"
+      },
+      "page": "page {page} of {pages}"
     }
   },
   "digest": {

@@ -143,7 +143,7 @@ Zbývá:
 
 **Stav (2026-10-12): hotovo.** Každé zařízení má na detailu kartu Štítek s QR kódem, číslem a odkazem. QR obsahuje jen odkaz `/d/<token>` (náhodný 12znakový kód, úroveň opravy chyb Q, takže přežije i poškrábání). Po naskenování: nepřihlášený projde přihlášením a vrátí se k zařízení; cizí firma, neplatný i smazaný štítek dostanou stejné neutrální „Štítek nenalezen“. Tisk štítků po budovách: výběr zařízení (odstraněná se netisknou), 6 běžných formátů archů A4 i vlastní rozměr, počet kopií, začátek na načatém archu, živý náhled archu a vektorové PDF s vloženým písmem (česká diakritika). Poslední formát si prohlížeč pamatuje. Tisknout může každý člen firmy. Ověřeno 116 automatickými testy (QR se dekóduje zpět, geometrie všech formátů, validace, vykreslení PDF, token najde zařízení jen ve vlastní firmě) a 7 kroky v prohlížeči, ve kterých se QR přečte ze snímku obrazovky jako telefonem a odkaz se otevře nepřihlášeně i jako cizí firma.
 
-**Od tebe:** vytisknout arch na skutečné štítky a naskenovat telefonem. Do nasazení vede odkaz v QR na adresu z `NEXT_PUBLIC_APP_URL` (teď `localhost`), takže ostré štítky tisknout až z app.sparxdeck.com.
+**Od tebe:** vytisknout arch na skutečné štítky a naskenovat telefonem. Do nasazení vede odkaz v QR na adresu z `NEXT_PUBLIC_APP_URL` (teď `localhost`), takže ostré štítky tisknout až z portal.sparxdeck.com.
 
 ## Část 7: Revize v terénu (jádro produktu)
 
@@ -312,7 +312,7 @@ Zbývá:
 - Závěrečná kontrola: kompletní čeština a angličtina, formáty data a čísel, přístupnost, Safari a Chrome na telefonu.
 - Spočítání odškrtnutých položek P1, P2 a P3.
 
-**Hotovo, když:** aplikace běží na app.sparxdeck.com a automatický test hlavního toku projde.
+**Hotovo, když:** aplikace běží na portal.sparxdeck.com a automatický test hlavního toku projde.
 
 **Stav (2026-10-15): všechno v kódu je hotové a ověřené, spuštění čeká na účty.** Postup je v [DEPLOY.md](DEPLOY.md).
 - **PWA:** aplikace jde nainstalovat na plochu telefonu i počítače.
@@ -565,6 +565,30 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 **Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“
 
 **Od tebe:** položky kontrolních seznamů pro další typy zařízení (hydrant, nouzové osvětlení, požární klapky a dveře), ideálně od revizního technika — pak je můžu zadat jako vzorové šablony podobně jako u hasicích přístrojů.
+
+### Část 18: Protokol 2 a podpis zákazníka
+
+**Stav (2026-10-20): hotovo** (zatím jen lokálně, nenasazeno). Odloženo: vlastní vzhled protokolu (P3, viz níže).
+
+- **Podpis zákazníka:** při dokončení revize se zákazník může podepsat prstem nebo myší a napsat své jméno (obojí nepovinné). Podpis je obrázek PNG, server ho ověří (`sniffImage`) a uloží s právy serveru do `org-assets` pod `<org>/signatures/<revize>.png`. Do protokolu se vykreslí do pole „Převzal(a) za zákazníka“ se jménem a datem. Kresba a jméno se nahrazují jen spolu: nový podpis nebo nové jméno nahradí celý předchozí, bez nich zůstane původní (i při opravě revize).
+- **Oprava dokončené revize:** vlastník nebo administrátor ji na stránce revize otevře tlačítkem „Opravit revizi“ s povinným důvodem (`reopen_inspection`, záznam v `inspection_reopenings`). Revize je znovu rozpracovaná, opraví se stejnými obrazovkami jako v terénu a znovu dokončí. Pravidla, aby oprava nezměnila, co se na místě skutečně stalo:
+  - Při otevření se vrátí termíny zařízení, které revize posunula (pokud je mezitím nic neposunulo dál). Při novém dokončení se počítají z data původní kontroly, ne ze dne opravy (`inspection_items.original_checked_at`, `device_last_before`). Opravou z „vyhovuje“ na „nevyhovuje“ tedy zařízení přijde o termín, jak má.
+  - Datum dokončení revize a technik v protokolu zůstávají původní. Kdo a kdy opravu dokončil, je v historii oprav na stránce revize.
+  - Závady se zakládají jen z kontrol znovu dokončených po otevření a nic, co revize už zapsala, se nezapíše podruhé.
+  - Během opravy nejde na budově začít novou revizi (`correction_in_progress`) a opravu nejde zrušit (`correction_not_cancellable`, smazala by i původní záznam). V aplikaci revize je označená jako „Oprava“.
+- **Verze protokolu:** nové dokončení vydá protokol znovu se stejným číslem jako novou verzi (`reissue_protocol`, `protocols.version`, `active`, `superseded_at`). Předchozí verze a její PDF zůstávají beze změny a jdou stáhnout (`/inspections/[id]/protocol?version=N`). Nová verze v PDF uvádí, které vydání nahrazuje. Odeslané e-maily všech verzí zůstávají vidět.
+- **Fotky závad v protokolu:** až dvě fotky u každé závady jako náhledy pod tabulkou závad.
+- **Souhrnný protokol:** `/inspections/summary` (tlačítko „Souhrnný protokol“ v seznamu revizí). Filtr zákazník, budova a období (výchozí poslední rok, dny podle časového pásma firmy), náhled po budovách a PDF ke stažení: revize s číslem protokolu a výsledky, otevřené závady. Nečísluje se a neukládá, vzniká na požádání.
+- **Formát čísla protokolu:** v Nastavení → Protokoly (`2026-0007`, `2026/0007`, `0007/2026`). Formát se uloží k protokolu při očíslování, takže změna nastavení nezmění už vydané protokoly. V názvu souboru je lomítko nahrazené pomlčkou.
+- **Technicky:** migrace `20261023090000_protocols_v2.sql` (verze protokolů, formát čísla, podpis, otevření k opravě) a `20261023100000_inspection_corrections.sql` (termíny, původní kontrola, závady, ochrana opravy, čas kontroly z telefonu nejdřív od otevření). `src/lib/protocol-summary.ts` (obsah souhrnu, testy), `src/lib/protocol-summary-data.ts`, `src/lib/pdf/protocol-summary.tsx`, `src/components/app/signature-pad.tsx`, `startOfDayInTimeZone()` v `src/lib/due.ts`.
+- **Ověření:**
+  - RLS testy: otevření jen vlastníkem nebo administrátorem s důvodem, cizí firma nic nevidí ani neotevře; vrácení termínů; zákaz nové revize a zrušení během opravy; nová verze se stejným číslem bez spotřeby čísla; původní dokončení a technik; žádné zdvojené závady; podpis jen z vlastní složky a jeho zachování.
+  - Jednotkové testy: verze a podpis v protokolu, formát čísla a název souboru, souhrnný protokol, začátek dne v časovém pásmu (i přes změnu času), vykreslení PDF s podpisem a fotkou závady.
+  - E2E `e2e/part18.mjs`: dokončení s podpisem, otevření k opravě, oprava jedné kontroly a nová verze protokolu (stará jde stáhnout), souhrn a jeho PDF, formát čísla v nastavení, tmavý režim a angličtina. Audit přístupnosti rozšířen o stránku dokončení s podpisem a souhrn.
+
+**Odloženo:** vlastní vzhled protokolu (barvy, rozložení loga, J P3). Protokol je záměrně černobílý kvůli tisku; počká na přání firem z pilotu.
+
+**Od tebe:** ověřit s revizním technikem, jestli podpis zákazníka, jeho jméno a datum v protokolu stačí, nebo jestli zákazníci chtějí podepisovat i něco dalšího.
 
 ---
 

@@ -8,6 +8,7 @@ import {
   dueWindow,
   isIsoDate,
   nextDueDate,
+  startOfDayInTimeZone,
   todayInTimeZone,
   worstDueState,
   type DueWindow,
@@ -87,6 +88,26 @@ describe("today in the organization's time zone", () => {
 
   it("falls back to UTC for an unknown zone", () => {
     expect(todayInTimeZone("Mars/Olympus", new Date("2026-03-31T22:30:00Z"))).toBe("2026-03-31");
+    expect(startOfDayInTimeZone("2026-03-31", "Mars/Olympus").toISOString()).toBe(
+      "2026-03-31T00:00:00.000Z",
+    );
+  });
+
+  it("knows when a day starts in a time zone, also across summer time", () => {
+    const start = (date: string, zone: string) => startOfDayInTimeZone(date, zone).toISOString();
+    expect(start("2026-01-15", "Europe/Prague")).toBe("2026-01-14T23:00:00.000Z");
+    expect(start("2026-07-15", "Europe/Prague")).toBe("2026-07-14T22:00:00.000Z");
+    // The days summer time starts and ends: midnight is still on the old offset.
+    expect(start("2026-03-29", "Europe/Prague")).toBe("2026-03-28T23:00:00.000Z");
+    expect(start("2026-03-30", "Europe/Prague")).toBe("2026-03-29T22:00:00.000Z");
+    expect(start("2026-10-25", "Europe/Prague")).toBe("2026-10-24T22:00:00.000Z");
+    expect(start("2026-10-26", "Europe/Prague")).toBe("2026-10-25T23:00:00.000Z");
+    expect(start("2026-07-15", "America/New_York")).toBe("2026-07-15T04:00:00.000Z");
+    expect(start("2026-07-15", "Asia/Tbilisi")).toBe("2026-07-14T20:00:00.000Z");
+    expect(start("2026-07-15", "UTC")).toBe("2026-07-15T00:00:00.000Z");
+    // Round trip: the start is that day there.
+    for (const zone of ["Europe/Prague", "America/New_York", "Asia/Riyadh"])
+      expect(todayInTimeZone(zone, startOfDayInTimeZone("2026-10-25", zone))).toBe("2026-10-25");
   });
 
   it("decides the due state by the organization's date", () => {

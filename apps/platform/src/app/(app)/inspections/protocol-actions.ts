@@ -28,7 +28,10 @@ export async function createProtocol(
   if (!protocol?.pdf_path) return { ok: false, error: "protocolFailed" };
 
   revalidatePath("/", "layout");
-  return { ok: true, data: { number: protocolNumber(protocol.year, protocol.number) } };
+  return {
+    ok: true,
+    data: { number: protocolNumber(protocol.year, protocol.number, protocol.number_format) },
+  };
 }
 
 /** E-mails the protocol's PDF and records who sent it where. */

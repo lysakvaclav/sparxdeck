@@ -287,6 +287,18 @@ export function ProtocolForm({
             {...form.register("footer")}
           />
         </Field>
+        <Field
+          id="numberFormat"
+          label={t("numberFormat")}
+          hint={t("numberFormatHint")}
+          error={fieldError(form.formState.errors.numberFormat?.message)}
+        >
+          <NativeSelect {...form.register("numberFormat")}>
+            <option value="year_number">2026-0007</option>
+            <option value="year_slash_number">2026/0007</option>
+            <option value="number_year">0007/2026</option>
+          </NativeSelect>
+        </Field>
         <FormFooter error={error} done={done} pending={pending} disabled={disabled} />
       </fieldset>
     </form>

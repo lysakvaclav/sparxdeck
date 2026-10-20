@@ -69,6 +69,9 @@ export type ErrorCode =
   | "invalidDefect"
   | "resolutionRequired"
   | "inspectionOpen"
+  | "anotherInspectionOpen"
+  | "correctionInProgress"
+  | "correctionNotCancellable"
   | "protocolFailed"
   | "protocolMissing"
   | "emailDisabled"
@@ -154,6 +157,9 @@ export function databaseErrorCode(
   if (message.includes("too_many_photos")) return "tooManyPhotos";
   if (message.includes("invalid_defect")) return "invalidDefect";
   if (message.includes("resolution_required")) return "resolutionRequired";
+  if (message.includes("another_inspection_open")) return "anotherInspectionOpen";
+  if (message.includes("correction_in_progress")) return "correctionInProgress";
+  if (message.includes("correction_not_cancellable")) return "correctionNotCancellable";
   if (message.includes("inspection_open")) return "inspectionOpen";
   if (message.includes("protocol_missing")) return "protocolMissing";
   if (message.includes("sample_exists")) return "sampleExists";

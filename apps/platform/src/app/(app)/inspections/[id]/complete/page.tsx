@@ -28,7 +28,7 @@ export default async function CompleteInspectionPage({ params }: Props) {
   const t = await getTranslations("inspections");
   const [{ devices, checks }, defects] = await Promise.all([
     loadInspectionRun(inspection, membership.user_id),
-    defectPreview(id),
+    defectPreview(id, inspection.reopened_at),
   ]);
 
   const byOutcome = (test: (deviceId: string) => boolean) =>
@@ -148,7 +148,16 @@ export default async function CompleteInspectionPage({ params }: Props) {
           )}
 
           <Card>
-            <CompleteForm inspectionId={id} blocked={open.length > 0} />
+            <CompleteForm
+              inspectionId={id}
+              blocked={open.length > 0}
+              correction={inspection.reopened_at !== null}
+              defaultNotes={inspection.notes ?? ""}
+              signedBefore={
+                inspection.customer_signature_path !== null ||
+                inspection.customer_signer_name !== null
+              }
+            />
           </Card>
         </div>
       </PageBody>

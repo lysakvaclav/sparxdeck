@@ -138,7 +138,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Obnovení rozdělané revize po zavření stránky (část 7: odpovědi v localStorage, fotky v IndexedDB, odešlou se po návratu)
 - [x] P2 Označení zařízení "nepřístupné" nebo "nenalezeno" s důvodem (část 15: „Nelze zkontrolovat“ s důvodem a poznámkou, `skip_device_check`; termín se neposune, odpovědi nevytvoří závadu, v protokolu a výsledku revize s důvodem; když se zařízení přece jen zkontroluje, označení se zruší)
 - [x] P2 Přidání nového zařízení přímo během revize (naskenování dosud nezaevidovaného štítku) (část 15: „Přidat zařízení“ v revizi i pro technika, `add_inspection_device`; dostane číslo štítku a hned se kontroluje, stejné výrobní číslo v budově odmítne; štítky se tisknou až k založenému zařízení, proto výsledek revize nabídne tisk štítků přidaných zařízení)
-- [ ] P2 Úprava dokončené revize se záznamem změny (přesunuto do části 18: oprava vytvoří novou verzi protokolu)
+- [x] P2 Úprava dokončené revize se záznamem změny (část 18: vlastník nebo administrátor ji otevře k opravě s povinným důvodem, `reopen_inspection`, historie v `inspection_reopenings` (kdo, kdy, proč, kdo opravu dokončil); oprava vrátí termíny, které revize posunula, a nové dokončení je počítá z původní kontroly; datum revize a technik zůstávají původní; během opravy nejde začít novou revizi ani opravu zrušit; vznikne nová verze protokolu)
 - [x] P2 Zrušení rozdělané revize (část 15: `cancel_inspection` smí ten, kdo revizi zahájil, vlastník a administrátor; smaže kontroly, odpovědi a fotky, zařízení zůstanou)
 - [x] P2 Hlasová diktovačka poznámek (využít funkci telefonu) (část 15: poznámky mají velké písmeno na začátku věty a na dotykovém telefonu nápovědu k mikrofonu na klávesnici; vlastní rozpoznávání řeči záměrně ne, klávesnice telefonu to umí spolehlivěji a česky)
 - [ ] P3 Svítilna a ovládání přiblížení u skeneru
@@ -169,10 +169,10 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Čitelnost při tisku (černobílý tisk) (část 9: jen černá a šedá, výsledky slovy, nevyhovující tučně; ověřeno na náhledu)
 - [x] P1 Jazyk protokolu podle nastavení (čeština, angličtina) (část 9: výchozí jazyk firmy v okamžiku dokončení, uložený u protokolu; ověřeno v `e2e/part9.mjs`)
 - [ ] P2 Vlastní text e-mailu a více příjemců
-- [ ] P2 Fotografie závad v protokolu
-- [ ] P2 Opětovné vygenerování protokolu po opravě (nová verze, původní zůstává)
-- [ ] P2 Souhrnný protokol za více budov nebo období
-- [ ] P3 Vlastní vzhled protokolu (barvy, rozložení)
+- [x] P2 Fotografie závad v protokolu (část 18: až dvě fotky u každé závady jako náhledy pod tabulkou závad)
+- [x] P2 Opětovné vygenerování protokolu po opravě (nová verze, původní zůstává) (část 18: `reissue_protocol`, stejné číslo, `protocols.version`/`active`; starší verze a jejich PDF beze změny a ke stažení přes `?version=N`; nová verze uvádí, které vydání nahrazuje; odeslané e-maily všech verzí zůstávají vidět)
+- [x] P2 Souhrnný protokol za více budov nebo období (část 18: `/inspections/summary`, filtr zákazník, budova a období ve dnech firemního časového pásma; náhled po budovách a PDF s revizemi, čísly protokolů, výsledky a otevřenými závadami; neukládá se)
+- [ ] P3 Vlastní vzhled protokolu (barvy, rozložení) (odloženo z části 18: protokol je záměrně černobílý kvůli tisku, počká na přání firem z pilotu)
 - [ ] P3 Šablony protokolů podle země a předpisů
 - [ ] P3 Elektronický podpis a časové razítko
 
@@ -214,8 +214,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 
 ## N. Podpisy a potvrzení
 
-- [ ] P2 Podpis zákazníka prstem na displeji
-- [ ] P2 Jméno podepisujícího a čas v protokolu
+- [x] P2 Podpis zákazníka prstem na displeji (část 18: plátno na stránce dokončení revize, nepovinné; PNG ověří a uloží server do `<org>/signatures/`, v protokolu v poli „Převzal(a) za zákazníka“; při opravě revize zůstává, pokud se zákazník nepodepíše znovu)
+- [x] P2 Jméno podepisujícího a čas v protokolu (část 18: jméno a datum podpisu v protokolu i na stránce revize; kresba a jméno se nahrazují jen spolu)
 - [ ] P3 Odeslání protokolu zákazníkovi k podpisu na dálku
 - [ ] P3 Právně uznatelný elektronický podpis (podle země)
 
@@ -245,7 +245,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Logo a patička protokolu (část 2: `src/app/(app)/settings`, úložiště `org-assets`)
 - [x] P1 Výchozí jazyk a časové pásmo (část 2: `organizations.default_locale`, `organizations.timezone` (kontrola v databázi))
 - [x] P1 Hranice "brzy" v dnech (část 2: `organizations.due_soon_days` (1–365, výchozí 30))
-- [ ] P2 Formát číslování protokolů
+- [x] P2 Formát číslování protokolů (část 18: Nastavení → Protokoly, `2026-0007`, `2026/0007` nebo `0007/2026`; formát se uloží k protokolu při očíslování, už vydané se nezmění; v názvu souboru bez lomítka)
 - [ ] P2 Výchozí text e-mailu zákazníkům
 - [ ] P3 Vlastní pole u zákazníků a zařízení
 

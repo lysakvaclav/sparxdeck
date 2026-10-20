@@ -3,9 +3,10 @@ import { getTranslations } from "next-intl/server";
 import sharp from "sharp";
 import { renderEmail, sendEmail } from "@/lib/email";
 import { memberNames } from "@/lib/inspection-data";
-import { renderProtocolPdf, type ProtocolLogo } from "@/lib/pdf/protocol";
+import { renderProtocolPdf, type ProtocolAssets, type ProtocolLogo } from "@/lib/pdf/protocol";
 import {
   buildProtocol,
+  protocolFileNumber,
   protocolNumber,
   type ProtocolCheck,
   type ProtocolDefect,
@@ -23,19 +24,31 @@ import { createClient } from "@/lib/supabase/server";
 
 export type Protocol = Database["public"]["Tables"]["protocols"]["Row"];
 
-/** The inspection's protocol, if it has one. */
+/** The inspection's current protocol, if it has one (a past, superseded version isn't it). */
 export async function protocolOf(inspectionId: string): Promise<Protocol | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("protocols")
     .select("*")
     .eq("inspection_id", inspectionId)
+    .eq("active", true)
     .maybeSingle();
   return data;
 }
 
-/** The logo as react-pdf takes it (PNG or JPEG); WebP is converted. Null if unusable. */
-async function loadLogo(path: string): Promise<ProtocolLogo | null> {
+/** Every version of the inspection's protocol, newest first (the active one is [0]). */
+export async function protocolHistoryOf(inspectionId: string): Promise<Protocol[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("protocols")
+    .select("*")
+    .eq("inspection_id", inspectionId)
+    .order("version", { ascending: false });
+  return data ?? [];
+}
+
+/** An org-assets image as react-pdf takes it (PNG or JPEG); WebP is converted. Null if unusable. */
+async function loadOrgImage(path: string): Promise<ProtocolLogo | null> {
   try {
     const supabase = await createClient();
     const { data } = await supabase.storage.from(ORG_ASSETS_BUCKET).download(path);
@@ -47,7 +60,7 @@ async function loadLogo(path: string): Promise<ProtocolLogo | null> {
     if (kind?.ext === "webp") return { data: await sharp(bytes).png().toBuffer(), format: "png" };
     return null;
   } catch (error) {
-    console.error("Protocol logo could not be loaded", error);
+    console.error("Protocol image could not be loaded", path, error);
     return null;
   }
 }
@@ -73,7 +86,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
         supabase
           .from("inspections")
           .select(
-            "started_at, completed_at, completed_by, notes, site:sites(name, address, customer:customers(name, company_id, vat_id, contact_person, billing_address))",
+            "started_at, completed_at, completed_by, notes, customer_signature_path, customer_signer_name, customer_signed_at, site:sites(name, address, customer:customers(name, company_id, vat_id, contact_person, billing_address))",
           )
           .eq("id", inspectionId)
           .single(),
@@ -82,7 +95,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
           supabase
             .from("inspection_items")
             .select(
-              "id, outcome, skip_reason, notes, checked_by, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
+              "id, outcome, skip_reason, notes, checked_by, original_checked_by, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
             )
             .eq("inspection_id", inspectionId)
             .order("id")
@@ -149,7 +162,8 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
               outcome: item.outcome,
               skipReason: item.skip_reason,
               nextDueOn: item.device.next_due_on,
-              checkedBy: name(item.checked_by),
+              // A correction keeps the technician who did the check on site.
+              checkedBy: name(item.original_checked_by ?? item.checked_by),
               note: item.notes,
               answers: answersOf.get(item.id) ?? [],
             },
@@ -158,6 +172,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
     );
     const seen = new Set<string>();
     const defects: ProtocolDefect[] = [];
+    const defectIdByNumber = new Map<number, string>();
     for (const [list, again] of [
       [created, false],
       [observed.flatMap((event) => (event.defect ? [event.defect] : [])), true],
@@ -165,6 +180,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
       for (const defect of list) {
         if (seen.has(defect.id)) continue;
         seen.add(defect.id);
+        defectIdByNumber.set(defect.number, defect.id);
         defects.push({
           number: defect.number,
           labelNumber: defect.device?.label_number ?? 0,
@@ -174,6 +190,45 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
         });
       }
     }
+
+    // A few photos per defect, so the protocol stays readable and quick to render.
+    const PHOTOS_PER_DEFECT = 2;
+    const defectPhotoRows =
+      defectIdByNumber.size > 0
+        ? await supabase
+            .from("defect_photos")
+            .select("defect_id, storage_path")
+            .in("defect_id", [...defectIdByNumber.values()])
+            .order("created_at")
+        : { data: [] };
+    const photoPathsByDefect = new Map<string, string[]>();
+    for (const row of defectPhotoRows.data ?? []) {
+      const list = photoPathsByDefect.get(row.defect_id) ?? [];
+      if (list.length < PHOTOS_PER_DEFECT) list.push(row.storage_path);
+      photoPathsByDefect.set(row.defect_id, list);
+    }
+    const defectPhotos = new Map<number, ProtocolLogo[]>();
+    for (const [number, defectId] of defectIdByNumber) {
+      const paths = photoPathsByDefect.get(defectId) ?? [];
+      if (paths.length === 0) continue;
+      const images = (await Promise.all(paths.map(loadOrgImage))).filter(
+        (image): image is ProtocolLogo => image !== null,
+      );
+      if (images.length > 0) defectPhotos.set(number, images);
+    }
+
+    // A reissued protocol says which issue it replaces.
+    const previousIssuedAt =
+      protocol.version > 1
+        ? ((
+            await supabase
+              .from("protocols")
+              .select("generated_at")
+              .eq("inspection_id", inspectionId)
+              .eq("version", protocol.version - 1)
+              .maybeSingle()
+          ).data?.generated_at ?? null)
+        : null;
 
     const generatedAt = new Date().toISOString();
     const t = (await getTranslations({
@@ -188,6 +243,8 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
         timeZone: organization.timezone,
         year: protocol.year,
         number: protocol.number,
+        numberFormat: protocol.number_format,
+        version: protocol.version,
         organization: {
           name: organization.name,
           legalName: organization.legal_name,
@@ -215,11 +272,20 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
         notes: inspection.notes,
         checks,
         defects,
+        customerSignature:
+          inspection.customer_signature_path || inspection.customer_signer_name
+            ? { name: inspection.customer_signer_name, signedAt: inspection.customer_signed_at }
+            : null,
+        previousIssuedAt,
       },
       t,
     );
-    const logo = organization.logo_path ? await loadLogo(organization.logo_path) : null;
-    const pdf = await renderProtocolPdf(model, logo);
+    const [logo, signature] = await Promise.all([
+      organization.logo_path ? loadOrgImage(organization.logo_path) : null,
+      inspection.customer_signature_path ? loadOrgImage(inspection.customer_signature_path) : null,
+    ]);
+    const assets: ProtocolAssets = { logo, signature, defectPhotos };
+    const pdf = await renderProtocolPdf(model, assets);
 
     const admin = createAdminClient();
     const path = `${protocol.organization_id}/${protocol.year}/${protocol.id}.pdf`;
@@ -246,7 +312,11 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
 /** The protocol's PDF file name in its language, e.g. "Protokol-2026-0007.pdf". */
 export async function protocolFileName(protocol: Protocol) {
   const t = await getTranslations({ locale: protocol.locale, namespace: "protocol.pdf" });
-  return t("fileName", { number: protocolNumber(protocol.year, protocol.number) });
+  return t("fileName", {
+    number: protocolFileNumber(
+      protocolNumber(protocol.year, protocol.number, protocol.number_format),
+    ),
+  });
 }
 
 /**
@@ -271,7 +341,7 @@ export async function emailProtocol(protocol: Protocol, recipient: string): Prom
   ]);
   if (!file || !organization || !inspection?.completed_at) return false;
 
-  const number = protocolNumber(protocol.year, protocol.number);
+  const number = protocolNumber(protocol.year, protocol.number, protocol.number_format);
   const t = await getTranslations({ locale: protocol.locale, namespace: "protocol.email" });
   const values = {
     number,

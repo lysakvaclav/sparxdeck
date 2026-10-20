@@ -667,7 +667,11 @@ export function FieldApp({
         icon={app.icon}
         iconClassName={app.tone}
         title={pack.inspection.siteName || t("title")}
-        meta={<Badge variant="primaryMinimal">{t("status.in_progress")}</Badge>}
+        meta={
+          <Badge variant="primaryMinimal">
+            {pack.inspection.correction ? t("reopen.badge") : t("status.in_progress")}
+          </Badge>
+        }
         breadcrumbs={[
           { label: t("title"), href: "/inspections" },
           ...(pack.inspection.customerId && pack.inspection.customerName
@@ -683,6 +687,11 @@ export function FieldApp({
       <PageBody width="medium">
         <div className="space-y-2.5 sm:space-y-[15px]">
           {closedAlert}
+          {pack.inspection.correction && (
+            <Alert variant="warning" title={t("reopen.openTitle")}>
+              <p>{t("reopen.openBody")}</p>
+            </Alert>
+          )}
           {device && !current && (
             <Alert variant="warning">
               <p>{tField("notInInspection")}</p>

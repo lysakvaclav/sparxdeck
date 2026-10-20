@@ -87,6 +87,48 @@ export function todayInTimeZone(timeZone: string, now: Date = new Date()): IsoDa
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
+/** How far a time zone is ahead of UTC at an instant, in milliseconds. */
+function zoneOffset(instant: number, timeZone: string) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+      .formatToParts(instant)
+      .map((part) => [part.type, Number(part.value)]),
+  );
+  const local = Date.UTC(
+    parts.year!,
+    parts.month! - 1,
+    parts.day!,
+    parts.hour!,
+    parts.minute!,
+    parts.second!,
+  );
+  return local - Math.floor(instant / 1000) * 1000;
+}
+
+/**
+ * The instant a calendar day starts in a time zone (UTC if the zone is unknown),
+ * e.g. to filter timestamps by days the way the company counts them.
+ */
+export function startOfDayInTimeZone(date: IsoDate, timeZone: string): Date {
+  const midnight = utcTime(date);
+  try {
+    // The offset at the guess, then at the result: right across a DST change.
+    const guess = midnight - zoneOffset(midnight, timeZone);
+    return new Date(midnight - zoneOffset(guess, timeZone));
+  } catch {
+    return new Date(midnight);
+  }
+}
+
 /**
  * Due state of an active device. The due day itself still counts as "soon"
  * (the inspection can be done that day); the day after, it's overdue.

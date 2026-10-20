@@ -6,6 +6,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { todayInTimeZone } from "@/lib/due";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { generateToken, hashToken } from "@/lib/tokens";
 
@@ -43,12 +44,15 @@ async function createUser(label: string): Promise<TestUser> {
   return user;
 }
 
+const organizations: string[] = [];
+
 async function createOrg(user: TestUser, name: string) {
   const { data, error } = await user.client.rpc("create_organization", {
     p_name: name,
     p_display_name: name,
   });
   if (error || !data) throw error ?? new Error("create_organization failed");
+  organizations.push(data);
   return data;
 }
 
@@ -74,12 +78,12 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
 
   afterAll(async () => {
     if (!admin) return;
-    for (const org of [orgA, orgB].filter(Boolean)) {
+    for (const org of organizations) {
       const { data: files } = await admin.storage.from("org-assets").list(org);
       if (files?.length)
         await admin.storage.from("org-assets").remove(files.map((f) => `${org}/${f.name}`));
     }
-    await admin.from("organizations").delete().in("id", [orgA, orgB].filter(Boolean));
+    await admin.from("organizations").delete().in("id", organizations);
     await Promise.all(users.map((user) => admin.auth.admin.deleteUser(user.id)));
   });
 
@@ -2003,6 +2007,328 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
         .download(`${orgA}/2026/${first.id}.pdf`);
       expect(file).toBeNull();
       await admin.storage.from("protocols").remove([`${orgA}/2026/${first.id}.pdf`]);
+    });
+  });
+
+  describe("correcting a completed inspection (a fresh organization)", () => {
+    let gina: TestUser;
+    let hank: TestUser;
+    let org: string;
+    let site: string;
+    let otherSite: string;
+    let devices: string[];
+    let questions: {
+      id: string;
+      item_type: string;
+      required: boolean;
+      fail_creates_defect: boolean;
+    }[];
+    let inspection: string;
+    let completedAt: string;
+    let first: { id: string; year: number; number: number };
+    const today = () => todayInTimeZone("Europe/Prague");
+
+    beforeAll(async () => {
+      gina = await createUser("gina");
+      hank = await createUser("hank");
+      org = await createOrg(gina, `RLS corrections ${run}`);
+      const token = generateToken();
+      await gina.client.from("invitations").insert({
+        organization_id: org,
+        email: hank.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: gina.id,
+      });
+      const { error: joined } = await hank.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Hank",
+      });
+      expect(joined).toBeNull();
+      const { data: customer } = await gina.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: s, error: sitesError } = await gina.client
+        .from("sites")
+        .insert([1, 2].map((n) => ({ organization_id: org, customer_id: customer!.id, name: `S${n}` })))
+        .select("id, name")
+        .order("name");
+      if (!s) throw sitesError;
+      site = s[0]!.id;
+      otherSite = s![1]!.id;
+      const { data: type } = await gina.client.from("device_types").select("id").single();
+      const { data: rows } = await gina.client
+        .from("devices")
+        .insert([1, 2].map(() => ({ organization_id: org, site_id: site, device_type_id: type!.id })))
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: template } = await gina.client
+        .from("checklist_templates")
+        .select(
+          "checklist_template_items(id, item_type, required, fail_creates_defect, sort_order)",
+        )
+        .eq("device_type_id", type!.id)
+        .eq("active", true)
+        .single();
+      questions = [...template!.checklist_template_items].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
+    });
+
+    /** Checks a device; `fail` answers the first defect question "no". */
+    async function check(user: TestUser, device: string, fail: boolean) {
+      const { data } = await user.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: device,
+      });
+      const item = (data as { item: string }).item;
+      const defectQuestion = questions.find(
+        (q) => q.required && q.item_type === "pass_fail" && q.fail_creates_defect,
+      );
+      for (const question of questions.filter((q) => q.required)) {
+        const failing = fail && question === defectQuestion;
+        const { error } = await user.client.rpc("save_answer", {
+          p_item: item,
+          p_template_item: question.id,
+          p_value_pass: question.item_type === "pass_fail" ? !failing : null,
+          p_value_number: question.item_type === "number" ? 5 : null,
+          p_value_text: question.item_type === "text" ? "OK" : null,
+          p_note: failing ? "Plomba chybí" : null,
+          p_defect_severity: null,
+        });
+        expect(error).toBeNull();
+      }
+      const { error } = await user.client.rpc("finish_device_check", { p_item: item });
+      expect(error).toBeNull();
+    }
+
+    async function dates() {
+      const { data } = await admin
+        .from("devices")
+        .select("id, last_inspection_on")
+        .in("id", devices);
+      return devices.map((id) => data!.find((row) => row.id === id)!.last_inspection_on);
+    }
+
+    async function protocols() {
+      const { data } = await gina.client
+        .from("protocols")
+        .select("id, year, number, version, active, superseded_at")
+        .eq("inspection_id", inspection)
+        .order("version");
+      return data!;
+    }
+
+    it("the technician completes it; only an owner or admin reopens it, with a reason", async () => {
+      const { data: started } = await hank.client.rpc("start_inspection", { p_site: site });
+      inspection = started!;
+      await check(hank, devices[0]!, false);
+      await check(hank, devices[1]!, false);
+      const { error } = await hank.client.rpc("complete_inspection", { p_inspection: inspection });
+      expect(error).toBeNull();
+      const [protocol] = await protocols();
+      expect(protocol).toMatchObject({ version: 1, active: true, superseded_at: null });
+      first = { id: protocol!.id, year: protocol!.year, number: protocol!.number };
+      expect(await dates()).toEqual([today(), today()]);
+      const { data: row } = await admin
+        .from("inspections")
+        .select("completed_at")
+        .eq("id", inspection)
+        .single();
+      completedAt = row!.completed_at!;
+
+      const reason = { p_inspection: inspection, p_reason: "Zařízení 1 nevyhovuje" };
+      const { error: technician } = await hank.client.rpc("reopen_inspection", reason);
+      expect(technician?.message).toMatch(/forbidden/);
+      const { error: stranger } = await bob.client.rpc("reopen_inspection", reason);
+      expect(stranger?.message).toMatch(/not_found/);
+      const { error: blank } = await gina.client.rpc("reopen_inspection", {
+        p_inspection: inspection,
+        p_reason: "   ",
+      });
+      expect(blank?.message).toMatch(/invalid_answer/);
+    });
+
+    it("reopening takes back its due dates; no new inspection or cancel slips into it", async () => {
+      const { error } = await gina.client.rpc("reopen_inspection", {
+        p_inspection: inspection,
+        p_reason: "Zařízení 1 nevyhovuje",
+      });
+      expect(error).toBeNull();
+      const { data: row } = await admin
+        .from("inspections")
+        .select("status, completed_at, reopened_at")
+        .eq("id", inspection)
+        .single();
+      expect(row).toMatchObject({ status: "in_progress", completed_at: null });
+      expect(row!.reopened_at).not.toBeNull();
+      // The devices had no date before this inspection.
+      expect(await dates()).toEqual([null, null]);
+
+      const { error: again } = await gina.client.rpc("reopen_inspection", {
+        p_inspection: inspection,
+        p_reason: "Znovu",
+      });
+      expect(again?.message).toMatch(/inspection_open/);
+      const { error: start } = await hank.client.rpc("start_inspection", { p_site: site });
+      expect(start?.message).toMatch(/correction_in_progress/);
+      const { error: cancel } = await gina.client.rpc("cancel_inspection", {
+        p_inspection: inspection,
+      });
+      expect(cancel?.message).toMatch(/correction_not_cancellable/);
+
+      const { data: record } = await hank.client
+        .from("inspection_reopenings")
+        .select("reason, reopened_by, previous_completed_by, completed_at")
+        .eq("inspection_id", inspection);
+      expect(record).toEqual([
+        {
+          reason: "Zařízení 1 nevyhovuje",
+          reopened_by: gina.id,
+          previous_completed_by: hank.id,
+          completed_at: null,
+        },
+      ]);
+      const { data: hidden } = await bob.client
+        .from("inspection_reopenings")
+        .select("id")
+        .eq("inspection_id", inspection);
+      expect(hidden).toEqual([]);
+      const { error: planted } = await gina.client.from("inspection_reopenings").insert({
+        organization_id: org,
+        inspection_id: inspection,
+        reason: "planted",
+      } as never);
+      expect(planted).not.toBeNull();
+    });
+
+    it("completing the correction reissues the protocol and keeps what happened on site", async () => {
+      await check(gina, devices[0]!, true);
+      const { data, error } = await gina.client.rpc("complete_inspection", {
+        p_inspection: inspection,
+      });
+      expect(error).toBeNull();
+      expect(data).toMatchObject({ passed: 1, failed: 1, defects: 1 });
+
+      const versions = await protocols();
+      expect(versions).toMatchObject([
+        { version: 1, active: false, year: first.year, number: first.number },
+        { version: 2, active: true, year: first.year, number: first.number },
+      ]);
+      expect(versions[0]!.superseded_at).not.toBeNull();
+      expect((data as { protocol: string }).protocol).toBe(versions[1]!.id);
+
+      // The original completion and technician stay; the correction is recorded.
+      const { data: row } = await admin
+        .from("inspections")
+        .select("completed_at, completed_by")
+        .eq("id", inspection)
+        .single();
+      expect(new Date(row!.completed_at!).getTime()).toBe(new Date(completedAt).getTime());
+      expect(row!.completed_by).toBe(hank.id);
+      const { data: record } = await gina.client
+        .from("inspection_reopenings")
+        .select("completed_by, completed_at")
+        .eq("inspection_id", inspection);
+      expect(record![0]!.completed_by).toBe(gina.id);
+      expect(record![0]!.completed_at).not.toBeNull();
+      const { data: item } = await admin
+        .from("inspection_items")
+        .select("checked_by, original_checked_by")
+        .eq("inspection_id", inspection)
+        .eq("device_id", devices[0]!)
+        .single();
+      expect(item).toEqual({ checked_by: gina.id, original_checked_by: hank.id });
+
+      // The failed device keeps no date; the untouched one gets its date back.
+      expect(await dates()).toEqual([null, today()]);
+    });
+
+    it("a second correction records nothing twice and uses up no protocol number", async () => {
+      const { error: reopened } = await gina.client.rpc("reopen_inspection", {
+        p_inspection: inspection,
+        p_reason: "Doplnění poznámky",
+      });
+      expect(reopened).toBeNull();
+      await check(gina, devices[0]!, true);
+      const { data, error } = await gina.client.rpc("complete_inspection", {
+        p_inspection: inspection,
+      });
+      expect(error).toBeNull();
+      expect(data).toMatchObject({ failed: 1, defects: 0 });
+
+      const { data: defects } = await gina.client
+        .from("defects")
+        .select("id, defect_events(kind)")
+        .eq("device_id", devices[0]!);
+      expect(defects).toHaveLength(1);
+      expect(defects![0]!.defect_events).toEqual([{ kind: "created" }]);
+      expect((await protocols()).map((p) => [p.version, p.active, p.number])).toEqual([
+        [1, false, first.number],
+        [2, false, first.number],
+        [3, true, first.number],
+      ]);
+
+      const { data: next } = await gina.client.rpc("start_inspection", { p_site: otherSite });
+      const { data: done } = await gina.client.rpc("complete_inspection", {
+        p_inspection: next!,
+      });
+      const { data: nextProtocol } = await gina.client
+        .from("protocols")
+        .select("number")
+        .eq("id", (done as { protocol: string }).protocol)
+        .single();
+      expect(nextProtocol!.number).toBe(first.number + 1);
+    });
+
+    it("a signature comes only from the company's folder and survives a correction", async () => {
+      const { data: started } = await gina.client.rpc("start_inspection", { p_site: site });
+      const { error: foreign } = await gina.client.rpc("complete_inspection", {
+        p_inspection: started!,
+        p_signature_path: `${orgB}/signatures/${started}.png`,
+        p_signer_name: "Jana Malá",
+      });
+      expect(foreign?.message).toMatch(/invalid_answer/);
+      const path = `${org}/signatures/${started}.png`;
+      const { error } = await gina.client.rpc("complete_inspection", {
+        p_inspection: started!,
+        p_signature_path: path,
+        p_signer_name: " Jana Malá ",
+      });
+      expect(error).toBeNull();
+      const signature = async () =>
+        (
+          await admin
+            .from("inspections")
+            .select("customer_signature_path, customer_signer_name, customer_signed_at")
+            .eq("id", started!)
+            .single()
+        ).data!;
+      const signed = await signature();
+      expect(signed).toMatchObject({
+        customer_signature_path: path,
+        customer_signer_name: "Jana Malá",
+      });
+      expect(signed.customer_signed_at).not.toBeNull();
+
+      // Corrected without signing again: the signature stays as it was.
+      await gina.client.rpc("reopen_inspection", { p_inspection: started!, p_reason: "Překlep" });
+      await gina.client.rpc("complete_inspection", { p_inspection: started! });
+      expect(await signature()).toEqual(signed);
+
+      // A new name alone replaces the whole signature (no stale drawing under it).
+      await gina.client.rpc("reopen_inspection", { p_inspection: started!, p_reason: "Jiný" });
+      await gina.client.rpc("complete_inspection", {
+        p_inspection: started!,
+        p_signer_name: "Petr Nový",
+      });
+      expect(await signature()).toMatchObject({
+        customer_signature_path: null,
+        customer_signer_name: "Petr Nový",
+      });
     });
   });
 

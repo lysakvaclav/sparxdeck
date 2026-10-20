@@ -128,6 +128,7 @@ export const companyDetailsSchema = z.object({
 
 export const protocolSettingsSchema = z.object({
   footer: optional(z.string().max(1000, "tooLong")),
+  numberFormat: z.enum(["year_number", "number_year", "year_slash_number"]),
 });
 
 export const regionalSettingsSchema = z.object({
@@ -422,9 +423,17 @@ export type LabelPrintValues = z.infer<typeof labelPrintSchema>;
 
 export const completeInspectionSchema = z.object({
   notes: optional(z.string().max(5000, "tooLong")),
+  /** A canvas signature as base64 PNG (no "data:" prefix); dropped if it isn't. */
+  signature: optional(z.string().max(500_000, "tooLong")),
+  signerName: optional(z.string().max(200, "tooLong")),
 });
 
 export type CompleteInspectionInput = z.input<typeof completeInspectionSchema>;
+
+/** Why a completed inspection is reopened for a correction (kept as a record). */
+export const reopenInspectionSchema = z.object({ reason: name(1000) });
+
+export type ReopenInspectionInput = z.input<typeof reopenInspectionSchema>;
 
 /** Where a protocol is e-mailed (one recipient; the customer's address by default). */
 export const protocolEmailSchema = z.object({ email });

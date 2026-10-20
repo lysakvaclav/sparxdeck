@@ -5,12 +5,14 @@ import { FONT, registerFonts } from "./fonts";
 
 // The inspection protocol on A4. Black on white with grey rules only, so it
 // reads the same from a black-and-white printer; results are words, not colours.
+// Table, Section and the measurements are also used by the summary report
+// (src/lib/pdf/protocol-summary.tsx), so the two documents read alike.
 
-const MM = 72 / 25.4;
-const INK = "#000000";
-const MUTED = "#444444";
-const RULE = "#9a9a9a";
-const SHADE = "#e9e9e9";
+export const MM = 72 / 25.4;
+export const INK = "#000000";
+export const MUTED = "#444444";
+export const RULE = "#9a9a9a";
+export const SHADE = "#e9e9e9";
 
 export type ProtocolLogo = { data: Buffer; format: "png" | "jpg" };
 
@@ -22,9 +24,9 @@ function footerLines(footer: string | null) {
     .reduce((sum, line) => sum + Math.max(1, Math.ceil(line.length / 110)), 0);
 }
 
-const label = { fontSize: 7, fontWeight: 700, color: MUTED, letterSpacing: 0.3 } as const;
+export const label = { fontSize: 7, fontWeight: 700, color: MUTED, letterSpacing: 0.3 } as const;
 
-function Box({ title, name, lines }: { title: string; name: string; lines: string[] }) {
+export function Box({ title, name, lines }: { title: string; name: string; lines: string[] }) {
   return (
     <View style={{ flex: 1, paddingRight: 4 * MM }}>
       <Text style={label}>{title.toUpperCase()}</Text>
@@ -38,9 +40,9 @@ function Box({ title, name, lines }: { title: string; name: string; lines: strin
   );
 }
 
-type Column = { key: string; title: string; width: string };
+export type Column = { key: string; title: string; width: string };
 
-function Table<Row>({
+export function Table<Row>({
   columns,
   rows,
   cell,
@@ -124,7 +126,7 @@ function Table<Row>({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{ marginTop: 6 * MM }}>
       <Text style={{ fontSize: 10.5, fontWeight: 700, marginBottom: 2 * MM }} minPresenceAhead={40}>
@@ -135,14 +137,29 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+export type ProtocolAssets = {
+  logo?: ProtocolLogo | null;
+  signature?: ProtocolLogo | null;
+  /** Up to a few photos per defect, keyed by its raw (untranslated) number. */
+  defectPhotos?: Map<number, ProtocolLogo[]>;
+};
+
 export function ProtocolDocument({
   model,
-  logo,
+  assets = {},
 }: {
   model: ProtocolModel;
-  logo: ProtocolLogo | null;
+  assets?: ProtocolAssets;
 }) {
+  const { logo = null, signature = null, defectPhotos = new Map<number, ProtocolLogo[]>() } = assets;
   const devices = model.devices;
+  const photos = [...defectPhotos.entries()].flatMap(([number, images]) =>
+    images.map((image, index) => ({
+      key: `${number}-${index}`,
+      caption: model.defects.find((defect) => defect.rawNumber === number)?.number ?? "",
+      image,
+    })),
+  );
   return (
     <Document
       title={`${model.title} ${model.number}`}
@@ -247,11 +264,33 @@ export function ProtocolDocument({
                 { key: "severity", title: model.defectColumns.severity, width: "18%" },
               ]}
               rows={model.defects}
-              cell={(row, key) => row[key as keyof typeof row]}
+              cell={(row, key) => row[key as keyof typeof row] as string}
               emphasis={(_, key) => key === "number"}
             />
           ) : (
             <Text>{model.noDefects}</Text>
+          )}
+          {photos.length > 0 && (
+            <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 3 * MM }}>
+              {photos.map((photo) => (
+                <View key={photo.key} style={{ width: 28 * MM, marginRight: 3 * MM, marginBottom: 3 * MM }}>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text -- a PDF image, not an <img> */}
+                  <Image
+                    src={photo.image}
+                    style={{
+                      width: 28 * MM,
+                      height: 21 * MM,
+                      objectFit: "cover",
+                      borderWidth: 0.5,
+                      borderColor: RULE,
+                    }}
+                  />
+                  <Text style={{ fontSize: 7, color: MUTED, marginTop: 0.5 * MM }}>
+                    {photo.caption}
+                  </Text>
+                </View>
+              ))}
+            </View>
           )}
         </Section>
 
@@ -261,13 +300,36 @@ export function ProtocolDocument({
           </Section>
         )}
 
-        {/* Room for signatures on paper (an electronic signature comes later). */}
+        {/* The technician signs on paper; the customer's finger signature (if
+            given) is drawn into its box instead of left blank. */}
         <View wrap={false} style={{ flexDirection: "row", marginTop: 10 * MM }}>
-          {model.signatures.map((signature, index) => (
-            <View key={signature.label} style={{ flex: 1, marginRight: index === 0 ? 10 * MM : 0 }}>
-              <Text style={label}>{signature.label.toUpperCase()}</Text>
-              <Text style={{ marginTop: 1 * MM, minHeight: 12 }}>{signature.name ?? ""}</Text>
-              <View style={{ height: 14 * MM, borderBottomWidth: 0.75, borderBottomColor: INK }} />
+          {model.signatures.map((entry, index) => (
+            <View key={entry.label} style={{ flex: 1, marginRight: index === 0 ? 10 * MM : 0 }}>
+              <Text style={label}>{entry.label.toUpperCase()}</Text>
+              <Text style={{ marginTop: 1 * MM, minHeight: 12 }}>
+                {[entry.name, entry.signedAt].filter(Boolean).join(" · ")}
+              </Text>
+              <View
+                style={{
+                  height: 14 * MM,
+                  borderBottomWidth: 0.75,
+                  borderBottomColor: INK,
+                  justifyContent: "flex-end",
+                }}
+              >
+                {index === 1 && signature && (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- a PDF image, not an <img>
+                  <Image
+                    src={signature}
+                    style={{
+                      height: 13 * MM,
+                      maxWidth: 55 * MM,
+                      objectFit: "contain",
+                      objectPositionX: 0,
+                    }}
+                  />
+                )}
+              </View>
               <Text style={{ fontSize: 7, color: MUTED, marginTop: 1 * MM }}>
                 {model.signatureHint}
               </Text>
@@ -309,8 +371,8 @@ export function ProtocolDocument({
 
 export async function renderProtocolPdf(
   model: ProtocolModel,
-  logo: ProtocolLogo | null,
+  assets: ProtocolAssets = {},
 ): Promise<Buffer> {
   registerFonts();
-  return renderToBuffer(<ProtocolDocument model={model} logo={logo} />);
+  return renderToBuffer(<ProtocolDocument model={model} assets={assets} />);
 }

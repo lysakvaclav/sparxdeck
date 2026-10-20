@@ -23,7 +23,7 @@ Webová a mobilní aplikace (SaaS, měsíční předplatné) pro servisní firmy
 | Aplikace | Cesta | Adresa |
 |---|---|---|
 | Landing page | `apps/landingpage` | sparxdeck.com (16 jazyků, hotová) |
-| Platforma | `apps/platform` | app.sparxdeck.com |
+| Platforma | `apps/platform` | portal.sparxdeck.com |
 
 Každá aplikace má vlastní `node_modules` a `package-lock.json` (instalace uvnitř složky aplikace). Pracovní větev: `sparxdeck`.
 
@@ -102,10 +102,19 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - Konec životnosti: `devices.end_of_life_on`, upozornění stejnou funkcí `dueState()` jako termín revize.
   - Hromadné úpravy: `src/app/(app)/devices/device-list-table.tsx` (klientská komponenta s celou tabulkou a zaškrtávátky — serverová komponenta nemůže klientské komponentě předat funkci jako `sortHref`, proto dostává `listParams` a adresu si skládá sama), akce `bulkUpdateDevices`. Lokaci lze měnit jen když je seznam filtrovaný na jednu budovu.
   - E2E past: nový headless Edge (`--headless=new`) nepotvrzuje `beforeunload`/`confirm` dialogy sám jako starší headless — ovladač (`driver.mjs`) teď na `Page.javascriptDialogOpening` vždy odpoví potvrzením, jinak by zablokoval `Page.navigate` do vypršení limitu.
+- Podpis a oprava revize (část 18, migrace `20261023090000_protocols_v2.sql` a `20261023100000_inspection_corrections.sql`):
+  - Podpis zákazníka kreslí `src/components/app/signature-pad.tsx` (plátno, vždy tmavý inkoust na bílé). Formulář dokončení ho vloží do stavu formuláře přes `form.setValue("signature", …)` před validací (není to registrované pole). Serverová akce PNG ověří a nahraje s právy serveru (`<org>/signatures/<revize>.png`); `complete_inspection` přijímá jen cestu ve složce firmy. Kresba a jméno se nahrazují jen spolu, bez nich zůstává předchozí podpis.
+  - Oprava = `reopen_inspection` (vlastník, admin, důvod; záznam `inspection_reopenings`) vrátí revizi do `in_progress` a vrátí termíny, které posunula. Nové dokončení (`reopened_at` je vyplněné) volá `reissue_protocol` místo `assign_protocol`: stejné číslo, nová verze.
+  - Termíny a protokol se počítají z původní kontroly (`inspection_items.original_checked_at/_by`, zapisuje `complete_inspection`), ne z času opravy; datum dokončení revize zůstává původní (`inspection_reopenings.previous_completed_at`).
+  - Závady po opravě vznikají jen z kontrol dokončených po `reopened_at` a nic, co revize už zapsala, se nezapíše znovu. `defectPreview(id, reopenedAt)` počítá totéž. `submit_device_check` omezuje čas kontroly z telefonu nejdřív na `reopened_at`.
+  - Během opravy `start_inspection` vrací `correction_in_progress` a `cancel_inspection` `correction_not_cancellable` (zrušení by smazalo původní revizi i protokoly); balíček terénní aplikace má `inspection.correction`.
+  - Souhrnný protokol `/inspections/summary` (+ `/pdf`): filtry čte `readSummaryFilters`, data `loadSummaryData` (`src/lib/protocol-summary-data.ts`), obsah `buildProtocolSummary` (`src/lib/protocol-summary.ts`, testy). Hranice období jsou dny ve firemním časovém pásmu (`startOfDayInTimeZone` v `src/lib/due.ts`). PDF se neukládá.
 - PDF: `@react-pdf/renderer` na serveru (`serverExternalPackages` v `next.config.ts`), písmo Noto Sans (OFL) v `src/assets/fonts` (`src/lib/pdf/fonts.ts`) s `outputFileTracingIncludes`, aby se dostalo i do nasazení. Dělení slov je vypnuté. Past: `lineHeight` na `Page` skryje dynamický text (`render`, číslo strany); výšku řádku nenastavovat.
 - Protokoly:
   - Tabulky `protocols` (číslo `ROK-NNNN` po firmě a roce z `organization_counters`, jazyk firmy, `pdf_path`) a `protocol_emails`.
   - Číslo přidělí `complete_inspection` (`assign_protocol`) ve stejné transakci. Starší revize si ho vyžádají přes `ensure_protocol`.
+  - Verze (část 18): k revizi může být víc řádků `protocols`, platný je ten s `active` (částečný unikátní index). Dotazy na protokol revize filtrovat `active = true` (`protocolOf`), vnořené `protocol:protocols(...)` je seznam: vybrat `active`. Starší verze a jejich PDF se nemění (`protocolHistoryOf`, `?version=N`).
+  - Formát čísla (`organizations.protocol_number_format`) se při očíslování uloží k protokolu (`protocols.number_format`); `protocolNumber(year, number, format)`, do názvu souboru přes `protocolFileNumber` (bez lomítka).
   - Obsah sestaví `buildProtocol` (`src/lib/protocol.ts`, čisté funkce s testy), rozvržení je v `src/lib/pdf/protocol.tsx`, načtení dat, uložení a e-mail v `src/lib/protocols.ts`.
   - PDF je v soukromém bucketu `protocols` (`<org>/<rok>/<id>.pdf`), který zapisuje jen server přes service role (`createAdminClient`). Uložený protokol se nemění.
   - Stažení přes `/inspections/[id]/protocol` (podepsaný odkaz 60 s, `?inline` pro tisk). Logo WebP se pro PDF převádí přes `sharp`.

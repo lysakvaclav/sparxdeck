@@ -1,6 +1,6 @@
 # SparxDeck platform
 
-The web app at `app.sparxdeck.com`: Next.js 16 (App Router), Supabase (Postgres, Auth, Storage, EU region), next-intl (Czech and English), Tailwind 4.
+The web app at `portal.sparxdeck.com`: Next.js 16 (App Router), Supabase (Postgres, Auth, Storage, EU region), next-intl (Czech and English), Tailwind 4.
 
 ## Setup
 
@@ -23,8 +23,8 @@ The web app at `app.sparxdeck.com`: Next.js 16 (App Router), Supabase (Postgres,
    To regenerate `src/lib/supabase/database.types.ts` after a migration, link once with `npx supabase login` and `npx supabase link --project-ref <ref>`, then run `npm run db:types`.
 
 5. **Auth settings** in the Supabase dashboard (_Authentication → URL Configuration_):
-   - Site URL: `http://localhost:3001` (production: `https://app.sparxdeck.com`)
-   - Redirect URLs: `http://localhost:3001/**` (production: `https://app.sparxdeck.com/**`)
+   - Site URL: `http://localhost:3001` (production: `https://portal.sparxdeck.com`)
+   - Redirect URLs: `http://localhost:3001/**` (production: `https://portal.sparxdeck.com/**`)
 
    Alternatively push `supabase/config.toml` with `npx supabase config push`.
 

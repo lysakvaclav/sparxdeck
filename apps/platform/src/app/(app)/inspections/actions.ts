@@ -5,10 +5,15 @@ import { getActiveMembership } from "@/lib/auth";
 import { buildAttributes, deviceTypeFields } from "@/lib/devices";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { generateProtocol } from "@/lib/protocols";
-import { ORG_ASSETS_BUCKET } from "@/lib/storage";
+import { ORG_ASSETS_BUCKET, sniffImage } from "@/lib/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { completeInspectionSchema, idSchema, inspectionDeviceSchema } from "@/lib/validation";
+import {
+  completeInspectionSchema,
+  idSchema,
+  inspectionDeviceSchema,
+  reopenInspectionSchema,
+} from "@/lib/validation";
 
 // Inspections are field work: every member may start and complete them (the
 // database functions check membership). Filling in a device's check happens in
@@ -41,6 +46,21 @@ export type CompletionSummary = {
   protocol: string | null;
 };
 
+/**
+ * The customer's finger-drawn signature (a small PNG, base64) goes to storage
+ * under the server's own authority: nobody else may write there, so there is
+ * no separate RLS policy to keep in step with this check.
+ */
+async function uploadSignature(organizationId: string, inspectionId: string, base64: string) {
+  const bytes = Buffer.from(base64, "base64");
+  if (bytes.length === 0 || bytes.length > 300_000 || sniffImage(bytes)?.ext !== "png") return null;
+  const path = `${organizationId}/signatures/${inspectionId}.png`;
+  const { error } = await createAdminClient()
+    .storage.from(ORG_ASSETS_BUCKET)
+    .upload(path, bytes, { contentType: "image/png", upsert: true });
+  return error ? null : path;
+}
+
 /** Completes the inspection: moves due dates of passed devices, records the rest. */
 export async function completeInspection(
   id: string,
@@ -52,10 +72,16 @@ export async function completeInspection(
   const parsed = completeInspectionSchema.safeParse(input);
   if (!parsed.success) return zodFieldErrors(parsed.error);
 
+  const signaturePath = parsed.data.signature
+    ? await uploadSignature(active.organization.id, id, parsed.data.signature)
+    : null;
+
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("complete_inspection", {
     p_inspection: id,
     p_notes: parsed.data.notes,
+    p_signature_path: signaturePath,
+    p_signer_name: parsed.data.signerName ?? null,
   });
   if (error || !data) return { ok: false, error: databaseErrorCode(error) };
   const summary = data as CompletionSummary;
@@ -65,6 +91,29 @@ export async function completeInspection(
 
   revalidatePath("/", "layout");
   return { ok: true, data: summary };
+}
+
+/**
+ * Reopens a completed inspection for a correction (owner or admin): it goes
+ * back to "in progress" so the usual check screens can fix it. Completing it
+ * again reissues the protocol as a new version; the original PDF stays.
+ */
+export async function reopenInspection(id: string, input: unknown): Promise<ActionResult> {
+  const active = await getActiveMembership();
+  if (!active) return { ok: false, error: "forbidden" };
+  if (!idSchema.safeParse(id).success) return { ok: false, error: "notFound" };
+  const parsed = reopenInspectionSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("reopen_inspection", {
+    p_inspection: id,
+    p_reason: parsed.data.reason,
+  });
+  if (error) return { ok: false, error: databaseErrorCode(error) };
+
+  revalidatePath("/", "layout");
+  return { ok: true };
 }
 
 /**

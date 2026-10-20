@@ -29,7 +29,7 @@ export async function ProtocolsCard({ scope }: { scope: Scope }) {
   const query = supabase
     .from("inspections")
     .select(
-      "id, completed_at, site:sites!inner(name, customer_id), inspection_items(outcome), protocol:protocols(year, number, pdf_path)",
+      "id, completed_at, site:sites!inner(name, customer_id), inspection_items(outcome), protocol:protocols(year, number, number_format, pdf_path, active)",
       { count: "exact" },
     )
     .eq("status", "completed");
@@ -71,8 +71,9 @@ export async function ProtocolsCard({ scope }: { scope: Scope }) {
               const passed = inspection.inspection_items.filter(
                 (item) => item.outcome === "passed",
               ).length;
-              const number = inspection.protocol
-                ? protocolNumber(inspection.protocol.year, inspection.protocol.number)
+              const protocol = inspection.protocol?.find((entry) => entry.active) ?? null;
+              const number = protocol
+                ? protocolNumber(protocol.year, protocol.number, protocol.number_format)
                 : null;
               return (
                 <TableRow key={inspection.id}>
@@ -103,7 +104,7 @@ export async function ProtocolsCard({ scope }: { scope: Scope }) {
                     </span>
                   </TableCell>
                   <TableCell className="py-0 text-end">
-                    {inspection.protocol?.pdf_path && number && (
+                    {protocol?.pdf_path && number && (
                       <Button asChild variant="ghost" size="icon" className="relative z-[1]">
                         <a
                           href={`/inspections/${inspection.id}/protocol`}

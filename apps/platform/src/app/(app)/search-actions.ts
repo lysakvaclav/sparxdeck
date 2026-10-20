@@ -93,6 +93,7 @@ export async function globalSearch(input: string): Promise<SearchHit[]> {
           .eq("organization_id", org)
           .eq("year", terms.protocol.year)
           .eq("number", terms.protocol.number)
+          .eq("active", true)
           .limit(HITS_PER_KIND)
       : empty,
   ]);

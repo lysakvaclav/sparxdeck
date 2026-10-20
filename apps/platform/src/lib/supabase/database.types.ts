@@ -10,6 +10,7 @@ export type ChecklistItemType = "pass_fail" | "number" | "text";
 export type DeviceStatus = "active" | "out_of_service" | "removed";
 
 export type InspectionStatus = "in_progress" | "completed";
+export type ProtocolNumberFormat = "year_number" | "number_year" | "year_slash_number";
 
 export type CheckOutcome = "passed" | "failed" | "not_checked";
 
@@ -46,6 +47,7 @@ export type Database = {
           logo_path: string | null;
           default_locale: string;
           protocol_footer_text: string | null;
+          protocol_number_format: ProtocolNumberFormat;
           settings: Json;
           timezone: string;
           due_soon_days: number;
@@ -65,6 +67,7 @@ export type Database = {
           logo_path: string | null;
           default_locale: string;
           protocol_footer_text: string | null;
+          protocol_number_format: ProtocolNumberFormat;
           settings: Json;
           timezone: string;
           due_soon_days: number;
@@ -516,6 +519,10 @@ export type Database = {
           completed_by: string | null;
           completed_at: string | null;
           notes: string | null;
+          reopened_at: string | null;
+          customer_signature_path: string | null;
+          customer_signer_name: string | null;
+          customer_signed_at: string | null;
         } & Timestamps;
         Insert: never;
         Update: never;
@@ -525,6 +532,31 @@ export type Database = {
             columns: ["site_id", "organization_id"];
             isOneToOne: false;
             referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
+      inspection_reopenings: {
+        Row: {
+          id: string;
+          organization_id: string;
+          inspection_id: string;
+          reopened_by: string | null;
+          reopened_at: string;
+          reason: string;
+          previous_completed_at: string | null;
+          previous_completed_by: string | null;
+          completed_at: string | null;
+          completed_by: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "inspection_reopenings_inspection_id_organization_id_fkey";
+            columns: ["inspection_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "inspections";
             referencedColumns: ["id", "organization_id"];
           },
         ];
@@ -541,6 +573,11 @@ export type Database = {
           notes: string | null;
           checked_by: string | null;
           checked_at: string | null;
+          /** The first finished result's time and technician (a correction keeps them). */
+          original_checked_at: string | null;
+          original_checked_by: string | null;
+          device_last_before: string | null;
+          device_last_known: boolean;
           editing_by: string | null;
           editing_at: string | null;
         } & Timestamps;
@@ -762,6 +799,10 @@ export type Database = {
           inspection_id: string;
           year: number;
           number: number;
+          version: number;
+          active: boolean;
+          superseded_at: string | null;
+          number_format: ProtocolNumberFormat;
           locale: "cs" | "en";
           pdf_path: string | null;
           pdf_size: number | null;
@@ -775,7 +816,7 @@ export type Database = {
           {
             foreignKeyName: "protocols_inspection_id_organization_id_fkey";
             columns: ["inspection_id", "organization_id"];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: "inspections";
             referencedColumns: ["id", "organization_id"];
           },
@@ -918,6 +959,7 @@ export type Database = {
       };
       delete_device_photo: { Args: { p_photo: string }; Returns: string };
       ensure_protocol: { Args: { p_inspection: string }; Returns: string };
+      reopen_inspection: { Args: { p_inspection: string; p_reason: string }; Returns: undefined };
       note_labels_printed: { Args: { p_org: string }; Returns: undefined };
       create_sample_data: { Args: { p_org: string }; Returns: string };
       remove_sample_data: { Args: { p_org: string }; Returns: { bucket: string; path: string }[] };
@@ -935,7 +977,15 @@ export type Database = {
         Returns: string;
       };
       delete_inspection_photo: { Args: { p_photo: string }; Returns: string };
-      complete_inspection: { Args: { p_inspection: string; p_notes?: string | null }; Returns: Json };
+      complete_inspection: {
+        Args: {
+          p_inspection: string;
+          p_notes?: string | null;
+          p_signature_path?: string | null;
+          p_signer_name?: string | null;
+        };
+        Returns: Json;
+      };
       get_invitation: {
         Args: { p_token: string };
         Returns: {
@@ -955,6 +1005,7 @@ export type Database = {
       check_outcome: CheckOutcome;
       defect_severity: DefectSeverity;
       defect_status: DefectStatus;
+      protocol_number_format: ProtocolNumberFormat;
     };
     CompositeTypes: Record<string, never>;
   };

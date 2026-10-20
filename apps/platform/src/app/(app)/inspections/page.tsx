@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { ExportIcon, PlayIcon } from "@/components/icons";
+import { ExportIcon, PanelTableIcon, PlayIcon } from "@/components/icons";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
@@ -33,6 +33,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const PAGE_SIZE = 20;
 
+/** The current version among the inspection's protocols (there can be past ones too). */
+function activeProtocol<T extends { active: boolean }>(protocols: T[] | null | undefined) {
+  return protocols?.find((protocol) => protocol.active) ?? null;
+}
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /** Inspections in progress (to continue) and completed ones (newest first). */
@@ -45,7 +50,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
   const from = (page - 1) * PAGE_SIZE;
   const supabase = await createClient();
   const select =
-    "id, status, started_at, started_by, completed_at, completed_by, site:sites(id, name, customer:customers(name)), inspection_items(outcome), protocol:protocols(year, number)";
+    "id, status, started_at, started_by, completed_at, completed_by, site:sites(id, name, customer:customers(name)), inspection_items(outcome), protocol:protocols(year, number, number_format, active)";
   const [open, done, names] = await Promise.all([
     supabase
       .from("inspections")
@@ -104,6 +109,12 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
         breadcrumbs={[{ label: organization.name, href: "/" }]}
         actions={
           <>
+            <Button asChild variant="outline">
+              <Link href="/inspections/summary">
+                <PanelTableIcon />
+                {t("summary.title")}
+              </Link>
+            </Button>
             {!!done.count && (
               <Button asChild variant="outline">
                 <a href="/inspections/export" download>
@@ -251,6 +262,10 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                             .length;
                         const failed = count("failed");
                         const notChecked = count("not_checked");
+                        const protocol = activeProtocol(inspection.protocol);
+                        const number = protocol
+                          ? protocolNumber(protocol.year, protocol.number, protocol.number_format)
+                          : null;
                         return (
                           <TableRow key={inspection.id}>
                             <TableCell className="w-full max-w-0 sm:w-[36%]">
@@ -265,8 +280,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                                   </RowLink>
                                   <span className="block truncate text-ui-sm text-muted-foreground sm:hidden">
                                     {inspection.completed_at && time(inspection.completed_at)}
-                                    {inspection.protocol &&
-                                      ` · ${protocolNumber(inspection.protocol.year, inspection.protocol.number)}`}
+                                    {number && ` · ${number}`}
                                   </span>
                                 </span>
                               </span>
@@ -278,12 +292,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                               {inspection.completed_at && time(inspection.completed_at)}
                             </TableCell>
                             <TableCell className="hidden font-mono whitespace-nowrap tabular-nums lg:table-cell">
-                              {inspection.protocol
-                                ? protocolNumber(
-                                    inspection.protocol.year,
-                                    inspection.protocol.number,
-                                  )
-                                : "—"}
+                              {number ?? "—"}
                             </TableCell>
                             <TableCell className="text-end">
                               <span className="inline-flex flex-wrap justify-end gap-1">

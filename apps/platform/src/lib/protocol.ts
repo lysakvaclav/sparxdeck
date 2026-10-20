@@ -6,6 +6,7 @@ import type {
   CheckSkipReason,
   ChecklistItemType,
   DefectSeverity,
+  ProtocolNumberFormat,
 } from "@/lib/supabase/database.types";
 
 // What an inspection protocol says, assembled from the inspection's records.
@@ -14,9 +15,26 @@ import type {
 
 export type ProtocolLocale = "cs" | "en";
 
-/** "2026-0007": the year it was completed and its number within that year. */
-export function protocolNumber(year: number, number: number): string {
-  return `${year}-${String(number).padStart(4, "0")}`;
+/** "2026-0007" by default; the organization's chosen format otherwise. */
+export function protocolNumber(
+  year: number,
+  number: number,
+  format: ProtocolNumberFormat = "year_number",
+): string {
+  const padded = String(number).padStart(4, "0");
+  switch (format) {
+    case "number_year":
+      return `${padded}/${year}`;
+    case "year_slash_number":
+      return `${year}/${padded}`;
+    default:
+      return `${year}-${padded}`;
+  }
+}
+
+/** The number as it can stand in a file name ("0007/2026" would be a folder). */
+export function protocolFileNumber(number: string): string {
+  return number.replaceAll("/", "-");
 }
 
 export type ProtocolAnswer = {
@@ -59,6 +77,8 @@ export type ProtocolInput = {
   timeZone: string;
   year: number;
   number: number;
+  numberFormat?: ProtocolNumberFormat;
+  version: number;
   organization: {
     name: string;
     legalName: string | null;
@@ -84,6 +104,9 @@ export type ProtocolInput = {
   notes: string | null;
   checks: ProtocolCheck[];
   defects: ProtocolDefect[];
+  customerSignature: { name: string | null; signedAt: string | null } | null;
+  /** For a reissued protocol (version > 1): when the version it replaces was issued. */
+  previousIssuedAt?: string | null;
 };
 
 /** Translated texts, as next-intl's `t` for the "protocol" namespace gives them. */
@@ -113,11 +136,17 @@ export type ProtocolModel = {
   }[];
   defectsTitle: string;
   defectColumns: Record<"number" | "device" | "description" | "severity", string>;
-  defects: { number: string; device: string; description: string; severity: string }[];
+  defects: {
+    number: string;
+    rawNumber: number;
+    device: string;
+    description: string;
+    severity: string;
+  }[];
   noDefects: string;
   notesTitle: string;
   notes: string | null;
-  signatures: { label: string; name: string | null }[];
+  signatures: { label: string; name: string | null; signedAt: string | null }[];
   signatureHint: string;
   footer: string | null;
   /** "Page 1 of 2" with the numbers filled in at render time. */
@@ -133,7 +162,7 @@ const lines = (value: string | null | undefined) =>
 const joined = (parts: (string | null | undefined)[]) => parts.filter(Boolean).join(" · ");
 
 export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel {
-  const number = protocolNumber(input.year, input.number);
+  const number = protocolNumber(input.year, input.number, input.numberFormat);
   const day = new Intl.DateTimeFormat(input.locale, {
     dateStyle: "medium",
     timeZone: input.timeZone,
@@ -187,7 +216,7 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
 
   return {
     locale: input.locale,
-    fileName: t("fileName", { number }),
+    fileName: t("fileName", { number: protocolFileNumber(number) }),
     title: t("title"),
     numberLabel: t("number"),
     number,
@@ -217,6 +246,19 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
       { label: t("date"), value: started === completed ? completed : `${started} – ${completed}` },
       { label: t("technician"), value: technicians.join(", ") || dash },
       { label: t("issued"), value: day.format(new Date(input.generatedAt)) },
+      ...(input.version > 1
+        ? [
+            {
+              label: t("version"),
+              value: input.previousIssuedAt
+                ? t("versionReplaces", {
+                    version: input.version,
+                    date: day.format(new Date(input.previousIssuedAt)),
+                  })
+                : String(input.version),
+            },
+          ]
+        : []),
     ],
     summary: t("summary", {
       total: checks.length,
@@ -258,6 +300,7 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
       .sort((a, b) => a.number - b.number)
       .map((defect) => ({
         number: t("defectNumber", { number: defectNumber(defect.number) }),
+        rawNumber: defect.number,
         device: formatLabel(defect.labelNumber),
         description: defect.again
           ? `${defect.description} (${t("defectAgain")})`
@@ -268,8 +311,14 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
     notesTitle: t("notesTitle"),
     notes: input.notes?.trim() || null,
     signatures: [
-      { label: t("signTechnician"), name: technicians[0] ?? null },
-      { label: t("signCustomer"), name: null },
+      { label: t("signTechnician"), name: technicians[0] ?? null, signedAt: null },
+      {
+        label: t("signCustomer"),
+        name: input.customerSignature?.name ?? null,
+        signedAt: input.customerSignature?.signedAt
+          ? day.format(new Date(input.customerSignature.signedAt))
+          : null,
+      },
     ],
     signatureHint: t("signHint"),
     footer: organization.footer?.trim() || null,

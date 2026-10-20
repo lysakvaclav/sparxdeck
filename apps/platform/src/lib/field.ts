@@ -99,6 +99,8 @@ export type FieldPack = {
     customerName: string | null;
     accessNotes: string | null;
     canCancel: boolean;
+    /** A completed inspection reopened for a correction (absent in older packs). */
+    correction?: boolean;
   };
   /** Active devices in route order. */
   devices: FieldDevice[];

@@ -20,7 +20,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { requireMembership } from "@/lib/auth";
+import { isManager, requireMembership } from "@/lib/auth";
 import { formatLabel } from "@/lib/devices";
 import { serverEnv } from "@/lib/env";
 import { loadFieldPack } from "@/lib/field-pack";
@@ -31,6 +31,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FieldApp } from "./field-app";
 import { ForgetOffline } from "./forget-offline";
 import { ProtocolCard } from "./protocol-card";
+import { ReopenInspectionButton } from "./reopen-button";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -83,6 +84,9 @@ export default async function InspectionPage({ params }: Props) {
           ? [{ label: site.customer.name, href: `/customers/${site.customer.id}` }]
           : []),
       ]}
+      actions={
+        isManager(membership.role) ? <ReopenInspectionButton inspectionId={inspection.id} /> : null
+      }
     />
   );
 
@@ -93,35 +97,43 @@ export default async function InspectionPage({ params }: Props) {
   const supabase = await createClient();
   const defectColumns =
     "id, number, description, severity, status, device:devices(label_number, type:device_types(name))";
-  const [items, names, { data: created }, { data: observed }, { data: added }] = await Promise.all([
-    fetchAll((from, to) =>
+  const [items, names, { data: created }, { data: observed }, { data: added }, { data: reopenings }] =
+    await Promise.all([
+      fetchAll((from, to) =>
+        supabase
+          .from("inspection_items")
+          .select(
+            "id, device_id, outcome, skip_reason, checked_by, original_checked_by, checked_at, notes, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
+          )
+          .eq("inspection_id", inspection.id)
+          .order("id")
+          .range(from, to),
+      ),
+      memberNames(inspection.organization_id),
       supabase
-        .from("inspection_items")
-        .select(
-          "id, device_id, outcome, skip_reason, checked_by, checked_at, notes, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
-        )
+        .from("defects")
+        .select(defectColumns)
         .eq("inspection_id", inspection.id)
-        .order("id")
-        .range(from, to),
-    ),
-    memberNames(inspection.organization_id),
-    supabase
-      .from("defects")
-      .select(defectColumns)
-      .eq("inspection_id", inspection.id)
-      .order("number"),
-    supabase
-      .from("defect_events")
-      .select(`defect:defects(${defectColumns})`)
-      .eq("inspection_id", inspection.id)
-      .eq("kind", "observed"),
-    supabase
-      .from("devices")
-      .select("id, label_number, type:device_types(name)")
-      .eq("added_in_inspection", inspection.id)
-      .is("deleted_at", null)
-      .order("label_number"),
-  ]);
+        .order("number"),
+      supabase
+        .from("defect_events")
+        .select(`defect:defects(${defectColumns})`)
+        .eq("inspection_id", inspection.id)
+        .eq("kind", "observed"),
+      supabase
+        .from("devices")
+        .select("id, label_number, type:device_types(name)")
+        .eq("added_in_inspection", inspection.id)
+        .is("deleted_at", null)
+        .order("label_number"),
+      completed
+        ? supabase
+            .from("inspection_reopenings")
+            .select("id, reopened_by, reopened_at, reason, completed_by, completed_at")
+            .eq("inspection_id", inspection.id)
+            .order("reopened_at", { ascending: false })
+        : Promise.resolve({ data: null }),
+    ]);
   // Defects found by this inspection: new ones, then open ones it found again.
   const defects = [
     ...(created ?? []).map((defect) => ({ ...defect, again: false })),
@@ -209,7 +221,7 @@ export default async function InspectionPage({ params }: Props) {
                         )}
                         {item.checked_at && (
                           <span className="ms-2 hidden text-ui-sm text-muted-foreground lg:inline">
-                            {name(item.checked_by)}
+                            {name(item.original_checked_by ?? item.checked_by)}
                           </span>
                         )}
                       </TableCell>
@@ -339,6 +351,19 @@ export default async function InspectionPage({ params }: Props) {
                       </Link>
                     ),
                   },
+                  ...(inspection.customer_signature_path || inspection.customer_signer_name
+                    ? [
+                        {
+                          label: t("result.signedBy"),
+                          value: [
+                            inspection.customer_signer_name,
+                            time(inspection.customer_signed_at),
+                          ]
+                            .filter(Boolean)
+                            .join(" · "),
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </Card>
@@ -390,6 +415,36 @@ export default async function InspectionPage({ params }: Props) {
                       </li>
                     ))}
                   </ul>
+                </CardContent>
+              </Card>
+            )}
+            {reopenings && reopenings.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("reopen.historyTitle")}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2.5">
+                  {reopenings.map((entry) => (
+                    <div key={entry.id} className="text-ui-sm">
+                      <p className="text-muted-foreground">
+                        {t("reopen.historyOpened", {
+                          when: [time(entry.reopened_at), name(entry.reopened_by)]
+                            .filter(Boolean)
+                            .join(" · "),
+                        })}
+                      </p>
+                      <p className="break-words whitespace-pre-line">{entry.reason}</p>
+                      {entry.completed_at && (
+                        <p className="text-muted-foreground">
+                          {t("reopen.historyCompleted", {
+                            when: [time(entry.completed_at), name(entry.completed_by)]
+                              .filter(Boolean)
+                              .join(" · "),
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}

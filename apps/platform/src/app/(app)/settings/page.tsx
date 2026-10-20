@@ -147,7 +147,10 @@ export default async function SettingsPage() {
             >
               <ProtocolForm
                 disabled={disabled}
-                defaults={{ footer: organization.protocol_footer_text ?? "" }}
+                defaults={{
+                  footer: organization.protocol_footer_text ?? "",
+                  numberFormat: organization.protocol_number_format,
+                }}
               />
             </SettingsCard>
             <SettingsCard
