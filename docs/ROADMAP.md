@@ -552,12 +552,17 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
   - E2E `e2e/part17.mjs`: nový typ s vlastním polem, zařízení s vyplněným polem a koncem životnosti, upozornění na stránce, fotka přidaná a smazaná, hromadná úprava dvou zařízení, tmavý režim a angličtina. Audit přístupnosti rozšířen o detail typu, nový typ a úpravu typu.
   - Objevená a opravená chyba ovladače e2e testů: nový headless Edge (`--headless=new`) nemá potvrzovací dialogy (např. neuložené změny šablony) automaticky potvrzené jako starší headless režim — bez odpovědi by zablokovaly navigaci. `e2e/driver.mjs` teď dialog vždy potvrdí.
 
-**Odloženo v rámci části 17** (menší rozsah, nevyžádáno v tomto kole):
-- Kopie šablony, výběr z možností jako typ položky, povinná fotka u položky (E).
+**Odloženo v rámci části 17** (menší rozsah, nevyžádáno v tomto kole). Majitel chce tyto dvě hlídat přednostně, technici na ně v terénu pravděpodobně narazí brzy:
+- **Povinná fotka u položky (E).**
+- **Přesun zařízení do jiné budovy s historií (F)** — hromadná úprava lokace funguje jen v rámci jedné budovy, bez historie.
+
+Zbylé počkají na zpětnou vazbu z pilotu:
+- Kopie šablony, výběr z možností jako typ položky (E).
 - Dovoz vlastních polí z CSV importu kromě hasiva a velikosti (zatím se doplní ručně po importu).
-- Přesun zařízení do jiné budovy s historií (F) — hromadná úprava lokace funguje jen v rámci jedné budovy, bez historie.
 - Vlastní pole u zákazníků (C).
 - Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře — obsah musí dodat revizní technik.
+
+**Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“
 
 **Od tebe:** položky kontrolních seznamů pro další typy zařízení (hydrant, nouzové osvětlení, požární klapky a dveře), ideálně od revizního technika — pak je můžu zadat jako vzorové šablony podobně jako u hasicích přístrojů.
 
