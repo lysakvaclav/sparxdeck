@@ -19,8 +19,8 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
           display: "grid",
           placeItems: "center",
           fontFamily: "system-ui, sans-serif",
-          color: "#1b2533",
-          background: "#f3f5f8",
+          color: "#182026",
+          background: "#f5f8fa",
           textAlign: "center",
           padding: 24,
         }}
@@ -29,17 +29,17 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
           <h1 style={{ fontSize: 20, margin: "0 0 8px" }}>
             Něco se pokazilo · Something went wrong
           </h1>
-          <p style={{ margin: "0 0 16px", color: "#5d6979" }}>
+          <p style={{ margin: "0 0 16px", color: "#5c7080" }}>
             Zkuste stránku načíst znovu. · Please reload the page.
           </p>
           {error.digest && (
-            <p style={{ fontFamily: "monospace", fontSize: 12, color: "#5d6979" }}>
+            <p style={{ fontFamily: "monospace", fontSize: 12, color: "#5c7080" }}>
               {error.digest}
             </p>
           )}
           {/* A full reload on purpose: the app around this page failed. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/" style={{ color: "#2f5ea6" }}>
+          <a href="/" style={{ color: "#137cbd" }}>
             SparxDeck
           </a>
         </div>

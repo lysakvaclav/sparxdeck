@@ -135,12 +135,12 @@ export async function DefectsCard({ scope, label }: { scope: Scope; label?: numb
           </TableBody>
         </Table>
       ) : (
-        <p className="px-5 py-2.5 text-muted-foreground">
+        <p className="px-[15px] py-2.5 text-muted-foreground">
           {total > 0 ? t("card.noneOpen") : t("card.none")}
         </p>
       )}
       {total > 0 && (
-        <div className="px-5 py-2 shadow-[inset_0_1px_0_var(--border)]">
+        <div className="px-[15px] py-2 shadow-[inset_0_1px_0_var(--border)]">
           <Link href={listHref} className="touch-link text-ui text-link hover:underline">
             {t("card.showAll", { count: total })}
           </Link>

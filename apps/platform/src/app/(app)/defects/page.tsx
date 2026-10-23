@@ -166,7 +166,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
       />
       <PageBody>
         <Card>
-          <div className="space-y-2 px-3 py-3 sm:px-4 shadow-[inset_0_-1px_0_var(--border)]">
+          <div className="space-y-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <SearchInput placeholder={t("searchPlaceholder")} />
               <p className="text-ui-sm text-muted-foreground" aria-live="polite">

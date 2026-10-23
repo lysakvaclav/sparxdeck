@@ -42,7 +42,7 @@ export function ForgetOffline({ inspectionId }: { inspectionId: string }) {
       variant="error"
       icon={ErrorIcon}
       title={t("closedCompleted")}
-      className="mb-3 sm:mb-5"
+      className="mb-2.5 sm:mb-[15px]"
     >
       <p>{t("leftInPhone", { count: left })}</p>
       <Button

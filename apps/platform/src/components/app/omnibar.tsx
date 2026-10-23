@@ -141,7 +141,7 @@ function Omnibar({ onClose }: { onClose: () => void }) {
   return (
     <DialogPrimitive.Root open onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgb(15_23_42/0.5)] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgb(16_22_26/0.7)] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           aria-busy={loading}
@@ -149,7 +149,7 @@ function Omnibar({ onClose }: { onClose: () => void }) {
           className="fixed inset-x-3 top-3 z-50 mx-auto flex max-h-[calc(100dvh-24px)] max-w-[640px] flex-col overflow-hidden rounded-xl bg-background shadow-elevation-4 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 sm:top-[12vh] sm:max-h-[76vh]"
         >
           <DialogPrimitive.Title className="sr-only">{t("label")}</DialogPrimitive.Title>
-          <div className="flex shrink-0 items-center gap-2.5 px-5 shadow-[0_1px_0_var(--border)]">
+          <div className="flex shrink-0 items-center gap-2.5 px-[15px] shadow-[0_1px_0_var(--border)]">
             <SearchIcon size={20} className="text-muted-foreground" />
             <input
               autoFocus
@@ -165,24 +165,24 @@ function Omnibar({ onClose }: { onClose: () => void }) {
               value={query}
               onChange={(event) => change(event.target.value)}
               onKeyDown={onKeyDown}
-              className="h-14 min-w-0 flex-1 bg-transparent text-ui-lg outline-none placeholder:text-subtle"
+              className="h-12 min-w-0 flex-1 bg-transparent text-ui-lg outline-none placeholder:text-subtle"
             />
             {loading && <Spinner size={16} />}
           </div>
 
           <div className="min-h-0 scrollbar-thin overflow-y-auto">
             {ordered.length > 0 ? (
-              <ul id="omnibar-results" role="listbox" ref={list} className="py-1.5">
+              <ul id="omnibar-results" role="listbox" ref={list} className="py-[5px]">
                 {SEARCH_KINDS.map((kind) => {
                   const group = ordered.filter((hit) => hit.kind === kind);
                   if (group.length === 0) return null;
                   const { icon: Icon, tone } = KIND_ICON[kind];
                   return (
                     <li key={kind} role="presentation">
-                      <p className="px-5 pt-2 pb-1 text-ui-sm font-semibold text-muted-foreground">
+                      <p className="px-[15px] pt-2 pb-1 text-ui-sm font-semibold text-muted-foreground">
                         {t(`groups.${kind}`)}
                       </p>
-                      <ul role="presentation" className="px-2">
+                      <ul role="presentation" className="px-[5px]">
                         {group.map((hit) => {
                           index++;
                           const position = index;
@@ -203,7 +203,7 @@ function Omnibar({ onClose }: { onClose: () => void }) {
                                 }}
                                 onMouseMove={() => setActive(position)}
                                 className={cn(
-                                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-1.5",
+                                  "flex min-h-[38px] items-center gap-2.5 rounded-md px-2.5 py-1 pointer-coarse:min-h-11",
                                   position === active && "bg-primary text-white",
                                 )}
                               >
@@ -233,12 +233,12 @@ function Omnibar({ onClose }: { onClose: () => void }) {
                 })}
               </ul>
             ) : (
-              <p className="px-5 py-5 text-ui text-muted-foreground" aria-live="polite">
+              <p className="px-[15px] py-[15px] text-ui text-muted-foreground" aria-live="polite">
                 {searched && !loading ? t("empty", { query: searched }) : t("hint")}
               </p>
             )}
           </div>
-          <p className="hidden shrink-0 px-5 py-1.5 text-ui-sm text-subtle shadow-[inset_0_1px_0_var(--border)] sm:block">
+          <p className="hidden shrink-0 px-[15px] py-1.5 text-ui-sm text-subtle shadow-[inset_0_1px_0_var(--border)] sm:block">
             {t("keys")}
           </p>
         </DialogPrimitive.Content>
@@ -258,19 +258,13 @@ export function RailSearchButton({ expanded }: { expanded: boolean }) {
       onClick={open}
       aria-label={expanded ? undefined : `${t("search")} (${shortcut})`}
       aria-keyshortcuts="Control+K Meta+K /"
-      className={
-        expanded
-          ? "mx-3 flex h-10 w-[calc(100%-24px)] items-center gap-3 rounded-lg bg-white/5 px-3 text-ui text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
-          : "mx-auto flex size-11 items-center justify-center rounded-lg text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
-      }
+      className="mx-1.5 flex h-[30px] w-[calc(100%-12px)] items-center gap-2.5 rounded-md px-[7px] text-ui text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
     >
-      <SearchIcon size={20} />
+      <SearchIcon />
       {expanded && (
         <>
           <span className="flex-1 truncate text-start">{t("search")}</span>
-          <kbd className="rounded-sm bg-white/10 px-1.5 py-0.5 font-sans text-ui-xs text-rail-foreground">
-            {shortcut}
-          </kbd>
+          <kbd className="font-sans text-ui-xs text-rail-foreground">{shortcut}</kbd>
         </>
       )}
     </button>
@@ -293,7 +287,7 @@ export function MobileSearchButton() {
       type="button"
       onClick={open}
       aria-label={t("search")}
-      className="flex size-11 items-center justify-center rounded-lg text-rail-foreground hover:bg-rail-hover hover:text-white"
+      className="flex size-11 items-center justify-center rounded-md text-rail-foreground hover:bg-rail-hover hover:text-white"
     >
       <SearchIcon size={20} />
     </button>

@@ -100,7 +100,7 @@ export default async function InspectionSummaryPage({
         }
       />
       <PageBody>
-        <div className="space-y-3 sm:space-y-5">
+        <div className="space-y-2.5 sm:space-y-[15px]">
           <SummaryFilters
             customer={customerId}
             site={siteId}

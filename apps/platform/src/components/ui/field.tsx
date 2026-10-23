@@ -15,7 +15,7 @@ type FieldProps = {
   children: React.ReactElement<ControlProps>;
 };
 
-/** Form group: label, control, helper or error text, wired for screen readers. */
+/** Blueprint form group: label, control, helper or error text, wired for screen readers. */
 function Field({ id, label, hint, error, className, suffix, children }: FieldProps) {
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   const control = React.cloneElement(children, {
@@ -24,7 +24,7 @@ function Field({ id, label, hint, error, className, suffix, children }: FieldPro
     "aria-describedby": describedBy,
   });
   return (
-    <div className={cn("space-y-1.5 [.brand_&]:space-y-2", className)}>
+    <div className={cn("space-y-[5px] [.brand_&]:space-y-2", className)}>
       <Label htmlFor={id}>{label}</Label>
       {suffix ? (
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">

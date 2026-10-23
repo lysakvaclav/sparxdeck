@@ -61,7 +61,7 @@ export function SiteForm(props: SiteFormProps) {
 
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)}>
-      <div className="space-y-4 p-5">
+      <div className="space-y-[15px] p-[15px]">
         <Field id="name" label={t("name")} error={fieldError(errors.name?.message)}>
           <Input
             autoComplete="off"

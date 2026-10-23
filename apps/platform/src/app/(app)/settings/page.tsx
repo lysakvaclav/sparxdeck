@@ -98,14 +98,14 @@ export default async function SettingsPage() {
         title={t("title")}
       />
       <PageBody>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[14rem_minmax(0,48rem)] lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[13rem_minmax(0,48rem)] lg:items-start">
           <nav aria-label={t("sections")} className="hidden lg:sticky lg:top-0 lg:block">
-            <ul className="space-y-0.5 rounded-lg bg-card p-2 shadow-elevation-1">
+            <ul className="rounded-lg bg-card p-[5px] shadow-elevation-0">
               {sections.map((section) => (
                 <li key={section.id}>
                   <a
                     href={`#${section.id}`}
-                    className="flex min-h-9 items-center rounded-md px-3 py-1.5 text-ui text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    className="flex min-h-[30px] items-center rounded-sm px-[7px] text-ui transition-colors hover:bg-accent"
                   >
                     {section.label}
                   </a>
@@ -113,7 +113,7 @@ export default async function SettingsPage() {
               ))}
             </ul>
           </nav>
-          <div className="grid grid-cols-1 gap-3 sm:gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {disabled && <Alert>{t("readOnly")}</Alert>}
             <SettingsCard
               id="company"

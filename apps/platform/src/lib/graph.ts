@@ -565,11 +565,11 @@ export const DUE_GROUPS = ["overdue", "soon", "ok", "never", "none"] as const;
 export type DueGroup = (typeof DUE_GROUPS)[number];
 
 export const DUE_COLOR: Record<DueGroup, string> = {
-  overdue: "#d14343",
-  soon: "#d98a1f",
-  ok: "#1a7f52",
-  never: "#5d6979",
-  none: "#a7b4c4",
+  overdue: "#db3737",
+  soon: "#d9822b",
+  ok: "#0f9960",
+  never: "#5c7080",
+  none: "#a7b6c2",
 };
 
 /** Colours chosen in the legend's editor, keyed by `${mode}:${group}`. */

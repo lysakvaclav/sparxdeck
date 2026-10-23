@@ -159,7 +159,7 @@ export default async function DeviceCheckPage({ params }: Props) {
     />
   );
   const factsLine = facts.length > 0 && (
-    <p className="mb-2.5 text-ui text-muted-foreground sm:mb-5">{facts.join(" · ")}</p>
+    <p className="mb-2.5 text-ui text-muted-foreground sm:mb-[15px]">{facts.join(" · ")}</p>
   );
 
   // Completed inspection: what was answered, read-only.
@@ -176,7 +176,7 @@ export default async function DeviceCheckPage({ params }: Props) {
       {header}
       <PageBody width="narrow">
         {factsLine}
-        <Alert className="mb-3 sm:mb-5">
+        <Alert className="mb-2.5 sm:mb-[15px]">
           {t("check.readOnly")}
           {item?.checked_at && (
             <>
@@ -200,7 +200,7 @@ export default async function DeviceCheckPage({ params }: Props) {
               return (
                 <li
                   key={question.id}
-                  className="space-y-1.5 px-5 py-2.5 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none"
+                  className="space-y-1.5 px-[15px] py-2.5 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none"
                 >
                   <div className="flex items-start gap-2">
                     <span className="text-muted-foreground tabular-nums">{index + 1}.</span>
@@ -237,7 +237,7 @@ export default async function DeviceCheckPage({ params }: Props) {
             })}
           </ol>
           {(item?.notes || photos.some((photo) => photo.questionId === null)) && (
-            <div className="space-y-1.5 px-5 py-2.5 shadow-[inset_0_1px_0_var(--border)]">
+            <div className="space-y-1.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">
               <p className="font-medium">{t("check.deviceSection")}</p>
               {item?.notes && <p className="whitespace-pre-line">{item.notes}</p>}
               <div className="flex flex-wrap gap-2">

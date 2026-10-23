@@ -62,10 +62,10 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
       {pending ? (
         <Spinner
           size={16}
-          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2"
+          className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2"
         />
       ) : (
-        <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
       )}
       <Input
         id="search"
@@ -76,14 +76,14 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="ps-9 pe-9 pointer-coarse:pe-11 [&::-webkit-search-cancel-button]:hidden"
+        className="ps-[30px] pe-[30px] pointer-coarse:pe-11 [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button
           type="button"
           onClick={clear}
           aria-label={t("clearSearch")}
-          className="absolute end-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-[var(--btn-icon)] hover:bg-accent pointer-coarse:size-10"
+          className="absolute end-[3px] top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-[var(--btn-icon)] hover:bg-accent pointer-coarse:size-10"
         >
           <CrossIcon />
         </button>

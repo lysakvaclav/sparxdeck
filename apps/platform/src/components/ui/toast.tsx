@@ -5,8 +5,7 @@ import { CrossIcon, TickCircleIcon, WarningSignIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 /*
- * Toasts: short confirmations at the top centre ("Link copied") on a white card
- * with a coloured icon.
+ * Blueprint toaster: short confirmations at the top centre ("Link copied").
  * Announced to screen readers; dismissed after a few seconds or by the cross.
  */
 
@@ -55,20 +54,26 @@ export function ToastProvider({
             key={item.id}
             role="status"
             className={cn(
-              "pointer-events-auto flex min-h-12 max-w-md animate-in items-center gap-3 rounded-lg bg-popover ps-4 pe-1.5 text-ui font-medium text-popover-foreground shadow-elevation-3 fade-in-0 slide-in-from-top-2",
-              item.intent === "success" && "[&>svg:first-child]:text-success-text",
-              item.intent === "danger" && "[&>svg:first-child]:text-destructive-text",
+              "pointer-events-auto flex min-h-10 max-w-md animate-in items-center gap-2.5 rounded-md ps-3 pe-[5px] text-ui shadow-elevation-3 fade-in-0 slide-in-from-top-2",
+              item.intent === "success"
+                ? "bg-success text-white"
+                : item.intent === "danger"
+                  ? "bg-destructive text-white"
+                  : "bg-popover text-popover-foreground",
             )}
           >
-            {item.intent === "success" && <TickCircleIcon size={18} />}
-            {item.intent === "danger" && <WarningSignIcon size={18} />}
+            {item.intent === "success" && <TickCircleIcon />}
+            {item.intent === "danger" && <WarningSignIcon />}
             <span className="min-w-0 flex-1 py-2">{item.message}</span>
             <button
               type="button"
               aria-label={closeLabel}
               onClick={() => dismiss(item.id)}
               className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-md text-[var(--btn-icon)] hover:bg-accent",
+                "flex size-[30px] shrink-0 items-center justify-center rounded-sm",
+                item.intent !== "none"
+                  ? "hover:bg-white/15"
+                  : "text-[var(--btn-icon)] hover:bg-accent",
               )}
             >
               <CrossIcon />

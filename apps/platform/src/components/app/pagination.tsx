@@ -33,34 +33,34 @@ export async function Pagination({
   return (
     <nav
       aria-label={t("pagination")}
-      className="flex items-center justify-between gap-3 px-4 py-2.5 shadow-[inset_0_1px_0_var(--border)]"
+      className="flex items-center justify-between gap-3 px-2.5 py-[5px] shadow-[inset_0_1px_0_var(--border)]"
     >
       <p className="text-ui-sm text-muted-foreground" aria-live="polite">
         {t("pageOf", { page, pages })}
       </p>
-      <div className="flex gap-2">
+      <div className="flex">
         {previous ? (
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="rounded-e-none">
             <Link href={previous} rel="prev">
               <ChevronLeftIcon className="rtl:rotate-180" />
               {t("previous")}
             </Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" className="rounded-e-none" disabled>
             <ChevronLeftIcon className="rtl:rotate-180" />
             {t("previous")}
           </Button>
         )}
         {next ? (
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="-ms-px rounded-s-none">
             <Link href={next} rel="next">
               {t("next")}
               <ChevronRightIcon className="rtl:rotate-180" />
             </Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" className="-ms-px rounded-s-none" disabled>
             {t("next")}
             <ChevronRightIcon className="rtl:rotate-180" />
           </Button>

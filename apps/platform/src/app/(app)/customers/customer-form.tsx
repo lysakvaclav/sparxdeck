@@ -70,8 +70,8 @@ export function CustomerForm({
 
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)}>
-      <div className="space-y-4 p-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="space-y-[15px] p-[15px]">
+        <div className="grid grid-cols-1 gap-[15px] md:grid-cols-2">
           <Field
             id="name"
             label={t("name")}

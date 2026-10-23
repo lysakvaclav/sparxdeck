@@ -123,7 +123,7 @@ export function DeviceListTable({
   return (
     <>
       {manager && selected.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2.5 bg-selected px-4 py-2.5 sm:px-5 shadow-[inset_0_-1px_0_var(--border)]">
+        <div className="flex flex-wrap items-center gap-2.5 bg-selected px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
           <p className="text-ui-sm font-medium whitespace-nowrap">
             {t("bulkEdit.selected", { count: selected.size })}
           </p>
@@ -237,7 +237,7 @@ export function DeviceListTable({
                 <TableCell className="hidden whitespace-nowrap md:table-cell">
                   {device.typeName}
                 </TableCell>
-                <TableCell className="hidden max-w-0 sm:table-cell sm:w-[22%] xl:w-[18%]">
+                <TableCell className="hidden max-w-0 sm:table-cell sm:w-[22%]">
                   <Link
                     href={`/sites/${device.siteId}`}
                     className="relative z-[1] block truncate hover:underline"
@@ -245,13 +245,13 @@ export function DeviceListTable({
                     {device.siteName}
                   </Link>
                 </TableCell>
-                <TableCell className="hidden max-w-0 truncate text-muted-foreground xl:table-cell xl:w-[16%]">
+                <TableCell className="hidden max-w-0 truncate text-muted-foreground xl:table-cell xl:w-[18%]">
                   {device.customerName}
                 </TableCell>
-                <TableCell className="hidden max-w-0 truncate lg:table-cell lg:w-[12%] xl:w-[10%]">
+                <TableCell className="hidden max-w-0 truncate lg:table-cell">
                   {device.locationName ?? <span className="text-subtle">—</span>}
                 </TableCell>
-                <TableCell className="hidden max-w-0 truncate font-mono text-ui-sm xl:table-cell xl:w-[11%]">
+                <TableCell className="hidden max-w-0 truncate font-mono text-ui-sm xl:table-cell">
                   {device.serialNumber ?? <span className="font-sans text-ui text-subtle">—</span>}
                 </TableCell>
                 <TableCell className="text-end sm:text-start">

@@ -97,7 +97,7 @@ export async function SiteDevicesCard({
   return (
     <Card>
       {/* Title and due summary first; on a phone the buttons wrap onto their own row. */}
-      <div className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 px-5 py-2.5 shadow-[0_1px_0_var(--border)]">
+      <div className="flex min-h-10 flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5 shadow-[0_1px_0_var(--border)]">
         <CardTitle>
           {t("title")} <span className="font-normal text-muted-foreground">({devices.length})</span>
         </CardTitle>
@@ -184,7 +184,7 @@ export async function SiteDevicesCard({
             </TableBody>
           </Table>
           {devices.length > SHOWN && (
-            <div className="px-5 py-2 shadow-[inset_0_1px_0_var(--border)]">
+            <div className="px-[15px] py-2 shadow-[inset_0_1px_0_var(--border)]">
               <Link
                 href={`/devices?site=${siteId}`}
                 className="touch-link text-ui text-link hover:underline"
@@ -223,7 +223,7 @@ function GroupRows({
           <th
             scope="colgroup"
             colSpan={4}
-            className="h-9 bg-muted px-5 text-start text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]"
+            className="h-[26px] bg-muted px-2.5 text-start text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]"
           >
             {title} <span className="font-normal">({count})</span>
           </th>

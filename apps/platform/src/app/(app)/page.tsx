@@ -273,7 +273,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     <>
       <PageHeader icon={home.icon} iconClassName={home.tone} title={tNav("dashboard")} />
       <PageBody>
-        <div className="mb-5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <div className="mb-[15px] flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
           <h2 className="text-ui-lg font-semibold">
             {t("welcome", {
               name: membership.display_name.split(" ")[0] ?? membership.display_name,
@@ -284,7 +284,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
         {manager && <GettingStarted organization={organization} />}
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-[15px] lg:grid-cols-4">
           {stats.map((stat) => {
             const Icon = stat.kind ? OBJECT_TYPES[stat.kind].icon : PeopleIcon;
             const tone = stat.kind ? OBJECT_TYPES[stat.kind].text : appIcon("team").tone;
@@ -292,38 +292,31 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
               <Link
                 key={stat.label}
                 href={stat.href}
-                className="group flex items-center gap-4 rounded-lg bg-card p-4 shadow-elevation-1 transition-shadow hover:shadow-elevation-2 sm:p-5"
+                className="group rounded-lg bg-card p-[15px] shadow-elevation-0 transition-shadow hover:shadow-elevation-2"
               >
-                <span
-                  className={cn(
-                    "flex size-11 shrink-0 items-center justify-center rounded-lg bg-current/10 max-sm:hidden",
-                    tone,
-                  )}
-                >
-                  <Icon size={20} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-ui text-muted-foreground">{stat.label}</span>
-                  <span className="mt-0.5 block text-[26px] leading-8 font-semibold tabular-nums">
-                    {stat.value}
-                  </span>
-                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-ui text-muted-foreground">{stat.label}</span>
+                  <Icon className={tone} />
+                </div>
+                <p className="mt-1.5 text-[28px] leading-8 font-semibold tabular-nums">
+                  {stat.value}
+                </p>
               </Link>
             );
           })}
         </div>
 
         {openInspections && openInspections.length > 0 && (
-          <Card className="mt-3 sm:mt-5">
+          <Card className="mt-2.5 sm:mt-[15px]">
             <CardHeader>
               <CardTitle>{t("inProgressTitle")}</CardTitle>
             </CardHeader>
-            <ul className="p-1.5">
+            <ul className="p-[5px]">
               {openInspections.map((inspection) => (
                 <li key={inspection.id}>
                   <Link
                     href={`/inspections/${inspection.id}`}
-                    className="flex min-h-9 items-center gap-2 rounded-md px-2.5 text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
+                    className="flex min-h-[30px] items-center gap-[7px] rounded-sm px-[7px] text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
                   >
                     <FormIcon className={appIcon("inspections").tone} />
                     <span className="min-w-0 flex-1 truncate">
@@ -344,7 +337,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           </Card>
         )}
 
-        <section aria-labelledby="overview-title" className="mt-6">
+        <section aria-labelledby="overview-title" className="mt-[15px] sm:mt-5">
           <div className="mb-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 id="overview-title" className="text-ui-lg font-semibold">
               {t("overview.title")}
@@ -369,7 +362,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           />
         </section>
 
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:mt-5 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:mt-[15px] sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <Card>
             <CardHeader>
               <CardTitle>{t("recentTitle")}</CardTitle>
@@ -420,17 +413,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             )}
           </Card>
 
-          <div className="space-y-3 sm:space-y-5">
+          <div className="space-y-2.5 sm:space-y-[15px]">
             <Card>
               <CardHeader>
                 <CardTitle>{t("quickActions")}</CardTitle>
               </CardHeader>
-              <ul className="p-1.5">
+              <ul className="p-[5px]">
                 {actions.map((action) => (
                   <li key={action.href + action.label}>
                     <Link
                       href={action.href}
-                      className="flex min-h-9 items-center gap-2 rounded-md px-2.5 text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
+                      className="flex min-h-[30px] items-center gap-[7px] rounded-sm px-[7px] text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
                     >
                       <action.icon className={cn(action.tone)} />
                       <span className="min-w-0 flex-1 truncate">{action.label}</span>

@@ -219,7 +219,7 @@ export function PlanWorkspace({
     <li
       key={device.id}
       className={cn(
-        "flex min-h-11 items-center gap-2 px-5 py-1 shadow-[inset_0_-1px_0_var(--border)]",
+        "flex min-h-11 items-center gap-2 px-[15px] py-1 shadow-[inset_0_-1px_0_var(--border)]",
         selectedId === device.id && "bg-primary/10",
       )}
     >
@@ -228,10 +228,10 @@ export function PlanWorkspace({
         className={cn(
           "size-2.5 shrink-0 rounded-full",
           {
-            overdue: "bg-[#d14343]",
+            overdue: "bg-[#db3737]",
             soon: "bg-[#bf7326]",
-            ok: "bg-[#1a7f52]",
-            never: "bg-[#6b7787]",
+            ok: "bg-[#0f9960]",
+            never: "bg-[#738694]",
           }[device.due],
         )}
       />
@@ -269,13 +269,13 @@ export function PlanWorkspace({
   ) =>
     rows.length > 0 || empty ? (
       <div>
-        <p className="bg-muted px-5 py-2 text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]">
+        <p className="bg-muted px-[15px] py-1 text-ui-sm font-semibold text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]">
           {title} <span className="font-normal tabular-nums">({rows.length})</span>
         </p>
         {rows.filter(matches).length > 0 ? (
           <ul>{rows.filter(matches).map(render)}</ul>
         ) : (
-          <p className="px-5 py-3 text-ui text-muted-foreground">
+          <p className="px-[15px] py-3 text-ui text-muted-foreground">
             {rows.length > 0 ? t("panel.noneFound") : empty}
           </p>
         )}
@@ -299,7 +299,7 @@ export function PlanWorkspace({
     ) : null;
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+    <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="space-y-2.5">
         <Card className="overflow-hidden">
           <PlanViewer
@@ -320,7 +320,7 @@ export function PlanWorkspace({
           >
             {placing && (
               <div className="pointer-events-none absolute inset-x-2.5 bottom-2.5 flex justify-center">
-                <div className="pointer-events-auto flex max-w-full items-center gap-2.5 rounded-md bg-[#1f2a37]/95 py-1.5 ps-3 pe-1.5 text-ui text-white shadow-elevation-3">
+                <div className="pointer-events-auto flex max-w-full items-center gap-2.5 rounded-md bg-[#182026]/90 py-1.5 ps-3 pe-1.5 text-ui text-white shadow-elevation-3">
                   <MapMarkerIcon className="shrink-0" />
                   <span className="min-w-0">{t("panel.placing", { label: placing.number })}</span>
                   <Button
@@ -364,7 +364,7 @@ export function PlanWorkspace({
         )}
       </div>
 
-      <div className="space-y-3 sm:space-y-5">
+      <div className="space-y-2.5 sm:space-y-[15px]">
         {selected && (
           <Card>
             <CardHeader
@@ -386,7 +386,7 @@ export function PlanWorkspace({
                 </span>
               </CardTitle>
             </CardHeader>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 px-5 py-2.5 text-ui">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 px-[15px] py-2.5 text-ui">
               <dt className="text-muted-foreground">{t("panel.location")}</dt>
               <dd className="min-w-0 truncate">{selected.locationName ?? t("panel.noLocation")}</dd>
               <dt className="text-muted-foreground">{t("panel.nextDue")}</dt>
@@ -397,7 +397,7 @@ export function PlanWorkspace({
                 <Badge variant={DUE_BADGE[selected.due]}>{t(`legend.${selected.due}`)}</Badge>
               </dd>
             </dl>
-            <div className="flex flex-wrap gap-2 px-5 pb-5">
+            <div className="flex flex-wrap gap-2 px-[15px] pb-[15px]">
               <Button asChild variant="outline" size="sm">
                 <Link href={`/devices/${selected.id}`}>
                   <DeviceIcon />
@@ -419,9 +419,9 @@ export function PlanWorkspace({
         )}
 
         <Card>
-          <div className="px-3 py-3 shadow-[inset_0_-1px_0_var(--border)]">
+          <div className="px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 inputMode="numeric"
@@ -429,12 +429,12 @@ export function PlanWorkspace({
                 placeholder={t("panel.search")}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="ps-9"
+                className="ps-[30px]"
               />
             </div>
           </div>
           {devices.length === 0 ? (
-            <p className="px-5 py-6 text-center text-ui text-muted-foreground">
+            <p className="px-[15px] py-6 text-center text-ui text-muted-foreground">
               {t("panel.noDevices")}
             </p>
           ) : (

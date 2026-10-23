@@ -33,7 +33,7 @@ export type PanelToggles = {
 
 function MenuButton({ label }: { label: string }) {
   return (
-    <DropdownMenuTrigger className="flex h-5 items-center gap-0.5 rounded-sm px-2 text-ui-sm text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-[var(--focus)] data-[state=open]:bg-accent data-[state=open]:text-foreground">
+    <DropdownMenuTrigger className="flex h-5 items-center gap-0.5 rounded-sm px-[7px] text-ui-sm text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-[var(--focus)] data-[state=open]:bg-accent data-[state=open]:text-foreground">
       {label}
       <CaretDownIcon className="size-3" />
     </DropdownMenuTrigger>

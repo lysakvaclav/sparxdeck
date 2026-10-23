@@ -143,13 +143,13 @@ export function LabelPrinter({
       onSubmit={(event) => {
         if (!parsed.success) event.preventDefault();
       }}
-      className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,460px)] lg:items-start"
+      className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,460px)] lg:items-start"
     >
       {chosen.map((device) => (
         <input key={device.id} type="hidden" name="deviceId" value={device.id} />
       ))}
 
-      <div className="space-y-3 sm:space-y-5">
+      <div className="space-y-2.5 sm:space-y-[15px]">
         <Card>
           <CardHeader
             actions={
@@ -269,7 +269,7 @@ export function LabelPrinter({
                   ))}
                 </TableBody>
               </Table>
-              <p className="px-5 py-2 text-ui-sm text-muted-foreground">
+              <p className="px-[15px] py-2 text-ui-sm text-muted-foreground">
                 {t("removedHidden")}
               </p>
             </>
@@ -280,7 +280,7 @@ export function LabelPrinter({
           <CardHeader>
             <CardTitle>{t("sheet")}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-[15px]">
             <Field id="label-format" label={t("format")}>
               <NativeSelect
                 name="preset"
@@ -333,7 +333,7 @@ export function LabelPrinter({
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-[15px] sm:grid-cols-2">
               <Field id="label-copies" label={t("copies")} error={fieldError("copies")}>
                 <Input
                   name="copies"
@@ -405,8 +405,8 @@ export function LabelPrinter({
         >
           <CardTitle>{t("preview")}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-lg bg-[#e3e8ef] p-3 dark:bg-[#121a26]">
+        <CardContent className="space-y-[15px]">
+          <div className="rounded-sm bg-[#d8e1e8] p-2.5 dark:bg-[#202b33]">
             {layout ? (
               <SheetPreview
                 layout={layout}
@@ -438,7 +438,7 @@ export function LabelPrinter({
       </Card>
 
       {/* Phones: the long device list would push the button far down; keep it at hand. */}
-      <div className="sticky bottom-0 z-10 -mx-3 -mb-8 flex items-center gap-2.5 bg-background px-3 py-2.5 shadow-[0_-1px_0_var(--border)] sm:-mx-5 sm:-mb-5 sm:px-5 lg:hidden">
+      <div className="sticky bottom-0 z-10 -mx-2.5 -mb-8 flex items-center gap-2.5 bg-background px-2.5 py-2 shadow-[0_-1px_0_var(--border)] sm:-mx-[15px] sm:px-[15px] lg:hidden">
         <p className="min-w-0 flex-1 truncate text-ui text-muted-foreground">
           {t("summary", {
             labels: labels.length,
@@ -512,10 +512,10 @@ function SheetPreview({
             className={cn(
               "absolute",
               label
-                ? "shadow-[inset_0_0_0_0.5px_#cdd5df]"
+                ? "shadow-[inset_0_0_0_0.5px_#bfccd6]"
                 : used
-                  ? "shadow-[inset_0_0_0_0.5px_#cdd5df] [background:repeating-linear-gradient(135deg,#e8ecf1_0_3px,#f6f8fa_3px_6px)]"
-                  : "shadow-[inset_0_0_0_0.5px_#e8ecf1]",
+                  ? "shadow-[inset_0_0_0_0.5px_#bfccd6] [background:repeating-linear-gradient(135deg,#e1e8ed_0_3px,#f5f8fa_3px_6px)]"
+                  : "shadow-[inset_0_0_0_0.5px_#e1e8ed]",
             )}
             style={{
               left: pct(x, PAGE.width),

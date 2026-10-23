@@ -9,8 +9,8 @@ const CHOSEN: Record<DefectSeverity | "none", string> = {
   critical: "bg-destructive text-white",
   // Darker than --warning so the white text reads (WCAG AA).
   major: "bg-[#a66321] text-white",
-  minor: "bg-[#5d6979] text-white",
-  none: "bg-[#5d6979] text-white",
+  minor: "bg-[#5c7080] text-white",
+  none: "bg-[#5c7080] text-white",
 };
 
 /**
@@ -52,7 +52,7 @@ export function SeverityPicker({
             // A second tap keeps the choice, as with the answers.
             onClick={() => !chosen && onChange(severity)}
             className={cn(
-              "flex h-9 items-center justify-center rounded-md px-2 text-ui font-medium transition-colors disabled:opacity-50 pointer-coarse:h-11",
+              "flex h-[30px] items-center justify-center rounded-md px-2 text-ui font-medium transition-colors disabled:opacity-50 pointer-coarse:h-11",
               chosen ? CHOSEN[severity ?? "none"] : "surface-button hover:bg-[var(--btn-bg-hover)]",
             )}
           >

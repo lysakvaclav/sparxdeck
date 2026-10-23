@@ -27,7 +27,7 @@ export function StartForm({ sites, initialSite }: { sites: SiteChoice[]; initial
 
   return (
     <>
-      <div className="space-y-4 p-5">
+      <div className="space-y-[15px] p-[15px]">
         <p className="text-ui text-muted-foreground">{t("startBody")}</p>
         <Field id="inspection-site" label={t("site")}>
           <NativeSelect value={siteId} onChange={(event) => setSiteId(event.target.value)}>

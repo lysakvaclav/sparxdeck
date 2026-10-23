@@ -54,7 +54,7 @@ export function OfflineList() {
           <CardTitle>{t("list")}</CardTitle>
         </CardHeader>
         {entries === null ? null : entries.length === 0 ? (
-          <p className="px-5 py-4 text-ui text-muted-foreground">{t("none")}</p>
+          <p className="px-[15px] py-4 text-ui text-muted-foreground">{t("none")}</p>
         ) : (
           <ul>
             {entries.map((entry) => (
@@ -62,7 +62,7 @@ export function OfflineList() {
                 {/* A full page load: the service worker serves the saved page. */}
                 <a
                   href={`/inspections/${entry.id}`}
-                  className="flex min-h-14 items-center gap-3 px-5 py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-accent"
+                  className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-[rgb(191_204_214/0.3)]"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-semibold">{entry.siteName}</span>

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { headers } from "next/headers";
@@ -16,13 +15,6 @@ const helveticaNow = localFont({
     { path: "../fonts/HelveticaNowDisplay-Bold.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-helvetica-now",
-  display: "swap",
-});
-
-// The workspace typeface (self-hosted at build time, so no outside request).
-const inter = Inter({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-inter",
   display: "swap",
 });
 
@@ -53,12 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html
-      lang={locale}
-      dir={dir}
-      className={`${helveticaNow.variable} ${inter.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang={locale} dir={dir} className={helveticaNow.variable} suppressHydrationWarning>
       <body>
         <ThemeProvider nonce={nonce}>
           <NextIntlClientProvider>{children}</NextIntlClientProvider>

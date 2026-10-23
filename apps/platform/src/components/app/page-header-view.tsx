@@ -27,10 +27,9 @@ export type PageHeaderProps = {
 };
 
 /**
- * Page header on a white bar: the section icon on a tinted tile, the path to
- * this page in small text over the bold page title, optional application menus
- * below, actions on the right. Server pages use PageHeader, client views
- * ClientPageHeader; both draw this.
+ * Foundry-style page header: coloured app icon, breadcrumb path ending in the
+ * bold page title, optional application menus below, actions on the right.
+ * Server pages use PageHeader, client views ClientPageHeader; both draw this.
  */
 export function PageHeaderView({
   title,
@@ -43,59 +42,47 @@ export function PageHeaderView({
   toolbar,
   breadcrumbsLabel,
 }: PageHeaderProps & { breadcrumbsLabel: string }) {
-  const crumbs = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : null;
   return (
     <>
-      <header className="relative z-10 shrink-0 bg-background shadow-[0_1px_0_var(--border)]">
-        <div className="flex min-h-16 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:px-6">
-          {Icon && (
-            <span
-              className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg bg-current/10 text-muted-foreground max-sm:size-9",
-                iconClassName,
-              )}
-            >
-              <Icon size={20} />
-            </span>
-          )}
+      <header className="relative z-10 shrink-0 bg-background shadow-elevation-1">
+        <div className="flex min-h-[50px] flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5">
+          {Icon && <Icon size={20} className={cn("text-muted-foreground", iconClassName)} />}
           <div className="min-w-0 flex-1">
-            {crumbs && (
-              <nav aria-label={breadcrumbsLabel} className="min-w-0">
-                <ol className="flex min-w-0 items-center gap-1">
-                  {crumbs.map((crumb, index) => (
-                    <li
-                      key={crumb.href}
-                      // Phones keep only the parent, so the title (e.g. a label number) fits.
-                      className={cn(
-                        "flex min-w-0 shrink items-center gap-1",
-                        index < crumbs.length - 1 && "hidden sm:flex",
-                      )}
-                    >
-                      <Link
-                        href={crumb.href}
-                        onClick={crumb.onClick}
-                        // A 44px touch target that takes only a line of room.
-                        className="truncate text-ui-sm text-muted-foreground hover:text-foreground hover:underline pointer-coarse:-my-3 pointer-coarse:block pointer-coarse:leading-[44px]"
+            <div className="flex min-w-0 items-center gap-1">
+              {breadcrumbs && breadcrumbs.length > 0 && (
+                <nav
+                  aria-label={breadcrumbsLabel}
+                  className="max-w-[45%] min-w-0 shrink-[10] sm:max-w-none"
+                >
+                  <ol className="flex min-w-0 items-center gap-1">
+                    {breadcrumbs.map((crumb, index) => (
+                      <li
+                        key={crumb.href}
+                        // Phones keep only the parent, so the title (e.g. a label number) fits.
+                        className={cn(
+                          "flex min-w-0 shrink items-center gap-1",
+                          index < breadcrumbs.length - 1 && "hidden sm:flex",
+                        )}
                       >
-                        {crumb.label}
-                      </Link>
-                      {index < crumbs.length - 1 && (
-                        <ChevronRightIcon size={12} className="text-subtle rtl:rotate-180" />
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            )}
-            <div className="flex min-w-0 items-center gap-2.5">
-              <h1 className="min-w-0 truncate text-lg leading-7 font-semibold sm:text-xl">
-                {title}
-              </h1>
+                        <Link
+                          href={crumb.href}
+                          onClick={crumb.onClick}
+                          className="truncate text-ui text-muted-foreground hover:text-foreground hover:underline pointer-coarse:block pointer-coarse:leading-[44px]"
+                        >
+                          {crumb.label}
+                        </Link>
+                        <ChevronRightIcon className="text-subtle rtl:rotate-180" />
+                      </li>
+                    ))}
+                  </ol>
+                </nav>
+              )}
+              <h1 className="min-w-0 truncate text-ui-lg font-semibold">{title}</h1>
               {meta && (
-                <div className="hidden shrink-0 items-center gap-1.5 sm:flex">{meta}</div>
+                <div className="ms-1 hidden shrink-0 items-center gap-1.5 sm:flex">{meta}</div>
               )}
             </div>
-            {menus && <div data-page-menus="" className="-ms-2 flex min-h-5 items-center" />}
+            {menus && <div data-page-menus="" className="-ms-[7px] flex min-h-5 items-center" />}
           </div>
           {actions && (
             <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
@@ -109,7 +96,7 @@ export function PageHeaderView({
   );
 }
 
-/** Scrolling page content on the light grey workspace background. */
+/** Scrolling page content on the light workspace background. */
 export function PageBody({
   children,
   width = "wide",
@@ -124,7 +111,7 @@ export function PageBody({
     <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
       <div
         className={cn(
-          "mx-auto w-full p-3 pb-8 sm:p-5 lg:p-6",
+          "mx-auto w-full p-2.5 pb-8 sm:p-[15px] lg:p-5",
           width === "narrow" && "max-w-3xl",
           width === "medium" && "max-w-5xl",
           width === "wide" && "max-w-[1600px]",

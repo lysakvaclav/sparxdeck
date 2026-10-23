@@ -608,7 +608,7 @@ export function FieldApp({
         <PageBody width="narrow">
           {closedAlert}
           {facts.length > 0 && (
-            <p className="mb-2.5 text-ui text-muted-foreground sm:mb-5">{facts.join(" · ")}</p>
+            <p className="mb-2.5 text-ui text-muted-foreground sm:mb-[15px]">{facts.join(" · ")}</p>
           )}
           <DeviceCheck
             key={`${current.id}:${templateId}`}
@@ -685,7 +685,7 @@ export function FieldApp({
         ]}
       />
       <PageBody width="medium">
-        <div className="space-y-3 sm:space-y-5">
+        <div className="space-y-2.5 sm:space-y-[15px]">
           {closedAlert}
           {pack.inspection.correction && (
             <Alert variant="warning" title={t("reopen.openTitle")}>
@@ -796,7 +796,7 @@ function FieldStatus({
     <div
       aria-live="polite"
       className={cn(
-        "mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-md px-2.5 py-2 text-ui",
+        "mt-[15px] flex flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-md px-2.5 py-2 text-ui",
         offline || stopped || toDecide ? "bg-warning/10" : "bg-muted",
       )}
       data-testid="field-status"

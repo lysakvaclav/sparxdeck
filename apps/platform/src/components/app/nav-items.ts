@@ -27,6 +27,8 @@ export type NavItem = {
     | "team"
     | "settings";
   icon: IconComponent;
+  /** Icon colour on the dark rail (each app has its own, as in Foundry). */
+  railTone: string;
   /** Icon colour in the page header (light and dark surfaces). */
   headerTone: string;
   /** Other path prefixes that belong to this item (a site's page is under Customers). */
@@ -46,28 +48,32 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/",
     label: "dashboard",
     icon: HomeIcon,
-    headerTone: "text-[#5d6979] dark:text-[#a7b4c4]",
+    railTone: "text-[#a7b6c2]",
+    headerTone: "text-[#5c7080] dark:text-[#a7b6c2]",
     phone: "tab",
   },
   {
     href: "/inspections",
     label: "inspections",
     icon: FormIcon,
-    headerTone: "text-[#0f8a80] dark:text-[#3fd0c2]",
+    railTone: "text-[#2ee6d6]",
+    headerTone: "text-[#00a396] dark:text-[#2ee6d6]",
     phone: "tab",
   },
   {
     href: "/defects",
     label: "defects",
     icon: IssueIcon,
-    headerTone: "text-[#d14343] dark:text-[#f08a8a]",
+    railTone: "text-[#ff7373]",
+    headerTone: "text-[#db3737] dark:text-[#ff7373]",
     phone: "tab",
   },
   {
     href: "/customers",
     label: "customers",
     icon: BriefcaseIcon,
-    headerTone: "text-[#3a67b0] dark:text-[#8ab0ee]",
+    railTone: "text-[#48aff0]",
+    headerTone: "text-[#137cbd] dark:text-[#48aff0]",
     also: ["/sites"],
     phone: "more",
   },
@@ -75,14 +81,16 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/devices",
     label: "devices",
     icon: FlameIcon,
-    headerTone: "text-[#c8326b] dark:text-[#f27aa6]",
+    railTone: "text-[#f5498b]",
+    headerTone: "text-[#db2c6f] dark:text-[#f5498b]",
     phone: "tab",
   },
   {
     href: "/plans",
     label: "plans",
     icon: LayersIcon,
-    headerTone: "text-[#b7860b] dark:text-[#f2c14e]",
+    railTone: "text-[#ffc940]",
+    headerTone: "text-[#d99e0b] dark:text-[#ffc940]",
     match: SITE_PLAN,
     phone: "more",
   },
@@ -90,28 +98,32 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/graph",
     label: "graph",
     icon: DataLineageIcon,
-    headerTone: "text-[#cf6f1d] dark:text-[#f2a65e]",
+    railTone: "text-[#f29d49]",
+    headerTone: "text-[#d9822b] dark:text-[#f29d49]",
     phone: "more",
   },
   {
     href: "/device-types",
     label: "deviceTypes",
     icon: ClipboardIcon,
-    headerTone: "text-[#6d4fc4] dark:text-[#b3a1f5]",
+    railTone: "text-[#ad99ff]",
+    headerTone: "text-[#7157d9] dark:text-[#ad99ff]",
     phone: "more",
   },
   {
     href: "/team",
     label: "team",
     icon: PeopleIcon,
-    headerTone: "text-[#1a7f52] dark:text-[#5cc995]",
+    railTone: "text-[#3dcc91]",
+    headerTone: "text-[#0f9960] dark:text-[#3dcc91]",
     phone: "more",
   },
   {
     href: "/settings",
     label: "settings",
     icon: CogIcon,
-    headerTone: "text-[#5d6979] dark:text-[#a7b4c4]",
+    railTone: "text-[#a7b6c2]",
+    headerTone: "text-[#5c7080] dark:text-[#a7b6c2]",
     phone: "more",
   },
 ];

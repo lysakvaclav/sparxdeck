@@ -158,8 +158,8 @@ export default async function InspectionPage({ params }: Props) {
       {header}
       <PageBody>
         <ForgetOffline inspectionId={inspection.id} />
-        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="contents lg:block lg:space-y-5">
+        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="contents lg:block lg:space-y-[15px]">
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -299,7 +299,7 @@ export default async function InspectionPage({ params }: Props) {
             )}
           </div>
 
-          <div className="contents lg:block lg:space-y-5">
+          <div className="contents lg:block lg:space-y-[15px]">
             <ProtocolCard
               inspectionId={inspection.id}
               organizationId={inspection.organization_id}
@@ -403,7 +403,7 @@ export default async function InspectionPage({ params }: Props) {
                       <li key={device.id}>
                         <Link
                           href={`/devices/${device.id}`}
-                          className="inline-flex min-h-9 items-center gap-1.5 rounded-md surface-button px-2.5 transition-colors hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
+                          className="inline-flex min-h-[30px] items-center gap-1.5 rounded-md surface-button px-2 hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
                         >
                           <span className="font-mono tabular-nums">
                             {formatLabel(device.label_number)}

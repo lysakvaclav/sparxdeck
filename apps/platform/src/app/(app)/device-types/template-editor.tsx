@@ -151,10 +151,10 @@ export function TemplateEditor({
         event.preventDefault();
         submit();
       }}
-      className="space-y-3 sm:space-y-5"
+      className="space-y-2.5 sm:space-y-[15px]"
     >
       <Card>
-        <div className="space-y-4 p-5">
+        <div className="space-y-[15px] p-[15px]">
           <Field id="template-name" label={t("name")} error={errors.name && tErr(errors.name)}>
             <Input value={name} maxLength={160} onChange={(event) => setName(event.target.value)} />
           </Field>
@@ -233,10 +233,10 @@ export function TemplateEditor({
                   key={item.key}
                   className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-2.5 gap-y-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none lg:grid-cols-[36px_minmax(0,1fr)_150px_80px_130px_88px] lg:items-start lg:py-1.5"
                 >
-                  <span className="pt-2 text-end text-muted-foreground tabular-nums">
+                  <span className="pt-[7px] text-end text-muted-foreground tabular-nums">
                     {index + 1}
                   </span>
-                  <div className="min-w-0 space-y-1.5">
+                  <div className="min-w-0 space-y-[5px]">
                     <label htmlFor={`item-${index}-label`} className="sr-only">
                       {t("itemLabel")}
                     </label>
@@ -284,7 +284,7 @@ export function TemplateEditor({
                         ))}
                       </NativeSelect>
                     </div>
-                    <label className="flex min-h-9 cursor-pointer items-center gap-2 lg:justify-center">
+                    <label className="flex min-h-[30px] cursor-pointer items-center gap-2 lg:justify-center">
                       <Checkbox
                         id={`item-${index}-required`}
                         checked={item.required}
@@ -294,7 +294,7 @@ export function TemplateEditor({
                       <span className="lg:sr-only">{t("required")}</span>
                     </label>
                     <label
-                      className="col-span-2 flex min-h-9 cursor-pointer items-center gap-2 sm:col-span-1 lg:justify-center"
+                      className="col-span-2 flex min-h-[30px] cursor-pointer items-center gap-2 sm:col-span-1 lg:justify-center"
                       title={item.type === "pass_fail" ? undefined : t("defectHint")}
                     >
                       <Checkbox
@@ -353,13 +353,13 @@ export function TemplateEditor({
             })}
           </ol>
         ) : (
-          <p className="px-5 py-8 text-center text-muted-foreground">
+          <p className="px-[15px] py-8 text-center text-muted-foreground">
             {tErr("templateEmpty")}
           </p>
         )}
 
         {formError && (
-          <div className="px-5 pb-5">
+          <div className="px-[15px] pb-[15px]">
             <Alert variant="error">{tErr(formError)}</Alert>
           </div>
         )}

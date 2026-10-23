@@ -118,8 +118,8 @@ export default async function CustomerPage({ params }: Props) {
       />
 
       <PageBody>
-        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="space-y-3 sm:space-y-5">
+        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="space-y-2.5 sm:space-y-[15px]">
             <Card>
               <CardHeader actions={sites && sites.length > 0 ? addSite : undefined}>
                 <CardTitle>
@@ -197,7 +197,7 @@ export default async function CustomerPage({ params }: Props) {
             <ProtocolsCard scope={{ customer: customer.id }} />
           </div>
 
-          <div className="space-y-3 sm:space-y-5">
+          <div className="space-y-2.5 sm:space-y-[15px]">
             <Card>
               <CardHeader>
                 <CardTitle>{t("detail.properties")}</CardTitle>

@@ -6,25 +6,26 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 /*
- * Toolbar: icon buttons in a 36px rounded box with a small label underneath. Scrolls sideways on narrow screens. Buttons can be
+ * Foundry-style toolbar: Blueprint buttons with the icon in a 30px box and a
+ * small label underneath. Scrolls sideways on narrow screens. Buttons can be
  * toggles (`active`) or menu triggers (`menu`); related tools share a group.
  */
 
 const box =
-  "surface-button relative flex size-9 items-center justify-center rounded-md transition-[background-color,box-shadow] duration-150 [&_svg]:text-[var(--btn-icon)]";
+  "surface-button relative flex size-[30px] items-center justify-center rounded-md transition-[background-color,box-shadow] duration-100 [&_svg]:text-[var(--btn-icon)]";
 const boxIdle =
-  "group-hover:bg-[var(--btn-bg-hover)] group-active:bg-[var(--btn-bg-active)] group-active:shadow-[var(--btn-shadow-active)]";
+  "group-hover:bg-[var(--btn-bg-hover)] group-active:bg-[var(--btn-bg-active)] group-active:[background-image:none] group-active:shadow-[var(--btn-shadow-active)]";
 const boxPressed =
-  "bg-tint-primary shadow-[inset_0_0_0_1px_var(--tint-primary-border)] [&_svg]:text-link";
+  "bg-[var(--btn-bg-active)] [background-image:none] shadow-[var(--btn-shadow-active)] [&_svg]:text-link";
 const boxDisabled =
-  "group-disabled:bg-[var(--btn-disabled-bg)] group-disabled:shadow-[inset_0_0_0_1px_var(--border)] group-disabled:[&_svg]:text-[var(--btn-disabled-fg)]";
+  "group-disabled:bg-[var(--btn-disabled-bg)] group-disabled:[background-image:none] group-disabled:shadow-none group-disabled:[&_svg]:text-[var(--btn-disabled-fg)]";
 
 export function Toolbar({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       role="toolbar"
       className={cn(
-        "relative z-[5] flex shrink-0 scrollbar-thin items-start gap-1.5 overflow-x-auto bg-background px-4 pt-2 pb-1.5 shadow-[inset_0_-1px_0_var(--border)] sm:px-6",
+        "relative z-[5] flex shrink-0 scrollbar-thin items-start gap-1 overflow-x-auto bg-background px-2.5 pt-[7px] pb-[5px] shadow-[inset_0_-1px_0_var(--border)]",
         className,
       )}
       {...props}
@@ -35,7 +36,7 @@ export function Toolbar({ className, children, ...props }: React.ComponentProps<
 }
 
 export function ToolbarSeparator() {
-  return <div aria-hidden className="mx-2 mt-0.5 h-12 w-px shrink-0 bg-border" />;
+  return <div aria-hidden className="mx-1.5 mt-0.5 h-[42px] w-px shrink-0 bg-border" />;
 }
 
 export function ToolbarSpacer() {
@@ -61,7 +62,7 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonPr
         type="button"
         aria-pressed={active === undefined || menu ? undefined : active}
         className={cn(
-          "group flex min-w-[52px] shrink-0 flex-col items-center gap-1 rounded-md px-0.5 text-ui-xs text-muted-foreground outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)] disabled:cursor-not-allowed disabled:text-[var(--btn-disabled-fg)]",
+          "group flex min-w-[46px] shrink-0 flex-col items-center gap-[3px] rounded-md px-0.5 text-ui-xs text-muted-foreground outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)] disabled:cursor-not-allowed disabled:text-[var(--btn-disabled-fg)]",
           className,
         )}
         {...props}
@@ -89,7 +90,7 @@ export function ToolbarGroup({ label, children }: { label: string; children: Rea
     <div
       role="group"
       aria-label={label}
-      className="flex shrink-0 flex-col items-center gap-1 px-0.5"
+      className="flex shrink-0 flex-col items-center gap-[3px] px-0.5"
     >
       <div className="flex">{children}</div>
       <span className="text-ui-xs whitespace-nowrap text-muted-foreground">{label}</span>

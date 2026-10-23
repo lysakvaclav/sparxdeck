@@ -59,7 +59,7 @@ export async function ProtocolCard({
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       {protocol?.pdf_path && protocol.generated_at ? (
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-[15px]">
           <div>
             <p className="font-mono text-[22px] leading-7 font-semibold tabular-nums">
               {number}
@@ -154,7 +154,7 @@ export async function ProtocolCard({
           )}
         </CardContent>
       ) : (
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-[15px]">
           {protocol ? (
             <Alert variant="warning" title={t("missingTitle")}>
               <p>{t("missingBody")}</p>

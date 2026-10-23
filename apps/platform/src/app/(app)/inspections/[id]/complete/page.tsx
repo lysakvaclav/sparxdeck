@@ -41,12 +41,12 @@ export default async function CompleteInspectionPage({ params }: Props) {
   const app = appIcon("inspections");
   const checkHref = (deviceId: string) => `/inspections/${id}/check/${deviceId}`;
   const list = (items: typeof devices) => (
-    <ul className="flex flex-wrap gap-1.5 px-5 py-2.5">
+    <ul className="flex flex-wrap gap-1.5 px-[15px] py-2.5">
       {items.map((device) => (
         <li key={device.id}>
           <Link
             href={checkHref(device.id)}
-            className="inline-flex min-h-9 items-center rounded-md surface-button px-2.5 transition-colors font-mono tabular-nums hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
+            className="inline-flex min-h-[30px] items-center rounded-md surface-button px-2 font-mono tabular-nums hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
           >
             {device.number}
           </Link>
@@ -67,7 +67,7 @@ export default async function CompleteInspectionPage({ params }: Props) {
         ]}
       />
       <PageBody width="narrow">
-        <div className="space-y-3 sm:space-y-5">
+        <div className="space-y-2.5 sm:space-y-[15px]">
           <div className="grid grid-cols-3 gap-2">
             {(
               [
@@ -115,15 +115,15 @@ export default async function CompleteInspectionPage({ params }: Props) {
               <CardHeader>
                 <CardTitle>{t("complete.skippedList")}</CardTitle>
               </CardHeader>
-              <p className="px-5 pt-2.5 text-ui-sm text-muted-foreground">
+              <p className="px-[15px] pt-2.5 text-ui-sm text-muted-foreground">
                 {t("complete.skippedHint")}
               </p>
-              <ul className="flex flex-wrap gap-1.5 px-5 py-2.5">
+              <ul className="flex flex-wrap gap-1.5 px-[15px] py-2.5">
                 {skipped.map((device) => (
                   <li key={device.id}>
                     <Link
                       href={checkHref(device.id)}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-md surface-button px-2.5 transition-colors hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
+                      className="inline-flex min-h-[30px] items-center gap-1.5 rounded-md surface-button px-2 hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11"
                     >
                       <span className="font-mono tabular-nums">{device.number}</span>
                       <span className="text-ui-sm text-muted-foreground">
@@ -140,7 +140,7 @@ export default async function CompleteInspectionPage({ params }: Props) {
               <CardHeader>
                 <CardTitle>{t("complete.notCheckedList")}</CardTitle>
               </CardHeader>
-              <p className="px-5 pt-2.5 text-ui-sm text-muted-foreground">
+              <p className="px-[15px] pt-2.5 text-ui-sm text-muted-foreground">
                 {t("complete.notCheckedHint")}
               </p>
               {list(notChecked)}

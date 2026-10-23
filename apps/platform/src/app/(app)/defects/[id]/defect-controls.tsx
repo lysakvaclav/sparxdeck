@@ -61,7 +61,7 @@ export function DefectStatusControls({
   const [noteError, setNoteError] = useState<ErrorCode>();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-[15px]">
       <div className="flex flex-wrap gap-2">
         {status === "open" && (
           <Button
@@ -90,7 +90,7 @@ export function DefectStatusControls({
         )}
         {pending && <Spinner size={16} className="self-center" />}
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-[5px]">
         <p className="text-ui font-medium">{tDefects("columns.severity")}</p>
         <SeverityPicker
           value={severity}
@@ -109,7 +109,7 @@ export function DefectStatusControls({
       >
         <form
           noValidate
-          className="space-y-4"
+          className="space-y-[15px]"
           onSubmit={(event) => {
             event.preventDefault();
             if (!note.trim()) {
@@ -278,7 +278,7 @@ export function AddDefectPhoto({ id, organizationId }: { id: string; organizatio
   }
 
   return (
-    <label className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md surface-button px-3.5 text-ui font-medium whitespace-nowrap transition-colors hover:bg-[var(--btn-bg-hover)] active:bg-[var(--btn-bg-active)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)] pointer-coarse:min-h-11 pointer-coarse:px-4">
+    <label className="inline-flex min-h-[30px] cursor-pointer items-center gap-[7px] rounded-md surface-button px-2.5 text-ui hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11">
       {busy ? <Spinner size={16} /> : <CameraIcon className="text-[var(--btn-icon)]" />}
       {t("addPhoto")}
       <input

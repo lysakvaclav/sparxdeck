@@ -1,7 +1,7 @@
 import type { IconComponent } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-/** Empty state: the icon on a soft round tile, title, short description, optional action. */
+/** Blueprint "non-ideal state": muted icon, title, short description, optional action. */
 export function EmptyState({
   icon: Icon,
   title,
@@ -16,10 +16,8 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center px-6 py-12 text-center", className)}>
-      <span className="flex size-14 items-center justify-center rounded-full bg-tint-primary text-link">
-        <Icon size={26} />
-      </span>
+    <div className={cn("flex flex-col items-center px-6 py-10 text-center", className)}>
+      <Icon size={48} className="text-[#a7b6c2] dark:text-[#5c7080]" />
       <h2 className="mt-4 text-ui-lg font-semibold">{title}</h2>
       {description && (
         <p className="mt-1.5 max-w-sm text-ui text-muted-foreground">{description}</p>

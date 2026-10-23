@@ -35,7 +35,7 @@ function query(values: Record<string, string | number | undefined>) {
 }
 
 const rowLink =
-  "flex min-h-9 items-center gap-2 rounded-md px-2.5 text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11";
+  "flex min-h-[30px] items-center gap-[7px] rounded-sm px-[7px] text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11";
 
 /**
  * The office's planning view: what is overdue or coming due within 30/60/90
@@ -140,13 +140,13 @@ export async function DueOverview({
   const scoped = { customer: scope.customer, site: scope.site };
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+    <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
       <Card>
-        <div className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 px-5 py-2.5 shadow-[0_1px_0_var(--border)]">
+        <div className="flex min-h-10 flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5 shadow-[0_1px_0_var(--border)]">
           <CardTitle>{t("overview.planTitle")}</CardTitle>
           <nav
             aria-label={t("overview.horizonLabel")}
-            className="ms-auto flex rounded-lg bg-accent p-1"
+            className="ms-auto flex rounded-md bg-muted p-0.5"
           >
             {HORIZONS.map((days) => (
               <Link
@@ -155,10 +155,10 @@ export async function DueOverview({
                 scroll={false}
                 aria-current={days === horizon ? "page" : undefined}
                 className={cn(
-                  "flex min-h-8 items-center rounded-md px-3 text-ui whitespace-nowrap transition-colors pointer-coarse:min-h-11",
+                  "flex min-h-[26px] items-center rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                   days === horizon
-                    ? "bg-background font-medium text-foreground shadow-elevation-1"
-                    : "font-medium text-muted-foreground hover:text-foreground",
+                    ? "bg-background font-semibold shadow-elevation-1"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {t("overview.horizon", { days })}
@@ -166,7 +166,7 @@ export async function DueOverview({
             ))}
           </nav>
         </div>
-        <p className="px-5 py-2 text-ui text-muted-foreground" aria-live="polite">
+        <p className="px-[15px] py-2 text-ui text-muted-foreground" aria-live="polite">
           {plan.rows.length > 0
             ? t("overview.summary", {
                 overdue: plan.overdue,
@@ -251,7 +251,7 @@ export async function DueOverview({
           </Table>
         )}
         {plan.rows.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-2.5 px-5 py-2 text-ui shadow-[inset_0_1px_0_var(--border)]">
+          <div className="flex flex-wrap items-center gap-x-2.5 px-[15px] py-2 text-ui shadow-[inset_0_1px_0_var(--border)]">
             {plan.rows.length > SHOWN && (
               <span className="text-muted-foreground">
                 {t("overview.moreSites", { count: plan.rows.length - SHOWN })}
@@ -267,13 +267,13 @@ export async function DueOverview({
         )}
       </Card>
 
-      <div className="space-y-3 sm:space-y-5">
+      <div className="space-y-2.5 sm:space-y-[15px]">
         <Card>
           <CardHeader>
             <CardTitle>{t("dueTitle")}</CardTitle>
           </CardHeader>
           {activeTotal > 0 ? (
-            <ul className="p-1.5">
+            <ul className="p-[5px]">
               {dueCounts.map(({ state, count: stateCount }) => (
                 <li key={state}>
                   <Link href={`/devices${query({ ...scoped, due: state })}`} className={rowLink}>
@@ -290,9 +290,9 @@ export async function DueOverview({
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-2.5 text-ui text-muted-foreground">{t("dueEmpty")}</p>
+            <p className="px-[15px] py-2.5 text-ui text-muted-foreground">{t("dueEmpty")}</p>
           )}
-          <p className="px-5 pb-2.5 text-ui-sm text-muted-foreground">
+          <p className="px-[15px] pb-2.5 text-ui-sm text-muted-foreground">
             {t("dueHint", { days: soonDays })}
           </p>
         </Card>
@@ -305,7 +305,7 @@ export async function DueOverview({
             </CardTitle>
           </CardHeader>
           {openDefects > 0 ? (
-            <ul className="p-1.5">
+            <ul className="p-[5px]">
               {defectCounts.map(({ severity, count: severityCount }) => (
                 <li key={severity}>
                   <Link href={`/defects${query({ ...scoped, severity })}`} className={rowLink}>
@@ -322,7 +322,7 @@ export async function DueOverview({
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-2.5 text-ui text-muted-foreground">{t("defectsEmpty")}</p>
+            <p className="px-[15px] py-2.5 text-ui text-muted-foreground">{t("defectsEmpty")}</p>
           )}
         </Card>
       </div>

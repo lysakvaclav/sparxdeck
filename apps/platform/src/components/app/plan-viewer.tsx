@@ -38,11 +38,11 @@ export type PlanMarker = {
 
 // Dots are graphics on a white chip: each has at least 3:1 contrast to white.
 const TONE: Record<MarkerTone, string> = {
-  danger: "bg-[#d14343]",
+  danger: "bg-[#db3737]",
   warning: "bg-[#bf7326]",
-  success: "bg-[#1a7f52]",
-  neutral: "bg-[#6b7787]",
-  muted: "bg-[#a7b4c4]",
+  success: "bg-[#0f9960]",
+  neutral: "bg-[#738694]",
+  muted: "bg-[#a7b6c2]",
 };
 
 /** A tap that moves less than this is a tap, not a drag. */
@@ -419,7 +419,7 @@ export function PlanViewer({
       onKeyDown={onKeyDown}
       style={fitShape ? { aspectRatio: `${size.width} / ${size.height}` } : undefined}
       className={cn(
-        "relative touch-none overflow-hidden bg-[#e8ecf1] outline-none select-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring)] dark:bg-[#1b2433]",
+        "relative touch-none overflow-hidden bg-[#e1e8ed] outline-none select-none focus-visible:shadow-[inset_0_0_0_2px_var(--ring)] dark:bg-[#202b33]",
         placing ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing",
         className,
       )}
@@ -469,10 +469,10 @@ export function PlanViewer({
               >
                 <span
                   className={cn(
-                    "flex items-center gap-1 rounded-full bg-white py-[3px] ps-1.5 pe-1.5 font-mono text-[11px] leading-none font-semibold text-[#1b2533] tabular-nums shadow-[0_0_0_1px_rgb(16_24_40/0.25),0_1px_3px_rgb(16_24_40/0.35)] transition-transform",
-                    selected && "scale-110 shadow-[0_0_0_2px_#3a67b0,0_2px_6px_rgb(16_24_40/0.4)]",
+                    "flex items-center gap-1 rounded-full bg-white py-[3px] ps-[5px] pe-1.5 font-mono text-[11px] leading-none font-semibold text-[#182026] tabular-nums shadow-[0_0_0_1px_rgb(16_22_26/0.25),0_1px_3px_rgb(16_22_26/0.35)] transition-transform",
+                    selected && "scale-110 shadow-[0_0_0_2px_#137cbd,0_2px_6px_rgb(16_22_26/0.4)]",
                     dragged && "scale-110",
-                    "[button:focus-visible>&]:shadow-[0_0_0_2px_#3a67b0,0_0_0_4px_rgb(58_103_176/0.35)]",
+                    "[button:focus-visible>&]:shadow-[0_0_0_2px_#137cbd,0_0_0_4px_rgb(19_124_189/0.35)]",
                   )}
                 >
                   <span aria-hidden className={cn("size-2.5 rounded-full", TONE[marker.tone])} />

@@ -84,7 +84,7 @@ function CountBadge({ count }: { count: number }) {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute -end-[6px] -top-[7px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-white px-[3px] text-[9px] leading-none font-semibold text-[#1b2533] shadow-[0_0_0_1px_rgb(16_24_40/0.25)]"
+      className="pointer-events-none absolute -end-[6px] -top-[7px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-white px-[3px] text-[9px] leading-none font-semibold text-[#182026] shadow-[0_0_0_1px_rgb(16_22_26/0.3)]"
     >
       {count}
     </span>
@@ -143,12 +143,12 @@ function ParentChevron({ id, data }: { id: string; data: GraphNodeData }) {
 function CustomerNodeView({ id, data, selected }: NodeProps<GraphFlowNode>) {
   const Icon = OBJECT_TYPES.customer.icon;
   return (
-    <div className={cn("relative h-full w-full rounded-[4px]", ring(data, selected))}>
-      <div className="flex h-4 items-center justify-center rounded-t-[4px] bg-node-header">
+    <div className={cn("relative h-full w-full rounded-[2px]", ring(data, selected))}>
+      <div className="flex h-4 items-center justify-center rounded-t-[2px] bg-node-header">
         <Icon className="size-2.5 text-white/85" />
       </div>
       <div
-        className="flex h-5 items-center rounded-b-[4px]"
+        className="flex h-5 items-center rounded-b-[2px]"
         style={{ background: data.color, color: data.textColor }}
       >
         <span aria-hidden className="w-1.5 shrink-0" />
@@ -171,7 +171,7 @@ function CustomerNodeView({ id, data, selected }: NodeProps<GraphFlowNode>) {
 function BarNodeView({ id, data, selected }: NodeProps<GraphFlowNode>) {
   return (
     <div
-      className={cn("relative flex h-full w-full items-center rounded-[4px]", ring(data, selected))}
+      className={cn("relative flex h-full w-full items-center rounded-[2px]", ring(data, selected))}
       style={{ background: data.color, color: data.textColor }}
     >
       <Handle
@@ -207,7 +207,7 @@ function CardNodeView({ id, data, selected }: NodeProps<GraphFlowNode>) {
   return (
     <div
       className={cn(
-        "relative h-full w-full overflow-hidden rounded-md bg-card text-card-foreground shadow-elevation-1",
+        "relative h-full w-full overflow-hidden rounded-[3px] bg-card text-card-foreground shadow-elevation-1",
         ring(data, selected),
       )}
     >
@@ -220,7 +220,7 @@ function CardNodeView({ id, data, selected }: NodeProps<GraphFlowNode>) {
         />
       )}
       <div aria-hidden className="h-[3px]" style={{ background: data.color }} />
-      <div className="flex items-start gap-2 px-2 pt-1.5">
+      <div className="flex items-start gap-2 px-2 pt-[5px]">
         <Icon className="mt-px" style={{ color: data.color }} />
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 truncate text-[12px] leading-4 font-semibold">

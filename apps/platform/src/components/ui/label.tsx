@@ -5,7 +5,7 @@ function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
     <label
       className={cn(
-        "block text-ui font-medium text-foreground [.brand_&]:text-sm",
+        "block text-ui text-foreground [.brand_&]:text-sm [.brand_&]:font-medium",
         className,
       )}
       {...props}

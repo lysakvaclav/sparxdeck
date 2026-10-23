@@ -83,11 +83,11 @@ export function Locations({
   return (
     <div className="space-y-3">
       {items.length > 0 ? (
-        <ol className="overflow-hidden rounded-lg shadow-elevation-0">
+        <ol className="overflow-hidden rounded-md shadow-elevation-0">
           {items.map((location, index) => (
             <li
               key={location.id}
-              className="flex min-h-11 items-center gap-2.5 bg-card py-0.5 ps-4 pe-1 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none even:bg-muted pointer-coarse:min-h-14"
+              className="flex min-h-[34px] items-center gap-2.5 bg-card py-0.5 ps-2.5 pe-0.5 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none even:bg-[rgb(191_204_214/0.12)] pointer-coarse:min-h-14"
             >
               <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-md bg-node-location px-1 text-ui-xs text-white tabular-nums">
                 {index + 1}
@@ -164,7 +164,7 @@ export function Locations({
           ))}
         </ol>
       ) : (
-        <p className="rounded-md bg-muted px-4 py-4 text-center text-muted-foreground">
+        <p className="rounded-md bg-[rgb(138_155_168/0.12)] px-4 py-4 text-center text-muted-foreground">
           {t("empty")}
         </p>
       )}
@@ -257,7 +257,7 @@ function NameForm({
         onSubmit(parsed.data.name, () => clearOnSubmit && setValue(""));
       }}
     >
-      <div className="min-w-0 flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-[5px]">
         <label htmlFor={id} className="sr-only">
           {label}
         </label>

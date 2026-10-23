@@ -74,18 +74,18 @@ function Steps({ step }: { step: Step }) {
           <span
             aria-current={index === current ? "step" : undefined}
             className={cn(
-              "flex items-center gap-2 rounded-full py-1 ps-1 pe-3",
-              index === current && "bg-tint-primary font-medium text-tint-primary-foreground",
+              "flex items-center gap-2 rounded-md px-2 py-1",
+              index === current && "bg-primary/10 font-semibold text-link",
               index < current && "text-muted-foreground",
               index > current && "text-subtle",
             )}
           >
             <span
               className={cn(
-                "flex size-6 items-center justify-center rounded-full text-ui-xs font-semibold tabular-nums",
+                "flex size-5 items-center justify-center rounded-full text-ui-sm tabular-nums",
                 index <= current
                   ? "bg-primary text-primary-foreground"
-                  : "bg-accent-strong",
+                  : "bg-[rgb(138_155_168/0.25)]",
               )}
             >
               {index < current ? "✓" : index + 1}
@@ -224,7 +224,7 @@ export function ImportWizard() {
     });
 
   return (
-    <div className="space-y-3 sm:space-y-5">
+    <div className="space-y-2.5 sm:space-y-[15px]">
       <Steps step={step} />
 
       {step === "file" && (
@@ -241,7 +241,7 @@ export function ImportWizard() {
           >
             <CardTitle>{t("file.title")}</CardTitle>
           </CardHeader>
-          <div className="space-y-4 p-5">
+          <div className="space-y-[15px] p-[15px]">
             <div
               onDragOver={(event) => {
                 event.preventDefault();
@@ -305,10 +305,10 @@ export function ImportWizard() {
               </span>
             </CardTitle>
           </CardHeader>
-          <div className="space-y-4 p-5">
+          <div className="space-y-[15px] p-[15px]">
             <p className="text-ui text-muted-foreground">{t("columns.hint")}</p>
             {sheets.length > 1 && (
-              <div className="max-w-xs space-y-1.5">
+              <div className="max-w-xs space-y-[5px]">
                 <label htmlFor="import-sheet" className="text-ui font-semibold">
                   {t("file.sheet")}
                 </label>
@@ -325,7 +325,7 @@ export function ImportWizard() {
                 </NativeSelect>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-[15px] lg:grid-cols-3">
               {(["customer", "site", "device"] as const).map((group) => (
                 <fieldset key={group} className="space-y-2.5">
                   <legend className="mb-1.5 text-ui font-semibold">
@@ -425,7 +425,7 @@ export function ImportWizard() {
             <CardHeader>
               <CardTitle>{t("check.title")}</CardTitle>
             </CardHeader>
-            <div className="grid grid-cols-2 gap-2.5 p-5 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 p-[15px] md:grid-cols-4">
               {(
                 [
                   ["customers", plan.customers.created, plan.customers.existing],
@@ -446,7 +446,7 @@ export function ImportWizard() {
                 </div>
               ))}
             </div>
-            <div className="space-y-2 px-5 pb-5">
+            <div className="space-y-2 px-[15px] pb-[15px]">
               {rows.length > IMPORT_MAX_ROWS && (
                 <Alert variant="error">{tErr("importTooLarge")}</Alert>
               )}
@@ -468,8 +468,8 @@ export function ImportWizard() {
           </Card>
 
           <Card>
-            <div className="flex flex-wrap items-center gap-2 px-3 py-3 shadow-[inset_0_-1px_0_var(--border)] sm:px-4">
-              <div role="tablist" className="flex rounded-lg bg-accent p-1">
+            <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
+              <div role="tablist" className="flex rounded-md bg-muted p-0.5">
                 {(
                   [
                     ["all", rows.length],
@@ -484,10 +484,10 @@ export function ImportWizard() {
                     aria-selected={filter === id}
                     onClick={() => setFilter(id)}
                     className={cn(
-                      "min-h-9 rounded-md px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
+                      "min-h-[30px] rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       filter === id
-                        ? "bg-background font-medium text-foreground shadow-elevation-1"
-                        : "font-medium text-muted-foreground hover:text-foreground",
+                        ? "bg-background font-semibold shadow-elevation-1"
+                        : "text-muted-foreground",
                     )}
                   >
                     {t(`check.tabs.${id}`)}{" "}
@@ -520,7 +520,7 @@ export function ImportWizard() {
               </Button>
             </CardFooter>
             {records.length === 0 && rows.length > 0 && (
-              <p className="px-5 pb-5 text-end text-ui-sm text-muted-foreground">
+              <p className="px-[15px] pb-[15px] text-end text-ui-sm text-muted-foreground">
                 {t("check.nothing")}
               </p>
             )}
@@ -533,7 +533,7 @@ export function ImportWizard() {
           <CardHeader>
             <CardTitle>{t("done.title")}</CardTitle>
           </CardHeader>
-          <div className="space-y-4 p-5">
+          <div className="space-y-[15px] p-[15px]">
             <Alert variant="success" icon={TickCircleIcon}>
               {t("done.summary", {
                 customers: result.customers,
@@ -604,7 +604,7 @@ function CheckTable({
 }) {
   const t = useTranslations("import.check");
   if (rows.length === 0)
-    return <p className="px-5 py-6 text-center text-ui text-muted-foreground">—</p>;
+    return <p className="px-[15px] py-6 text-center text-ui text-muted-foreground">—</p>;
   return (
     <>
       <Table>
@@ -685,7 +685,7 @@ function CheckTable({
         </TableBody>
       </Table>
       {rows.length > SHOWN_ROWS && (
-        <p className="px-5 py-2 text-ui-sm text-muted-foreground">
+        <p className="px-[15px] py-2 text-ui-sm text-muted-foreground">
           {t("more", { count: rows.length - SHOWN_ROWS })}
         </p>
       )}

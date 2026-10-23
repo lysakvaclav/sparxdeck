@@ -2,17 +2,15 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /*
- * Card used as a section: white surface with a soft border and rounded
- * corners, an optional header (title, small description, actions) over a
- * divider, and content below. Content is clipped to the corners (a table's
- * header band too) with a little room for focus rings.
+ * Blueprint card used as a section: white surface with a hairline elevation, an
+ * optional header bar (title, small description, actions) and content below.
  */
 
 function Card({ className, ...props }: React.ComponentProps<"section">) {
   return (
     <section
       className={cn(
-        "relative min-w-0 overflow-clip rounded-lg bg-card text-card-foreground shadow-elevation-1 [overflow-clip-margin:3px]",
+        "relative min-w-0 rounded-lg bg-card text-card-foreground shadow-elevation-0",
         className,
       )}
       {...props}
@@ -29,19 +27,19 @@ function CardHeader({
   return (
     <div
       className={cn(
-        "flex min-h-14 items-center gap-3 px-5 py-2.5 shadow-[inset_0_-1px_0_var(--border)]",
+        "flex min-h-10 items-center gap-2.5 px-[15px] py-1.5 shadow-[0_1px_0_var(--border)]",
         className,
       )}
       {...props}
     >
       <div className="min-w-0 flex-1">{children}</div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}
     </div>
   );
 }
 
 function CardTitle({ className, ...props }: React.ComponentProps<"h2">) {
-  return <h2 className={cn("truncate text-[0.9375rem] font-semibold", className)} {...props} />;
+  return <h2 className={cn("truncate text-ui font-semibold", className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
@@ -49,7 +47,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("p-5", className)} {...props} />;
+  return <div className={cn("p-[15px]", className)} {...props} />;
 }
 
 /** Action row at the bottom of a card (forms): right-aligned buttons over a divider. */
@@ -57,7 +55,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2.5 px-5 py-4 shadow-[inset_0_1px_0_var(--border)] sm:flex-row sm:items-center sm:justify-end",
+        "flex flex-col-reverse gap-2.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)] sm:flex-row sm:items-center sm:justify-end",
         className,
       )}
       {...props}

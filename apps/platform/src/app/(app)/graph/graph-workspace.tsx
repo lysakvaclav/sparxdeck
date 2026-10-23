@@ -417,8 +417,8 @@ function Workspace({ data, organizationId, canEdit, focusId }: Props) {
   );
 
   const edges = useMemo<Edge[]>(() => {
-    const base = dark ? "#5d6979" : "#a3aebb";
-    const accent = dark ? "#8ab0ee" : "#3a67b0";
+    const base = dark ? "#5c7080" : "#8a9ba8";
+    const accent = dark ? "#48aff0" : "#137cbd";
     return visible.flatMap((id) => {
       const parentId = graph.nodes.get(id)?.parentId;
       if (!parentId || !visibleSet.has(parentId)) return [];
@@ -670,7 +670,7 @@ function Workspace({ data, organizationId, canEdit, focusId }: Props) {
       const height = Math.round(Math.min(4096, Math.max(500, bounds.height + 120)));
       const viewport = getViewportForBounds(bounds, width, height, 0.1, 2, 0.05);
       const background =
-        getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim() || "#eef1f5";
+        getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim() || "#ebf1f5";
       const dataUrl = await toPng(element, {
         backgroundColor: background,
         width,
@@ -990,7 +990,7 @@ function Workspace({ data, organizationId, canEdit, focusId }: Props) {
           />
           <DropdownMenu>
             <div className="flex shrink-0 flex-col items-center gap-[3px] px-0.5">
-              <DropdownMenuTrigger className="flex h-9 min-w-[150px] items-center gap-2 rounded-md surface-button px-2.5 text-ui outline-none hover:bg-[var(--btn-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]">
+              <DropdownMenuTrigger className="flex h-[30px] min-w-[150px] items-center gap-[7px] rounded-md surface-button px-2.5 text-ui outline-none hover:bg-[var(--btn-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus)]">
                 <TintIcon className="text-[var(--btn-icon)]" />
                 <span className="flex-1 text-start">{colorLabel}</span>
                 <CaretDownIcon className="text-[var(--btn-icon)]" />
@@ -1023,7 +1023,7 @@ function Workspace({ data, organizationId, canEdit, focusId }: Props) {
               <button
                 type="button"
                 aria-label={t("tree.close")}
-                className="absolute inset-0 z-20 bg-[rgb(16_24_40/0.4)] lg:hidden"
+                className="absolute inset-0 z-20 bg-[rgb(16_22_26/0.4)] lg:hidden"
                 onClick={() => setTreeOpen(false)}
               />
               <GraphTree
@@ -1209,7 +1209,7 @@ function ZoomControls({
             onClick={item.onClick}
             disabled={item.disabled}
             className={cn(
-              "relative flex size-9 items-center justify-center surface-button hover:bg-[var(--btn-bg-hover)] focus-visible:z-10 active:bg-[var(--btn-bg-active)] active:[background-image:none] active:shadow-[var(--btn-shadow-active)] disabled:cursor-not-allowed disabled:bg-[var(--btn-disabled-bg)] disabled:[background-image:none] disabled:shadow-none pointer-coarse:size-11 [&_svg]:text-[var(--btn-icon)] disabled:[&_svg]:text-[var(--btn-disabled-fg)]",
+              "relative flex size-[30px] items-center justify-center surface-button hover:bg-[var(--btn-bg-hover)] focus-visible:z-10 active:bg-[var(--btn-bg-active)] active:[background-image:none] active:shadow-[var(--btn-shadow-active)] disabled:cursor-not-allowed disabled:bg-[var(--btn-disabled-bg)] disabled:[background-image:none] disabled:shadow-none pointer-coarse:size-11 [&_svg]:text-[var(--btn-icon)] disabled:[&_svg]:text-[var(--btn-disabled-fg)]",
               index === 0 && "rounded-t-md",
               index === items.length - 1 && "rounded-b-md",
               index > 0 && "-mt-px",

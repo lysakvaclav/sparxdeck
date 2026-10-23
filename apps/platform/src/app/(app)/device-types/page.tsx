@@ -62,7 +62,7 @@ export default async function DeviceTypesPage() {
         }
       />
       <PageBody>
-        {!manager && <Alert className="mb-5">{t("readOnly")}</Alert>}
+        {!manager && <Alert className="mb-[15px]">{t("readOnly")}</Alert>}
         <Card>
           {types && types.length > 0 ? (
             <Table>
