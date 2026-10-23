@@ -199,8 +199,8 @@ export default async function DefectPage({ params }: Props) {
         actions={<ShareButton />}
       />
       <PageBody>
-        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="contents lg:block lg:space-y-[15px]">
+        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="contents lg:block lg:space-y-5">
             {defect.status === "resolved" && defect.resolution_note && (
               <Alert
                 variant="success"
@@ -254,13 +254,13 @@ export default async function DefectPage({ params }: Props) {
               <CardHeader>
                 <CardTitle>{t("detail.history")}</CardTitle>
               </CardHeader>
-              <ol className="px-[15px] pt-[15px]">
+              <ol className="px-5 pt-5">
                 {(events ?? []).map((event, index, list) => {
                   const Icon =
                     (event.kind === "status" && STATUS_ICON[event.to_value ?? ""]) ||
                     EVENT_ICON[event.kind];
                   return (
-                    <li key={event.id} className="relative flex gap-3 pb-[15px]">
+                    <li key={event.id} className="relative flex gap-3 pb-5">
                       {index < list.length - 1 && (
                         <span
                           aria-hidden
@@ -295,13 +295,13 @@ export default async function DefectPage({ params }: Props) {
                   );
                 })}
               </ol>
-              <div className="px-[15px] pb-[15px]">
+              <div className="px-5 pb-5">
                 <CommentForm id={defect.id} />
               </div>
             </Card>
           </div>
 
-          <div className="contents lg:block lg:space-y-[15px]">
+          <div className="contents lg:block lg:space-y-5">
             <Card className="max-lg:order-3">
               <CardContent>
                 <DefectStatusControls

@@ -111,20 +111,20 @@ export async function GettingStarted({ organization }: { organization: Organizat
   if (!showGuide) {
     // Only a reminder that the sample data is still there.
     return sample ? (
-      <Card className="mb-2.5 px-[15px] py-2.5 sm:mb-[15px]" data-testid="sample-reminder">
+      <Card className="mb-3 px-5 py-3 sm:mb-5" data-testid="sample-reminder">
         {sampleControls}
       </Card>
     ) : null;
   }
 
   return (
-    <Card className="mb-2.5 sm:mb-[15px]" data-testid="getting-started">
-      <div className="flex min-h-10 flex-wrap items-center gap-x-2.5 gap-y-1 px-[15px] py-1.5 shadow-[0_1px_0_var(--border)]">
-        <h2 className="text-ui font-semibold">{t("title")}</h2>
+    <Card className="mb-3 sm:mb-5" data-testid="getting-started">
+      <div className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2.5 shadow-[0_1px_0_var(--border)]">
+        <h2 className="text-[0.9375rem] font-semibold">{t("title")}</h2>
         <span className="text-ui-sm text-muted-foreground">
           {t("progress", { done: finished, total: STEPS.length })}
         </span>
-        <div aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
+        <div aria-hidden className="h-1.5 w-28 overflow-hidden rounded-full bg-accent-strong">
           <div
             className="h-full rounded-full bg-success"
             style={{ width: `${(finished / STEPS.length) * 100}%` }}
@@ -139,18 +139,18 @@ export async function GettingStarted({ organization }: { organization: Organizat
           <li
             key={step}
             className={cn(
-              "flex flex-col gap-2 px-[15px] py-2.5 sm:flex-row sm:items-center",
+              "flex flex-col gap-2.5 px-5 py-3.5 sm:flex-row sm:items-center",
               step === next && "bg-accent/40",
             )}
           >
-            <div className="flex min-w-0 flex-1 items-start gap-2.5">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
               {done[step] ? (
-                <TickCircleIcon size={20} className="shrink-0 text-success-text" />
+                <TickCircleIcon size={24} className="shrink-0 text-success-text" />
               ) : (
                 <span
                   className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full text-ui-xs font-semibold tabular-nums",
-                    step === next ? "bg-primary text-white" : "bg-muted text-muted-foreground",
+                    "flex size-6 shrink-0 items-center justify-center rounded-full text-ui-xs font-semibold tabular-nums",
+                    step === next ? "bg-primary text-white" : "bg-tint-neutral text-tint-neutral-foreground",
                   )}
                 >
                   {index + 1}
@@ -166,9 +166,9 @@ export async function GettingStarted({ organization }: { organization: Organizat
               </div>
             </div>
             {done[step] ? (
-              <span className="ps-[30px] text-ui-sm text-success-text sm:ps-0">{t("done")}</span>
+              <span className="ps-9 text-ui-sm text-success-text sm:ps-0">{t("done")}</span>
             ) : (
-              <div className="ms-[30px] flex flex-wrap gap-1.5 self-start sm:ms-0 sm:self-auto">
+              <div className="ms-9 flex flex-wrap gap-2 self-start sm:ms-0 sm:self-auto">
                 {step === "customer" && (
                   <Button asChild size="sm" variant="outline">
                     <Link href="/import">{t("steps.customer.import")}</Link>
@@ -182,7 +182,7 @@ export async function GettingStarted({ organization }: { organization: Organizat
           </li>
         ))}
       </ol>
-      <div className="px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">{sampleControls}</div>
+      <div className="px-5 py-3 shadow-[inset_0_1px_0_var(--border)]">{sampleControls}</div>
     </Card>
   );
 }

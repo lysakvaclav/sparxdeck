@@ -31,7 +31,7 @@ export async function DevicePhotosCard({
         <CardTitle>{t("photos")}</CardTitle>
       </CardHeader>
       {photos && photos.length > 0 ? (
-        <ul className="flex flex-wrap gap-2 p-[15px]">
+        <ul className="flex flex-wrap gap-2 p-5">
           {photos.map((photo, index) => (
             <li key={photo.id} className="relative">
               <a href={urlOf(photo.storage_path)} target="_blank" rel="noreferrer">
@@ -47,7 +47,7 @@ export async function DevicePhotosCard({
           ))}
         </ul>
       ) : (
-        <p className="px-[15px] py-4 text-ui text-muted-foreground">{t("noPhotos")}</p>
+        <p className="px-5 py-4 text-ui text-muted-foreground">{t("noPhotos")}</p>
       )}
     </Card>
   );

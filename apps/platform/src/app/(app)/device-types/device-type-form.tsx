@@ -147,10 +147,10 @@ export function DeviceTypeForm(
         event.preventDefault();
         submit();
       }}
-      className="space-y-2.5 sm:space-y-[15px]"
+      className="space-y-3 sm:space-y-5"
     >
       <Card>
-        <div className="space-y-[15px] p-[15px]">
+        <div className="space-y-4 p-5">
           <Field id="name" label={t("name")} error={errors.name && tErr(errors.name)}>
             <Input value={name} maxLength={120} onChange={(event) => setName(event.target.value)} />
           </Field>
@@ -193,9 +193,9 @@ export function DeviceTypeForm(
             {fields.map((field) => (
               <li
                 key={field.rowKey}
-                className="flex items-start gap-2 px-[15px] py-2.5 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none"
+                className="flex items-start gap-2 px-5 py-2.5 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none"
               >
-                <div className="min-w-0 flex-1 space-y-[5px]">
+                <div className="min-w-0 flex-1 space-y-1.5">
                   <label htmlFor={`field-${field.rowKey}`} className="sr-only">
                     {t("fieldLabel")}
                   </label>
@@ -235,7 +235,7 @@ export function DeviceTypeForm(
           </ul>
         )}
         {formError && (
-          <Alert variant="error" className="m-[15px] mt-0">
+          <Alert variant="error" className="m-5 mt-0">
             {tErr(formError)}
           </Alert>
         )}

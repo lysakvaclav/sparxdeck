@@ -85,7 +85,7 @@ export function BottomPanel({
     <section
       ref={panelRef}
       aria-label={t("label")}
-      className="relative flex shrink-0 flex-col bg-background shadow-[0_-1px_0_var(--border),0_-2px_6px_rgb(16_22_26/0.08)]"
+      className="relative flex shrink-0 flex-col bg-background shadow-[0_-1px_0_var(--border),0_-2px_6px_rgb(16_24_40/0.08)]"
       style={{ height: maximized ? "72%" : height }}
     >
       {!maximized && (
@@ -116,7 +116,7 @@ export function BottomPanel({
       )}
       <div
         role="tablist"
-        className="flex h-[34px] shrink-0 items-stretch bg-muted shadow-[inset_0_-1px_0_var(--border)]"
+        className="flex h-10 shrink-0 items-stretch bg-muted shadow-[inset_0_-1px_0_var(--border)]"
       >
         {tabs.map((item) => (
           <button
@@ -126,7 +126,7 @@ export function BottomPanel({
             aria-selected={tab === item.id}
             onClick={() => onTab(item.id)}
             className={cn(
-              "flex items-center gap-[7px] px-3.5 text-ui shadow-[inset_-1px_0_0_var(--border)] transition-colors",
+              "flex items-center gap-2 px-3.5 text-ui shadow-[inset_-1px_0_0_var(--border)] transition-colors",
               tab === item.id
                 ? "bg-background text-foreground shadow-[inset_-1px_0_0_var(--border),inset_0_2px_0_var(--primary)]"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -178,12 +178,12 @@ function Preview({
 }) {
   const t = useTranslations("graph.bottom");
   if (!node) {
-    return <p className="px-[15px] py-8 text-center text-muted-foreground">{t("noSelection")}</p>;
+    return <p className="px-5 py-8 text-center text-muted-foreground">{t("noSelection")}</p>;
   }
   const children = node.childIds.map((id) => graph.nodes.get(id)!).filter(Boolean);
   if (children.length === 0) {
     return (
-      <p className="px-[15px] py-8 text-center text-muted-foreground">
+      <p className="px-5 py-8 text-center text-muted-foreground">
         {t("noChildren", { name: node.label })}
       </p>
     );
@@ -257,7 +257,7 @@ function KindTable({
         {rows.map((child, index) => (
           <TableRow
             key={child.id}
-            className="cursor-pointer hover:bg-[rgb(191_204_214/0.3)]"
+            className="cursor-pointer hover:bg-accent"
             onClick={() => onFocus(child.id)}
           >
             {kind === "location" && (
@@ -308,7 +308,7 @@ function KindTable({
           </TableRow>
         ))}
       </TableBody>
-      <caption className="caption-bottom px-[15px] py-2 text-start text-ui-sm text-muted-foreground">
+      <caption className="caption-bottom px-5 py-2 text-start text-ui-sm text-muted-foreground">
         {tGraph(`kindsPlural.${kind}`)}: {tCommon("results", { count: rows.length })}
       </caption>
     </Table>
@@ -352,14 +352,14 @@ function ObjectList({
     <>
       <div className="sticky start-0 top-0 z-[2] flex items-center gap-3 bg-background px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
         <div className="relative w-full max-w-xs">
-          <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             aria-label={t("filter")}
             placeholder={t("filter")}
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            className="ps-[30px] [&::-webkit-search-cancel-button]:hidden"
+            className="ps-9 [&::-webkit-search-cancel-button]:hidden"
           />
         </div>
         {rows.length > LIST_LIMIT && (
@@ -386,7 +386,7 @@ function ObjectList({
             return (
               <TableRow
                 key={node.id}
-                className="cursor-pointer hover:bg-[rgb(191_204_214/0.3)]"
+                className="cursor-pointer hover:bg-accent"
                 onClick={() => onFocus(node.id)}
               >
                 <TableCell>

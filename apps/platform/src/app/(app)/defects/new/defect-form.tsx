@@ -130,7 +130,7 @@ export function DefectForm({
 
   return (
     <form noValidate onSubmit={submit}>
-      <div className="space-y-[15px] p-[15px]">
+      <div className="space-y-4 p-5">
         {fixed ? (
           <div>
             <p className="text-ui-sm text-muted-foreground">{t("form.device")}</p>
@@ -161,7 +161,7 @@ export function DefectForm({
             onChange={(event) => setDescription(event.target.value)}
           />
         </Field>
-        <div className="space-y-[5px]">
+        <div className="space-y-1.5">
           <p className="text-ui font-medium">{t("form.severity")}</p>
           <SeverityPicker
             value={severity}
@@ -169,7 +169,7 @@ export function DefectForm({
             label={t("form.severity")}
           />
         </div>
-        <div className="space-y-[5px]">
+        <div className="space-y-1.5">
           <p className="text-ui font-medium">{t("form.photos")}</p>
           {photos.length > 0 && (
             <ul className="flex flex-wrap gap-2">
@@ -193,7 +193,7 @@ export function DefectForm({
               ))}
             </ul>
           )}
-          <label className="inline-flex min-h-[30px] cursor-pointer items-center gap-[7px] rounded-md surface-button px-2.5 text-ui hover:bg-[var(--btn-bg-hover)] pointer-coarse:min-h-11">
+          <label className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md surface-button px-3.5 text-ui font-medium whitespace-nowrap transition-colors hover:bg-[var(--btn-bg-hover)] active:bg-[var(--btn-bg-active)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)] pointer-coarse:min-h-11 pointer-coarse:px-4">
             <CameraIcon className="text-[var(--btn-icon)]" />
             {t("form.addPhoto")}
             <input

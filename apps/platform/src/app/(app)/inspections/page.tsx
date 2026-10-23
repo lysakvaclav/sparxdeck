@@ -138,7 +138,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
             />
           </Card>
         ) : (
-          <div className="space-y-2.5 sm:space-y-[15px]">
+          <div className="space-y-3 sm:space-y-5">
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -204,7 +204,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                             <span className="inline-flex items-center gap-2">
                               <span
                                 aria-hidden
-                                className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-[rgb(138_155_168/0.3)] sm:block"
+                                className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-accent-strong sm:block"
                               >
                                 <span
                                   className="block h-full bg-primary"
@@ -222,7 +222,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                   </TableBody>
                 </Table>
               ) : (
-                <p className="px-[15px] py-3 text-ui text-muted-foreground">
+                <p className="px-5 py-3 text-ui text-muted-foreground">
                   {t("noneInProgress")}
                 </p>
               )}
@@ -319,7 +319,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                   <Pagination pathname="/inspections" params={{}} page={page} pages={pages} />
                 </>
               ) : (
-                <p className="px-[15px] py-3 text-ui text-muted-foreground">{t("noneCompleted")}</p>
+                <p className="px-5 py-3 text-ui text-muted-foreground">{t("noneCompleted")}</p>
               )}
             </Card>
           </div>

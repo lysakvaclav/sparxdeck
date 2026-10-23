@@ -3,6 +3,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { appIcon } from "@/components/app/nav-items";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -25,13 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const ROLE_ORDER = { owner: 0, admin: 1, technician: 2 } as const;
-
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return (
-    (parts[0]?.[0] ?? "") + (parts.length > 1 ? (parts.at(-1)?.[0] ?? "") : "")
-  ).toUpperCase();
-}
 
 export default async function TeamPage() {
   const { membership, organization } = await requireMembership();
@@ -98,12 +92,7 @@ export default async function TeamPage() {
                   <TableRow key={member.id}>
                     <TableCell className="max-w-0">
                       <span className="flex min-w-0 items-center gap-2.5">
-                        <span
-                          aria-hidden
-                          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#5c7080] text-[10px] font-semibold text-white"
-                        >
-                          {initials(member.display_name)}
-                        </span>
+                        <Avatar name={member.display_name} size={30} />
                         <span className="min-w-0">
                           <span className="block truncate font-medium">
                             {member.display_name}

@@ -20,9 +20,11 @@ import { TextLogo } from "./text-logo";
 import { UserMenu } from "./user-menu";
 
 const tabClass =
-  "relative flex min-h-14 flex-col items-center justify-center gap-1 text-[10.5px] transition-colors";
-const tabActive =
-  "text-link before:absolute before:inset-x-3 before:top-0 before:h-[3px] before:bg-primary";
+  "group relative flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors";
+const tabActive = "text-link";
+/** The icon's pill in the bottom bar: tinted for the current section. */
+const tabPill =
+  "flex h-7 w-14 items-center justify-center rounded-full transition-colors group-aria-[current=page]:bg-tint-primary group-data-[active]:bg-tint-primary";
 const moreItems = NAV_ITEMS.filter((item) => item.phone === "more");
 
 type AppShellProps = {
@@ -35,10 +37,10 @@ type AppShellProps = {
 };
 
 /**
- * Workspace frame, as in Foundry: a dark navigation rail with coloured app icons
- * (expandable to show labels) and the page on the right, which brings its own
- * header (PageHeader) and scrolling body (PageBody). Phones get a dark top bar and
- * a bottom tab bar. Logical properties keep right-to-left locales mirrored.
+ * Workspace frame: a dark navy navigation rail with plain icons (expandable to
+ * show labels) and the page on the right, which brings its own header
+ * (PageHeader) and scrolling body (PageBody). Phones get a dark top bar and a
+ * white bottom tab bar. Logical properties keep right-to-left locales mirrored.
  */
 export function AppShell({
   organizationName,
@@ -69,13 +71,14 @@ export function AppShell({
         aria-current={active ? "page" : undefined}
         aria-label={expanded ? undefined : t(item.label)}
         className={cn(
-          "mx-1.5 flex h-[30px] items-center gap-2.5 rounded-md px-[7px] text-ui transition-colors",
+          "flex items-center rounded-lg transition-colors",
+          expanded ? "mx-3 h-10 gap-3 px-3 text-ui font-medium" : "mx-auto size-11 justify-center",
           active
             ? "bg-rail-active text-white"
             : "text-rail-foreground hover:bg-rail-hover hover:text-white",
         )}
       >
-        <Icon className={item.railTone} />
+        <Icon size={20} />
         {expanded && <span className="truncate">{t(item.label)}</span>}
       </Link>
     );
@@ -101,19 +104,19 @@ export function AppShell({
             <aside
               className={cn(
                 "hidden shrink-0 flex-col bg-rail transition-[width] duration-150 lg:flex",
-                expanded ? "w-[220px]" : "w-11",
+                expanded ? "w-60" : "w-16",
               )}
             >
               {/* The brand on top in both widths (the mark alone when collapsed). */}
               <div
                 className={cn(
-                  "flex h-[50px] shrink-0 items-center",
-                  expanded ? "ps-[13px] pe-2.5" : "justify-center",
+                  "flex h-16 shrink-0 items-center",
+                  expanded ? "ps-6 pe-3" : "justify-center",
                 )}
               >
                 {expanded ? (
                   <div className="min-w-0">
-                    <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
+                    <TextLogo label="SparxDeck" className="mb-1 h-[18px] text-white" />
                     <p
                       className="truncate text-ui-xs text-rail-foreground"
                       title={organizationName}
@@ -122,27 +125,32 @@ export function AppShell({
                     </p>
                   </div>
                 ) : (
-                  <TextLogo label="SparxDeck" className="aspect-square h-[18px] text-white" />
+                  <TextLogo label="SparxDeck" className="aspect-square h-6 text-white" />
                 )}
               </div>
 
-              <div className="pb-1.5">
+              <div className="pt-1 pb-2">
                 <RailSearchButton expanded={expanded} />
               </div>
-              <nav aria-label={t("mainNavigation")} className="flex-1 overflow-y-auto pb-2">
-                <ul className="space-y-0.5">{home && railItem(home)}</ul>
-                <div aria-hidden className="mx-2.5 my-2 h-px bg-white/10" />
-                <ul className="space-y-0.5">{apps.map(railItem)}</ul>
+              <nav aria-label={t("mainNavigation")} className="flex-1 overflow-y-auto pb-3">
+                <ul className="space-y-1">{home && railItem(home)}</ul>
+                <div aria-hidden className="mx-4 my-3 h-px bg-white/10" />
+                <ul className="space-y-1">{apps.map(railItem)}</ul>
               </nav>
 
-              <div className="shrink-0 px-1.5 pb-1.5">
+              <div className={cn("shrink-0 pb-2", expanded ? "px-3" : "flex justify-center")}>
                 <RailToggle
                   expanded={expanded}
                   label={expanded ? t("collapseRail") : t("expandRail")}
                   onClick={toggleRail}
                 />
               </div>
-              <div className="shrink-0 p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]">
+              <div
+                className={cn(
+                  "shrink-0 py-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]",
+                  expanded ? "px-3" : "flex justify-center",
+                )}
+              >
                 <UserMenu
                   name={userName}
                   email={userEmail}
@@ -153,14 +161,14 @@ export function AppShell({
 
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Mobile top bar */}
-              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
-                <Link href="/" className="flex min-h-12 min-w-0 flex-col justify-center">
+              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-4 pe-2 pt-[env(safe-area-inset-top)] lg:hidden">
+                <Link href="/" className="flex min-h-14 min-w-0 flex-col justify-center">
                   <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
                   <span className="truncate text-ui-xs text-rail-foreground">
                     {organizationName}
                   </span>
                 </Link>
-                <div className="flex shrink-0 items-center">
+                <div className="flex shrink-0 items-center gap-1">
                   <MobileSearchButton />
                   <UserMenu name={userName} email={userEmail} variant="compact" />
                 </div>
@@ -184,7 +192,9 @@ export function AppShell({
                             aria-current={active ? "page" : undefined}
                             className={cn(tabClass, active ? tabActive : "text-muted-foreground")}
                           >
-                            <Icon size={20} />
+                            <span className={tabPill}>
+                              <Icon size={20} />
+                            </span>
                             <span className="max-w-full truncate px-0.5">{t(label)}</span>
                           </Link>
                         </li>
@@ -194,6 +204,9 @@ export function AppShell({
                   <li className="flex-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger
+                        data-active={
+                          moreItems.some((item) => isActive(pathname, item)) ? "" : undefined
+                        }
                         className={cn(
                           tabClass,
                           "w-full outline-none focus-visible:bg-accent",
@@ -202,7 +215,9 @@ export function AppShell({
                             : "text-muted-foreground",
                         )}
                       >
-                        <MoreIcon size={20} />
+                        <span className={tabPill}>
+                          <MoreIcon size={20} />
+                        </span>
                         <span className="max-w-full truncate px-0.5">{t("more")}</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="top" align="end" className="min-w-52">
@@ -247,7 +262,7 @@ function RailToggle({
       onClick={onClick}
       aria-label={label}
       aria-expanded={expanded}
-      className="flex size-[30px] shrink-0 items-center justify-center rounded-md text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
+      className="flex size-11 shrink-0 items-center justify-center rounded-lg text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
     >
       <Icon />
     </button>

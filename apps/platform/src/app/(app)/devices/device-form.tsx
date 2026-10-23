@@ -77,7 +77,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-[15px] p-[15px] shadow-[inset_0_-1px_0_var(--border)]">
+    <div className="space-y-4 p-5 shadow-[inset_0_-1px_0_var(--border)]">
       <div>
         <h2 className="text-ui font-semibold">{title}</h2>
         {description && <p className="mt-0.5 text-ui-sm text-muted-foreground">{description}</p>}
@@ -171,7 +171,7 @@ export function DeviceForm(props: DeviceFormProps) {
     );
   }
 
-  const twoColumns = "grid grid-cols-1 gap-[15px] sm:grid-cols-2";
+  const twoColumns = "grid grid-cols-1 gap-4 sm:grid-cols-2";
 
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)}>

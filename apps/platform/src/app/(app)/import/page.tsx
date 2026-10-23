@@ -43,7 +43,7 @@ export default async function ImportPage() {
         breadcrumbs={[{ label: tCustomers("title"), href: "/customers" }]}
       />
       <PageBody width="wide">
-        <div className="space-y-2.5 sm:space-y-[15px]">
+        <div className="space-y-3 sm:space-y-5">
           <p className="max-w-3xl text-ui text-muted-foreground">{t("description")}</p>
           <ImportWizard />
           <ImportHistory

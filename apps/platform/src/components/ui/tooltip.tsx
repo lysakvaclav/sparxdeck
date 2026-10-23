@@ -12,7 +12,7 @@ function TooltipProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Blueprint tooltip next to an icon-only control. The trigger keeps its own accessible name. */
+/** Tooltip next to an icon-only control. The trigger keeps its own accessible name. */
 function Tooltip({
   label,
   side = "top",
@@ -29,7 +29,7 @@ function Tooltip({
         <TooltipPrimitive.Content
           side={side}
           sideOffset={6}
-          className="z-50 max-w-72 rounded-md bg-tooltip px-2 py-[5px] text-ui-sm text-tooltip-foreground shadow-elevation-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0"
+          className="z-50 max-w-72 rounded-md bg-tooltip px-2.5 py-1.5 text-ui-sm font-medium text-tooltip-foreground shadow-elevation-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0"
         >
           {label}
           <TooltipPrimitive.Arrow className="fill-tooltip" width={10} height={5} />

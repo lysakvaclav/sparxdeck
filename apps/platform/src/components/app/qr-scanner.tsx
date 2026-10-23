@@ -182,9 +182,9 @@ export function QrScanner({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed inset-0 z-50 flex flex-col bg-[#10161a] text-white outline-none"
+          className="fixed inset-0 z-50 flex flex-col bg-[#0f1520] text-white outline-none"
         >
-          <div className="flex min-h-12 shrink-0 items-center gap-2.5 px-[15px] pt-[env(safe-area-inset-top)]">
+          <div className="flex min-h-12 shrink-0 items-center gap-2.5 px-5 pt-[env(safe-area-inset-top)]">
             <DialogPrimitive.Title className="min-w-0 flex-1 truncate text-ui-lg font-semibold">
               {t("title")}
             </DialogPrimitive.Title>
@@ -209,7 +209,7 @@ export function QrScanner({
             />
             {camera === "live" ? (
               <div aria-hidden className="absolute inset-0 flex items-center justify-center">
-                <div className="aspect-square w-[min(70vw,320px)] rounded-xl shadow-[0_0_0_9999px_rgb(16_22_26/0.55)] ring-2 ring-white/90" />
+                <div className="aspect-square w-[min(70vw,320px)] rounded-xl shadow-[0_0_0_9999px_rgb(16_24_40/0.55)] ring-2 ring-white/90" />
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
@@ -225,13 +225,13 @@ export function QrScanner({
             )}
             <p
               aria-live="polite"
-              className="absolute inset-x-4 bottom-4 rounded-md bg-[rgb(16_22_26/0.75)] px-3 py-2 text-center text-ui"
+              className="absolute inset-x-4 bottom-4 rounded-md bg-[rgb(16_24_40/0.75)] px-3 py-2 text-center text-ui"
             >
               {message ?? (camera === "live" ? t("aim") : t("useAlternatives"))}
             </p>
           </div>
 
-          <div className="shrink-0 space-y-2.5 px-[15px] pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
+          <div className="shrink-0 space-y-2.5 px-5 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
             <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-white/10 px-3 text-ui font-medium hover:bg-white/15">
               <CameraIcon className="text-white" />
               {t("photo")}
@@ -248,7 +248,7 @@ export function QrScanner({
               />
             </label>
             {photoError && (
-              <p className="text-center text-ui-sm text-[#ff7373]">{t("photoFailed")}</p>
+              <p className="text-center text-ui-sm text-[#f08a8a]">{t("photoFailed")}</p>
             )}
             <form
               className="flex gap-2"

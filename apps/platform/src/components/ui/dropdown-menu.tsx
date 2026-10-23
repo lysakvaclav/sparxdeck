@@ -5,7 +5,7 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { CaretRightIcon, SmallTickIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-// Blueprint menu: 5px padding, 30px items with a grey icon, hover tint.
+// Menu: a rounded panel with 36px items, a grey icon and a soft hover tint.
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
@@ -13,7 +13,7 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
 const contentClass =
-  "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[180px] overflow-y-auto rounded-md bg-popover p-[5px] text-popover-foreground shadow-elevation-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1";
+  "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[200px] overflow-y-auto rounded-lg bg-popover p-1.5 text-popover-foreground shadow-elevation-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1";
 
 function DropdownMenuContent({
   className,
@@ -32,7 +32,7 @@ function DropdownMenuContent({
 }
 
 const itemClass =
-  "relative flex min-h-[30px] cursor-pointer items-center gap-[7px] rounded-sm px-[7px] text-ui outline-none select-none pointer-coarse:min-h-11 data-[disabled]:cursor-not-allowed data-[disabled]:text-[var(--btn-disabled-fg)] data-[highlighted]:bg-accent [&_svg]:shrink-0 [&_svg]:text-[var(--btn-icon)] data-[disabled]:[&_svg]:opacity-60";
+  "relative flex min-h-9 cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-ui outline-none select-none pointer-coarse:min-h-11 data-[disabled]:cursor-not-allowed data-[disabled]:text-[var(--btn-disabled-fg)] data-[highlighted]:bg-accent [&_svg]:shrink-0 [&_svg]:text-[var(--btn-icon)] data-[disabled]:[&_svg]:opacity-60";
 
 function DropdownMenuItem({
   className,
@@ -62,10 +62,10 @@ function DropdownMenuCheckboxItem({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
   return (
     <DropdownMenuPrimitive.CheckboxItem
-      className={cn(itemClass, "ps-[30px]", className)}
+      className={cn(itemClass, "ps-9", className)}
       {...props}
     >
-      <DropdownMenuPrimitive.ItemIndicator className="absolute start-[7px] flex items-center">
+      <DropdownMenuPrimitive.ItemIndicator className="absolute start-2.5 flex items-center">
         <SmallTickIcon />
       </DropdownMenuPrimitive.ItemIndicator>
       {children}
@@ -79,8 +79,8 @@ function DropdownMenuRadioItem({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
   return (
-    <DropdownMenuPrimitive.RadioItem className={cn(itemClass, "ps-[30px]", className)} {...props}>
-      <DropdownMenuPrimitive.ItemIndicator className="absolute start-[7px] flex items-center">
+    <DropdownMenuPrimitive.RadioItem className={cn(itemClass, "ps-9", className)} {...props}>
+      <DropdownMenuPrimitive.ItemIndicator className="absolute start-2.5 flex items-center">
         <SmallTickIcon />
       </DropdownMenuPrimitive.ItemIndicator>
       {children}
@@ -121,7 +121,7 @@ function DropdownMenuLabel({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label>) {
   return (
     <DropdownMenuPrimitive.Label
-      className={cn("px-[7px] pt-2 pb-1 text-ui font-semibold", className)}
+      className={cn("px-2.5 pt-2.5 pb-1 text-ui-xs font-semibold tracking-wide text-muted-foreground uppercase", className)}
       {...props}
     />
   );
@@ -133,7 +133,7 @@ function DropdownMenuSeparator({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
   return (
     <DropdownMenuPrimitive.Separator
-      className={cn("mx-[5px] my-[5px] h-px bg-border", className)}
+      className={cn("-mx-1.5 my-1.5 h-px bg-border", className)}
       {...props}
     />
   );

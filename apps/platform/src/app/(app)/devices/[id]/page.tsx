@@ -164,8 +164,8 @@ export default async function DevicePage({ params }: Props) {
       />
 
       <PageBody>
-        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="space-y-2.5 sm:space-y-[15px]">
+        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="space-y-3 sm:space-y-5">
             {!inactive ? (
               <Alert
                 variant={callout.variant}
@@ -289,16 +289,16 @@ export default async function DevicePage({ params }: Props) {
             <DevicePhotosCard deviceId={device.id} organizationId={organization.id} />
           </div>
 
-          <div className="space-y-2.5 sm:space-y-[15px]">
+          <div className="space-y-3 sm:space-y-5">
             <Card>
               <CardHeader>
                 <CardTitle>{tLabels("card.title")}</CardTitle>
               </CardHeader>
-              <div className="flex gap-[15px] p-[15px]">
+              <div className="flex gap-4 p-5">
                 <QrCode
                   value={qrUrl}
                   label={tLabels("card.qr", { label })}
-                  className="size-[120px] shrink-0 rounded-sm shadow-[0_0_0_1px_var(--border)]"
+                  className="size-[120px] shrink-0 rounded-lg shadow-[0_0_0_1px_var(--border)]"
                 />
                 <div className="flex min-w-0 flex-col items-start gap-2.5">
                   <div>
@@ -317,7 +317,7 @@ export default async function DevicePage({ params }: Props) {
                   )}
                 </div>
               </div>
-              <div className="space-y-1 px-[15px] pb-[15px]">
+              <div className="space-y-1 px-5 pb-5">
                 <p className="text-ui-sm text-muted-foreground">{tLabels("card.url")}</p>
                 <p className="font-mono text-ui-sm break-all">{qrUrl}</p>
                 <p className="text-ui-sm text-muted-foreground">{tLabels("card.hint")}</p>

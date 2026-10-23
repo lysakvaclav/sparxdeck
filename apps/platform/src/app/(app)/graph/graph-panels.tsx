@@ -112,10 +112,10 @@ export function FindBar({
   return (
     <div
       role="search"
-      className="absolute start-2.5 top-2.5 z-10 flex w-[min(25rem,calc(100%-1.25rem))] items-center gap-0.5 rounded-md bg-popover p-[5px] shadow-elevation-3"
+      className="absolute start-2.5 top-2.5 z-10 flex w-[min(25rem,calc(100%-1.25rem))] items-center gap-0.5 rounded-md bg-popover p-1.5 shadow-elevation-3"
     >
       <div className="relative min-w-0 flex-1">
-        <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <label htmlFor="graph-find" className="sr-only">
           {t("placeholder")}
         </label>
@@ -136,7 +136,7 @@ export function FindBar({
               onClose();
             }
           }}
-          className="ps-[30px] pe-16"
+          className="ps-9 pe-16"
         />
         <span
           className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-ui-sm text-muted-foreground tabular-nums"
@@ -259,7 +259,7 @@ export function GraphLegend({
               <Popover.Root>
                 <Popover.Trigger
                   aria-label={t("legend.pickColor", { name: group.label })}
-                  className="flex size-4 shrink-0 items-center justify-center rounded-[3px] shadow-[inset_0_0_0_1px_rgb(16_22_26/0.2)] outline-offset-2 hover:ring-2 hover:ring-primary/40"
+                  className="flex size-4 shrink-0 items-center justify-center rounded-[4px] shadow-[inset_0_0_0_1px_rgb(16_24_40/0.2)] outline-offset-2 hover:ring-2 hover:ring-primary/40"
                   style={{ background: group.color }}
                 />
                 <Popover.Portal>
@@ -275,7 +275,7 @@ export function GraphLegend({
                         aria-label={swatch}
                         onClick={() => onColor(group.key, swatch)}
                         className={cn(
-                          "size-5 rounded-[3px] shadow-[inset_0_0_0_1px_rgb(16_22_26/0.2)] hover:scale-110",
+                          "size-5 rounded-[4px] shadow-[inset_0_0_0_1px_rgb(16_24_40/0.2)] hover:scale-110",
                           swatch === group.color &&
                             "ring-2 ring-primary ring-offset-1 ring-offset-popover",
                         )}
@@ -288,7 +288,7 @@ export function GraphLegend({
             ) : (
               <span
                 aria-hidden
-                className="size-4 shrink-0 rounded-[3px] shadow-[inset_0_0_0_1px_rgb(16_22_26/0.2)]"
+                className="size-4 shrink-0 rounded-[4px] shadow-[inset_0_0_0_1px_rgb(16_24_40/0.2)]"
                 style={{ background: group.color }}
               />
             )}
@@ -419,7 +419,7 @@ export function GraphTree({
             twoLine ? "min-h-[38px] py-[3px]" : "min-h-[26px] pointer-coarse:min-h-11",
             isSelected
               ? "bg-primary text-primary-foreground"
-              : "hover:bg-[rgb(191_204_214/0.4)] dark:hover:bg-[rgb(92_112_128/0.3)]",
+              : "hover:bg-accent",
           )}
           style={{ paddingInlineStart: `${4 + level * 18}px` }}
         >
@@ -451,7 +451,7 @@ export function GraphTree({
             type="button"
             onClick={() => onFocus(node.id)}
             className={cn(
-              "flex min-w-0 flex-1 items-center gap-[7px] text-start outline-none",
+              "flex min-w-0 flex-1 items-center gap-2 text-start outline-none",
               isHidden && "opacity-55",
             )}
           >
@@ -492,7 +492,7 @@ export function GraphTree({
     >
       <div className="flex shrink-0 items-center gap-1.5 p-2.5 pb-2">
         <div className="relative min-w-0 flex-1">
-          <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             aria-label={t("tree.search")}
@@ -500,7 +500,7 @@ export function GraphTree({
             value={filter}
             maxLength={100}
             onChange={(event) => setFilter(event.target.value)}
-            className="ps-[30px] [&::-webkit-search-cancel-button]:hidden"
+            className="ps-9 [&::-webkit-search-cancel-button]:hidden"
           />
         </div>
         <DropdownMenu>
@@ -578,7 +578,7 @@ export function GraphTree({
                 {hiddenNodes.map((node) => (
                   <li
                     key={node.id}
-                    className="flex min-h-[34px] items-center gap-[7px] ps-2.5 pe-1.5 shadow-[inset_0_-1px_0_var(--border)]"
+                    className="flex min-h-10 items-center gap-2 ps-2.5 pe-1.5 shadow-[inset_0_-1px_0_var(--border)]"
                   >
                     <TypeIcon kind={node.kind} />
                     <span className="min-w-0 flex-1 truncate">{node.label}</span>
@@ -644,7 +644,7 @@ export function GraphInspector({
     })).filter((entry) => entry.count > 0);
     return (
       <aside aria-label={t("inspector.title")} className={frame}>
-        <div className="flex min-h-[50px] shrink-0 items-center gap-2 ps-[15px] pe-[5px] shadow-[inset_0_-1px_0_var(--border)]">
+        <div className="flex min-h-14 shrink-0 items-center gap-2 ps-5 pe-2 shadow-[inset_0_-1px_0_var(--border)]">
           <h2 className="min-w-0 flex-1 truncate">
             {t("inspector.multiple", { count: selected.size })}
           </h2>
@@ -652,7 +652,7 @@ export function GraphInspector({
             <CrossIcon />
           </Button>
         </div>
-        <div className="space-y-3 p-[15px]">
+        <div className="space-y-3 p-5">
           <ul className="space-y-1.5">
             {byKind.map(({ kind, count }) => (
               <li key={kind} className="flex items-center gap-2">
@@ -723,7 +723,7 @@ export function GraphInspector({
 
   return (
     <aside aria-label={t("inspector.title")} className={frame} data-testid="graph-inspector">
-      <div className="flex min-h-[50px] shrink-0 items-center gap-2.5 ps-[15px] pe-[5px]">
+      <div className="flex min-h-14 shrink-0 items-center gap-2.5 ps-5 pe-2">
         <TypeIcon kind={node.kind} color={color} />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-ui" title={node.label}>
@@ -739,7 +739,7 @@ export function GraphInspector({
         </Button>
       </div>
 
-      <div className="flex shrink-0 flex-wrap gap-2 px-[15px] pb-2.5">
+      <div className="flex shrink-0 flex-wrap gap-2 px-5 pb-2.5">
         <Button asChild size="sm">
           <Link href={node.href}>
             <ShareIcon />
@@ -776,14 +776,14 @@ export function GraphInspector({
         <TabsContent value="properties" className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
           <div className="p-2.5">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute start-[7px] top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 aria-label={t("inspector.filter")}
                 placeholder={t("inspector.filter")}
                 value={filter}
                 onChange={(event) => setFilter(event.target.value)}
-                className="ps-[30px] [&::-webkit-search-cancel-button]:hidden"
+                className="ps-9 [&::-webkit-search-cancel-button]:hidden"
               />
             </div>
           </div>
@@ -792,7 +792,7 @@ export function GraphInspector({
               {fields.map((field) => (
                 <div
                   key={field.key}
-                  className="group flex items-start gap-2 px-[15px] py-[7px] shadow-[inset_0_-1px_0_var(--border)]"
+                  className="group flex items-start gap-2 px-5 py-2 shadow-[inset_0_-1px_0_var(--border)]"
                 >
                   <div className="min-w-0 flex-1">
                     <dt className="font-semibold">{t(`fields.${field.key}`)}</dt>
@@ -819,7 +819,7 @@ export function GraphInspector({
               ))}
             </dl>
           ) : (
-            <p className="px-[15px] py-6 text-center text-muted-foreground">
+            <p className="px-5 py-6 text-center text-muted-foreground">
               {t("inspector.noMatch")}
             </p>
           )}
@@ -828,7 +828,7 @@ export function GraphInspector({
         <TabsContent value="relations" className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
           {parent && (
             <section className="py-1.5 shadow-[inset_0_-1px_0_var(--border)]">
-              <h3 className="px-[15px] py-1 text-ui-sm font-semibold text-muted-foreground">
+              <h3 className="px-5 py-1 text-ui-sm font-semibold text-muted-foreground">
                 {t("inspector.parent")}
               </h3>
               <RelationRow
@@ -840,7 +840,7 @@ export function GraphInspector({
             </section>
           )}
           <section className="py-1.5">
-            <h3 className="px-[15px] py-1 text-ui-sm font-semibold text-muted-foreground">
+            <h3 className="px-5 py-1 text-ui-sm font-semibold text-muted-foreground">
               {t("inspector.children")} ({children.length})
             </h3>
             {children.length > 0 ? (
@@ -857,13 +857,13 @@ export function GraphInspector({
                 ))}
               </ul>
             ) : (
-              <p className="px-[15px] py-2 text-muted-foreground">{t("inspector.noChildren")}</p>
+              <p className="px-5 py-2 text-muted-foreground">{t("inspector.noChildren")}</p>
             )}
           </section>
         </TabsContent>
 
         <TabsContent value="details" className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 p-[15px]">
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 p-5">
             <dt className="text-muted-foreground">{t("details.type")}</dt>
             <dd>
               <Badge>{t(`kinds.${node.kind}`)}</Badge>
@@ -924,7 +924,7 @@ function RelationRow({
     <button
       type="button"
       onClick={() => onFocus(node.id)}
-      className="flex min-h-[34px] w-full items-center gap-[7px] px-[15px] text-start transition-colors hover:bg-[rgb(191_204_214/0.3)] pointer-coarse:min-h-11"
+      className="flex min-h-10 w-full items-center gap-2 px-5 text-start transition-colors hover:bg-accent pointer-coarse:min-h-11"
     >
       <TypeIcon kind={node.kind} color={color} />
       <span className="min-w-0 flex-1 truncate">{node.label}</span>
@@ -948,7 +948,7 @@ function Keys({ keys }: { keys: string[] }) {
       {keys.map((key, index) => (
         <kbd
           key={index}
-          className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-background px-1.5 font-mono text-ui-sm shadow-[0_0_0_1px_rgb(16_22_26/0.1),0_1px_1px_rgb(16_22_26/0.2)]"
+          className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-background px-1.5 font-mono text-ui-sm shadow-[0_0_0_1px_rgb(16_24_40/0.1),0_1px_1px_rgb(16_24_40/0.2)]"
         >
           {key}
         </kbd>

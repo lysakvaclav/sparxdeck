@@ -4,154 +4,186 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Workspace design, modelled on Palantir's Blueprint (the toolkit behind Foundry):
- * system UI font at 14px, a cool gray palette, one blue for actions and
- * selection, 30px controls with a light gradient and inset borders, hairline
- * dividers and soft elevations. Object types carry their own colour.
+ * Workspace design: a modern field-service app. A dark navy rail with plain
+ * icons, a white top bar per page, white cards with soft borders on a light
+ * grey page, one muted royal blue for actions, Inter, 36px controls with 6px
+ * corners, pill badges in soft tints, coloured avatars. Object types carry
+ * their own colour.
+ *
+ * Text colours reach WCAG AA (4.5:1) on cards and on the page; the tints
+ * (--tint-*) pair a background with a text colour that does too.
  *
  * The sign-in screens keep the landing page look: see `.brand`, applied by the
  * (auth) layout.
  */
 :root {
   --ui-font:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
-  --page: #f5f8fa;
-  --canvas: #ebf1f5;
+    var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    sans-serif;
+  --page: #f3f5f8;
+  --canvas: #eef1f5;
   --background: #ffffff;
-  --foreground: #182026;
+  --foreground: #1b2533;
   --card: #ffffff;
-  --card-foreground: #182026;
+  --card-foreground: #1b2533;
   --popover: #ffffff;
-  --popover-foreground: #182026;
-  --primary: #137cbd;
-  --primary-hover: #106ba3;
-  --primary-active: #0e5a8a;
+  --popover-foreground: #1b2533;
+  --primary: #3a67b0;
+  --primary-hover: #30599c;
+  --primary-active: #284c86;
   --primary-foreground: #ffffff;
-  --link: #106ba3;
-  --secondary: #f5f8fa;
-  --secondary-foreground: #182026;
-  --muted: #f5f8fa;
-  --muted-foreground: #5c7080;
-  --subtle: #607485;
-  --accent: rgb(167 182 194 / 0.3);
-  --accent-strong: rgb(115 134 148 / 0.3);
-  --accent-foreground: #182026;
-  --selected: rgb(19 124 189 / 0.15);
-  --border: rgb(16 22 26 / 0.15);
-  --border-strong: rgb(16 22 26 / 0.2);
-  --input: rgb(16 22 26 / 0.15);
-  --ring: #137cbd;
-  --focus: rgb(19 124 189 / 0.6);
-  --destructive: #db3737;
-  --destructive-hover: #c23030;
-  --destructive-active: #a82a2a;
-  --destructive-text: #c23030;
+  --link: #2f5ea6;
+  --secondary: #f3f5f8;
+  --secondary-foreground: #1b2533;
+  --muted: #f6f8fa;
+  --muted-foreground: #5d6979;
+  --subtle: #647080;
+  --accent: #eef2f7;
+  --accent-strong: #e3e9f1;
+  --accent-foreground: #1b2533;
+  --selected: rgb(58 103 176 / 0.1);
+  --border: #e2e7ee;
+  --border-strong: #cdd5df;
+  --input: #cdd5df;
+  --control-border: #8a96a6;
+  --ring: #3a67b0;
+  --focus: rgb(58 103 176 / 0.45);
+  --focus-soft: rgb(58 103 176 / 0.18);
+  --destructive: #d14343;
+  --destructive-hover: #ba3737;
+  --destructive-active: #a32f2f;
+  --destructive-text: #b42f2f;
   --destructive-foreground: #ffffff;
-  --success: #0f9960;
-  --success-text: #0d8050;
-  --warning: #d9822b;
-  --warning-text: #87501a;
+  --success: #1a7f52;
+  --success-text: #157046;
+  --warning: #d98a1f;
+  --warning-text: #8a5310;
   --highlight: #ffc940;
-  --rail: #293742;
-  --rail-foreground: #a7b6c2;
-  --rail-hover: #30404d;
-  --rail-active: #394b59;
-  --node-header: #182026;
-  --node-customer: #137cbd;
-  --node-site: #238c2c;
+  --rail: #1f2a37;
+  --rail-foreground: #b3bdca;
+  --rail-hover: #2a3746;
+  --rail-active: #36465b;
+  --node-header: #1b2533;
+  --node-customer: #3a67b0;
+  --node-site: #23843a;
   --node-location: #96622d;
-  --node-device: #db2c6f;
-  --edge: #8a9ba8;
-  --tooltip: #394b59;
-  --tooltip-foreground: #f5f8fa;
+  --node-device: #d02f6b;
+  --edge: #8a96a6;
+  --tooltip: #1f2a37;
+  --tooltip-foreground: #f3f5f8;
+  /* Soft tints: background, text and border of badges, callouts, highlights. */
+  --tint-neutral-bg: #eef1f5;
+  --tint-neutral-fg: #3c4858;
+  --tint-neutral-border: #dde3ea;
+  --tint-primary-bg: #e9effa;
+  --tint-primary-fg: #2c5aa0;
+  --tint-primary-border: #c9d8f2;
+  --tint-success-bg: #e6f4ed;
+  --tint-success-fg: #14663f;
+  --tint-success-border: #bfe3cf;
+  --tint-warning-bg: #fdf1df;
+  --tint-warning-fg: #7f4a0c;
+  --tint-warning-border: #f3d6a8;
+  --tint-danger-bg: #fdecec;
+  --tint-danger-fg: #a62b2b;
+  --tint-danger-border: #f3c3c3;
   /* Controls */
-  --btn-bg: #f5f8fa;
-  --btn-bg-hover: #ebf1f5;
-  --btn-bg-active: #d8e1e8;
-  --btn-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0));
-  --btn-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.2), inset 0 -1px 0 rgb(16 22 26 / 0.1);
-  --btn-shadow-active: inset 0 0 0 1px rgb(16 22 26 / 0.2), inset 0 1px 2px rgb(16 22 26 / 0.2);
-  --btn-disabled-bg: rgb(206 217 224 / 0.5);
-  --btn-disabled-fg: rgb(92 112 128 / 0.6);
-  --btn-icon: #5c7080;
-  --btn-intent-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0));
-  --btn-intent-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.4), inset 0 -1px 0 rgb(16 22 26 / 0.2);
-  --btn-intent-shadow-active:
-    inset 0 0 0 1px rgb(16 22 26 / 0.4), inset 0 1px 2px rgb(16 22 26 / 0.2);
+  --btn-bg: #ffffff;
+  --btn-bg-hover: #f4f6f9;
+  --btn-bg-active: #e9edf2;
+  --btn-gradient: none;
+  --btn-shadow: inset 0 0 0 1px #cdd5df, 0 1px 2px rgb(16 24 40 / 0.05);
+  --btn-shadow-active: inset 0 0 0 1px #b9c3cf;
+  --btn-disabled-bg: #f1f3f6;
+  --btn-disabled-fg: #97a2af;
+  --btn-icon: #5d6979;
+  --btn-intent-gradient: none;
+  --btn-intent-shadow: 0 1px 2px rgb(16 24 40 / 0.12);
+  --btn-intent-shadow-active: none;
   --input-bg: #ffffff;
-  --input-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.15), inset 0 1px 1px rgb(16 22 26 / 0.2);
-  --input-placeholder: rgb(92 112 128 / 0.6);
+  --input-shadow: inset 0 0 0 1px #cdd5df;
+  --input-placeholder: #8a95a3;
   /* Elevations */
-  --elevation-0: 0 0 0 1px rgb(16 22 26 / 0.15);
-  --elevation-1: 0 0 0 1px rgb(16 22 26 / 0.1), 0 1px 1px rgb(16 22 26 / 0.2);
-  --elevation-2:
-    0 0 0 1px rgb(16 22 26 / 0.1), 0 1px 1px rgb(16 22 26 / 0.2), 0 2px 6px rgb(16 22 26 / 0.2);
-  --elevation-3:
-    0 0 0 1px rgb(16 22 26 / 0.1), 0 2px 4px rgb(16 22 26 / 0.2), 0 8px 24px rgb(16 22 26 / 0.2);
-  --elevation-4:
-    0 0 0 1px rgb(16 22 26 / 0.1), 0 4px 8px rgb(16 22 26 / 0.2),
-    0 18px 46px 6px rgb(16 22 26 / 0.2);
+  --elevation-0: 0 0 0 1px var(--border);
+  --elevation-1: 0 0 0 1px var(--border), 0 1px 2px rgb(16 24 40 / 0.05);
+  --elevation-2: 0 0 0 1px var(--border), 0 4px 12px rgb(16 24 40 / 0.08);
+  --elevation-3: 0 0 0 1px var(--border), 0 12px 28px rgb(16 24 40 / 0.12);
+  --elevation-4: 0 0 0 1px rgb(16 24 40 / 0.06), 0 24px 56px rgb(16 24 40 / 0.24);
   --gradient-heading: linear-gradient(to bottom, #111111 0%, #5c5c5c 45%, #b3b3b3 100%);
   color-scheme: light;
 }
 
 .dark {
-  --page: #293742;
-  --canvas: #202b33;
-  --background: #30404d;
-  --foreground: #f5f8fa;
-  --card: #30404d;
-  --card-foreground: #f5f8fa;
-  --popover: #30404d;
-  --popover-foreground: #f5f8fa;
-  --link: #5cb7f2;
-  --secondary: #394b59;
-  --secondary-foreground: #f5f8fa;
-  --muted: #293742;
-  --muted-foreground: #a7b6c2;
-  --subtle: #9eacb8;
-  --accent: rgb(138 155 168 / 0.15);
-  --accent-strong: rgb(138 155 168 / 0.3);
-  --accent-foreground: #f5f8fa;
-  --selected: rgb(19 124 189 / 0.3);
-  --border: rgb(16 22 26 / 0.4);
-  --border-strong: rgb(16 22 26 / 0.5);
-  --input: rgb(16 22 26 / 0.3);
-  --ring: #48aff0;
-  --focus: rgb(72 175 240 / 0.6);
-  --destructive-text: #ff8a8a;
-  --success-text: #3dcc91;
-  --warning-text: #ffb366;
-  --rail: #182026;
-  --rail-foreground: #a7b6c2;
-  --rail-hover: #202b33;
-  --rail-active: #30404d;
-  --node-header: #10161a;
-  --edge: #5c7080;
-  --tooltip: #e1e8ed;
-  --tooltip-foreground: #182026;
-  --btn-bg: #394b59;
-  --btn-bg-hover: #30404d;
-  --btn-bg-active: #202b33;
-  --btn-gradient: linear-gradient(to bottom, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0));
-  --btn-shadow: 0 0 0 1px rgb(16 22 26 / 0.4);
-  --btn-shadow-active: 0 0 0 1px rgb(16 22 26 / 0.6), inset 0 1px 2px rgb(16 22 26 / 0.2);
-  --btn-disabled-bg: rgb(57 75 89 / 0.5);
-  --btn-disabled-fg: rgb(167 182 194 / 0.6);
-  --btn-icon: #a7b6c2;
-  --input-bg: rgb(16 22 26 / 0.3);
-  --input-shadow: inset 0 0 0 1px rgb(16 22 26 / 0.3), inset 0 1px 1px rgb(16 22 26 / 0.4);
-  --input-placeholder: rgb(167 182 194 / 0.6);
-  --elevation-0: 0 0 0 1px rgb(16 22 26 / 0.4);
-  --elevation-1: 0 0 0 1px rgb(16 22 26 / 0.2), 0 1px 1px rgb(16 22 26 / 0.4);
-  --elevation-2:
-    0 0 0 1px rgb(16 22 26 / 0.2), 0 1px 1px rgb(16 22 26 / 0.4), 0 2px 6px rgb(16 22 26 / 0.4);
-  --elevation-3:
-    0 0 0 1px rgb(16 22 26 / 0.2), 0 2px 4px rgb(16 22 26 / 0.4), 0 8px 24px rgb(16 22 26 / 0.4);
-  --elevation-4:
-    0 0 0 1px rgb(16 22 26 / 0.2), 0 4px 8px rgb(16 22 26 / 0.4),
-    0 18px 46px 6px rgb(16 22 26 / 0.4);
+  --page: #0f1520;
+  --canvas: #0c121b;
+  --background: #161e2b;
+  --foreground: #e7ecf2;
+  --card: #161e2b;
+  --card-foreground: #e7ecf2;
+  --popover: #1b2433;
+  --popover-foreground: #e7ecf2;
+  --link: #8ab0ee;
+  --secondary: #1e2837;
+  --secondary-foreground: #e7ecf2;
+  --muted: #1a2230;
+  --muted-foreground: #9aa7b6;
+  --subtle: #8a97a7;
+  --accent: #222d3d;
+  --accent-strong: #2a3648;
+  --accent-foreground: #e7ecf2;
+  --selected: rgb(111 155 224 / 0.16);
+  --border: #263244;
+  --border-strong: #34425a;
+  --input: #34425a;
+  --control-border: #7d8a9c;
+  --ring: #6f9be0;
+  --focus: rgb(111 155 224 / 0.55);
+  --focus-soft: rgb(111 155 224 / 0.22);
+  --destructive-text: #f08a8a;
+  --success-text: #5cc995;
+  --warning-text: #f0b45e;
+  --rail: #0b111a;
+  --rail-foreground: #9aa7b6;
+  --rail-hover: #162030;
+  --rail-active: #22304a;
+  --node-header: #0b111a;
+  --node-customer: #6f9be0;
+  --edge: #5d6979;
+  --tooltip: #e7ecf2;
+  --tooltip-foreground: #161e2b;
+  --tint-neutral-bg: #243042;
+  --tint-neutral-fg: #c5cfdb;
+  --tint-neutral-border: #324057;
+  --tint-primary-bg: #1d2f4f;
+  --tint-primary-fg: #a9c4f2;
+  --tint-primary-border: #2b4470;
+  --tint-success-bg: #13301f;
+  --tint-success-fg: #7fd6a8;
+  --tint-success-border: #20513a;
+  --tint-warning-bg: #352710;
+  --tint-warning-fg: #f2c27a;
+  --tint-warning-border: #5a4220;
+  --tint-danger-bg: #381b1e;
+  --tint-danger-fg: #f5a3a3;
+  --tint-danger-border: #5c2a2e;
+  --btn-bg: #1b2433;
+  --btn-bg-hover: #222d3d;
+  --btn-bg-active: #2a3648;
+  --btn-gradient: none;
+  --btn-shadow: inset 0 0 0 1px #34425a;
+  --btn-shadow-active: inset 0 0 0 1px #415070;
+  --btn-disabled-bg: #1a2230;
+  --btn-disabled-fg: #5d6a7a;
+  --btn-icon: #9aa7b6;
+  --btn-intent-shadow: none;
+  --input-bg: #121a26;
+  --input-shadow: inset 0 0 0 1px #34425a;
+  --input-placeholder: #6b7889;
+  --elevation-0: 0 0 0 1px var(--border);
+  --elevation-1: 0 0 0 1px var(--border), 0 1px 2px rgb(0 0 0 / 0.3);
+  --elevation-2: 0 0 0 1px var(--border), 0 4px 12px rgb(0 0 0 / 0.35);
+  --elevation-3: 0 0 0 1px var(--border-strong), 0 12px 28px rgb(0 0 0 / 0.45);
+  --elevation-4: 0 0 0 1px var(--border-strong), 0 24px 56px rgb(0 0 0 / 0.6);
   --gradient-heading: linear-gradient(to bottom, #ffffff 0%, #bdbdbd 45%, #5c5c5c 100%);
   color-scheme: dark;
 }
@@ -286,21 +318,39 @@
   --color-edge: var(--edge);
   --color-tooltip: var(--tooltip);
   --color-tooltip-foreground: var(--tooltip-foreground);
+  --color-control-border: var(--control-border);
+  --color-tint-neutral: var(--tint-neutral-bg);
+  --color-tint-neutral-foreground: var(--tint-neutral-fg);
+  --color-tint-neutral-border: var(--tint-neutral-border);
+  --color-tint-primary: var(--tint-primary-bg);
+  --color-tint-primary-foreground: var(--tint-primary-fg);
+  --color-tint-primary-border: var(--tint-primary-border);
+  --color-tint-success: var(--tint-success-bg);
+  --color-tint-success-foreground: var(--tint-success-fg);
+  --color-tint-success-border: var(--tint-success-border);
+  --color-tint-warning: var(--tint-warning-bg);
+  --color-tint-warning-foreground: var(--tint-warning-fg);
+  --color-tint-warning-border: var(--tint-warning-border);
+  --color-tint-danger: var(--tint-danger-bg);
+  --color-tint-danger-foreground: var(--tint-danger-fg);
+  --color-tint-danger-border: var(--tint-danger-border);
   --font-sans: var(--ui-font);
   --font-display: var(--ui-font);
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  /* Codes (label, defect and protocol numbers): the UI face with even-width digits. */
+  --font-mono: var(--ui-font);
+  --font-mono--font-feature-settings: "tnum" 1;
   --text-ui-lg: 1rem;
-  --text-ui-lg--line-height: 1.25rem;
+  --text-ui-lg--line-height: 1.5rem;
   --text-ui: 0.875rem;
-  --text-ui--line-height: 1.125rem;
-  --text-ui-sm: 0.75rem;
-  --text-ui-sm--line-height: 1rem;
-  --text-ui-xs: 0.6875rem;
-  --text-ui-xs--line-height: 0.875rem;
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 3px;
-  --radius-xl: 6px;
+  --text-ui--line-height: 1.25rem;
+  --text-ui-sm: 0.8125rem;
+  --text-ui-sm--line-height: 1.125rem;
+  --text-ui-xs: 0.75rem;
+  --text-ui-xs--line-height: 1rem;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --shadow-elevation-0: var(--elevation-0);
   --shadow-elevation-1: var(--elevation-1);
   --shadow-elevation-2: var(--elevation-2);
@@ -321,6 +371,8 @@
     @apply bg-page font-sans text-ui text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Inter: the open digits read better in tables and dates. */
+    font-feature-settings: "cv11" 1;
   }
 
   h1,
@@ -362,10 +414,10 @@
 /* Thin scrollbars inside the workspace panels. */
 @utility scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgb(92 112 128 / 0.35) transparent;
+  scrollbar-color: rgb(93 105 121 / 0.35) transparent;
 }
 
-/* Blueprint button surfaces (see components/ui/button.tsx). */
+/* Neutral button and input surfaces (see components/ui/button.tsx, input.tsx). */
 @utility surface-button {
   background-color: var(--btn-bg);
   background-image: var(--btn-gradient);

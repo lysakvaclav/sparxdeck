@@ -62,7 +62,7 @@ export async function DevicePlanCard({
           focusId={device.id}
           className="h-[260px]"
         />
-        <p className="truncate px-[15px] py-2 text-ui-sm text-muted-foreground shadow-[inset_0_1px_0_var(--border)]">
+        <p className="truncate px-5 py-2 text-ui-sm text-muted-foreground shadow-[inset_0_1px_0_var(--border)]">
           {placement.plan.name}
         </p>
       </Card>

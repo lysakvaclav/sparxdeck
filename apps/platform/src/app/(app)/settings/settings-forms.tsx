@@ -58,7 +58,7 @@ function FormFooter({
   const tErr = useTranslations("errors");
   if (disabled) return null;
   return (
-    <div className="-mx-[15px] -mb-[15px] space-y-2.5 px-[15px] py-2.5 shadow-[inset_0_1px_0_var(--border)]">
+    <div className="-mx-5 -mb-5 space-y-2.5 px-5 py-2.5 shadow-[inset_0_1px_0_var(--border)]">
       {error && <Alert variant="error">{tErr(error)}</Alert>}
       {done && <Alert variant="success">{t("saved")}</Alert>}
       <div className="flex justify-end">
@@ -418,7 +418,7 @@ export function DigestForm({ defaults, disabled }: { defaults: DigestSettingsInp
       onSubmit={form.handleSubmit((values) => run(() => saveDigestSettings(values)))}
     >
       <fieldset disabled={disabled} className="space-y-4">
-        <label className="flex min-h-[30px] cursor-pointer items-center gap-2.5 pointer-coarse:min-h-11">
+        <label className="flex min-h-9 cursor-pointer items-center gap-2.5 pointer-coarse:min-h-11">
           <Controller
             control={form.control}
             name="weeklyDigest"

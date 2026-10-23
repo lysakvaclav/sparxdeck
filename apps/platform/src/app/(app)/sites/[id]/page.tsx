@@ -109,8 +109,8 @@ export default async function SitePage({ params }: Props) {
       />
 
       <PageBody>
-        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="space-y-2.5 sm:space-y-[15px]">
+        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="space-y-3 sm:space-y-5">
             {/* What the technician needs at the door, first and impossible to miss. */}
             <Alert
               variant={site.access_notes ? "info" : "neutral"}
@@ -154,7 +154,7 @@ export default async function SitePage({ params }: Props) {
             </Card>
           </div>
 
-          <div className="space-y-2.5 sm:space-y-[15px]">
+          <div className="space-y-3 sm:space-y-5">
             <Card>
               <CardHeader>
                 <CardTitle>{t("detail.properties")}</CardTitle>

@@ -716,7 +716,7 @@ export function DeviceCheck({
   const photoInput = (questionId: string | null, labelText: string) => (
     <label
       className={cn(
-        "inline-flex min-h-[30px] cursor-pointer items-center gap-[7px] rounded-md px-2.5 text-ui text-muted-foreground hover:bg-accent pointer-coarse:min-h-11",
+        "inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2.5 text-ui text-muted-foreground hover:bg-accent pointer-coarse:min-h-11",
         !canAddPhoto && "pointer-events-none opacity-50",
       )}
     >
@@ -766,7 +766,7 @@ export function DeviceCheck({
               </a>
             )}
             {photo.status !== "uploaded" && (
-              <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 rounded-b-md bg-[rgb(16_22_26/0.7)] py-0.5 text-[10px] text-white">
+              <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 rounded-b-md bg-[rgb(15_23_42/0.72)] py-0.5 text-[10px] text-white">
                 {photo.status === "uploading" ? t("uploading") : t("photoWaiting")}
               </span>
             )}
@@ -793,7 +793,7 @@ export function DeviceCheck({
         : tOutcome("open");
 
   return (
-    <div className="space-y-2.5 pb-2 sm:space-y-[15px]">
+    <div className="space-y-2.5 pb-2 sm:space-y-5">
       {hold.state === "blocked" && (
         <Alert variant="warning" title={t("heldTitle", { name: hold.name })}>
           <p>{t("heldBody")}</p>
@@ -922,7 +922,7 @@ export function DeviceCheck({
         </Alert>
       )}
 
-      <fieldset disabled={!editable || !!conflict} className="space-y-2.5 sm:space-y-[15px]">
+      <fieldset disabled={!editable || !!conflict} className="space-y-3 sm:space-y-5">
         {questions.map((question, index) => {
           const answer = answers[question.id] ?? EMPTY_ANSWER;
           const isMissing = missing.has(question.id);
@@ -939,7 +939,7 @@ export function DeviceCheck({
             <Card
               key={question.id}
               id={`question-${question.id}`}
-              className={cn("space-y-2.5 p-[15px]", isMissing && "ring-2 ring-destructive")}
+              className={cn("space-y-2.5 p-5", isMissing && "ring-2 ring-destructive")}
             >
               <p className="flex gap-2 text-ui-lg leading-6">
                 <span className="text-muted-foreground tabular-nums">{index + 1}.</span>
@@ -1050,7 +1050,7 @@ export function DeviceCheck({
                   <button
                     type="button"
                     onClick={() => setOpenNotes((current) => new Set(current).add(question.id))}
-                    className="inline-flex min-h-[30px] items-center gap-[7px] rounded-md px-2.5 text-ui text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11"
+                    className="inline-flex min-h-9 items-center gap-2 rounded-md px-2.5 text-ui text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11"
                   >
                     <AnnotationIcon className="text-[var(--btn-icon)]" />
                     {t("addNote")}
@@ -1062,7 +1062,7 @@ export function DeviceCheck({
           );
         })}
 
-        <Card className="space-y-2.5 p-[15px]">
+        <Card className="space-y-2.5 p-5">
           <p className="text-ui-lg font-medium">{t("deviceSection")}</p>
           <Textarea
             rows={2}
@@ -1119,7 +1119,7 @@ export function DeviceCheck({
         />
       )}
 
-      <div className="sticky bottom-0 z-10 -mx-2.5 -mb-8 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 bg-background px-2.5 py-2 shadow-[0_-1px_0_var(--border)] sm:-mx-[15px] sm:px-[15px] lg:-mx-5 lg:px-5">
+      <div className="sticky bottom-0 z-10 -mx-3 -mb-8 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 bg-background px-3 py-2.5 shadow-[0_-1px_0_var(--border)] sm:-mx-5 sm:-mb-5 sm:px-5 lg:-mx-6 lg:-mb-6 lg:px-6">
         <Button asChild variant="outline" size="lg">
           <Link
             href={overviewHref}

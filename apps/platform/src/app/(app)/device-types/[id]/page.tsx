@@ -114,12 +114,12 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
 
       <PageBody>
         {sample && (
-          <Alert variant="warning" title={t("sampleTitle")} className="mb-[15px]">
+          <Alert variant="warning" title={t("sampleTitle")} className="mb-5">
             <p>{t("sampleBody")}</p>
           </Alert>
         )}
         {shown && activeVersion && shown.id !== activeVersion.id && (
-          <Alert icon={HistoryIcon} className="mb-[15px]">
+          <Alert icon={HistoryIcon} className="mb-5">
             <p>
               {t("detail.olderVersion", { version: shown.version, active: activeVersion.version })}{" "}
               <Link
@@ -132,7 +132,7 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="grid grid-cols-1 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <Card>
             <CardHeader>
               <CardTitle>
@@ -184,7 +184,7 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
             </Table>
           </Card>
 
-          <div className="space-y-2.5 sm:space-y-[15px]">
+          <div className="space-y-3 sm:space-y-5">
             <Card>
               <CardHeader>
                 <CardTitle>{t("detail.properties")}</CardTitle>
@@ -242,7 +242,7 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
                         }
                         aria-current={current ? "true" : undefined}
                         className={cn(
-                          "flex items-start gap-2.5 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] transition-colors last:shadow-none hover:bg-[rgb(191_204_214/0.3)]",
+                          "flex items-start gap-2.5 px-5 py-2 shadow-[inset_0_-1px_0_var(--border)] transition-colors last:shadow-none hover:bg-accent",
                           current && "bg-selected",
                         )}
                       >

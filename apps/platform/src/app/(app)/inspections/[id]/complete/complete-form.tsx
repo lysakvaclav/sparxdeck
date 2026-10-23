@@ -83,7 +83,7 @@ export function CompleteForm({
         void form.handleSubmit(onSubmit)(event);
       }}
     >
-      <div className="space-y-[15px] p-[15px]">
+      <div className="space-y-4 p-5">
         {correction && <Alert variant="warning">{t("complete.correctionHint")}</Alert>}
         <p className="text-ui text-muted-foreground">{t("complete.datesHint")}</p>
         <Field

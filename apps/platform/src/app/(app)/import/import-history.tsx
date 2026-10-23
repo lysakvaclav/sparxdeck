@@ -66,7 +66,7 @@ export function ImportHistory({ items }: { items: ImportHistoryItem[] }) {
         </CardTitle>
       </CardHeader>
       {items.length === 0 ? (
-        <p className="px-[15px] py-6 text-center text-ui text-muted-foreground">{t("empty")}</p>
+        <p className="px-5 py-6 text-center text-ui text-muted-foreground">{t("empty")}</p>
       ) : (
         <Table>
           <TableHead>

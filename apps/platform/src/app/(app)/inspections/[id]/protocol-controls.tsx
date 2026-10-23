@@ -106,7 +106,7 @@ export function SendProtocolButton({
         icon={EnvelopeIcon}
         closeLabel={tCommon("close")}
       >
-        <form noValidate onSubmit={submit} className="space-y-[15px]">
+        <form noValidate onSubmit={submit} className="space-y-4">
           {!enabled && <Alert variant="warning">{t("emailDisabled")}</Alert>}
           <Field
             id="protocol-email"

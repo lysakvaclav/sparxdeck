@@ -122,7 +122,7 @@ export async function ProtocolsCard({ scope }: { scope: Scope }) {
           </TableBody>
         </Table>
       ) : (
-        <p className="px-[15px] py-2.5 text-muted-foreground">{t("empty")}</p>
+        <p className="px-5 py-2.5 text-muted-foreground">{t("empty")}</p>
       )}
     </Card>
   );

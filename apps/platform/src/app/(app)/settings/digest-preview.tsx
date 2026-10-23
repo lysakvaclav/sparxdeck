@@ -53,7 +53,7 @@ export async function DigestPreview({ organization }: { organization: Organizati
       <div className="space-y-1.5">
         <p className="text-ui font-medium">{t("previewTitle")}</p>
         {digest ? (
-          <div className="space-y-2 rounded-md bg-muted p-[15px] text-ui">
+          <div className="space-y-2 rounded-md bg-muted p-5 text-ui">
             <p className="text-ui-sm text-muted-foreground">
               {t("subject")}: <span className="text-foreground">{digest.subject}</span>
             </p>

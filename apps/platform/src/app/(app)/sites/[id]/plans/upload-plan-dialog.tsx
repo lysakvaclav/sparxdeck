@@ -208,7 +208,7 @@ export function UploadPlanDialog({
       >
         {replace && <p className="text-ui text-muted-foreground">{t("replaceHint")}</p>}
 
-        <div className="space-y-[5px]">
+        <div className="space-y-1.5">
           <p className="text-ui font-semibold" id="plan-file-label">
             {t("file")}
           </p>
@@ -236,7 +236,7 @@ export function UploadPlanDialog({
                 src={preview}
                 alt={t("preview")}
                 data-page={prepared?.page}
-                className="max-h-[260px] max-w-full rounded-sm bg-white object-contain shadow-elevation-1"
+                className="max-h-[260px] max-w-full rounded-md bg-white object-contain shadow-elevation-1"
               />
             ) : (
               <MediaIcon size={20} className="text-subtle" />

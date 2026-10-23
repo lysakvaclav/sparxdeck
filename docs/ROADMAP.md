@@ -562,7 +562,7 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 - Vlastní pole u zákazníků (C).
 - Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře — obsah musí dodat revizní technik.
 
-**Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“
+**Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“ **Vyřešeno novým designem platformy (23. 10. 2026):** odznaky mají nové barvy a `e2e/a11y.mjs` prochází bez nálezů.
 
 **Od tebe:** položky kontrolních seznamů pro další typy zařízení (hydrant, nouzové osvětlení, požární klapky a dveře), ideálně od revizního technika — pak je můžu zadat jako vzorové šablony podobně jako u hasicích přístrojů.
 
@@ -595,3 +595,4 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 ## Hotové navíc (P2, mimo plán)
 
 - Přihlášení odkazem v e-mailu (magic link) je hotové v kódu v rámci části 1. Odškrtne se po ověření.
+- Nový vzhled platformy (23. 10. 2026, na přání majitele podle předlohy): moderní SaaS místo Palantir Foundry / Blueprint 3. Písmo Inter, tmavě modrá lišta s ikonami, bílé zaoblené karty, ploché tlačítka, odznaky jako pilulky, avatary s iniciálami, nová paleta ve světlém i tmavém režimu. Funkce se nezměnily (testy, celá sada e2e a audit přístupnosti beze změn). Přihlašovací obrazovky si nechávají vzhled landing page.

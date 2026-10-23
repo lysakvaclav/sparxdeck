@@ -6,7 +6,7 @@ import { RAIL_COOKIE } from "@/components/app/nav-items";
 import { requireMembership } from "@/lib/auth";
 
 // The phone's status bar matches the app's dark top bar.
-export const viewport: Viewport = { themeColor: "#293742" };
+export const viewport: Viewport = { themeColor: "#1f2a37" };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { membership, organization } = await requireMembership();

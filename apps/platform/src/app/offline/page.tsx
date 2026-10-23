@@ -18,10 +18,10 @@ export default async function OfflinePage() {
   const t = await getTranslations("offline");
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
-      <header className="flex h-[50px] shrink-0 items-center gap-2.5 bg-[#293742] px-[15px] text-white">
+      <header className="flex h-14 shrink-0 items-center gap-2.5 bg-rail px-5 text-white">
         <TextLogo label="SparxDeck" className="h-4" />
       </header>
-      <main className="mx-auto w-full max-w-xl flex-1 space-y-[15px] p-2.5 sm:p-5">
+      <main className="mx-auto w-full max-w-xl flex-1 space-y-4 p-3 sm:p-5">
         <div className="flex items-start gap-2.5">
           <OfflineIcon size={20} className="mt-0.5 shrink-0 text-warning-text" />
           <div className="space-y-1">

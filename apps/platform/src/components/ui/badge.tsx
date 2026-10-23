@@ -2,19 +2,19 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Blueprint tags: 20px, 12px text, 3px radius. "Minimal" variants are tinted.
+// Pill tags: 22px, medium-weight small text in a soft tint (AA contrast in both themes).
 const badgeVariants = cva(
-  "inline-flex min-h-5 max-w-full items-center gap-1 rounded-md px-1.5 text-ui-sm whitespace-nowrap",
+  "inline-flex min-h-[22px] max-w-full items-center gap-1 rounded-full px-2 text-ui-xs font-medium whitespace-nowrap",
   {
     variants: {
       variant: {
-        default: "bg-[rgb(138_155_168/0.2)] text-foreground",
-        solid: "bg-[#5c7080] text-[#f5f8fa]",
+        default: "bg-tint-neutral text-tint-neutral-foreground",
+        solid: "bg-[#5d6979] text-white dark:bg-[#3c4858]",
         primary: "bg-primary text-primary-foreground",
-        primaryMinimal: "bg-primary/15 text-link",
-        success: "bg-success/15 text-success-text",
-        warning: "bg-warning/15 text-warning-text",
-        danger: "bg-destructive/15 text-destructive-text",
+        primaryMinimal: "bg-tint-primary text-tint-primary-foreground",
+        success: "bg-tint-success text-tint-success-foreground",
+        warning: "bg-tint-warning text-tint-warning-foreground",
+        danger: "bg-tint-danger text-tint-danger-foreground",
         outline: "shadow-[inset_0_0_0_1px_var(--border-strong)] text-muted-foreground",
       },
     },

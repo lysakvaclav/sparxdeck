@@ -74,9 +74,9 @@ export default async function PlansPage({ searchParams }: { searchParams: Search
             />
           </Card>
         ) : (
-          <div className="space-y-2.5 sm:space-y-[15px]">
+          <div className="space-y-3 sm:space-y-5">
             <Card>
-              <div className="flex flex-col gap-2 px-2.5 py-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:px-4 sm:items-center sm:justify-between">
                 <SearchInput placeholder={t("list.searchPlaceholder")} />
                 <p className="text-ui-sm text-muted-foreground" aria-live="polite">
                   {t("list.count", { count: shown.length })}
@@ -109,7 +109,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Search
                       </span>
                     </CardTitle>
                   </CardHeader>
-                  <ul className="grid grid-cols-1 gap-2.5 p-[15px] sm:grid-cols-2 xl:grid-cols-4">
+                  <ul className="grid grid-cols-1 gap-2.5 p-5 sm:grid-cols-2 xl:grid-cols-4">
                     {rows.map((plan) => (
                       <PlanTile
                         key={plan.id}
