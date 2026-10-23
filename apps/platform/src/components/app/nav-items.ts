@@ -27,7 +27,7 @@ export type NavItem = {
     | "team"
     | "settings";
   icon: IconComponent;
-  /** Icon colour on the dark rail (each app has its own, as in Foundry). */
+  /** Icon colour on the dark rail (the same muted grey for every app). */
   railTone: string;
   /** Icon colour in the page header (light and dark surfaces). */
   headerTone: string;
@@ -56,7 +56,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/inspections",
     label: "inspections",
     icon: FormIcon,
-    railTone: "text-[#2ee6d6]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#00a396] dark:text-[#2ee6d6]",
     phone: "tab",
   },
@@ -64,7 +64,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/defects",
     label: "defects",
     icon: IssueIcon,
-    railTone: "text-[#ff7373]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#db3737] dark:text-[#ff7373]",
     phone: "tab",
   },
@@ -72,7 +72,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/customers",
     label: "customers",
     icon: BriefcaseIcon,
-    railTone: "text-[#48aff0]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#137cbd] dark:text-[#48aff0]",
     also: ["/sites"],
     phone: "more",
@@ -81,7 +81,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/devices",
     label: "devices",
     icon: FlameIcon,
-    railTone: "text-[#f5498b]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#db2c6f] dark:text-[#f5498b]",
     phone: "tab",
   },
@@ -89,7 +89,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/plans",
     label: "plans",
     icon: LayersIcon,
-    railTone: "text-[#ffc940]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#d99e0b] dark:text-[#ffc940]",
     match: SITE_PLAN,
     phone: "more",
@@ -98,7 +98,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/graph",
     label: "graph",
     icon: DataLineageIcon,
-    railTone: "text-[#f29d49]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#d9822b] dark:text-[#f29d49]",
     phone: "more",
   },
@@ -106,7 +106,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/device-types",
     label: "deviceTypes",
     icon: ClipboardIcon,
-    railTone: "text-[#ad99ff]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#7157d9] dark:text-[#ad99ff]",
     phone: "more",
   },
@@ -114,7 +114,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/team",
     label: "team",
     icon: PeopleIcon,
-    railTone: "text-[#3dcc91]",
+    railTone: "text-[#a7b6c2]",
     headerTone: "text-[#0f9960] dark:text-[#3dcc91]",
     phone: "more",
   },
