@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { DEFECT_SEVERITIES } from "@/lib/defects";
-import { BULK_MAX, DEVICE_STATUSES, FIELD_KEY, FIELD_LABEL_MAX, MAX_DEVICE_TYPE_FIELDS } from "@/lib/devices";
+import {
+  BULK_MAX,
+  DEVICE_STATUSES,
+  FIELD_KEY,
+  FIELD_LABEL_MAX,
+  MAX_DEVICE_TYPE_FIELDS,
+} from "@/lib/devices";
 import { addDays, isIsoDate, todayInTimeZone } from "@/lib/due";
 import {
   CUSTOM_LIMITS,
@@ -348,10 +354,18 @@ export const bulkEditDevicesSchema = z
     path: ["status"],
   });
 
+/** Moving a device to another building and/or location, with an optional note. */
+export const moveDeviceSchema = z.object({
+  siteId: z.uuid("required"),
+  locationId: optional(z.uuid("notFound")),
+  note: optional(z.string().max(500, "tooLong")),
+});
+
 export type DeviceInput = z.input<typeof deviceSchema>;
 export type DeviceEditInput = z.input<typeof deviceEditSchema>;
 export type BulkDevicesInput = z.input<typeof bulkDevicesSchema>;
 export type BulkEditDevicesInput = z.input<typeof bulkEditDevicesSchema>;
+export type MoveDeviceInput = z.input<typeof moveDeviceSchema>;
 
 // ---------------------------------------------------------------------------
 // Label printing

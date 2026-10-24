@@ -1166,6 +1166,275 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("moving devices (a fresh organization)", () => {
+    let ivan: TestUser;
+    let jana: TestUser;
+    let org: string;
+    let siteA: string;
+    let siteB: string;
+    let locA: string;
+    let locB: string;
+    let device: string;
+
+    beforeAll(async () => {
+      ivan = await createUser("ivan");
+      jana = await createUser("jana");
+      org = await createOrg(ivan, `RLS moves ${run}`);
+      const token = generateToken();
+      await ivan.client.from("invitations").insert({
+        organization_id: org,
+        email: jana.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: ivan.id,
+      });
+      const { error: joined } = await jana.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Jana",
+      });
+      expect(joined).toBeNull();
+      const { data: customer } = await ivan.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: sites } = await ivan.client
+        .from("sites")
+        .insert(
+          ["A", "B"].map((name) => ({ organization_id: org, customer_id: customer!.id, name })),
+        )
+        .select("id, name")
+        .order("name");
+      siteA = sites![0]!.id;
+      siteB = sites![1]!.id;
+      const { data: locations } = await ivan.client
+        .from("locations")
+        .insert([
+          { organization_id: org, site_id: siteA, name: "Sklep A", sort_order: 1 },
+          { organization_id: org, site_id: siteB, name: "Chodba B", sort_order: 1 },
+        ])
+        .select("id, site_id");
+      locA = locations!.find((l) => l.site_id === siteA)!.id;
+      locB = locations!.find((l) => l.site_id === siteB)!.id;
+      const { data: type } = await ivan.client.from("device_types").select("id").single();
+      const { data: d } = await ivan.client
+        .from("devices")
+        .insert({
+          organization_id: org,
+          site_id: siteA,
+          location_id: locA,
+          device_type_id: type!.id,
+        })
+        .select("id")
+        .single();
+      device = d!.id;
+    });
+
+    const placeOf = async () =>
+      (await ivan.client.from("devices").select("site_id, location_id").eq("id", device).single())
+        .data;
+
+    it("only an owner or admin of the company moves a device, and only the database writes history", async () => {
+      const move = { p_device: device, p_site: siteB, p_location: locB, p_note: "Na opravu" };
+      const { error: technician } = await jana.client.rpc("move_device", move);
+      expect(technician?.message).toMatch(/not_found/);
+      const { error: stranger } = await bob.client.rpc("move_device", move);
+      expect(stranger?.message).toMatch(/not_found/);
+      expect(await placeOf()).toEqual({ site_id: siteA, location_id: locA });
+
+      // The building column has no update privilege: moving goes through move_device.
+      const { error: direct } = await ivan.client
+        .from("devices")
+        .update({ site_id: siteB } as never)
+        .eq("id", device);
+      expect(direct).not.toBeNull();
+      const { error: forged } = await ivan.client.from("device_moves").insert({
+        organization_id: org,
+        device_id: device,
+        from_site_id: siteA,
+        to_site_id: siteB,
+      } as never);
+      expect(forged).not.toBeNull();
+    });
+
+    it("a move to another building records where from, where to, who and the note", async () => {
+      const { error } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteB,
+        p_location: locB,
+        p_note: "  Na opravu  ",
+      });
+      expect(error).toBeNull();
+      expect(await placeOf()).toEqual({ site_id: siteB, location_id: locB });
+      const { data: moves } = await jana.client
+        .from("device_moves")
+        .select("from_site_id, to_site_id, from_location_name, to_location_name, note, moved_by")
+        .eq("device_id", device);
+      expect(moves).toEqual([
+        {
+          from_site_id: siteA,
+          to_site_id: siteB,
+          from_location_name: "Sklep A",
+          to_location_name: "Chodba B",
+          note: "Na opravu",
+          moved_by: ivan.id,
+        },
+      ]);
+      const { data: bobsView } = await bob.client
+        .from("device_moves")
+        .select("id")
+        .eq("device_id", device);
+      expect(bobsView).toEqual([]);
+    });
+
+    it("a location of another building, the same place, or another company's building are refused", async () => {
+      const { error: wrongLocation } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteA,
+        p_location: locB,
+        p_note: null,
+      });
+      expect(wrongLocation?.message).toMatch(/locations_mismatch/);
+      const { error: same } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteB,
+        p_location: locB,
+        p_note: null,
+      });
+      expect(same?.message).toMatch(/no_change/);
+      const { data: bobsCustomer } = await bob.client
+        .from("customers")
+        .insert({ organization_id: orgB, name: "Bob moves" })
+        .select("id")
+        .single();
+      const { data: bobsSite } = await bob.client
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: bobsCustomer!.id, name: "Bob moves" })
+        .select("id")
+        .single();
+      const { error: foreign } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: bobsSite!.id,
+        p_location: null,
+        p_note: null,
+      });
+      expect(foreign?.message).toMatch(/not_found/);
+    });
+
+    it("changing the location in the edit form or deleting the location is in the history too", async () => {
+      const { error } = await ivan.client
+        .from("devices")
+        .update({ location_id: null })
+        .eq("id", device)
+        .select("id");
+      expect(error).toBeNull();
+      await ivan.client.from("devices").update({ location_id: locB }).eq("id", device);
+      const { error: deleteError } = await ivan.client.from("locations").delete().eq("id", locB);
+      expect(deleteError).toBeNull();
+      expect(await placeOf()).toEqual({ site_id: siteB, location_id: null });
+      const { data: moves } = await ivan.client
+        .from("device_moves")
+        .select("from_site_id, to_site_id, from_location_name, to_location_name, note")
+        .eq("device_id", device)
+        .order("moved_at");
+      const sameSite = { from_site_id: siteB, to_site_id: siteB, note: null };
+      expect(moves?.slice(1)).toEqual([
+        { ...sameSite, from_location_name: "Chodba B", to_location_name: null },
+        { ...sameSite, from_location_name: null, to_location_name: "Chodba B" },
+        { ...sameSite, from_location_name: "Chodba B", to_location_name: null },
+      ]);
+    });
+
+    it("the spot on the old building's floor plan goes away with a move", async () => {
+      const { data: plan, error: planError } = await ivan.client
+        .from("floor_plans")
+        .insert({
+          organization_id: org,
+          site_id: siteB,
+          name: "Plan B",
+          image_path: `${org}/floor-plans/${siteB}/${randomUUID()}.webp`,
+          image_width: 100,
+          image_height: 100,
+        })
+        .select("id")
+        .single();
+      expect(planError).toBeNull();
+      const { error: placeError } = await ivan.client.rpc("place_device", {
+        p_device: device,
+        p_plan: plan!.id,
+        p_x: 0.5,
+        p_y: 0.5,
+      });
+      expect(placeError).toBeNull();
+      const { error } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteA,
+        p_location: locA,
+        p_note: null,
+      });
+      expect(error).toBeNull();
+      const { data: placements } = await ivan.client
+        .from("device_placements")
+        .select("device_id")
+        .eq("device_id", device);
+      expect(placements).toEqual([]);
+    });
+
+    it("a device being checked in a running inspection stays in its building", async () => {
+      const { data: inspection, error: startError } = await jana.client.rpc("start_inspection", {
+        p_site: siteA,
+      });
+      expect(startError).toBeNull();
+      const { error: openError } = await jana.client.rpc("open_device_check", {
+        p_inspection: inspection!,
+        p_device: device,
+      });
+      expect(openError).toBeNull();
+      const { error } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteB,
+        p_location: null,
+        p_note: null,
+      });
+      expect(error?.message).toMatch(/device_in_inspection/);
+      // Within the building the location may still change.
+      const { error: within } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: siteA,
+        p_location: null,
+        p_note: null,
+      });
+      expect(within).toBeNull();
+      const { error: cancelError } = await ivan.client.rpc("cancel_inspection", {
+        p_inspection: inspection!,
+      });
+      expect(cancelError).toBeNull();
+    });
+
+    it("sample data and real buildings don't mix", async () => {
+      const { data: sampleCustomer, error: sampleError } = await ivan.client.rpc(
+        "create_sample_data",
+        { p_org: org },
+      );
+      expect(sampleError).toBeNull();
+      const { data: sampleSite } = await ivan.client
+        .from("sites")
+        .select("id")
+        .eq("customer_id", sampleCustomer!)
+        .limit(1)
+        .single();
+      const { error } = await ivan.client.rpc("move_device", {
+        p_device: device,
+        p_site: sampleSite!.id,
+        p_location: null,
+        p_note: null,
+      });
+      expect(error?.message).toMatch(/sample_mismatch/);
+      const { error: removeError } = await ivan.client.rpc("remove_sample_data", { p_org: org });
+      expect(removeError).toBeNull();
+    });
+  });
+
   describe("inspections", () => {
     let site: string;
     let devices: string[];
@@ -2052,7 +2321,9 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
         .single();
       const { data: s, error: sitesError } = await gina.client
         .from("sites")
-        .insert([1, 2].map((n) => ({ organization_id: org, customer_id: customer!.id, name: `S${n}` })))
+        .insert(
+          [1, 2].map((n) => ({ organization_id: org, customer_id: customer!.id, name: `S${n}` })),
+        )
         .select("id, name")
         .order("name");
       if (!s) throw sitesError;
@@ -2061,7 +2332,9 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       const { data: type } = await gina.client.from("device_types").select("id").single();
       const { data: rows } = await gina.client
         .from("devices")
-        .insert([1, 2].map(() => ({ organization_id: org, site_id: site, device_type_id: type!.id })))
+        .insert(
+          [1, 2].map(() => ({ organization_id: org, site_id: site, device_type_id: type!.id })),
+        )
         .select("id, label_number")
         .order("label_number");
       devices = rows!.map((row) => row.id);

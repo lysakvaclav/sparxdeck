@@ -299,6 +299,9 @@
     "importInUse": "The import can't be undone anymore: its records are in use (inspections, defects, floor plans or new devices).",
     "importUndone": "The import has already been undone.",
     "deviceExists": "A device with this serial number is already in the building. Find it in the list.",
+    "deviceInInspection": "The device is being checked in an open inspection of its building. You can move it once the inspection is completed or cancelled.",
+    "sampleMismatch": "A device from the sample data can't move to a real building, and the other way round.",
+    "noChange": "The device is already in this building and location.",
     "fieldKeyInvalid": "Invalid field key.",
     "fieldsTooMany": "At most 8 custom fields.",
     "fieldKeyDuplicate": "Two fields can't share a key.",
@@ -1220,6 +1223,7 @@
       "editTitle": "Edit device",
       "placement": "Placement",
       "site": "Building",
+      "moveHint": "To move the device to another building, use Move on its page.",
       "sitePlaceholder": "Choose a building",
       "location": "Location",
       "noLocation": "No location",
@@ -1302,6 +1306,21 @@
       "result": "Result",
       "checkedBy": "Checked by",
       "empty": "No completed inspection yet."
+    },
+    "move": {
+      "button": "Move",
+      "title": "Move device",
+      "current": "current",
+      "note": "Note",
+      "noteHint": "Optional, e.g. why the device is moving. It is kept in the location history.",
+      "planWarning": "The spot on the floor plan of the current building will be removed. You can place the device again in the new building.",
+      "confirm": "Move",
+      "moved": "The device has moved to {site}."
+    },
+    "moves": {
+      "title": "Location history",
+      "from": "From:",
+      "to": "To:"
     },
     "bulkEdit": {
       "selected": "{count} selected",

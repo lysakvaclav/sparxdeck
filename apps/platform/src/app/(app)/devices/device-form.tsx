@@ -176,7 +176,12 @@ export function DeviceForm(props: DeviceFormProps) {
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)}>
       <Section title={t("placement")}>
-        <Field id="siteId" label={t("site")} error={fieldError(errors.siteId?.message)}>
+        <Field
+          id="siteId"
+          label={t("site")}
+          hint={mode === "edit" ? t("moveHint") : undefined}
+          error={fieldError(errors.siteId?.message)}
+        >
           <NativeSelect
             disabled={mode === "edit"}
             {...form.register("siteId", {

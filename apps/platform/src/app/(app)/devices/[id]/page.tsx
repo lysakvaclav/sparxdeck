@@ -37,11 +37,14 @@ import {
 import { serverEnv } from "@/lib/env";
 import { labelUrl } from "@/lib/qr";
 import { openInspectionOf } from "@/lib/inspection-data";
-import { getDevice } from "@/lib/records";
+import { getDevice, getDeviceFormOptions } from "@/lib/records";
+import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { StartInspectionButton } from "../../inspections/start-button";
 import { deleteDevice } from "../actions";
 import { DeviceHistoryCard } from "./history-card";
+import { MoveDeviceButton } from "./move-dialog";
+import { DeviceMovesCard } from "./moves-card";
 import { DevicePhotosCard } from "./photos-card";
 import { DevicePlanCard } from "./plan-card";
 
@@ -100,6 +103,17 @@ export default async function DevicePage({ params }: Props) {
     ? dueState(device.end_of_life_on, today, organization.due_soon_days)
     : "never";
   const link = "text-link hover:underline";
+  // The move dialog's buildings and whether the device has a spot on a plan (managers only).
+  const [moveOptions, placement] = manager
+    ? await Promise.all([
+        getDeviceFormOptions(organization.id),
+        (await createClient())
+          .from("device_placements")
+          .select("device_id")
+          .eq("device_id", device.id)
+          .maybeSingle(),
+      ])
+    : [null, null];
 
   return (
     <>
@@ -325,7 +339,20 @@ export default async function DevicePage({ params }: Props) {
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader
+                actions={
+                  moveOptions &&
+                  site && (
+                    <MoveDeviceButton
+                      deviceId={device.id}
+                      siteId={site.id}
+                      locationId={device.location?.id ?? null}
+                      placed={!!placement?.data}
+                      sites={moveOptions.sites}
+                    />
+                  )
+                }
+              >
                 <CardTitle>{tForm("placement")}</CardTitle>
               </CardHeader>
               <DetailList
@@ -354,6 +381,7 @@ export default async function DevicePage({ params }: Props) {
                 ]}
               />
             </Card>
+            <DeviceMovesCard deviceId={device.id} organizationId={organization.id} />
             {site && active && (
               <DevicePlanCard
                 device={{ id: device.id, label, typeName, due: state }}

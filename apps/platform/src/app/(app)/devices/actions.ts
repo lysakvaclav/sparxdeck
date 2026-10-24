@@ -12,6 +12,7 @@ import {
   deviceEditSchema,
   deviceSchema,
   idSchema,
+  moveDeviceSchema,
 } from "@/lib/validation";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -186,6 +187,36 @@ export async function bulkUpdateDevices(input: unknown): Promise<ActionResult<{ 
 
   revalidateDevices();
   return { ok: true, data: { count: data.length } };
+}
+
+/**
+ * Moves a device to another building or location (move_device: owners and admins,
+ * not during a running check, not between sample and real data). The history row
+ * is written by the database.
+ */
+export async function moveDevice(id: string, input: unknown): Promise<ActionResult> {
+  const active = await requireManager();
+  if (!active) return { ok: false, error: "forbidden" };
+  if (!idSchema.safeParse(id).success) return { ok: false, error: "notFound" };
+  const parsed = moveDeviceSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("move_device", {
+    p_device: id,
+    p_site: parsed.data.siteId,
+    p_location: parsed.data.locationId,
+    p_note: parsed.data.note,
+  });
+  if (error) {
+    const code = databaseErrorCode(error);
+    if (code === "locationsMismatch")
+      return { ok: false, error: "notFound", fieldErrors: { locationId: "notFound" } };
+    return { ok: false, error: code };
+  }
+
+  revalidateDevices();
+  return { ok: true };
 }
 
 /** Soft delete; the label number is never reused. */

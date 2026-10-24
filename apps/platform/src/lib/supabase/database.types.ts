@@ -792,6 +792,45 @@ export type Database = {
           },
         ];
       };
+      device_moves: {
+        Row: {
+          id: string;
+          organization_id: string;
+          device_id: string;
+          from_site_id: string;
+          to_site_id: string;
+          from_location_name: string | null;
+          to_location_name: string | null;
+          note: string | null;
+          moved_by: string | null;
+          moved_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "device_moves_device_id_organization_id_fkey";
+            columns: ["device_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "devices";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "device_moves_from_site_id_organization_id_fkey";
+            columns: ["from_site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "device_moves_to_site_id_organization_id_fkey";
+            columns: ["to_site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
       protocols: {
         Row: {
           id: string;
@@ -958,6 +997,10 @@ export type Database = {
         Returns: string;
       };
       delete_device_photo: { Args: { p_photo: string }; Returns: string };
+      move_device: {
+        Args: { p_device: string; p_site: string; p_location: string | null; p_note: string | null };
+        Returns: undefined;
+      };
       ensure_protocol: { Args: { p_inspection: string }; Returns: string };
       reopen_inspection: { Args: { p_inspection: string; p_reason: string }; Returns: undefined };
       note_labels_printed: { Args: { p_org: string }; Returns: undefined };

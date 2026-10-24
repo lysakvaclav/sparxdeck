@@ -1,7 +1,8 @@
 // Part 17 walkthrough: a firm adds its own device type with custom fields,
 // creates a device of that type (filling the fields, an end-of-life date, a
 // photo), sees the end-of-life warning, and bulk-changes two devices' status
-// from the list. Dark mode and English.
+// from the list, then moves a device to another building (with history).
+// Dark mode and English.
 // Run: npm run e2e (needs `npm run build && npm start` on port 3001 and .env.local).
 import fs from "node:fs";
 import path from "node:path";
@@ -49,6 +50,7 @@ let phone = await launch({ width: 1440, height: 900 });
 try {
   const owner = await createUser("part17-owner");
   let siteId;
+  let customerId;
 
   await step("owner sets up the company with a building", async () => {
     await signIn(phone, owner);
@@ -64,6 +66,7 @@ try {
       { organization_id: await orgOf(owner), customer_id: customer.id, name: "Hydrantova 5" },
     ]);
     siteId = site.id;
+    customerId = customer.id;
   });
 
   let typeHref;
@@ -153,6 +156,40 @@ try {
     await phone.screenshot(`${OUT}/p17-03-bulk.png`);
   });
 
+  await step(
+    "the device moves to another building with a note, and its history shows it",
+    async () => {
+      const [other] = await insertRows("sites", [
+        { organization_id: await orgOf(owner), customer_id: customerId, name: "Hasičská 12" },
+      ]);
+      await phone.goto(`${APP}${deviceHref}`);
+      await phone.waitForText("Umístění");
+      await phone.clickText("Přesunout", "button");
+      await phone.waitForText("Přesunout zařízení");
+      await phone.selectValue("#move-site", other.id);
+      await phone.type("#move-note", "Výměna za nový přístroj");
+      await phone.screenshot(`${OUT}/p17-06-move.png`);
+      await phone.clickText("Přesunout", "button");
+      await phone.waitForText("Zařízení je přesunuté do budovy Hasičská 12");
+      await phone.waitForText("Historie umístění");
+      await phone.waitForText("Výměna za nový přístroj");
+      const deviceId = deviceHref.split("/")[2];
+      const [device] = await selectRows("devices", `id=eq.${deviceId}&select=site_id`);
+      if (device.site_id !== other.id) throw new Error(`device still in ${device.site_id}`);
+      const moves = await selectRows(
+        "device_moves",
+        `device_id=eq.${deviceId}&select=from_site_id,to_site_id,note`,
+      );
+      if (
+        moves.length !== 1 ||
+        moves[0].from_site_id !== siteId ||
+        moves[0].note !== "Výměna za nový přístroj"
+      )
+        throw new Error(`history ${JSON.stringify(moves)}`);
+      await phone.screenshot(`${OUT}/p17-07-moved.png`);
+    },
+  );
+
   await step("dark mode and English", async () => {
     await phone.close();
     phone = await launch({ width: 1440, height: 900, dark: true });
@@ -162,6 +199,7 @@ try {
     await phone.goto(`${APP}${deviceHref}`);
     await phone.waitForText("End of life");
     await phone.waitForText("End of life is approaching");
+    await phone.waitForText("Location history");
     await phone.screenshot(`${OUT}/p17-04-dark-en.png`);
     await phone.goto(`${APP}${typeHref}/edit`);
     await phone.waitForText("Custom fields");

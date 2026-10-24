@@ -87,6 +87,9 @@ export type ErrorCode =
   | "importInUse"
   | "importUndone"
   | "deviceExists"
+  | "deviceInInspection"
+  | "sampleMismatch"
+  | "noChange"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -146,6 +149,9 @@ export function databaseErrorCode(
   if (message.includes("import_in_use")) return "importInUse";
   if (message.includes("import_undone")) return "importUndone";
   if (message.includes("device_exists")) return "deviceExists";
+  if (message.includes("device_in_inspection")) return "deviceInInspection";
+  if (message.includes("sample_mismatch")) return "sampleMismatch";
+  if (message.includes("no_change")) return "noChange";
   if (message.includes("invalid_template")) return "templateInvalid";
   if (message.includes("checks_unfinished")) return "checksUnfinished";
   if (message.includes("inspection_closed")) return "inspectionClosed";

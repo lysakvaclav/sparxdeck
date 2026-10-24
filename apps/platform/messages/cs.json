@@ -299,6 +299,9 @@
     "importInUse": "Import už nejde vrátit: s jeho záznamy se už pracovalo (revize, závady, půdorysy nebo nová zařízení).",
     "importUndone": "Import už je vrácený.",
     "deviceExists": "Zařízení s tímto výrobním číslem už v budově je. Najděte ho v seznamu.",
+    "deviceInInspection": "Zařízení se právě kontroluje v rozpracované revizi své budovy. Přesunout ho půjde po dokončení nebo zrušení revize.",
+    "sampleMismatch": "Zařízení z ukázkových dat nejde přesunout do skutečné budovy a naopak.",
+    "noChange": "Zařízení už v této budově a lokaci je.",
     "fieldKeyInvalid": "Neplatný klíč pole.",
     "fieldsTooMany": "Nejvýš 8 vlastních polí.",
     "fieldKeyDuplicate": "Dvě pole nemohou mít stejný klíč.",
@@ -1220,6 +1223,7 @@
       "editTitle": "Upravit zařízení",
       "placement": "Umístění",
       "site": "Budova",
+      "moveHint": "Do jiné budovy zařízení přesunete tlačítkem Přesunout na jeho stránce.",
       "sitePlaceholder": "Vyberte budovu",
       "location": "Lokace",
       "noLocation": "Bez lokace",
@@ -1302,6 +1306,21 @@
       "result": "Výsledek",
       "checkedBy": "Zkontroloval",
       "empty": "Zatím žádná dokončená revize."
+    },
+    "move": {
+      "button": "Přesunout",
+      "title": "Přesunout zařízení",
+      "current": "současná",
+      "note": "Poznámka",
+      "noteHint": "Nepovinné, např. proč se zařízení stěhuje. Uloží se do historie umístění.",
+      "planWarning": "Umístění na půdorysu v současné budově se zruší. V nové budově ho můžete umístit znovu.",
+      "confirm": "Přesunout",
+      "moved": "Zařízení je přesunuté do budovy {site}."
+    },
+    "moves": {
+      "title": "Historie umístění",
+      "from": "Odkud:",
+      "to": "Kam:"
     },
     "bulkEdit": {
       "selected": "Vybráno {count}",

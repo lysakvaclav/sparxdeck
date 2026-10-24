@@ -555,7 +555,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 **Odloženo v rámci části 17** (menší rozsah, nevyžádáno v tomto kole). Majitel chce tyto dvě hlídat přednostně, technici na ně v terénu pravděpodobně narazí brzy:
 - **Povinná fotka u položky (E).**
-- **Přesun zařízení do jiné budovy s historií (F)** — hromadná úprava lokace funguje jen v rámci jedné budovy, bez historie.
+- ~~**Přesun zařízení do jiné budovy s historií (F)**~~ **hotovo 2026-10-24:** tlačítko „Přesunout“ na kartě Umístění (budova, lokace, poznámka), karta „Historie umístění“ na stránce zařízení. Historii zapisuje databáze při každé změně budovy nebo lokace, i z úpravy zařízení, hromadné úpravy a smazání lokace.
 
 Zbylé počkají na zpětnou vazbu z pilotu:
 - Kopie šablony, výběr z možností jako typ položky (E).
