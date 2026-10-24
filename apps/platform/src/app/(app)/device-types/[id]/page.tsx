@@ -256,7 +256,13 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
                               <Badge variant="primaryMinimal">{t("detail.active")}</Badge>
                             )}
                           </span>
-                          <span className="block text-ui-sm text-muted-foreground">
+                          {/* Grey text falls below 4.5:1 on the blue of the current row. */}
+                          <span
+                            className={cn(
+                              "block text-ui-sm",
+                              current ? "text-foreground" : "text-muted-foreground",
+                            )}
+                          >
                             {format.dateTime(new Date(version.created_at), {
                               dateStyle: "medium",
                               timeStyle: "short",

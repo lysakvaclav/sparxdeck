@@ -34,7 +34,8 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 9 | Protokoly (PDF a e-mail) | J, L (protokol) | Hotovo, odesílání e-mailem čeká na nastavení Resend |
 | 10 | Přehled termínů a týdenní souhrn | K, L (souhrn) | Hotovo, odesílání souhrnu čeká na Resend a nasazení |
 | 11 | Hledání, průvodce a export | S (hledání), X, R | Hotovo |
-| 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na sparxdeck-app.vercel.app (landing sparxdeck.vercel.app); doména, e-maily a placené plány před prvním zákazníkem |
+| 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na portal.sparxdeck.com (landing sparxdeck.com); zbývá Resend, Sentry, zálohy v produkci a test na iPhonu |
+| 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno (2026-10-23); z části 17 zbývá 6 odložených položek |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -397,7 +398,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 **Hotovo, když:** nahraju plán patra, rozmístím na něj zařízení z budovy, na telefonu během revize vidím na plánu, co zbývá, a cizí firma plán nevidí.
 
-**Stav (2026-10-16): hotovo** (zatím jen lokálně, nenasazeno).
+**Stav (2026-10-16): hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com).
 
 - **Nahrání:**
   - Obrázek (JPG, PNG, WebP, i fotka z telefonu) nebo PDF, u vícestránkového PDF s výběrem strany a náhledem.
@@ -433,7 +434,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ### Část 14: Import z Excelu
 
-**Stav (2026-10-17): hotovo** (zatím jen lokálně, nenasazeno).
+**Stav (2026-10-17): hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com).
 
 - **Kde:** tlačítko „Import z Excelu“ u seznamu zákazníků (i v prázdném stavu), u seznamu zařízení a v průvodci Začínáme. Jen pro vlastníka a administrátora.
 - **Soubor:**
@@ -466,7 +467,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ### Část 15: Revize v terénu 2
 
-**Stav (2026-10-17): hotovo** (zatím jen lokálně, nenasazeno).
+**Stav (2026-10-17): hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com).
 
 - **Nelze zkontrolovat:**
   - Tlačítko pod kontrolou: důvod „Nepřístupné“ nebo „Nenalezeno“ a nepovinná poznámka (např. byt zamčený).
@@ -496,7 +497,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ### Část 16: Offline naplno
 
-**Stav (2026-10-18): hotovo** (zatím jen lokálně, nenasazeno).
+**Stav (2026-10-18): hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com).
 
 - **Uložení do telefonu:**
   - Stačí revizi otevřít s připojením. Uloží se celá: zařízení v pořadí trasy, stav kontrol, šablony, otevřené závady, půdorysy (obrázky), stránka i soubory aplikace.
@@ -537,7 +538,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ### Část 17: Zařízení a šablony 2
 
-**Stav (2026-10-20): částečně hotovo** (zatím jen lokálně, nenasazeno). Hotovo: vlastní typy zařízení s vlastními poli, fotky zařízení, konec životnosti, hromadné úpravy. Odloženo na později v rámci této části (viz níže): kopie šablony, výběr z možností jako typ položky, povinná fotka u položky, přesun zařízení mezi budovami s historií, vlastní pole u zákazníků.
+**Stav (2026-10-20): částečně hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com). Hotovo: vlastní typy zařízení s vlastními poli, fotky zařízení, konec životnosti, hromadné úpravy. Odloženo na později v rámci této části (viz níže): kopie šablony, výběr z možností jako typ položky, povinná fotka u položky, přesun zařízení mezi budovami s historií, vlastní pole u zákazníků.
 
 - **Vlastní typy zařízení:** firma si přidá vlastní typ (`/device-types/new`) se jménem, intervalem revize a vlastními poli — stejnou cestou jako zákazníky a budovy (práva přes RLS, ne přes funkci). Technický kód (`device_types.code`) se odvodí z názvu, při shodě se za něj přidá číslo. Po založení typu aplikace rovnou nabídne editor šablony kontroly (bez položek typ nejde použít v revizi).
 - **Vlastní pole podle typu:** `device_types.custom_fields` — pole `{klíč, název}`, nejvýš 8 na typ. Klíč se při přidávání nového pole odvodí z názvu a navždy se nemění (přejmenování pole v `/device-types/[id]/edit` tak nikdy neztratí hodnoty uložené pod starým klíčem). Hodnoty se ukládají do `devices.attributes` jako dřív (sloupec z části 5), jen podle pole typu místo pevné dvojice hasivo/velikost. Vzorový typ hasicího přístroje dostal tato dvě pole jako data při zakládání firmy (`seed_organization_defaults`) a existující firmy je dostaly zpětně.
@@ -562,13 +563,13 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 - Vlastní pole u zákazníků (C).
 - Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře — obsah musí dodat revizní technik.
 
-**Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“
+**Objevená drobná chyba přístupnosti (mimo rozsah této části):** odznak „Aktivní verze“ (styl `primaryMinimal`) nemá dost kontrastu na stránce typu zařízení. Styl se používá na mnoha místech v aplikaci, oprava jednoho místa nestačí. Nic to nemění pro první uživatele; vyřešit před pilotem samostatným úkolem: „Oprav kontrast stylu odznaku primaryMinimal, zkontroluj všechna místa, kde se používá, a spusť kontrolu přístupnosti.“ **Vyřešeno 2026-10-24:** text odznaku je tmavší (`--primary-active`, v tmavém režimu dál `--link`) a šedý text na zvýrazněném řádku historie verzí je tmavý; `e2e/a11y.mjs` prochází bez nálezů.
 
 **Od tebe:** položky kontrolních seznamů pro další typy zařízení (hydrant, nouzové osvětlení, požární klapky a dveře), ideálně od revizního technika — pak je můžu zadat jako vzorové šablony podobně jako u hasicích přístrojů.
 
 ### Část 18: Protokol 2 a podpis zákazníka
 
-**Stav (2026-10-20): hotovo** (zatím jen lokálně, nenasazeno). Odloženo: vlastní vzhled protokolu (P3, viz níže).
+**Stav (2026-10-20): hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com). Odloženo: vlastní vzhled protokolu (P3, viz níže).
 
 - **Podpis zákazníka:** při dokončení revize se zákazník může podepsat prstem nebo myší a napsat své jméno (obojí nepovinné). Podpis je obrázek PNG, server ho ověří (`sniffImage`) a uloží s právy serveru do `org-assets` pod `<org>/signatures/<revize>.png`. Do protokolu se vykreslí do pole „Převzal(a) za zákazníka“ se jménem a datem. Kresba a jméno se nahrazují jen spolu: nový podpis nebo nové jméno nahradí celý předchozí, bez nich zůstane původní (i při opravě revize).
 - **Oprava dokončené revize:** vlastník nebo administrátor ji na stránce revize otevře tlačítkem „Opravit revizi“ s povinným důvodem (`reopen_inspection`, záznam v `inspection_reopenings`). Revize je znovu rozpracovaná, opraví se stejnými obrazovkami jako v terénu a znovu dokončí. Pravidla, aby oprava nezměnila, co se na místě skutečně stalo:

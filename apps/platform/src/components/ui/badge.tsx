@@ -11,7 +11,9 @@ const badgeVariants = cva(
         default: "bg-[rgb(138_155_168/0.2)] text-foreground",
         solid: "bg-[#5c7080] text-[#f5f8fa]",
         primary: "bg-primary text-primary-foreground",
-        primaryMinimal: "bg-primary/15 text-link",
+        // Darker than --link: on a selected row (blue tint under the tint) --link
+        // falls below 4.5:1. Dark mode keeps the light link blue.
+        primaryMinimal: "bg-primary/15 text-primary-active dark:text-link",
         success: "bg-success/15 text-success-text",
         warning: "bg-warning/15 text-warning-text",
         danger: "bg-destructive/15 text-destructive-text",

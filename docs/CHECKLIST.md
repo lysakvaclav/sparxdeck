@@ -326,7 +326,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Test hlavního toku od přihlášení po vznik protokolu (část 12: `playwright/main-flow.spec.ts`, `npm run test:flow`, na telefonu i počítači; v CI po zapnutí `RUN_MAIN_FLOW`)
 - [ ] P1 Sledování chyb (např. Sentry) (připraveno: `@sentry/nextjs`, chybové stránky s kódem chyby, tunel `/monitoring`; zapne se doplněním `NEXT_PUBLIC_SENTRY_DSN`)
 - [x] P1 Zdravotní kontrola aplikace (část 1: `src/app/api/health/route.ts`)
-- [ ] P1 Nasazení na veřejnou adresu, oddělené testovací a produkční prostředí (připraveno: `docs/DEPLOY.md`, `npm run db:push:production` s potvrzením, GitHub Actions; čeká na účty Vercel a Supabase)
+- [x] P1 Nasazení na veřejnou adresu, oddělené testovací a produkční prostředí (portal.sparxdeck.com na Vercelu, produkční Supabase `ellnjenfqupwqelsojjg` oddělená od vývojové `zclhipzzqvhmpqxxaust`, migrace do produkce jen přes `npm run db:push:production`; commity `b5ac007`, `e946fa4`)
 - [x] P1 Migrace databáze verzované v repozitáři (část 1: `apps/platform/supabase/migrations`, `npm run db:push`)
 - [ ] P2 Výkon: seznamy se stránkováním a indexy na nejčastější dotazy
 - [x] P2 Přístupnost podle zásad WCAG (kontrast, popisky, ovládání klávesnicí) (část 12: `e2e/a11y.mjs` s axe-core, WCAG 2.1 A a AA bez vážných nálezů na 26 pohledech včetně telefonu a tmavého režimu; ruční test se čtečkou obrazovky zbývá)
