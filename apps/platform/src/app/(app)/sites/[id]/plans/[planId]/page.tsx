@@ -112,12 +112,12 @@ export default async function FloorPlanPage({ params, searchParams }: Props) {
                     className={cn(
                       "flex min-h-[30px] items-center gap-1.5 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       item.id === plan.id
-                        ? "bg-background font-semibold shadow-elevation-1"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {item.name}
-                    <span className="text-muted-foreground tabular-nums">{item.placed}</span>
+                    <span className="tabular-nums">{item.placed}</span>
                   </Link>
                 </li>
               ))}

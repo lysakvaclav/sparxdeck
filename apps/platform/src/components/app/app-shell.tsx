@@ -100,7 +100,7 @@ export function AppShell({
             {/* Desktop rail */}
             <aside
               className={cn(
-                "hidden shrink-0 flex-col bg-rail transition-[width] duration-150 lg:flex",
+                "hidden shrink-0 flex-col bg-rail shadow-[inset_-3px_0_0_var(--primary)] transition-[width] duration-150 lg:flex",
                 expanded ? "w-[220px]" : "w-11",
               )}
             >
@@ -153,7 +153,7 @@ export function AppShell({
 
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Mobile top bar */}
-              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
+              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] shadow-[inset_0_-2px_0_var(--primary)] lg:hidden">
                 <Link href="/" className="flex min-h-12 min-w-0 flex-col justify-center">
                   <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
                   <span className="truncate text-ui-xs text-rail-foreground">

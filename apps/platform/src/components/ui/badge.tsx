@@ -8,8 +8,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[rgb(138_155_168/0.2)] text-foreground",
-        solid: "bg-[#5c7080] text-[#f5f8fa]",
+        default: "bg-accent-strong text-foreground",
+        solid: "bg-[#5f6b7a] text-white",
         primary: "bg-primary text-primary-foreground",
         // Darker than --link: on a selected row (blue tint under the tint) --link
         // falls below 4.5:1. Dark mode keeps the light link blue.

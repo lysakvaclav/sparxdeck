@@ -486,12 +486,12 @@ export function ImportWizard() {
                     className={cn(
                       "min-h-[30px] rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       filter === id
-                        ? "bg-background font-semibold shadow-elevation-1"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground"
                         : "text-muted-foreground",
                     )}
                   >
                     {t(`check.tabs.${id}`)}{" "}
-                    <span className="text-muted-foreground tabular-nums">{count}</span>
+                    <span className="tabular-nums">{count}</span>
                   </button>
                 ))}
               </div>

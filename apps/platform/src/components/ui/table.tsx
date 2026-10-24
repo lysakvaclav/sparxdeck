@@ -4,8 +4,8 @@ import { CaretDownIcon, CaretUpIcon, DoubleCaretVerticalIcon } from "@/component
 import { cn } from "@/lib/utils";
 
 /*
- * Blueprint HTML table, condensed and bordered: bold header on a light band,
- * hairline grid, row hover. A row links to a detail page through `RowLink` (a
+ * Condensed table: grey column labels on a light band, horizontal hairlines,
+ * row hover. A row links to a detail page through `RowLink` (a
  * stretched link in the first cell), so the whole row is clickable and accessible.
  */
 
@@ -40,15 +40,15 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
-const cellBorders =
-  "shadow-[inset_0_-1px_0_var(--border)] [&:not(:first-child)]:shadow-[inset_1px_0_0_var(--border),inset_0_-1px_0_var(--border)]";
+// Horizontal dividers only.
+const cellBorders = "shadow-[inset_0_-1px_0_var(--border)]";
 
 function TableHeaderCell({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       scope="col"
       className={cn(
-        "h-[30px] px-2.5 text-start align-middle text-ui font-semibold whitespace-nowrap",
+        "h-[30px] px-2.5 text-start align-middle text-ui font-medium whitespace-nowrap text-muted-foreground",
         cellBorders,
         className,
       )}
@@ -81,7 +81,13 @@ function SortableHeader({
       className={className}
       aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : undefined}
     >
-      <Link href={href} className="inline-flex items-center gap-1 rounded-sm hover:text-link">
+      <Link
+        href={href}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-sm hover:text-link",
+          active && "text-foreground",
+        )}
+      >
         {children}
         <Caret className={cn(active ? "text-link" : "text-subtle")} />
       </Link>
@@ -95,7 +101,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
       className={cn(
         "h-[34px] px-2.5 align-middle pointer-coarse:h-12",
         cellBorders,
-        "[tr:last-child>&]:shadow-none [tr:last-child>&:not(:first-child)]:shadow-[inset_1px_0_0_var(--border)]",
+        "[tr:last-child>&]:shadow-none",
         className,
       )}
       {...props}

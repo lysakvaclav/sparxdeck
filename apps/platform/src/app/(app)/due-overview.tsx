@@ -157,7 +157,7 @@ export async function DueOverview({
                 className={cn(
                   "flex min-h-[26px] items-center rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                   days === horizon
-                    ? "bg-background font-semibold shadow-elevation-1"
+                    ? "bg-segment-active font-semibold text-segment-active-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

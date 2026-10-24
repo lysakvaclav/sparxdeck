@@ -135,7 +135,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                 className={cn(
                   "flex min-h-[26px] items-center rounded-md px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                   view === option
-                    ? "bg-background font-semibold shadow-elevation-1"
+                    ? "bg-segment-active font-semibold text-segment-active-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

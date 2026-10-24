@@ -366,7 +366,7 @@ export function InspectionRun({
                   className={cn(
                     "min-h-[30px] flex-1 rounded-[3px] px-4 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                     mode === id
-                      ? "bg-background font-semibold shadow-elevation-1"
+                      ? "bg-segment-active font-semibold text-segment-active-foreground"
                       : "text-muted-foreground",
                   )}
                 >
@@ -443,11 +443,11 @@ export function InspectionRun({
                     className={cn(
                       "min-h-[30px] flex-1 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       tab === id
-                        ? "bg-background font-semibold shadow-elevation-1"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground"
                         : "text-muted-foreground",
                     )}
                   >
-                    {label} <span className="text-muted-foreground tabular-nums">{count}</span>
+                    {label} <span className="tabular-nums">{count}</span>
                   </button>
                 ))}
               </div>
