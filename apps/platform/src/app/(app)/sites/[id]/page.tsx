@@ -10,6 +10,7 @@ import { DetailList } from "@/components/app/detail-list";
 import { OBJECT_TYPES } from "@/components/app/object-types";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { ShareButton } from "@/components/app/share-button";
+import { SitePlansCard } from "@/components/app/site-plans-card";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,6 +178,12 @@ export default async function SitePage({ params }: Props) {
                 ]}
               />
             </Card>
+            <SitePlansCard
+              organizationId={organization.id}
+              siteId={site.id}
+              today={todayInTimeZone(organization.timezone)}
+              manager={manager}
+            />
             {site.notes && (
               <Card>
                 <CardHeader>

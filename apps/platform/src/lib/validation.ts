@@ -469,6 +469,29 @@ export const defectNoteSchema = z.object({ note: name(2000) });
 
 export const defectDescriptionSchema = z.object({ description: name(2000) });
 
+/** Who fixes a defect: a member's user id, or "" for nobody. */
+export const defectAssigneeSchema = z.object({ userId: optional(z.uuid("memberNotFound")) });
+
+/** By when a defect should be fixed, or "" for no deadline. */
+export const defectDueSchema = z.object({ dueOn: anyDate("2000-01-01") });
+
+// ---------------------------------------------------------------------------
+// Planned inspections
+// ---------------------------------------------------------------------------
+
+export const inspectionPlanSchema = z.object({
+  siteId: z.uuid("required"),
+  plannedOn: z
+    .string()
+    .min(1, "required")
+    .refine(isIsoDate, { message: "dateInvalid", abort: true })
+    .refine((value) => value >= "2000-01-01", "dateInvalid"),
+  technicianId: optional(z.uuid("memberNotFound")),
+  note: optional(z.string().max(1000, "tooLong")),
+});
+
+export type InspectionPlanInput = z.input<typeof inspectionPlanSchema>;
+
 export type DefectInput = z.input<typeof defectSchema>;
 
 // ---------------------------------------------------------------------------

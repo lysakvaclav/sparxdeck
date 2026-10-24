@@ -153,8 +153,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Detail závady: popis, fotky, zařízení, budova, historie (část 8: `src/app/(app)/defects/[id]`, i fotky z revize; historie `defect_events` ukazuje, kdo co změnil)
 - [x] P1 Seznam závad s filtry (část 8: `src/app/(app)/defects`, stav, závažnost, zákazník, budova, hledání popisu i čísla štítku, řazení)
 - [x] P1 Uzavření závady s poznámkou o řešení (část 8: poznámka povinná, hlídá i databáze)
-- [ ] P2 Přiřazení závady konkrétnímu člověku
-- [ ] P2 Termín na odstranění závady a upozornění
+- [x] P2 Přiřazení závady konkrétnímu člověku (část 19: karta Řešení na závadě, `assign_defect` jen na člena firmy, změna v historii; filtr „Řeším já“ a sloupec Řeší v seznamu; odebrání člena přiřazení zruší; „Moje práce“ na přehledu)
+- [x] P2 Termín na odstranění závady a upozornění (část 19: `set_defect_due`, změna v historii; po termínu červeně a do 7 dnů oranžově na závadě i v seznamu, filtr „Po termínu odstranění“, počet na přehledu v „Moje práce“; upozornění e-mailem přijde s Resend a částí 22)
 - [x] P2 Návaznost: další úspěšná kontrola zařízení nabídne uzavření závady (část 15: po vyhovující kontrole dialog s otevřenými závadami zařízení a předvyplněnou poznámkou, uzavře vybrané; zapíše se do historie závady)
 - [ ] P3 Nabídka nebo objednávka opravy pro zákazníka
 
@@ -185,8 +185,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P1 Filtr podle zákazníka a budovy (část 10: přehled termínů, stavy a otevřené závady na úvodní stránce, filtr v adrese)
 - [x] P1 Hranice "brzy" jako nastavení organizace (část 2: `organizations.due_soon_days`, `src/app/(app)/settings`)
 - [x] P1 Správné hraniční případy (testy na přechod měsíců, přestupné roky, časová pásma) (část 5: `tests/due.test.ts` a shoda s databází v `tests/rls.test.ts`)
-- [ ] P2 Kalendářní pohled blížících se revizí
-- [ ] P2 Přehled vytížení techniků
+- [x] P2 Kalendářní pohled blížících se revizí (část 19: `/calendar`, měsíc s naplánovanými revizemi a počtem zařízení k revizi po dnech a budovách, filtr zákazníka a technika, klik na den naplánuje revizi; na telefonu seznam dnů; plánované revize `inspection_plans` (budova, den, technik, poznámka), spojí se s revizí při jejím zahájení; migrace `20261024120000_planning.sql`)
+- [x] P2 Přehled vytížení techniků (část 19: `/calendar?view=workload`, technici po týdnech na 8 týdnů dopředu, počet revizí a zařízení v jejich budovách, nepřiřazené zvlášť; výpočet `workload()` v `src/lib/calendar.ts` s testy)
 - [ ] P2 Export seznamu termínů do CSV
 - [ ] P3 Exportní kalendář (ICS) pro Google a Apple kalendář
 - [ ] P3 Statistiky (počet kontrol, závad, trendy)

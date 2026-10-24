@@ -8,7 +8,9 @@ import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/erro
 import type { DefectSeverity, DefectStatus } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import {
+  defectAssigneeSchema,
   defectDescriptionSchema,
+  defectDueSchema,
   defectNoteSchema,
   defectSchema,
   idSchema,
@@ -132,6 +134,40 @@ export async function commentDefect(id: string, input: unknown): Promise<ActionR
   const { error } = await supabase.rpc("comment_defect", {
     p_defect: id,
     p_note: parsed.data.note,
+  });
+  if (error) return { ok: false, error: databaseErrorCode(error) };
+  revalidateDefects();
+  return { ok: true };
+}
+
+/** Assigns the defect to a member of the company, or to nobody. */
+export async function assignDefect(id: string, input: unknown): Promise<ActionResult> {
+  const active = await getActiveMembership();
+  if (!active) return { ok: false, error: "forbidden" };
+  if (!idSchema.safeParse(id).success) return { ok: false, error: "notFound" };
+  const parsed = defectAssigneeSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("assign_defect", {
+    p_defect: id,
+    p_user: parsed.data.userId,
+  });
+  if (error) return { ok: false, error: databaseErrorCode(error) };
+  revalidateDefects();
+  return { ok: true };
+}
+
+/** Sets or clears the date by which the defect should be fixed. */
+export async function setDefectDue(id: string, input: unknown): Promise<ActionResult> {
+  const active = await getActiveMembership();
+  if (!active) return { ok: false, error: "forbidden" };
+  if (!idSchema.safeParse(id).success) return { ok: false, error: "notFound" };
+  const parsed = defectDueSchema.safeParse(input);
+  if (!parsed.success) return zodFieldErrors(parsed.error);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_defect_due", {
+    p_defect: id,
+    p_due: parsed.data.dueOn,
   });
   if (error) return { ok: false, error: databaseErrorCode(error) };
   revalidateDefects();

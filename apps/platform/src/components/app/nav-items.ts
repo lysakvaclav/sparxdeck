@@ -1,5 +1,6 @@
 import {
   BriefcaseIcon,
+  CalendarIcon,
   ClipboardIcon,
   CogIcon,
   DataLineageIcon,
@@ -18,6 +19,7 @@ export type NavItem = {
   label:
     | "dashboard"
     | "inspections"
+    | "calendar"
     | "defects"
     | "customers"
     | "devices"
@@ -59,6 +61,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     railTone: "text-[#a7b6c2]",
     headerTone: "text-[#00a396] dark:text-[#2ee6d6]",
     phone: "tab",
+  },
+  {
+    href: "/calendar",
+    label: "calendar",
+    icon: CalendarIcon,
+    railTone: "text-[#a7b6c2]",
+    headerTone: "text-[#728c23] dark:text-[#b6d94c]",
+    phone: "more",
   },
   {
     href: "/defects",

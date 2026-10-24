@@ -36,6 +36,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 11 | Hledání, průvodce a export | S (hledání), X, R | Hotovo |
 | 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na portal.sparxdeck.com (landing sparxdeck.com); zbývá Resend, Sentry, zálohy v produkci a test na iPhonu |
 | 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno; z části 17 čekají 4 položky na zpětnou vazbu z pilotu |
+| 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nenasazeno |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -590,6 +591,21 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 **Odloženo:** vlastní vzhled protokolu (barvy, rozložení loga, J P3). Protokol je záměrně černobílý kvůli tisku; počká na přání firem z pilotu.
 
 **Od tebe:** ověřit s revizním technikem, jestli podpis zákazníka, jeho jméno a datum v protokolu stačí, nebo jestli zákazníci chtějí podepisovat i něco dalšího.
+
+### Část 19: Plánování a závady 2
+
+**Stav (2026-10-24): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Plánované revize:** budova, den, technik (nepovinně) a poznámka (`inspection_plans`). Plánuje vlastník a administrátor, vidí všichni. Zahájení revize v budově ji spojí s nejbližší nezahájenou plánovanou revizí té budovy (od 60 dní zpět do 14 dní dopředu, pozdě i trochu dřív se počítá); zrušení revize plán zase uvolní. Smazání budovy odstraní její nezahájené plány, odebrání člena zruší jeho přiřazení.
+- **Kalendář `/calendar`:** měsíc s plánovanými revizemi (stav barevně: naplánovaná, probíhá, hotová, nezahájená) a počtem zařízení s termínem revize po dnech. Filtr zákazníka a technika, upozornění na zařízení po termínu a nezahájené revize. Klik na den ukáže plány a budovy s termínem a nabídne „Naplánovat“ (předvyplněná budova a den), u plánu „Zahájit revizi“ nebo „Otevřít revizi“. Na telefonu seznam dnů s událostmi.
+- **Vytížení techniků:** tabulka technici × týdny (tento a 7 dalších), počet revizí a aktivních zařízení v jejich budovách, nepřiřazené revize zvlášť.
+- **Budova:** karta „Plánované revize“ s nejbližšími návštěvami a tlačítkem „Naplánovat“.
+- **Závady 2:** karta Řešení na závadě: kdo ji řeší (jen člen firmy) a termín odstranění; obojí v historii. Po termínu červené upozornění a datum v seznamu, do 7 dnů oranžové. Seznam závad má sloupce Řeší a Termín odstranění, filtry „Kdo řeší“ (já, nikdo, člen) a „Termín odstranění“ (po termínu, s termínem) a řazení podle termínu.
+- **Přehled:** karta „Moje práce“ pro přihlášeného: jeho revize na 14 dní a závady přiřazené jemu (kolik po termínu).
+- **Technicky:** migrace `20261024120000_planning.sql` (sloupce `defects.assigned_to`/`due_on` s klíčem na členství, `assign_defect`, `set_defect_due`, události `assignee` a `due`, tabulka `inspection_plans` s RLS a právy sloupců, triggery spojení s revizí a smazané budovy). `src/lib/calendar.ts` (mřížka měsíce, stav plánu, vytížení, testy), `src/lib/calendar-data.ts`, `src/components/app/plan-dialog.tsx`, `src/app/(app)/calendar`.
+- **Ověření:** RLS testy (přiřazení jen členovi, cizí firma nic, technik plány jen čte, spojení s revizí a uvolnění po zrušení, odebrání člena, smazaná budova), jednotkové testy kalendáře, `e2e/part19.mjs` (kalendář, plán ze dne, vytížení, budova, závada po termínu, „Moje práce“ technika na telefonu, tmavý režim a angličtina), audit přístupnosti rozšířen o kalendář a vytížení.
+
+**Odloženo:** e-mailové upozornění na blížící se termín odstranění a přiřazení (s Resend v části 22), export kalendáře ICS (P3).
 
 ---
 

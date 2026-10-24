@@ -16,6 +16,10 @@ export type DefectFilterValues = {
   severity?: string;
   customer?: string;
   site?: string;
+  /** "me", "none" or a member's user id. */
+  assignee?: string;
+  /** "overdue" (fix-by date passed) or "set" (has a fix-by date). */
+  due?: string;
 };
 
 const RESETS: Record<keyof DefectFilterValues, (keyof DefectFilterValues)[]> = {
@@ -23,6 +27,8 @@ const RESETS: Record<keyof DefectFilterValues, (keyof DefectFilterValues)[]> = {
   severity: [],
   customer: ["site"],
   site: [],
+  assignee: [],
+  due: [],
 };
 
 /** Filter bar of the defect list; every filter lives in the URL. */
@@ -30,10 +36,12 @@ export function DefectFilters({
   values,
   customers,
   sites,
+  members,
 }: {
   values: DefectFilterValues;
   customers: { id: string; name: string }[];
   sites: { id: string; name: string; customerId: string }[];
+  members: { id: string; name: string }[];
 }) {
   const t = useTranslations("defects");
   const router = useRouter();
@@ -121,6 +129,15 @@ export function DefectFilters({
         t("filters.allSites"),
         siteOptions.map((site) => ({ value: site.id, label: site.name })),
       )}
+      {select("assignee", t("filters.assignee"), t("filters.anyAssignee"), [
+        { value: "me", label: t("filters.assignedToMe") },
+        { value: "none", label: t("filters.unassigned") },
+        ...members.map((member) => ({ value: member.id, label: member.name })),
+      ])}
+      {select("due", t("filters.due"), t("filters.anyDue"), [
+        { value: "overdue", label: t("filters.dueOverdue") },
+        { value: "set", label: t("filters.dueSet") },
+      ])}
       <div className="col-span-2 flex items-center gap-2 sm:col-span-1 sm:w-auto!">
         {Object.values(values).some(Boolean) && (
           <Button variant="ghost" size="sm" onClick={clear}>

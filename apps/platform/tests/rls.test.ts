@@ -1595,6 +1595,262 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("planning and defect assignment (a fresh organization)", () => {
+    let lada: TestUser;
+    let milan: TestUser;
+    let org: string;
+    let site: string;
+    let otherSite: string;
+    let device: string;
+    let defect: string;
+    let milanMembership: string;
+    const today = () => todayInTimeZone("Europe/Prague");
+    const shift = (days: number) => {
+      const date = new Date(`${today()}T00:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days);
+      return date.toISOString().slice(0, 10);
+    };
+
+    beforeAll(async () => {
+      lada = await createUser("lada");
+      milan = await createUser("milan");
+      org = await createOrg(lada, `RLS planning ${run}`);
+      const token = generateToken();
+      await lada.client.from("invitations").insert({
+        organization_id: org,
+        email: milan.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: lada.id,
+      });
+      const { error: joined } = await milan.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Milan",
+      });
+      expect(joined).toBeNull();
+      const { data: membership } = await lada.client
+        .from("memberships")
+        .select("id")
+        .eq("organization_id", org)
+        .eq("user_id", milan.id)
+        .single();
+      milanMembership = membership!.id;
+      const { data: customer } = await lada.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: sites } = await lada.client
+        .from("sites")
+        .insert(
+          ["A", "B"].map((name) => ({ organization_id: org, customer_id: customer!.id, name })),
+        )
+        .select("id, name")
+        .order("name");
+      site = sites![0]!.id;
+      otherSite = sites![1]!.id;
+      const { data: type } = await lada.client.from("device_types").select("id").single();
+      const { data: d } = await lada.client
+        .from("devices")
+        .insert({ organization_id: org, site_id: site, device_type_id: type!.id })
+        .select("id")
+        .single();
+      device = d!.id;
+      const { data: created } = await milan.client.rpc("create_defect", {
+        p_device: device,
+        p_description: "Chybí plomba",
+        p_severity: "major",
+      });
+      defect = created!;
+    });
+
+    it("any member assigns a defect to a member and sets its fix-by date, with history", async () => {
+      const { error } = await milan.client.rpc("assign_defect", {
+        p_defect: defect,
+        p_user: lada.id,
+      });
+      expect(error).toBeNull();
+      const { error: dueError } = await milan.client.rpc("set_defect_due", {
+        p_defect: defect,
+        p_due: shift(-1),
+      });
+      expect(dueError).toBeNull();
+      const { data: row } = await lada.client
+        .from("defects")
+        .select("assigned_to, due_on")
+        .eq("id", defect)
+        .single();
+      expect(row).toEqual({ assigned_to: lada.id, due_on: shift(-1) });
+      const { data: events } = await lada.client
+        .from("defect_events")
+        .select("kind, actor, from_value, to_value")
+        .eq("defect_id", defect)
+        .in("kind", ["assignee", "due"])
+        .order("created_at");
+      expect(events).toEqual([
+        { kind: "assignee", actor: milan.id, from_value: null, to_value: lada.id },
+        { kind: "due", actor: milan.id, from_value: null, to_value: shift(-1) },
+      ]);
+      // Setting the same values again records nothing new.
+      await milan.client.rpc("assign_defect", { p_defect: defect, p_user: lada.id });
+      const { count } = await lada.client
+        .from("defect_events")
+        .select("id", { count: "exact", head: true })
+        .eq("defect_id", defect)
+        .eq("kind", "assignee");
+      expect(count).toBe(1);
+    });
+
+    it("a defect can't go to a non-member, and another company can't touch it", async () => {
+      const { error: outsider } = await lada.client.rpc("assign_defect", {
+        p_defect: defect,
+        p_user: bob.id,
+      });
+      expect(outsider?.message).toMatch(/member_not_found/);
+      const { error: foreign } = await bob.client.rpc("assign_defect", {
+        p_defect: defect,
+        p_user: bob.id,
+      });
+      expect(foreign?.message).toMatch(/not_found/);
+      const { error: foreignDue } = await bob.client.rpc("set_defect_due", {
+        p_defect: defect,
+        p_due: null,
+      });
+      expect(foreignDue?.message).toMatch(/not_found/);
+      // The columns themselves are not writable.
+      const { error: direct } = await lada.client
+        .from("defects")
+        .update({ assigned_to: null } as never)
+        .eq("id", defect);
+      expect(direct).not.toBeNull();
+    });
+
+    it("owners and admins plan; technicians and other companies only read or see nothing", async () => {
+      const { data: plan, error } = await lada.client
+        .from("inspection_plans")
+        .insert({
+          organization_id: org,
+          site_id: site,
+          planned_on: shift(3),
+          technician_id: milan.id,
+          note: "Klíče u správce",
+          created_by: lada.id,
+        })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      const { data: seen } = await milan.client
+        .from("inspection_plans")
+        .select("id, technician_id")
+        .eq("id", plan!.id);
+      expect(seen).toEqual([{ id: plan!.id, technician_id: milan.id }]);
+
+      const { error: technicianInsert } = await milan.client.from("inspection_plans").insert({
+        organization_id: org,
+        site_id: site,
+        planned_on: shift(4),
+      });
+      expect(technicianInsert).not.toBeNull();
+      const { data: technicianUpdate } = await milan.client
+        .from("inspection_plans")
+        .update({ note: "x" })
+        .eq("id", plan!.id)
+        .select("id");
+      expect(technicianUpdate).toEqual([]);
+      const { data: technicianDelete } = await milan.client
+        .from("inspection_plans")
+        .delete()
+        .eq("id", plan!.id)
+        .select("id");
+      expect(technicianDelete).toEqual([]);
+
+      const { data: bobsView } = await bob.client
+        .from("inspection_plans")
+        .select("id")
+        .eq("id", plan!.id);
+      expect(bobsView).toEqual([]);
+      const { error: bobInsert } = await bob.client.from("inspection_plans").insert({
+        organization_id: org,
+        site_id: site,
+        planned_on: shift(4),
+      });
+      expect(bobInsert).not.toBeNull();
+
+      // A technician from outside the company, or the inspection link from the client.
+      const { error: outsider } = await lada.client.from("inspection_plans").insert({
+        organization_id: org,
+        site_id: site,
+        planned_on: shift(5),
+        technician_id: bob.id,
+      });
+      expect(outsider?.code).toBe("23503");
+      const { error: link } = await lada.client
+        .from("inspection_plans")
+        .update({ inspection_id: randomUUID() } as never)
+        .eq("id", plan!.id);
+      expect(link).not.toBeNull();
+    });
+
+    it("starting an inspection carries out the earliest open plan; cancelling frees it", async () => {
+      const { data: plans } = await lada.client
+        .from("inspection_plans")
+        .insert([
+          { organization_id: org, site_id: site, planned_on: shift(-2) },
+          { organization_id: org, site_id: site, planned_on: shift(30) },
+        ])
+        .select("id, planned_on")
+        .order("planned_on");
+      const late = plans![0]!.id;
+      const { data: inspection } = await milan.client.rpc("start_inspection", { p_site: site });
+      const { data: linked } = await lada.client
+        .from("inspection_plans")
+        .select("id, inspection_id")
+        .eq("site_id", site)
+        .not("inspection_id", "is", null);
+      expect(linked).toEqual([{ id: late, inspection_id: inspection }]);
+
+      const { error } = await lada.client.rpc("cancel_inspection", { p_inspection: inspection! });
+      expect(error).toBeNull();
+      const { data: freed } = await lada.client
+        .from("inspection_plans")
+        .select("inspection_id")
+        .eq("id", late)
+        .single();
+      expect(freed?.inspection_id).toBeNull();
+    });
+
+    it("removing a member clears their plans and defects; deleting a building drops its open plans", async () => {
+      const { error } = await lada.client.rpc("remove_member", { p_membership: milanMembership });
+      expect(error).toBeNull();
+      const { data: plans } = await lada.client
+        .from("inspection_plans")
+        .select("technician_id")
+        .eq("organization_id", org)
+        .not("technician_id", "is", null);
+      expect(plans).toEqual([]);
+      await lada.client.rpc("assign_defect", { p_defect: defect, p_user: lada.id });
+
+      const { data: other } = await lada.client
+        .from("inspection_plans")
+        .insert({ organization_id: org, site_id: otherSite, planned_on: shift(1) })
+        .select("id")
+        .single();
+      await lada.client
+        .from("sites")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", otherSite);
+      const { data: gone } = await lada.client
+        .from("inspection_plans")
+        .select("id")
+        .eq("id", other!.id);
+      expect(gone).toEqual([]);
+      const { error: deletedSite } = await lada.client
+        .from("inspection_plans")
+        .insert({ organization_id: org, site_id: otherSite, planned_on: shift(1) });
+      expect(deletedSite?.message).toMatch(/site_deleted/);
+    });
+  });
+
   describe("inspections", () => {
     let site: string;
     let devices: string[];

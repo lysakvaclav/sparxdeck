@@ -22,12 +22,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { requireMembership } from "@/lib/auth";
-import { DEFECT_SEVERITIES, DEFECT_STATUSES } from "@/lib/defects";
+import { DEFECT_SEVERITIES, DEFECT_STATUSES, defectDueState } from "@/lib/defects";
 import { formatLabel, labelQuery } from "@/lib/devices";
+import { CALENDAR_FORMAT, calendarDate, todayInTimeZone } from "@/lib/due";
+import { memberNames } from "@/lib/inspection-data";
 import { ilikeAny, pageParam } from "@/lib/search";
 import type { DefectSeverity, DefectStatus } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { idSchema } from "@/lib/validation";
 import { DefectFilters, type DefectFilterValues } from "./defect-filters";
 
@@ -37,7 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PAGE_SIZE = 50;
-const SORTS = ["newest", "severity"] as const;
+const SORTS = ["newest", "severity", "due"] as const;
+const DUE_FILTERS = ["overdue", "set"] as const;
 type Sort = (typeof SORTS)[number];
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -53,7 +57,7 @@ function oneOf<T extends string>(options: readonly T[], value: string | undefine
 
 /** Defects across the company: unresolved ones by default, most recent first. */
 export default async function DefectsPage({ searchParams }: { searchParams: SearchParams }) {
-  const { organization } = await requireMembership();
+  const { membership, organization } = await requireMembership();
   const t = await getTranslations("defects");
   const tCommon = await getTranslations("common");
   const format = await getFormatter();
@@ -67,23 +71,35 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
     severity: oneOf(DEFECT_SEVERITIES, first(params.severity)),
     customer: validId(first(params.customer)),
     site: validId(first(params.site)),
+    assignee: (() => {
+      const value = first(params.assignee);
+      return value === "me" || value === "none" ? value : validId(value);
+    })(),
+    due: oneOf(DUE_FILTERS, first(params.due)),
   };
+  const today = todayInTimeZone(organization.timezone);
 
   const supabase = await createClient();
   const org = organization.id;
   let query = supabase
     .from("defects")
     .select(
-      "id, number, description, severity, status, created_at, device:devices!inner(id, label_number, site_id, type:device_types(name), site:sites!inner(id, name, customer_id))",
+      "id, number, description, severity, status, created_at, assigned_to, due_on, device:devices!inner(id, label_number, site_id, type:device_types(name), site:sites!inner(id, name, customer_id))",
       { count: "exact" },
     )
     .eq("organization_id", org);
   // Unresolved (open + in progress) unless a status or "all" is chosen.
-  if (!filters.status) query = query.neq("status", "resolved");
+  // A fix-by date only matters until the defect is resolved.
+  if (!filters.status || filters.due) query = query.neq("status", "resolved");
   else if (filters.status !== "all") query = query.eq("status", filters.status as DefectStatus);
   if (filters.severity) query = query.eq("severity", filters.severity as DefectSeverity);
   if (filters.site) query = query.eq("device.site_id", filters.site);
   if (filters.customer) query = query.eq("device.site.customer_id", filters.customer);
+  if (filters.assignee === "me") query = query.eq("assigned_to", membership.user_id);
+  else if (filters.assignee === "none") query = query.is("assigned_to", null);
+  else if (filters.assignee) query = query.eq("assigned_to", filters.assignee);
+  if (filters.due === "overdue") query = query.lt("due_on", today);
+  else if (filters.due === "set") query = query.not("due_on", "is", null);
   const label = labelQuery(q);
   if (label) query = query.eq("device.label_number", label);
   else {
@@ -93,10 +109,14 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
   query =
     sort === "severity"
       ? query.order("severity", { ascending: false }).order("created_at", { ascending: false })
-      : query.order("created_at", { ascending: false });
+      : sort === "due"
+        ? query
+            .order("due_on", { ascending: true, nullsFirst: false })
+            .order("created_at", { ascending: false })
+        : query.order("created_at", { ascending: false });
 
   const from = (page - 1) * PAGE_SIZE;
-  const [result, customers, sites] = await Promise.all([
+  const [result, customers, sites, names] = await Promise.all([
     query.order("id").range(from, from + PAGE_SIZE - 1),
     fetchAll((start, end) =>
       supabase
@@ -118,6 +138,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
         .order("id")
         .range(start, end),
     ),
+    memberNames(org),
   ]);
   const { data: defects, count, error } = result;
   const total = count ?? 0;
@@ -181,6 +202,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
                 name: site.name,
                 customerId: site.customer_id,
               }))}
+              members={[...names].map(([id, name]) => ({ id, name }))}
             />
           </div>
 
@@ -209,6 +231,17 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
                   <TableHeaderCell className="hidden sm:table-cell">
                     {t("columns.status")}
                   </TableHeaderCell>
+                  <TableHeaderCell className="hidden lg:table-cell">
+                    {t("columns.assignee")}
+                  </TableHeaderCell>
+                  <SortableHeader
+                    href={sortHref("due")}
+                    active={sort === "due"}
+                    direction="asc"
+                    className="hidden md:table-cell"
+                  >
+                    {t("columns.due")}
+                  </SortableHeader>
                   <SortableHeader
                     href={sortHref("newest")}
                     active={sort === "newest"}
@@ -255,6 +288,23 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
                     <TableCell className="hidden whitespace-nowrap sm:table-cell">
                       <DefectStatusBadge status={defect.status} />
                     </TableCell>
+                    <TableCell className="hidden max-w-0 truncate lg:table-cell">
+                      {defect.assigned_to ? (
+                        names.get(defect.assigned_to)
+                      ) : (
+                        <span className="text-subtle">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="hidden whitespace-nowrap tabular-nums md:table-cell">
+                      {defect.due_on ? (
+                        <DueOn
+                          date={format.dateTime(calendarDate(defect.due_on), CALENDAR_FORMAT)}
+                          state={defectDueState(defect.due_on, defect.status, today)}
+                        />
+                      ) : (
+                        <span className="text-subtle">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="hidden whitespace-nowrap text-muted-foreground xl:table-cell">
                       {format.dateTime(new Date(defect.created_at), { dateStyle: "medium" })}
                     </TableCell>
@@ -273,5 +323,19 @@ export default async function DefectsPage({ searchParams }: { searchParams: Sear
         </Card>
       </PageBody>
     </>
+  );
+}
+
+/** A fix-by date: red when overdue, orange when close (as due dates elsewhere). */
+function DueOn({ date, state }: { date: string; state: ReturnType<typeof defectDueState> }) {
+  return (
+    <span
+      className={cn(
+        state === "overdue" && "font-semibold text-destructive-text",
+        state === "soon" && "font-semibold text-warning-text",
+      )}
+    >
+      {date}
+    </span>
   );
 }

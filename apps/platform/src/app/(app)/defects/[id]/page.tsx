@@ -4,11 +4,14 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
   AnnotationIcon,
+  CalendarIcon,
   EditIcon,
   IssueClosedIcon,
   IssueIcon,
+  PersonIcon,
   PlayIcon,
   SearchIcon,
+  TimeIcon,
   UndoIcon,
   WarningSignIcon,
   type IconComponent,
@@ -21,8 +24,9 @@ import { ShareButton } from "@/components/app/share-button";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireMembership } from "@/lib/auth";
-import { defectNumber } from "@/lib/defects";
+import { defectDueState, defectNumber } from "@/lib/defects";
 import { deviceName } from "@/lib/devices";
+import { CALENDAR_FORMAT, calendarDate, todayInTimeZone } from "@/lib/due";
 import { memberNames } from "@/lib/inspection-data";
 import { ORG_ASSETS_BUCKET, SIGNED_URL_SECONDS } from "@/lib/storage";
 import type { DefectEventKind } from "@/lib/supabase/database.types";
@@ -31,6 +35,7 @@ import { idSchema } from "@/lib/validation";
 import {
   AddDefectPhoto,
   CommentForm,
+  DefectAssignment,
   DefectStatusControls,
   DescriptionEditor,
 } from "./defect-controls";
@@ -65,6 +70,8 @@ const EVENT_ICON: Record<DefectEventKind, IconComponent> = {
   description: EditIcon,
   comment: AnnotationIcon,
   observed: SearchIcon,
+  assignee: PersonIcon,
+  due: CalendarIcon,
 };
 
 const STATUS_ICON: Record<string, IconComponent> = {
@@ -126,6 +133,12 @@ export default async function DefectPage({ params }: Props) {
     format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" });
   const statusLabel = (value: string | null) =>
     value ? t(`status.${value as "open" | "in_progress" | "resolved"}`) : "";
+  const day = (value: string) => format.dateTime(calendarDate(value), CALENDAR_FORMAT);
+  const dueState = defectDueState(
+    defect.due_on,
+    defect.status,
+    todayInTimeZone(organization.timezone),
+  );
   const severityLabel = (value: string | null) =>
     value ? t(`severity.${value as "minor" | "major" | "critical"}`) : "";
   const eventText = (event: NonNullable<typeof events>[number]) => {
@@ -153,6 +166,14 @@ export default async function DefectPage({ params }: Props) {
         return t("events.comment", { actor });
       case "observed":
         return t("events.observed");
+      case "assignee":
+        return event.to_value
+          ? t("events.assigned", { actor, name: name(event.to_value) })
+          : t("events.unassigned", { actor });
+      case "due":
+        return event.to_value
+          ? t("events.due", { actor, date: day(event.to_value) })
+          : t("events.dueCleared", { actor });
     }
   };
   const gallery = (list: { id: string; storage_path: string }[]) => (
@@ -201,6 +222,16 @@ export default async function DefectPage({ params }: Props) {
       <PageBody>
         <div className="grid grid-cols-1 gap-2.5 sm:gap-[15px] lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="contents lg:block lg:space-y-[15px]">
+            {defect.due_on && (dueState === "overdue" || dueState === "soon") && (
+              <Alert
+                variant={dueState === "overdue" ? "error" : "warning"}
+                icon={dueState === "overdue" ? WarningSignIcon : TimeIcon}
+                title={t(dueState === "overdue" ? "detail.dueOverdueTitle" : "detail.dueSoonTitle")}
+                className="max-lg:order-1"
+              >
+                {t("detail.dueBody", { date: day(defect.due_on) })}
+              </Alert>
+            )}
             {defect.status === "resolved" && defect.resolution_note && (
               <Alert
                 variant="success"
@@ -311,6 +342,22 @@ export default async function DefectPage({ params }: Props) {
                 />
               </CardContent>
             </Card>
+            {defect.status !== "resolved" && (
+              <Card className="max-lg:order-3">
+                <CardHeader>
+                  <CardTitle>{t("detail.handling")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DefectAssignment
+                    key={`${defect.assigned_to}-${defect.due_on}`}
+                    id={defect.id}
+                    assignedTo={defect.assigned_to}
+                    dueOn={defect.due_on}
+                    members={[...names].map(([member, display]) => ({ id: member, name: display }))}
+                  />
+                </CardContent>
+              </Card>
+            )}
             <Card className="max-lg:order-6">
               <CardHeader>
                 <CardTitle>{t("detail.properties")}</CardTitle>
@@ -364,6 +411,9 @@ export default async function DefectPage({ params }: Props) {
                           ),
                         },
                       ]
+                    : []),
+                  ...(defect.assigned_to
+                    ? [{ label: t("detail.assignee"), value: name(defect.assigned_to) }]
                     : []),
                   {
                     label: t("detail.foundAt"),

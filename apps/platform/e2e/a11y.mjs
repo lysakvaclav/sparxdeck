@@ -5,7 +5,16 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import { launch, sleep } from "./driver.mjs";
-import { APP, cleanup, createUser, organizationOf, selectRows, signIn } from "./support.mjs";
+import {
+  APP,
+  cleanup,
+  createUser,
+  insertRows,
+  organizationOf,
+  selectRows,
+  signIn,
+  updateRows,
+} from "./support.mjs";
 
 const OUT = process.argv[2] ?? ".e2e-output";
 const AXE = fs.readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
@@ -118,6 +127,22 @@ try {
     "floor_plans",
     `organization_id=eq.${org}&select=id,site_id&order=sort_order&limit=1`,
   );
+  // Part 19: a planned visit and a defect with a person and a passed fix-by date.
+  const soon = new Date();
+  soon.setUTCDate(soon.getUTCDate() + 2);
+  await insertRows("inspection_plans", [
+    {
+      organization_id: org,
+      site_id: site.id,
+      planned_on: soon.toISOString().slice(0, 10),
+      technician_id: owner.id,
+      note: "Klíče u správce",
+    },
+  ]);
+  await updateRows("defects", `id=eq.${defect.id}`, {
+    assigned_to: owner.id,
+    due_on: "2026-01-15",
+  });
 
   const pages = [
     ["dashboard", "/"],
@@ -146,6 +171,8 @@ try {
     ["import", "/import"],
     ["plan", `/sites/${plan.site_id}/plans/${plan.id}`],
     ["offline", "/offline"],
+    ["calendar", "/calendar"],
+    ["calendar-workload", "/calendar?view=workload"],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -210,6 +237,7 @@ try {
     ["phone import", "/import"],
     ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],
     ["phone offline", "/offline"],
+    ["phone calendar", "/calendar"],
   ]) {
     await visit(page, label, path);
     await touchTargets(page, label);

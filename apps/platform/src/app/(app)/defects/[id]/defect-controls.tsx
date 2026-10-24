@@ -3,11 +3,20 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CameraIcon, EditIcon, IssueClosedIcon, PlayIcon, UndoIcon } from "@/components/icons";
+import {
+  CameraIcon,
+  CrossIcon,
+  EditIcon,
+  IssueClosedIcon,
+  PlayIcon,
+  UndoIcon,
+} from "@/components/icons";
 import { SeverityPicker } from "@/components/app/severity-picker";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
@@ -15,10 +24,12 @@ import { compressImage } from "@/lib/client/image";
 import type { ActionResult, ErrorCode } from "@/lib/errors";
 import type { DefectSeverity, DefectStatus } from "@/lib/supabase/database.types";
 import {
+  assignDefect,
   changeDefectSeverity,
   changeDefectStatus,
   commentDefect,
   editDefectDescription,
+  setDefectDue,
 } from "../actions";
 import { uploadDefectPhotos } from "../new/defect-form";
 
@@ -294,5 +305,87 @@ export function AddDefectPhoto({ id, organizationId }: { id: string; organizatio
         }}
       />
     </label>
+  );
+}
+
+/** Who fixes the defect and by when; every change goes to the history. */
+export function DefectAssignment({
+  id,
+  assignedTo,
+  dueOn,
+  members,
+}: {
+  id: string;
+  assignedTo: string | null;
+  dueOn: string | null;
+  members: { id: string; name: string }[];
+}) {
+  const t = useTranslations("defects.detail");
+  const tCommon = useTranslations("common");
+  const { pending, run } = useRun();
+  const [due, setDue] = useState(dueOn ?? "");
+  const dueChanged = due !== (dueOn ?? "");
+
+  return (
+    <div className="space-y-[15px]">
+      <Field id="defect-assignee" label={t("assignee")}>
+        <NativeSelect
+          value={assignedTo ?? ""}
+          disabled={pending}
+          onChange={(event) => run(() => assignDefect(id, { userId: event.target.value }))}
+        >
+          <option value="">{t("nobody")}</option>
+          {members.map((member) => (
+            <option key={member.id} value={member.id}>
+              {member.name}
+            </option>
+          ))}
+        </NativeSelect>
+      </Field>
+      <form
+        noValidate
+        className="space-y-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          run(() => setDefectDue(id, { dueOn: due }));
+        }}
+      >
+        <Field id="defect-due" label={t("dueOn")} hint={t("dueHint")}>
+          <Input
+            type="date"
+            value={due}
+            disabled={pending}
+            className="sm:max-w-[200px]"
+            onChange={(event) => setDue(event.target.value)}
+          />
+        </Field>
+        {(dueChanged || dueOn) && (
+          <div className="flex flex-wrap gap-2">
+            {dueChanged && (
+              <Button type="submit" size="sm" disabled={pending}>
+                {tCommon("save")}
+              </Button>
+            )}
+            {dueOn && !dueChanged && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () => setDefectDue(id, { dueOn: "" }),
+                    () => setDue(""),
+                  )
+                }
+              >
+                <CrossIcon />
+                {t("clearDue")}
+              </Button>
+            )}
+          </div>
+        )}
+      </form>
+    </div>
   );
 }

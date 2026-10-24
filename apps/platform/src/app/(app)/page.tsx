@@ -41,6 +41,7 @@ import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { DueOverview } from "./due-overview";
 import { GettingStarted } from "./getting-started";
+import { MyWork } from "./my-work";
 import { OverviewFilters } from "./overview-filters";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -305,6 +306,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             );
           })}
         </div>
+
+        <MyWork organizationId={organization.id} userId={membership.user_id} today={today} />
 
         {openInspections && openInspections.length > 0 && (
           <Card className="mt-2.5 sm:mt-[15px]">

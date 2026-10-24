@@ -128,7 +128,8 @@
     "inspections": "Inspections",
     "more": "More",
     "defects": "Defects",
-    "search": "Search"
+    "search": "Search",
+    "calendar": "Calendar"
   },
   "dashboard": {
     "title": "Overview",
@@ -190,6 +191,12 @@
       },
       "moreSites": "and {count, plural, one {# more building} other {# more buildings}}",
       "showDevices": "Devices due within {days} days"
+    },
+    "myWork": {
+      "title": "My work",
+      "today": "Today",
+      "defects": "{count, plural, one {# defect assigned to me} other {# defects assigned to me}}",
+      "overdue": "{count, plural, one {# past its fix-by date} other {# past their fix-by date}}"
     }
   },
   "team": {
@@ -1726,7 +1733,15 @@
       "severity": "Severity",
       "customer": "Customer",
       "site": "Building",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "assignee": "Assigned to",
+      "anyAssignee": "Anyone",
+      "assignedToMe": "Assigned to me",
+      "unassigned": "Unassigned",
+      "due": "Fix by",
+      "anyDue": "Any fix-by date",
+      "dueOverdue": "Past the fix-by date",
+      "dueSet": "With a fix-by date"
     },
     "columns": {
       "number": "Number",
@@ -1735,7 +1750,9 @@
       "site": "Building",
       "severity": "Severity",
       "status": "Status",
-      "created": "Found"
+      "created": "Found",
+      "assignee": "Assigned to",
+      "due": "Fix by"
     },
     "form": {
       "device": "Device",
@@ -1775,7 +1792,16 @@
       "resolveTitle": "Resolve the defect",
       "resolveNote": "How the defect was resolved",
       "resolveNotePlaceholder": "E.g. seal replaced, extinguisher sent for repair…",
-      "changeSeverity": "Change severity"
+      "changeSeverity": "Change severity",
+      "handling": "Handling",
+      "assignee": "Assigned to",
+      "nobody": "Nobody",
+      "dueOn": "Fix by",
+      "dueHint": "When the defect should be fixed. Once the date passes, it shows in red here and in the list.",
+      "clearDue": "Remove the date",
+      "dueOverdueTitle": "The fix-by date has passed",
+      "dueSoonTitle": "The fix-by date is close",
+      "dueBody": "The defect should have been fixed by {date}."
     },
     "events": {
       "created": "{actor} reported the defect ({severity})",
@@ -1785,7 +1811,11 @@
       "description": "{actor} edited the description",
       "comment": "{actor}",
       "observed": "Found again in an inspection",
-      "someone": "Someone"
+      "someone": "Someone",
+      "assigned": "{actor} assigned the defect to {name}",
+      "unassigned": "{actor} removed the assignment",
+      "due": "{actor} set the fix-by date to {date}",
+      "dueCleared": "{actor} removed the fix-by date"
     },
     "card": {
       "title": "Defects",
@@ -2062,5 +2092,80 @@
     "waiting": "{count, plural, one {# change waits} other {# changes wait}} to be sent",
     "retry": "Try again",
     "home": "Go to the overview"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "views": "View",
+    "view": {
+      "month": "Month",
+      "workload": "Technicians' workload"
+    },
+    "previous": "Previous month",
+    "next": "Next month",
+    "today": "Today",
+    "close": "Close",
+    "attention": "Attention",
+    "overdueDevices": "{count, plural, one {# device is past its inspection date} other {# devices are past their inspection date}}",
+    "missedPlans": "{count, plural, one {# planned inspection this month wasn't started} other {# planned inspections this month weren't started}}",
+    "devicesDue": "{count, plural, one {# device due} other {# devices due}}",
+    "dayCounts": "{plans, plural, =0 {no planned inspection} one {# planned inspection} other {# planned inspections}}, {devices, plural, =0 {no device due} one {# device due} other {# devices due}}",
+    "more": "+ {count} more",
+    "legendDue": "Devices' inspection dates",
+    "emptyMonth": "Nothing is planned this month and no device is due for inspection.",
+    "formerMember": "Former team member",
+    "state": {
+      "planned": "Planned",
+      "inProgress": "In progress",
+      "done": "Done",
+      "missed": "Not started"
+    },
+    "day": {
+      "plans": "Planned inspections",
+      "noPlans": "Nothing is planned for this day.",
+      "due": "Inspection dates",
+      "noDue": "No device is due for inspection on this day.",
+      "planThis": "Plan",
+      "openInspection": "Open inspection",
+      "edit": "Edit"
+    },
+    "plan": {
+      "title": "Plan an inspection",
+      "editTitle": "Edit the planned inspection",
+      "site": "Building",
+      "sitePlaceholder": "Choose a building",
+      "date": "Day",
+      "technician": "Technician",
+      "unassigned": "Unassigned",
+      "note": "Note",
+      "noteHint": "Optional, e.g. an agreed time or a contact on site.",
+      "confirm": "Plan",
+      "created": "The inspection is planned.",
+      "updated": "The planned inspection is updated.",
+      "deleted": "The planned inspection is deleted.",
+      "delete": "Delete",
+      "deleteTitle": "Delete the planned inspection?",
+      "deleteConfirm": "Delete"
+    },
+    "filters": {
+      "label": "Calendar filters",
+      "customer": "Customer",
+      "allCustomers": "All customers",
+      "technician": "Technician",
+      "allTechnicians": "All technicians",
+      "unassigned": "Unassigned"
+    },
+    "workload": {
+      "technician": "Technician",
+      "thisWeek": "This week",
+      "total": "Total",
+      "visits": "{count, plural, one {# inspection} other {# inspections}}",
+      "devices": "{count, plural, one {# device} other {# devices}}",
+      "hint": "Planned inspections in the next {weeks} weeks and the number of active devices in their buildings."
+    },
+    "siteCard": {
+      "title": "Planned inspections",
+      "plan": "Plan",
+      "empty": "No inspection planned yet."
+    }
   }
 }

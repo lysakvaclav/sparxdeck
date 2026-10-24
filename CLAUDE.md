@@ -121,6 +121,10 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - PDF je v soukromém bucketu `protocols` (`<org>/<rok>/<id>.pdf`), který zapisuje jen server přes service role (`createAdminClient`). Uložený protokol se nemění.
   - Stažení přes `/inspections/[id]/protocol` (podepsaný odkaz 60 s, `?inline` pro tisk). Logo WebP se pro PDF převádí přes `sharp`.
   - Texty jsou v `protocol.pdf` a `protocol.email`, jazyk dodá `getTranslations({ locale })` (request config explicitní jazyk respektuje).
+- Plánování a závady 2 (část 19, migrace `20261024120000_planning.sql`):
+  - `inspection_plans` (budova, den, technik, poznámka): RLS jako u zákazníků (zapisuje vlastník/admin), `inspection_id` nastavuje jen trigger `link_inspection_plan` při vložení revize (nejbližší otevřený plán budovy v okně −60/+14 dní), zrušení revize ho uvolní (`on delete set null`). Technik plánu i řešitel závady mají klíč na `memberships (organization_id, user_id)` s `on delete set null`, takže odebrání člena přiřazení zruší.
+  - `defects.assigned_to`, `defects.due_on` jen přes `assign_defect` a `set_defect_due` (každý člen), události `assignee`/`due`. Stav termínu `defectDueState()` v `src/lib/defects.ts` (do 7 dní „brzy“).
+  - Kalendář `/calendar` (měsíc, `?view=workload`), výpočty v `src/lib/calendar.ts` (testy), data `src/lib/calendar-data.ts`, dialog `src/components/app/plan-dialog.tsx` (i na stránce budovy, `site-plans-card.tsx`), „Moje práce“ na přehledu (`(app)/my-work.tsx`).
 - Přehled termínů na úvodní stránce:
   - Co propadá za 30/60/90 dní po budovách: `src/lib/due-plan.ts` (`duePlan`, `horizonWindow`, testy hranic), `src/app/(app)/due-overview.tsx`.
   - Filtr zákazníka a budovy je v adrese (`overview-filters.tsx`).

@@ -128,7 +128,8 @@
     "inspections": "Revize",
     "more": "Více",
     "defects": "Závady",
-    "search": "Hledat"
+    "search": "Hledat",
+    "calendar": "Kalendář"
   },
   "dashboard": {
     "title": "Přehled",
@@ -190,6 +191,12 @@
       },
       "moreSites": "a {count, plural, one {další # budova} few {další # budovy} other {dalších # budov}}",
       "showDevices": "Zařízení s termínem do {days} dní"
+    },
+    "myWork": {
+      "title": "Moje práce",
+      "today": "Dnes",
+      "defects": "{count, plural, one {# závada přiřazená mně} few {# závady přiřazené mně} other {# závad přiřazených mně}}",
+      "overdue": "{count, plural, one {# po termínu odstranění} few {# po termínu odstranění} other {# po termínu odstranění}}"
     }
   },
   "team": {
@@ -1726,7 +1733,15 @@
       "severity": "Závažnost",
       "customer": "Zákazník",
       "site": "Budova",
-      "clear": "Zrušit filtry"
+      "clear": "Zrušit filtry",
+      "assignee": "Kdo řeší",
+      "anyAssignee": "Řeší kdokoli",
+      "assignedToMe": "Řeším já",
+      "unassigned": "Nikdo nepřiřazený",
+      "due": "Termín odstranění",
+      "anyDue": "Jakýkoli termín",
+      "dueOverdue": "Po termínu odstranění",
+      "dueSet": "S termínem odstranění"
     },
     "columns": {
       "number": "Číslo",
@@ -1735,7 +1750,9 @@
       "site": "Budova",
       "severity": "Závažnost",
       "status": "Stav",
-      "created": "Zjištěno"
+      "created": "Zjištěno",
+      "assignee": "Řeší",
+      "due": "Termín odstranění"
     },
     "form": {
       "device": "Zařízení",
@@ -1775,7 +1792,16 @@
       "resolveTitle": "Vyřešit závadu",
       "resolveNote": "Jak byla závada vyřešena",
       "resolveNotePlaceholder": "Např. vyměněna plomba, přístroj předán k opravě…",
-      "changeSeverity": "Změnit závažnost"
+      "changeSeverity": "Změnit závažnost",
+      "handling": "Řešení",
+      "assignee": "Řeší",
+      "nobody": "Nikdo",
+      "dueOn": "Termín odstranění",
+      "dueHint": "Do kdy má být závada odstraněná. Po termínu se v seznamu i tady zobrazí červeně.",
+      "clearDue": "Zrušit termín",
+      "dueOverdueTitle": "Termín odstranění uplynul",
+      "dueSoonTitle": "Blíží se termín odstranění",
+      "dueBody": "Závada měla být odstraněná do {date}."
     },
     "events": {
       "created": "{actor} zapsal(a) závadu ({severity})",
@@ -1785,7 +1811,11 @@
       "description": "{actor} upravil(a) popis",
       "comment": "{actor}",
       "observed": "Znovu zjištěno při revizi",
-      "someone": "Někdo"
+      "someone": "Někdo",
+      "assigned": "{actor} přiřadil(a) závadu: {name}",
+      "unassigned": "{actor} zrušil(a) přiřazení",
+      "due": "{actor} nastavil(a) termín odstranění na {date}",
+      "dueCleared": "{actor} zrušil(a) termín odstranění"
     },
     "card": {
       "title": "Závady",
@@ -2062,5 +2092,80 @@
     "waiting": "{count, plural, one {# změna čeká} few {# změny čekají} other {# změn čeká}} na odeslání",
     "retry": "Zkusit znovu",
     "home": "Přejít na přehled"
+  },
+  "calendar": {
+    "title": "Kalendář",
+    "views": "Zobrazení",
+    "view": {
+      "month": "Měsíc",
+      "workload": "Vytížení techniků"
+    },
+    "previous": "Předchozí měsíc",
+    "next": "Další měsíc",
+    "today": "Dnes",
+    "close": "Zavřít",
+    "attention": "Pozor",
+    "overdueDevices": "{count, plural, one {# zařízení je po termínu revize} few {# zařízení jsou po termínu revize} other {# zařízení je po termínu revize}}",
+    "missedPlans": "{count, plural, one {# naplánovaná revize v tomto měsíci se nezahájila} few {# naplánované revize v tomto měsíci se nezahájily} other {# naplánovaných revizí v tomto měsíci se nezahájilo}}",
+    "devicesDue": "{count, plural, one {# zařízení k revizi} few {# zařízení k revizi} other {# zařízení k revizi}}",
+    "dayCounts": "{plans, plural, =0 {žádná plánovaná revize} one {# plánovaná revize} few {# plánované revize} other {# plánovaných revizí}}, {devices, plural, =0 {žádné zařízení k revizi} one {# zařízení k revizi} few {# zařízení k revizi} other {# zařízení k revizi}}",
+    "more": "+ {count} další",
+    "legendDue": "Termíny revizí zařízení",
+    "emptyMonth": "V tomto měsíci není nic naplánované a žádné zařízení nemá termín revize.",
+    "formerMember": "Bývalý člen týmu",
+    "state": {
+      "planned": "Naplánovaná",
+      "inProgress": "Probíhá",
+      "done": "Hotová",
+      "missed": "Nezahájená"
+    },
+    "day": {
+      "plans": "Plánované revize",
+      "noPlans": "Na tento den není nic naplánované.",
+      "due": "Termíny revizí",
+      "noDue": "Žádné zařízení nemá v tento den termín revize.",
+      "planThis": "Naplánovat",
+      "openInspection": "Otevřít revizi",
+      "edit": "Upravit"
+    },
+    "plan": {
+      "title": "Naplánovat revizi",
+      "editTitle": "Upravit plánovanou revizi",
+      "site": "Budova",
+      "sitePlaceholder": "Vyberte budovu",
+      "date": "Den",
+      "technician": "Technik",
+      "unassigned": "Nepřiřazeno",
+      "note": "Poznámka",
+      "noteHint": "Nepovinné, např. domluvený čas nebo kontakt na místě.",
+      "confirm": "Naplánovat",
+      "created": "Revize je naplánovaná.",
+      "updated": "Plánovaná revize je upravená.",
+      "deleted": "Plánovaná revize je smazaná.",
+      "delete": "Smazat",
+      "deleteTitle": "Opravdu smazat plánovanou revizi?",
+      "deleteConfirm": "Smazat"
+    },
+    "filters": {
+      "label": "Filtry kalendáře",
+      "customer": "Zákazník",
+      "allCustomers": "Všichni zákazníci",
+      "technician": "Technik",
+      "allTechnicians": "Všichni technici",
+      "unassigned": "Nepřiřazené"
+    },
+    "workload": {
+      "technician": "Technik",
+      "thisWeek": "Tento týden",
+      "total": "Celkem",
+      "visits": "{count, plural, one {# revize} few {# revize} other {# revizí}}",
+      "devices": "{count, plural, one {# zařízení} few {# zařízení} other {# zařízení}}",
+      "hint": "Naplánované revize v příštích {weeks} týdnech a počet aktivních zařízení v jejich budovách."
+    },
+    "siteCard": {
+      "title": "Plánované revize",
+      "plan": "Naplánovat",
+      "empty": "Zatím žádná naplánovaná revize."
+    }
   }
 }

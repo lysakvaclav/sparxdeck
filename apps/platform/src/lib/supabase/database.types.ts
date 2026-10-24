@@ -27,7 +27,9 @@ export type DefectEventKind =
   | "severity"
   | "description"
   | "comment"
-  | "observed";
+  | "observed"
+  | "assignee"
+  | "due";
 
 type Timestamps = { created_at: string; updated_at: string };
 
@@ -234,6 +236,48 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "sites";
             referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
+      inspection_plans: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string;
+          planned_on: string;
+          technician_id: string | null;
+          note: string | null;
+          inspection_id: string | null;
+          created_by: string | null;
+        } & Timestamps;
+        Insert: {
+          organization_id: string;
+          site_id: string;
+          planned_on: string;
+          technician_id?: string | null;
+          note?: string | null;
+          created_by?: string | null;
+        };
+        Update: Partial<{
+          site_id: string;
+          planned_on: string;
+          technician_id: string | null;
+          note: string | null;
+        }>;
+        Relationships: [
+          {
+            foreignKeyName: "inspection_plans_site_id_organization_id_fkey";
+            columns: ["site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "inspection_plans_inspection_id_fkey";
+            columns: ["inspection_id"];
+            isOneToOne: false;
+            referencedRelation: "inspections";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -681,6 +725,8 @@ export type Database = {
           resolved_at: string | null;
           resolved_by: string | null;
           resolution_note: string | null;
+          assigned_to: string | null;
+          due_on: string | null;
         } & Timestamps;
         Insert: never;
         Update: never;
@@ -998,6 +1044,8 @@ export type Database = {
         Returns: string;
       };
       delete_device_photo: { Args: { p_photo: string }; Returns: string };
+      assign_defect: { Args: { p_defect: string; p_user: string | null }; Returns: undefined };
+      set_defect_due: { Args: { p_defect: string; p_due: string | null }; Returns: undefined };
       move_device: {
         Args: { p_device: string; p_site: string; p_location: string | null; p_note: string | null };
         Returns: undefined;
