@@ -35,7 +35,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 10 | Přehled termínů a týdenní souhrn | K, L (souhrn) | Hotovo, odesílání souhrnu čeká na Resend a nasazení |
 | 11 | Hledání, průvodce a export | S (hledání), X, R | Hotovo |
 | 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na portal.sparxdeck.com (landing sparxdeck.com); zbývá Resend, Sentry, zálohy v produkci a test na iPhonu |
-| 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno (2026-10-23); z části 17 zbývá 6 odložených položek |
+| 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno; z části 17 čekají 4 položky na zpětnou vazbu z pilotu |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -538,7 +538,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 
 ### Část 17: Zařízení a šablony 2
 
-**Stav (2026-10-20): částečně hotovo** (nasazeno 2026-10-23 na portal.sparxdeck.com). Hotovo: vlastní typy zařízení s vlastními poli, fotky zařízení, konec životnosti, hromadné úpravy. Odloženo na později v rámci této části (viz níže): kopie šablony, výběr z možností jako typ položky, povinná fotka u položky, přesun zařízení mezi budovami s historií, vlastní pole u zákazníků.
+**Stav (2026-10-24): hotovo kromě položek čekajících na pilot** (nasazeno na portal.sparxdeck.com). Hotovo: vlastní typy zařízení s vlastními poli, fotky zařízení, konec životnosti, hromadné úpravy, přesun zařízení s historií a povinná fotka u položky (2026-10-24). Na zpětnou vazbu z pilotu čeká: kopie šablony, výběr z možností jako typ položky, vlastní pole u zákazníků, dovoz dalších vlastních polí z CSV.
 
 - **Vlastní typy zařízení:** firma si přidá vlastní typ (`/device-types/new`) se jménem, intervalem revize a vlastními poli — stejnou cestou jako zákazníky a budovy (práva přes RLS, ne přes funkci). Technický kód (`device_types.code`) se odvodí z názvu, při shodě se za něj přidá číslo. Po založení typu aplikace rovnou nabídne editor šablony kontroly (bez položek typ nejde použít v revizi).
 - **Vlastní pole podle typu:** `device_types.custom_fields` — pole `{klíč, název}`, nejvýš 8 na typ. Klíč se při přidávání nového pole odvodí z názvu a navždy se nemění (přejmenování pole v `/device-types/[id]/edit` tak nikdy neztratí hodnoty uložené pod starým klíčem). Hodnoty se ukládají do `devices.attributes` jako dřív (sloupec z části 5), jen podle pole typu místo pevné dvojice hasivo/velikost. Vzorový typ hasicího přístroje dostal tato dvě pole jako data při zakládání firmy (`seed_organization_defaults`) a existující firmy je dostaly zpětně.
@@ -554,7 +554,7 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
   - Objevená a opravená chyba ovladače e2e testů: nový headless Edge (`--headless=new`) nemá potvrzovací dialogy (např. neuložené změny šablony) automaticky potvrzené jako starší headless režim — bez odpovědi by zablokovaly navigaci. `e2e/driver.mjs` teď dialog vždy potvrdí.
 
 **Odloženo v rámci části 17** (menší rozsah, nevyžádáno v tomto kole). Majitel chce tyto dvě hlídat přednostně, technici na ně v terénu pravděpodobně narazí brzy:
-- **Povinná fotka u položky (E).**
+- ~~**Povinná fotka u položky (E).**~~ **hotovo 2026-10-24:** „Povinná fotka“ v editoru šablony; bez fotky dané položky nejde kontrolu dokončit (databáze i telefon, i bez signálu), vynechání zařízení ji nepotřebuje.
 - ~~**Přesun zařízení do jiné budovy s historií (F)**~~ **hotovo 2026-10-24:** tlačítko „Přesunout“ na kartě Umístění (budova, lokace, poznámka), karta „Historie umístění“ na stránce zařízení. Historii zapisuje databáze při každé změně budovy nebo lokace, i z úpravy zařízení, hromadné úpravy a smazání lokace.
 
 Zbylé počkají na zpětnou vazbu z pilotu:

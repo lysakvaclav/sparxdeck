@@ -34,7 +34,7 @@ export default async function EditTemplatePage({ params }: Props) {
   const { data: items } = template
     ? await supabase
         .from("checklist_template_items")
-        .select("id, label, item_type, required, fail_creates_defect")
+        .select("id, label, item_type, required, fail_creates_defect, photo_required")
         .eq("template_id", template.id)
         .order("sort_order")
     : { data: [] };
@@ -60,6 +60,7 @@ export default async function EditTemplatePage({ params }: Props) {
             type: item.item_type,
             required: item.required,
             failCreatesDefect: item.fail_creates_defect,
+            photoRequired: item.photo_required,
           }))}
           isSample={template?.is_sample ?? false}
           currentVersion={template?.version ?? 0}

@@ -4,6 +4,7 @@ import {
   answerPayload,
   defectSeverityOf,
   isAnswered,
+  missingPhotos,
   missingRequired,
   outcomeOf,
   parseNumber,
@@ -12,12 +13,18 @@ import {
   type Question,
 } from "@/lib/inspections";
 
-const question = (id: string, type: Question["type"], required = true): Question => ({
+const question = (
+  id: string,
+  type: Question["type"],
+  required = true,
+  photoRequired = false,
+): Question => ({
   id,
   label: id,
   type,
   required,
   failCreatesDefect: false,
+  photoRequired,
 });
 const answer = (values: Partial<AnswerDraft>): AnswerDraft => ({ ...EMPTY_ANSWER, ...values });
 
@@ -29,6 +36,21 @@ describe("device check rules", () => {
     question("remark", "text", false),
     question("reading", "text"),
   ];
+
+  it("a photo-required question needs a photo of its own, sent or waiting in the phone", () => {
+    const withPhotos = [
+      question("gauge", "number", true, true),
+      question("seal", "pass_fail"),
+      question("overall", "text", false, true),
+    ];
+    expect(missingPhotos(withPhotos, {}).map((q) => q.id)).toEqual(["gauge", "overall"]);
+    expect(missingPhotos(withPhotos, { gauge: 1, seal: 2 }).map((q) => q.id)).toEqual(["overall"]);
+    expect(missingPhotos(withPhotos, { gauge: 1, overall: 3 })).toEqual([]);
+    // Optional answer, required photo: the photo is still required.
+    expect(missingPhotos(withPhotos, { gauge: 1, overall: 0 }).map((q) => q.id)).toEqual([
+      "overall",
+    ]);
+  });
 
   it("reads numbers with a decimal comma or point", () => {
     expect(parseNumber("12,5")).toBe(12.5);

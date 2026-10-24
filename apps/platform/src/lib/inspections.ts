@@ -14,6 +14,8 @@ export type Question = {
   type: ChecklistItemType;
   required: boolean;
   failCreatesDefect: boolean;
+  /** The check can't be finished without a photo of this question. */
+  photoRequired: boolean;
 };
 
 /** An answer as the form holds it: a number stays text while it's being typed. */
@@ -65,6 +67,17 @@ export function missingRequired(
   return questions.filter(
     (question) => question.required && !isAnswered(question, answers[question.id]),
   );
+}
+
+/**
+ * Photo-required questions without a photo yet (`photos`: count per question id,
+ * sent and waiting in the phone alike), in checklist order.
+ */
+export function missingPhotos(
+  questions: readonly Question[],
+  photos: Readonly<Record<string, number>>,
+): Question[] {
+  return questions.filter((question) => question.photoRequired && !(photos[question.id] ?? 0));
 }
 
 /** Failed as soon as one yes/no question is answered "no". */

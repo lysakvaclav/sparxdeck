@@ -1435,6 +1435,166 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("required photos on checklist questions (a fresh organization)", () => {
+    let kate: TestUser;
+    let org: string;
+    let type: string;
+    let site: string;
+    let devices: string[];
+    let gauge: string;
+    let seal: string;
+    let inspection: string;
+    const png = Uint8Array.from(
+      atob(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      ),
+      (c) => c.charCodeAt(0),
+    );
+    const items = (photo: boolean) => [
+      {
+        label: "Tlakoměr",
+        type: "number",
+        required: true,
+        failCreatesDefect: false,
+        photoRequired: photo,
+      },
+      { label: "Plomba", type: "pass_fail", required: true, failCreatesDefect: false },
+    ];
+
+    beforeAll(async () => {
+      kate = await createUser("kate");
+      org = await createOrg(kate, `RLS photos ${run}`);
+      const { data: t } = await kate.client.from("device_types").select("id").single();
+      type = t!.id;
+      const { data: customer } = await kate.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: s } = await kate.client
+        .from("sites")
+        .insert({ organization_id: org, customer_id: customer!.id, name: "S" })
+        .select("id")
+        .single();
+      site = s!.id;
+      const { data: d } = await kate.client
+        .from("devices")
+        .insert([1, 2].map(() => ({ organization_id: org, site_id: site, device_type_id: type })))
+        .select("id, label_number")
+        .order("label_number");
+      devices = d!.map((row) => row.id);
+    });
+
+    it("the template keeps the flag, and switching it makes a new version", async () => {
+      const { data: first, error } = await kate.client.rpc("save_checklist_template", {
+        p_device_type: type,
+        p_name: "Kontrola",
+        p_items: items(true),
+      });
+      expect(error).toBeNull();
+      const { data: again } = await kate.client.rpc("save_checklist_template", {
+        p_device_type: type,
+        p_name: "Kontrola",
+        p_items: items(true),
+      });
+      expect(again).toBe(first);
+      const { data: rows } = await kate.client
+        .from("checklist_template_items")
+        .select("id, label, photo_required")
+        .eq("template_id", first!)
+        .order("sort_order");
+      expect(rows?.map((row) => row.photo_required)).toEqual([true, false]);
+      gauge = rows![0]!.id;
+      seal = rows![1]!.id;
+
+      const { error: badFlag } = await kate.client.rpc("save_checklist_template", {
+        p_device_type: type,
+        p_name: "Kontrola",
+        p_items: [{ ...items(true)[0], photoRequired: "yes" }],
+      });
+      expect(badFlag?.message).toMatch(/invalid_template/);
+    });
+
+    it("a check can't be finished without the required photo, online or from the phone", async () => {
+      const { data: started, error: startError } = await kate.client.rpc("start_inspection", {
+        p_site: site,
+      });
+      expect(startError).toBeNull();
+      inspection = started!;
+      const { data: opened } = await kate.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+      });
+      const item = (opened as { item: string }).item;
+      await kate.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: gauge,
+        p_value_number: 12.5,
+      });
+      await kate.client.rpc("save_answer", {
+        p_item: item,
+        p_template_item: seal,
+        p_value_pass: true,
+      });
+      const { error: noPhoto } = await kate.client.rpc("finish_device_check", { p_item: item });
+      expect(noPhoto?.message).toMatch(/check_incomplete/);
+
+      // A photo of another question doesn't count.
+      const sealPath = `${org}/inspections/${inspection}/${item}/seal-${run}.png`;
+      await kate.client.storage
+        .from("org-assets")
+        .upload(sealPath, png, { contentType: "image/png" });
+      await kate.client.rpc("add_inspection_photo", {
+        p_item: item,
+        p_template_item: seal,
+        p_path: sealPath,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      const { error: wrongPhoto } = await kate.client.rpc("finish_device_check", { p_item: item });
+      expect(wrongPhoto?.message).toMatch(/check_incomplete/);
+
+      const gaugePath = `${org}/inspections/${inspection}/${item}/gauge-${run}.png`;
+      await kate.client.storage
+        .from("org-assets")
+        .upload(gaugePath, png, { contentType: "image/png" });
+      const { error: photoError } = await kate.client.rpc("add_inspection_photo", {
+        p_item: item,
+        p_template_item: gauge,
+        p_path: gaugePath,
+        p_content_type: "image/png",
+        p_size: png.length,
+      });
+      expect(photoError).toBeNull();
+      const { data: outcome, error } = await kate.client.rpc("finish_device_check", {
+        p_item: item,
+      });
+      expect(error).toBeNull();
+      expect(outcome).toBe("passed");
+      await kate.client.storage.from("org-assets").remove([sealPath, gaugePath]);
+
+      // From the phone: the whole check at once, still refused without the photo.
+      const { data: second } = await kate.client.rpc("open_device_check", {
+        p_inspection: inspection,
+        p_device: devices[1]!,
+      });
+      const secondItem = (second as { item: string }).item;
+      const { error: phone } = await kate.client.rpc("submit_device_check", {
+        p_item: secondItem,
+        p_answers: { [gauge]: { number: 11 }, [seal]: { pass: true } },
+        p_action: "finish",
+      });
+      expect(phone?.message).toMatch(/check_incomplete/);
+
+      // Leaving the device out needs no photo.
+      const { error: skipError } = await kate.client.rpc("skip_device_check", {
+        p_item: secondItem,
+        p_reason: "inaccessible",
+      });
+      expect(skipError).toBeNull();
+    });
+  });
+
   describe("inspections", () => {
     let site: string;
     let devices: string[];

@@ -66,7 +66,7 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
   const { data: items } = shown
     ? await supabase
         .from("checklist_template_items")
-        .select("id, sort_order, label, item_type, required, fail_creates_defect")
+        .select("id, sort_order, label, item_type, required, fail_creates_defect, photo_required")
         .eq("template_id", shown.id)
         .order("sort_order")
     : { data: [] };
@@ -156,6 +156,9 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
                   <TableHeaderCell className="hidden w-40 text-center sm:table-cell">
                     {t("columns.defect")}
                   </TableHeaderCell>
+                  <TableHeaderCell className="hidden w-32 text-center md:table-cell">
+                    {t("columns.photo")}
+                  </TableHeaderCell>
                 </tr>
               </TableHead>
               <TableBody>
@@ -176,6 +179,11 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
                     <TableCell className="hidden text-center sm:table-cell">
                       <span className="inline-flex justify-center">
                         {item.fail_creates_defect ? yes : no}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      <span className="inline-flex justify-center">
+                        {item.photo_required ? yes : no}
                       </span>
                     </TableCell>
                   </TableRow>

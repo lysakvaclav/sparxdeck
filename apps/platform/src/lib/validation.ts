@@ -229,6 +229,7 @@ export const checklistItemSchema = z
     type: z.enum(CHECKLIST_ITEM_TYPES),
     required: z.boolean(),
     failCreatesDefect: z.boolean(),
+    photoRequired: z.boolean(),
   })
   // Only a yes/no answer can fail, so only it can open a defect.
   .refine((item) => !item.failCreatesDefect || item.type === "pass_fail", {

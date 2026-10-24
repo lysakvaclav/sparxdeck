@@ -1096,7 +1096,8 @@
       "label": "Checklist item",
       "answer": "Answer",
       "required": "Required",
-      "defect": "Failure = defect"
+      "defect": "Failure = defect",
+      "photo": "Photo required"
     },
     "itemTypes": {
       "pass_fail": "Yes / no",
@@ -1145,6 +1146,8 @@
       "defect": "Failure = defect",
       "defectFor": "Failure creates a defect: {name}",
       "defectHint": "Only a yes / no answer can create a defect.",
+      "photo": "Photo required",
+      "photoFor": "Photo required: {name}",
       "moveUp": "Move up: {name}",
       "moveDown": "Move down: {name}",
       "remove": "Remove item: {name}",
@@ -1466,7 +1469,9 @@
       "pass": "Pass",
       "fail": "Fail",
       "required": "required",
+      "photoRequired": "photo required",
       "missing": "Answer this item.",
+      "photoMissing": "Add a photo to this item.",
       "numberPlaceholder": "Value",
       "textPlaceholder": "Answer",
       "addNote": "Note",
@@ -1482,6 +1487,7 @@
       "finishedPassed": "{label}: passed.",
       "finishedFailed": "{label}: failed.",
       "missingCount": "{count, plural, one {# required answer missing.} other {# required answers missing.}}",
+      "missingPhotoCount": "{count, plural, one {# required photo is missing.} other {# required photos are missing.}}",
       "willPass": "Result: pass",
       "willFail": "Result: fail",
       "saved": "Saved",

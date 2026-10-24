@@ -121,7 +121,7 @@ export async function loadQuestions(templateId: string): Promise<Question[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("checklist_template_items")
-    .select("id, label, item_type, required, fail_creates_defect, sort_order")
+    .select("id, label, item_type, required, fail_creates_defect, photo_required, sort_order")
     .eq("template_id", templateId)
     .order("sort_order");
   return (data ?? []).map((item) => ({
@@ -130,6 +130,7 @@ export async function loadQuestions(templateId: string): Promise<Question[]> {
     type: item.item_type,
     required: item.required,
     failCreatesDefect: item.fail_creates_defect,
+    photoRequired: item.photo_required,
   }));
 }
 

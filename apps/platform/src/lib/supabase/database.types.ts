@@ -298,6 +298,7 @@ export type Database = {
           item_type: ChecklistItemType;
           required: boolean;
           fail_creates_defect: boolean;
+          photo_required: boolean;
         };
         Insert: never;
         Update: never;

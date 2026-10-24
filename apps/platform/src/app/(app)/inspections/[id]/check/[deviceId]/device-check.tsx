@@ -66,6 +66,7 @@ import {
 import {
   EMPTY_ANSWER,
   defectSeverityOf,
+  missingPhotos,
   missingRequired,
   outcomeOf,
   parseNumber,
@@ -193,6 +194,7 @@ export function DeviceCheck({
       ),
   );
   const [missing, setMissing] = useState<ReadonlySet<string>>(new Set());
+  const [missingPhoto, setMissingPhoto] = useState<ReadonlySet<string>>(new Set());
   const [offline, setOffline] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -510,6 +512,13 @@ export function DeviceCheck({
     const url = URL.createObjectURL(blob);
     objectUrls.current.push(url);
     setPhotos((list) => [...list, { key: id, questionId, url, status: "waiting" }]);
+    if (questionId && missingPhoto.has(questionId)) {
+      setMissingPhoto((current) => {
+        const copy = new Set(current);
+        copy.delete(questionId);
+        return copy;
+      });
+    }
     const stored = await queuePhoto({ id, inspectionId, deviceId, questionId, blob });
     if (!stored) {
       // Not in the phone's queue (storage full or blocked): it would never be sent.
@@ -598,10 +607,24 @@ export function DeviceCheck({
   async function finish() {
     setNotice(null);
     const gaps = missingRequired(questions, answers);
-    if (gaps.length > 0) {
+    const photoCounts: Record<string, number> = {};
+    for (const photo of photos)
+      if (photo.questionId)
+        photoCounts[photo.questionId] = (photoCounts[photo.questionId] ?? 0) + 1;
+    const photoGaps = missingPhotos(questions, photoCounts);
+    if (gaps.length > 0 || photoGaps.length > 0) {
       setMissing(new Set(gaps.map((q) => q.id)));
-      setNotice(t("missingCount", { count: gaps.length }));
-      document.getElementById(`question-${gaps[0]!.id}`)?.scrollIntoView({ block: "center" });
+      setMissingPhoto(new Set(photoGaps.map((q) => q.id)));
+      setNotice(
+        [
+          gaps.length > 0 && t("missingCount", { count: gaps.length }),
+          photoGaps.length > 0 && t("missingPhotoCount", { count: photoGaps.length }),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      );
+      const first = questions.find((q) => gaps.includes(q) || photoGaps.includes(q));
+      document.getElementById(`question-${first!.id}`)?.scrollIntoView({ block: "center" });
       return;
     }
     setFinishing(true);
@@ -926,6 +949,7 @@ export function DeviceCheck({
         {questions.map((question, index) => {
           const answer = answers[question.id] ?? EMPTY_ANSWER;
           const isMissing = missing.has(question.id);
+          const photoMissing = missingPhoto.has(question.id);
           const numberInvalid =
             question.type === "number" && Number.isNaN(parseNumber(answer.number));
           const noteOpen = openNotes.has(question.id);
@@ -939,15 +963,25 @@ export function DeviceCheck({
             <Card
               key={question.id}
               id={`question-${question.id}`}
-              className={cn("space-y-2.5 p-[15px]", isMissing && "ring-2 ring-destructive")}
+              className={cn(
+                "space-y-2.5 p-[15px]",
+                (isMissing || photoMissing) && "ring-2 ring-destructive",
+              )}
             >
               <p className="flex gap-2 text-ui-lg leading-6">
                 <span className="text-muted-foreground tabular-nums">{index + 1}.</span>
                 <span className="min-w-0 flex-1 font-medium">
                   {question.label}
-                  {question.required && (
+                  {(question.required || question.photoRequired) && (
                     <span className="ms-1.5 text-ui-sm font-normal text-muted-foreground">
-                      ({t("required")})
+                      (
+                      {[
+                        question.required && t("required"),
+                        question.photoRequired && t("photoRequired"),
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                      )
                     </span>
                   )}
                 </span>
@@ -1032,6 +1066,9 @@ export function DeviceCheck({
               )}
               {isMissing && !numberInvalid && (
                 <p className="text-ui-sm text-destructive-text">{t("missing")}</p>
+              )}
+              {photoMissing && (
+                <p className="text-ui-sm text-destructive-text">{t("photoMissing")}</p>
               )}
 
               {noteOpen && (

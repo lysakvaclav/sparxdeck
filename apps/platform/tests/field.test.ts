@@ -18,9 +18,30 @@ import {
 import { EMPTY_ANSWER, type AnswerDraft, type Question } from "@/lib/inspections";
 
 const questions: Question[] = [
-  { id: "q1", label: "Plomba", type: "pass_fail", required: true, failCreatesDefect: true },
-  { id: "q2", label: "Tlak", type: "number", required: true, failCreatesDefect: false },
-  { id: "q3", label: "Poznámka", type: "text", required: false, failCreatesDefect: false },
+  {
+    id: "q1",
+    label: "Plomba",
+    type: "pass_fail",
+    required: true,
+    failCreatesDefect: true,
+    photoRequired: false,
+  },
+  {
+    id: "q2",
+    label: "Tlak",
+    type: "number",
+    required: true,
+    failCreatesDefect: false,
+    photoRequired: false,
+  },
+  {
+    id: "q3",
+    label: "Poznámka",
+    type: "text",
+    required: false,
+    failCreatesDefect: false,
+    photoRequired: false,
+  },
 ];
 
 const answer = (patch: Partial<AnswerDraft>): AnswerDraft => ({ ...EMPTY_ANSWER, ...patch });

@@ -1096,7 +1096,8 @@
       "label": "Položka kontroly",
       "answer": "Odpověď",
       "required": "Povinná",
-      "defect": "Nesplnění = závada"
+      "defect": "Nesplnění = závada",
+      "photo": "Povinná fotka"
     },
     "itemTypes": {
       "pass_fail": "Ano / ne",
@@ -1145,6 +1146,8 @@
       "defect": "Nesplnění = závada",
       "defectFor": "Nesplnění vytvoří závadu: {name}",
       "defectHint": "Závadu může vytvořit jen odpověď ano / ne.",
+      "photo": "Povinná fotka",
+      "photoFor": "Povinná fotka: {name}",
       "moveUp": "Posunout nahoru: {name}",
       "moveDown": "Posunout dolů: {name}",
       "remove": "Odebrat položku: {name}",
@@ -1466,7 +1469,9 @@
       "pass": "Vyhovuje",
       "fail": "Nevyhovuje",
       "required": "povinná",
+      "photoRequired": "povinná fotka",
       "missing": "Odpovězte na tuto položku.",
+      "photoMissing": "Přidejte k této položce fotku.",
       "numberPlaceholder": "Hodnota",
       "textPlaceholder": "Odpověď",
       "addNote": "Poznámka",
@@ -1482,6 +1487,7 @@
       "finishedPassed": "{label}: vyhovuje.",
       "finishedFailed": "{label}: nevyhovuje.",
       "missingCount": "{count, plural, one {Chybí # povinná odpověď.} few {Chybí # povinné odpovědi.} other {Chybí # povinných odpovědí.}}",
+      "missingPhotoCount": "{count, plural, one {Chybí # povinná fotka.} few {Chybí # povinné fotky.} other {Chybí # povinných fotek.}}",
       "willPass": "Výsledek: vyhovuje",
       "willFail": "Výsledek: nevyhovuje",
       "saved": "Uloženo",

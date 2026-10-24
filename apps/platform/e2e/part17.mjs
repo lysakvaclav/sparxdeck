@@ -1,7 +1,8 @@
 // Part 17 walkthrough: a firm adds its own device type with custom fields,
 // creates a device of that type (filling the fields, an end-of-life date, a
 // photo), sees the end-of-life warning, and bulk-changes two devices' status
-// from the list, then moves a device to another building (with history).
+// from the list, moves a device to another building (with history) and checks
+// a device whose question requires a photo.
 // Dark mode and English.
 // Run: npm run e2e (needs `npm run build && npm start` on port 3001 and .env.local).
 import fs from "node:fs";
@@ -189,6 +190,48 @@ try {
       await phone.screenshot(`${OUT}/p17-07-moved.png`);
     },
   );
+
+  await step("a photo-required question blocks Done until its photo is added", async () => {
+    const org = await orgOf(owner);
+    await phone.goto(`${APP}${typeHref}/template`);
+    await phone.waitForText("Upravit šablonu kontroly");
+    await phone.click("#item-0-photo");
+    await phone.clickText("Uložit jako verzi 2", "button");
+    await phone.waitForText("Povinná fotka");
+    const [device] = await insertRows("devices", [
+      { organization_id: org, site_id: siteId, device_type_id: typeHref.split("/")[2] },
+    ]);
+    await phone.goto(`${APP}/devices/${device.id}`);
+    await phone.clickText("Zkontrolovat", "button");
+    await phone.waitForText("povinná, povinná fotka");
+    await phone.evaluate(`(() => {
+      const group = document.querySelector("[role=group][aria-label=\\"Je bez koroze\\"]");
+      [...group.querySelectorAll("button")].find((b) => b.innerText.includes("Vyhovuje")).click();
+    })()`);
+    await phone.waitForText("Uloženo");
+    await phone.clickText("Hotovo", "button");
+    await phone.waitForText("Chybí 1 povinná fotka.");
+    await phone.waitForText("Přidejte k této položce fotku.");
+    await phone.screenshot(`${OUT}/p17-08-photo-required.png`);
+    const [question] = await selectRows(
+      "checklist_template_items",
+      `organization_id=eq.${org}&photo_required=is.true&select=id`,
+    );
+    await phone.setFile(`[data-testid="photo-${question.id}"]`, photoPng(`${OUT}/p17-photo.png`));
+    await phone.clickText("Hotovo", "button");
+    await phone.waitForText(": vyhovuje.");
+    const [item] = await selectRows(
+      "inspection_items",
+      `device_id=eq.${device.id}&select=id,outcome`,
+    );
+    if (item?.outcome !== "passed") throw new Error(`check ${JSON.stringify(item)}`);
+    const photos = await selectRows(
+      "inspection_photos",
+      `item_id=eq.${item.id}&select=template_item_id`,
+    );
+    if (photos.length !== 1 || photos[0].template_item_id !== question.id)
+      throw new Error(`photos ${JSON.stringify(photos)}`);
+  });
 
   await step("dark mode and English", async () => {
     await phone.close();

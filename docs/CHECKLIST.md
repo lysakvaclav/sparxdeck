@@ -82,7 +82,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [ ] P2 Šablony pro hydranty, nouzové osvětlení, požární klapky a dveře
 - [ ] P2 Duplikování a úprava šablony
 - [ ] P2 Výběr možností (rozbalovací seznam) jako typ položky
-- [ ] P2 Foto jako povinná odpověď u vybraných položek
+- [x] P2 Foto jako povinná odpověď u vybraných položek (část 17, doplněno 2026-10-24: zaškrtávátko „Povinná fotka“ u položky v editoru šablony, nová verze šablony; kontrolu nejde dokončit, dokud položka nemá fotku (online i odeslanou z telefonu, hlídá `check_answers_complete`), telefon to řekne předem a ukáže, u které položky; „Nelze zkontrolovat“ fotku nepotřebuje; migrace `20261024110000_photo_required.sql`, testy `tests/rls.test.ts`, `tests/inspections.test.ts`, `e2e/part17.mjs`)
 - [ ] P3 Knihovna šablon podle země a předpisů
 - [ ] P3 Výpočty a podmínky (zobrazit položku jen když…)
 

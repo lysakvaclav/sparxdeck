@@ -29,6 +29,7 @@ const itemValues = (item: ChecklistItemValues): ChecklistItemValues => ({
   type: item.type,
   required: item.required,
   failCreatesDefect: item.failCreatesDefect,
+  photoRequired: item.photoRequired,
 });
 
 let counter = 0;
@@ -196,6 +197,7 @@ export function TemplateEditor({
                     type: "pass_fail",
                     required: true,
                     failCreatesDefect: false,
+                    photoRequired: false,
                   },
                 ])
               }
@@ -212,13 +214,14 @@ export function TemplateEditor({
 
         <div
           aria-hidden
-          className="hidden grid-cols-[36px_minmax(0,1fr)_150px_80px_130px_88px] items-center gap-2.5 bg-muted px-2.5 py-1.5 font-semibold shadow-[inset_0_-1px_0_var(--border)] lg:grid"
+          className="hidden grid-cols-[36px_minmax(0,1fr)_150px_80px_130px_100px_88px] items-center gap-2.5 bg-muted px-2.5 py-1.5 font-semibold shadow-[inset_0_-1px_0_var(--border)] lg:grid"
         >
           <span className="text-end">#</span>
           <span>{t("itemLabel")}</span>
           <span>{t("answer")}</span>
           <span className="text-center">{t("required")}</span>
           <span className="text-center">{t("defect")}</span>
+          <span className="text-center">{t("photo")}</span>
           <span />
         </div>
 
@@ -231,7 +234,7 @@ export function TemplateEditor({
               return (
                 <li
                   key={item.key}
-                  className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-2.5 gap-y-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none lg:grid-cols-[36px_minmax(0,1fr)_150px_80px_130px_88px] lg:items-start lg:py-1.5"
+                  className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-2.5 gap-y-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] last:shadow-none lg:grid-cols-[36px_minmax(0,1fr)_150px_80px_130px_100px_88px] lg:items-start lg:py-1.5"
                 >
                   <span className="pt-[7px] text-end text-muted-foreground tabular-nums">
                     {index + 1}
@@ -265,7 +268,7 @@ export function TemplateEditor({
                       </p>
                     )}
                   </div>
-                  <div className="col-start-2 grid grid-cols-2 gap-2.5 sm:grid-cols-[150px_auto_auto] sm:items-center lg:contents">
+                  <div className="col-start-2 grid grid-cols-2 gap-2.5 sm:grid-cols-[150px_auto_auto_auto] sm:items-center lg:contents">
                     <div>
                       <NativeSelect
                         id={`item-${index}-type`}
@@ -294,7 +297,7 @@ export function TemplateEditor({
                       <span className="lg:sr-only">{t("required")}</span>
                     </label>
                     <label
-                      className="col-span-2 flex min-h-[30px] cursor-pointer items-center gap-2 sm:col-span-1 lg:justify-center"
+                      className="flex min-h-[30px] cursor-pointer items-center gap-2 lg:justify-center"
                       title={item.type === "pass_fail" ? undefined : t("defectHint")}
                     >
                       <Checkbox
@@ -312,6 +315,17 @@ export function TemplateEditor({
                           {tErr(defectError)}
                         </span>
                       )}
+                    </label>
+                    <label className="flex min-h-[30px] cursor-pointer items-center gap-2 lg:justify-center">
+                      <Checkbox
+                        id={`item-${index}-photo`}
+                        checked={item.photoRequired}
+                        aria-label={t("photoFor", { name: display })}
+                        onCheckedChange={(value) =>
+                          update(item.key, { photoRequired: value === true })
+                        }
+                      />
+                      <span className="lg:sr-only">{t("photo")}</span>
                     </label>
                   </div>
                   <div className="col-start-2 flex justify-end gap-0.5 lg:col-start-auto">

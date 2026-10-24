@@ -106,7 +106,9 @@ export async function loadFieldPack(
     ? await fetchAll((from, to) =>
         supabase
           .from("checklist_template_items")
-          .select("id, template_id, label, item_type, required, fail_creates_defect, sort_order")
+          .select(
+            "id, template_id, label, item_type, required, fail_creates_defect, photo_required, sort_order",
+          )
           .in("template_id", templateIds)
           .order("sort_order")
           .order("id")
@@ -122,6 +124,7 @@ export async function loadFieldPack(
       type: row.item_type,
       required: row.required,
       failCreatesDefect: row.fail_creates_defect,
+      photoRequired: row.photo_required,
     });
 
   // Open defects of the building's devices (a "no" to their question is added to them).
