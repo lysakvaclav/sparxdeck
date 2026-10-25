@@ -378,6 +378,64 @@
   box-shadow: var(--input-shadow);
 }
 
+/* Dropdowns (NativeSelect): with a mouse, browsers that support the
+   customizable select draw the option list as a modern menu; phones keep their
+   own picker and other browsers the system list. */
+@media (pointer: fine) {
+  @supports (appearance: base-select) {
+    select.picker,
+    select.picker::picker(select) {
+      appearance: base-select;
+    }
+    select.picker {
+      display: flex;
+      align-items: center;
+    }
+    select.picker::picker-icon {
+      display: none;
+    }
+    select.picker::picker(select) {
+      margin-block: 4px;
+      padding: 4px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--popover);
+      color: var(--popover-foreground);
+      box-shadow: var(--elevation-3);
+      max-height: min(320px, 60dvh);
+    }
+    select.picker option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      padding: 0 8px;
+      border-radius: 5px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    select.picker option::checkmark {
+      order: 1;
+      margin-inline-start: auto;
+      color: var(--link);
+    }
+    select.picker option:hover,
+    select.picker option:focus-visible {
+      background: var(--accent-strong);
+      outline: none;
+    }
+    select.picker option:checked {
+      background: var(--selected);
+      color: var(--link);
+      font-weight: 500;
+    }
+    select.picker option:disabled {
+      color: var(--btn-disabled-fg);
+      cursor: default;
+    }
+  }
+}
+
 /* React Flow's attribution link: readable on the canvas (WCAG AA). */
 .react-flow .react-flow__attribution a {
   color: var(--muted-foreground);
