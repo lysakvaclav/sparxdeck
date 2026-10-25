@@ -2,9 +2,9 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Blueprint tags: 20px, 12px text, 3px radius. "Minimal" variants are tinted.
+// Tags: 20px pills with 12px text. "Minimal" variants are tinted.
 const badgeVariants = cva(
-  "inline-flex min-h-5 max-w-full items-center gap-1 rounded-md px-1.5 text-ui-sm whitespace-nowrap",
+  "inline-flex min-h-5 max-w-full items-center gap-1 rounded-full px-2 text-ui-sm font-medium whitespace-nowrap",
   {
     variants: {
       variant: {

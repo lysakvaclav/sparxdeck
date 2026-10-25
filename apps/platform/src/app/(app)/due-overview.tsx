@@ -146,7 +146,7 @@ export async function DueOverview({
           <CardTitle>{t("overview.planTitle")}</CardTitle>
           <nav
             aria-label={t("overview.horizonLabel")}
-            className="ms-auto flex rounded-md bg-muted p-0.5"
+            className="ms-auto flex rounded-lg bg-canvas p-0.5"
           >
             {HORIZONS.map((days) => (
               <Link
@@ -155,9 +155,9 @@ export async function DueOverview({
                 scroll={false}
                 aria-current={days === horizon ? "page" : undefined}
                 className={cn(
-                  "flex min-h-[26px] items-center rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
+                  "flex min-h-[26px] items-center rounded-[5px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                   days === horizon
-                    ? "bg-segment-active font-semibold text-segment-active-foreground"
+                    ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

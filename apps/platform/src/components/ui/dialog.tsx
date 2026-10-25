@@ -6,7 +6,7 @@ import { CrossIcon, type IconComponent } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
-/** Blueprint dialog: white header bar with icon, title and close, light body. */
+/** Dialog: white panel with a header bar (icon, title, close) over the body. */
 export function Dialog({
   open,
   onOpenChange,
@@ -27,11 +27,11 @@ export function Dialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgb(16_22_26/0.7)] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgb(15_23_42/0.45)] backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cn(
-            "fixed inset-x-3 top-1/2 z-50 mx-auto flex max-h-[85dvh] max-w-[560px] -translate-y-1/2 flex-col overflow-hidden rounded-xl bg-canvas shadow-elevation-4 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+            "fixed inset-x-3 top-1/2 z-50 mx-auto flex max-h-[85dvh] max-w-[560px] -translate-y-1/2 flex-col overflow-hidden rounded-xl bg-background shadow-elevation-4 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
             className,
           )}
         >

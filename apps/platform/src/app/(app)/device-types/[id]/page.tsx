@@ -250,7 +250,7 @@ export default async function DeviceTypePage({ params, searchParams }: Props) {
                         }
                         aria-current={current ? "true" : undefined}
                         className={cn(
-                          "flex items-start gap-2.5 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] transition-colors last:shadow-none hover:bg-[rgb(191_204_214/0.3)]",
+                          "flex items-start gap-2.5 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] transition-colors last:shadow-none hover:bg-accent",
                           current && "bg-selected",
                         )}
                       >

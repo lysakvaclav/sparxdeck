@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /*
- * Blueprint-style buttons: 30px tall, a light top-down gradient with inset
- * borders, grey icons in neutral buttons. 44px on touch screens; the landing
+ * Buttons: 30px tall, flat with a thin border and a soft shadow, medium-weight
+ * labels, grey icons in neutral buttons. 44px on touch screens; the landing
  * page shape on the sign-in screens (.brand).
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-md leading-none font-normal whitespace-nowrap transition-[background-color,box-shadow] duration-100 select-none disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [.brand_&]:font-medium",
+  "inline-flex shrink-0 items-center justify-center rounded-md leading-none font-medium whitespace-nowrap transition-[background-color,box-shadow] duration-100 select-none disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [.brand_&]:font-medium",
   {
     variants: {
       variant: {

@@ -27,8 +27,7 @@ export type PageHeaderProps = {
 };
 
 /**
- * Foundry-style page header: coloured app icon, breadcrumb path ending in the
- * bold page title, optional application menus below, actions on the right.
+ * Page header: coloured app icon, breadcrumb path ending in the bold page title, optional application menus below, actions on the right.
  * Server pages use PageHeader, client views ClientPageHeader; both draw this.
  */
 export function PageHeaderView({
@@ -44,7 +43,7 @@ export function PageHeaderView({
 }: PageHeaderProps & { breadcrumbsLabel: string }) {
   return (
     <>
-      <header className="relative z-10 shrink-0 bg-background shadow-elevation-1">
+      <header className="relative z-10 shrink-0 bg-background shadow-[0_1px_0_var(--border)]">
         <div className="flex min-h-[50px] flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5">
           {Icon && <Icon size={20} className={cn("text-muted-foreground", iconClassName)} />}
           <div className="min-w-0 flex-1">

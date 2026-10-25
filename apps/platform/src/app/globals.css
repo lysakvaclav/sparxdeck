@@ -4,149 +4,152 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Workspace design: a modern analytics look (dark navy rail with a blue edge,
- * white panels with hairline borders on a light grey page, Roboto at 14px, one
- * blue for actions and links, flat 30px controls with a thin border, dark filled
- * selected segments). Sizes and spacing follow the earlier Blueprint layout.
- * Object types carry their own colour.
+ * Workspace design: a soft modern SaaS look. Slate rail with rounded active
+ * items, white panels with hairline borders and light shadows on a pale grey
+ * page, Inter at 14px, one calm blue for actions and links, 6-8px corners,
+ * pill badges and white selected segments on a grey track. Sizes and spacing
+ * follow the earlier Blueprint layout. Object types carry their own colour.
  *
  * The sign-in screens keep the landing page look: see `.brand`, applied by the
  * (auth) layout.
  */
 :root {
-  --ui-font: var(--font-roboto), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --page: #f4f6f8;
-  --canvas: #eef1f4;
+  --ui-font: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --page: #f5f7fa;
+  --canvas: #eef2f6;
   --background: #ffffff;
-  --foreground: #1d2733;
+  --foreground: #1e2836;
   --card: #ffffff;
-  --card-foreground: #1d2733;
+  --card-foreground: #1e2836;
   --popover: #ffffff;
-  --popover-foreground: #1d2733;
-  --primary: #1f6fd1;
-  --primary-hover: #1a5fb4;
-  --primary-active: #164f96;
+  --popover-foreground: #1e2836;
+  --primary: #3567b5;
+  --primary-hover: #2d5aa0;
+  --primary-active: #264d8a;
   --primary-foreground: #ffffff;
-  --link: #1565c0;
-  --secondary: #f4f6f8;
-  --secondary-foreground: #1d2733;
-  --muted: #f4f6f8;
-  --muted-foreground: #5f6b7a;
-  --subtle: #66717f;
-  --accent: rgb(15 27 45 / 0.05);
-  --accent-strong: rgb(15 27 45 / 0.09);
-  --accent-foreground: #1d2733;
-  --selected: rgb(31 111 209 / 0.1);
-  --border: #e1e5ea;
-  --border-strong: #cfd5dc;
-  --input: #cfd5dc;
-  --ring: #1f6fd1;
-  --focus: rgb(31 111 209 / 0.5);
-  --destructive: #db3737;
-  --destructive-hover: #c23030;
-  --destructive-active: #a82a2a;
-  --destructive-text: #c23030;
+  --link: #2f63b0;
+  --secondary: #f5f7fa;
+  --secondary-foreground: #1e2836;
+  --muted: #f5f7fa;
+  --muted-foreground: #5b6778;
+  --subtle: #5f6b7a;
+  --accent: rgb(30 41 59 / 0.05);
+  --accent-strong: rgb(30 41 59 / 0.09);
+  --accent-foreground: #1e2836;
+  --selected: rgb(53 103 181 / 0.1);
+  --border: #e4e8ee;
+  --border-strong: #d3dae3;
+  --input: #d3dae3;
+  --ring: #3567b5;
+  --focus: rgb(53 103 181 / 0.45);
+  --destructive: #d64545;
+  --destructive-hover: #c03a3a;
+  --destructive-active: #a83232;
+  --destructive-text: #ad3030;
   --destructive-foreground: #ffffff;
-  --success: #0f9960;
-  --success-text: #0d8050;
+  --success: #1f9d63;
+  --success-text: #13804e;
   --warning: #d9822b;
   --warning-text: #87501a;
   --highlight: #ffc940;
-  --rail: #0f1b2d;
-  --rail-foreground: #a9b4c2;
-  --rail-hover: #18263b;
-  --rail-active: #22324a;
-  --node-header: #0f1b2d;
-  --node-customer: #1f6fd1;
+  --rail: #2b3a4b;
+  --rail-foreground: #c3cdd8;
+  --rail-hover: #364759;
+  --rail-active: #44576b;
+  --node-header: #2b3a4b;
+  --node-customer: #3567b5;
   --node-site: #238c2c;
   --node-location: #96622d;
   --node-device: #db2c6f;
-  --edge: #9aa5b2;
-  --tooltip: #1f2d3d;
-  --tooltip-foreground: #f4f6f8;
+  --edge: #a3adba;
+  --tooltip: #1e2836;
+  --tooltip-foreground: #f5f7fa;
   /* Controls */
   --btn-bg: #ffffff;
-  --btn-bg-hover: #f3f5f8;
-  --btn-bg-active: #e8ecf1;
+  --btn-bg-hover: #f6f8fb;
+  --btn-bg-active: #edf1f5;
   --btn-gradient: none;
-  --btn-shadow: inset 0 0 0 1px #cfd5dc;
-  --btn-shadow-active: inset 0 0 0 1px #b9c1cb;
-  --btn-disabled-bg: #f1f3f6;
-  --btn-disabled-fg: #98a2ae;
-  --btn-icon: #5f6b7a;
+  --btn-shadow: inset 0 0 0 1px #d3dae3, 0 1px 2px rgb(16 24 40 / 0.05);
+  --btn-shadow-active: inset 0 0 0 1px #c2cad5;
+  --btn-disabled-bg: #f2f4f7;
+  --btn-disabled-fg: #98a2b0;
+  --btn-icon: #5b6778;
   --btn-intent-gradient: none;
-  --btn-intent-shadow: none;
-  --btn-intent-shadow-active: inset 0 1px 2px rgb(15 27 45 / 0.2);
+  --btn-intent-shadow: 0 1px 2px rgb(16 24 40 / 0.12);
+  --btn-intent-shadow-active: inset 0 1px 2px rgb(16 24 40 / 0.2);
   --input-bg: #ffffff;
-  --input-shadow: inset 0 0 0 1px #cfd5dc;
-  --input-placeholder: #8a95a3;
+  --input-shadow: inset 0 0 0 1px #d3dae3;
+  --input-placeholder: #8a94a3;
   /* Elevations */
-  --elevation-0: 0 0 0 1px #e1e5ea;
-  --elevation-1: 0 0 0 1px #e1e5ea, 0 1px 2px rgb(15 27 45 / 0.04);
-  --elevation-2: 0 0 0 1px #e1e5ea, 0 2px 8px rgb(15 27 45 / 0.08);
-  --elevation-3: 0 0 0 1px #dde2e8, 0 8px 24px rgb(15 27 45 / 0.12);
-  --elevation-4: 0 0 0 1px #dde2e8, 0 18px 46px rgb(15 27 45 / 0.2);
+  --elevation-0: 0 0 0 1px #e4e8ee, 0 1px 2px rgb(16 24 40 / 0.04);
+  --elevation-1: 0 0 0 1px #e4e8ee, 0 1px 3px rgb(16 24 40 / 0.06);
+  --elevation-2: 0 0 0 1px #e4e8ee, 0 4px 12px rgb(16 24 40 / 0.08);
+  --elevation-3: 0 0 0 1px rgb(16 24 40 / 0.06), 0 12px 32px rgb(16 24 40 / 0.14);
+  --elevation-4: 0 0 0 1px rgb(16 24 40 / 0.06), 0 24px 56px rgb(16 24 40 / 0.22);
   --gradient-heading: linear-gradient(to bottom, #111111 0%, #5c5c5c 45%, #b3b3b3 100%);
-  --segment-active: #1f2d3d;
-  --segment-active-foreground: #ffffff;
+  --segment-active: #ffffff;
+  --segment-active-foreground: #1e2836;
+  --segment-shadow: 0 1px 2px rgb(16 24 40 / 0.12), 0 0 0 1px rgb(16 24 40 / 0.06);
   color-scheme: light;
 }
 
 .dark {
-  --page: #0e1622;
-  --canvas: #0b121c;
-  --background: #152131;
-  --foreground: #e8edf3;
-  --card: #152131;
-  --card-foreground: #e8edf3;
-  --popover: #1a2738;
-  --popover-foreground: #e8edf3;
-  --link: #6aa9f5;
-  --secondary: #1f2d40;
-  --secondary-foreground: #e8edf3;
-  --muted: #111c2a;
-  --muted-foreground: #9aa8b8;
-  --subtle: #8f9db0;
+  --page: #0f1520;
+  --canvas: #0c111a;
+  --background: #182130;
+  --foreground: #e6ebf2;
+  --card: #182130;
+  --card-foreground: #e6ebf2;
+  --popover: #1d2738;
+  --popover-foreground: #e6ebf2;
+  --link: #7fb0f0;
+  --secondary: #202b3c;
+  --secondary-foreground: #e6ebf2;
+  --muted: #131a27;
+  --muted-foreground: #9ba7b7;
+  --subtle: #8f9cae;
   --accent: rgb(255 255 255 / 0.05);
   --accent-strong: rgb(255 255 255 / 0.09);
-  --accent-foreground: #e8edf3;
-  --selected: rgb(106 169 245 / 0.16);
-  --border: #243246;
-  --border-strong: #2e3f56;
-  --input: #2e3f56;
-  --ring: #6aa9f5;
-  --focus: rgb(106 169 245 / 0.55);
+  --accent-foreground: #e6ebf2;
+  --selected: rgb(127 176 240 / 0.16);
+  --border: #273246;
+  --border-strong: #334055;
+  --input: #334055;
+  --ring: #7fb0f0;
+  --focus: rgb(127 176 240 / 0.55);
   --destructive-text: #ff8a8a;
   --success-text: #3dcc91;
   --warning-text: #ffb366;
-  --rail: #0a111b;
-  --rail-foreground: #9aa8b8;
-  --rail-hover: #121c2a;
-  --rail-active: #1b2839;
-  --node-header: #0a111b;
+  --rail: #0b111b;
+  --rail-foreground: #a7b3c3;
+  --rail-hover: #172133;
+  --rail-active: #223047;
+  --node-header: #0b111b;
   --edge: #5f6b7a;
-  --tooltip: #e8edf3;
-  --tooltip-foreground: #152131;
-  --btn-bg: #1a2738;
-  --btn-bg-hover: #213044;
-  --btn-bg-active: #26364c;
+  --tooltip: #e6ebf2;
+  --tooltip-foreground: #182130;
+  --btn-bg: #1d2738;
+  --btn-bg-hover: #243044;
+  --btn-bg-active: #2a374c;
   --btn-gradient: none;
-  --btn-shadow: inset 0 0 0 1px #2e3f56;
-  --btn-shadow-active: inset 0 0 0 1px #3a4d68;
-  --btn-disabled-bg: #172334;
+  --btn-shadow: inset 0 0 0 1px #334055, 0 1px 2px rgb(0 0 0 / 0.25);
+  --btn-shadow-active: inset 0 0 0 1px #3f4e66;
+  --btn-disabled-bg: #1a2333;
   --btn-disabled-fg: #5d6b7c;
-  --btn-icon: #9aa8b8;
-  --input-bg: #101a27;
-  --input-shadow: inset 0 0 0 1px #2e3f56;
+  --btn-icon: #9ba7b7;
+  --input-bg: #121a28;
+  --input-shadow: inset 0 0 0 1px #334055;
   --input-placeholder: #6f7d8e;
-  --elevation-0: 0 0 0 1px #243246;
-  --elevation-1: 0 0 0 1px #243246, 0 1px 2px rgb(0 0 0 / 0.3);
-  --elevation-2: 0 0 0 1px #243246, 0 2px 8px rgb(0 0 0 / 0.35);
-  --elevation-3: 0 0 0 1px #2e3f56, 0 8px 24px rgb(0 0 0 / 0.45);
-  --elevation-4: 0 0 0 1px #2e3f56, 0 18px 46px rgb(0 0 0 / 0.6);
+  --elevation-0: 0 0 0 1px #273246;
+  --elevation-1: 0 0 0 1px #273246, 0 1px 3px rgb(0 0 0 / 0.3);
+  --elevation-2: 0 0 0 1px #273246, 0 4px 12px rgb(0 0 0 / 0.35);
+  --elevation-3: 0 0 0 1px #334055, 0 12px 32px rgb(0 0 0 / 0.45);
+  --elevation-4: 0 0 0 1px #334055, 0 24px 56px rgb(0 0 0 / 0.6);
   --gradient-heading: linear-gradient(to bottom, #ffffff 0%, #bdbdbd 45%, #5c5c5c 100%);
-  --segment-active: #e8edf3;
-  --segment-active-foreground: #152131;
+  --segment-active: #2a374c;
+  --segment-active-foreground: #f2f5f9;
+  --btn-intent-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+  --segment-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
   color-scheme: dark;
 }
 
@@ -256,6 +259,7 @@
   --color-selected: var(--selected);
   --color-segment-active: var(--segment-active);
   --color-segment-active-foreground: var(--segment-active-foreground);
+  --shadow-segment: var(--segment-shadow);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -293,10 +297,10 @@
   --text-ui-sm--line-height: 1rem;
   --text-ui-xs: 0.6875rem;
   --text-ui-xs--line-height: 0.875rem;
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 3px;
-  --radius-xl: 6px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --shadow-elevation-0: var(--elevation-0);
   --shadow-elevation-1: var(--elevation-1);
   --shadow-elevation-2: var(--elevation-2);
@@ -358,7 +362,7 @@
 /* Thin scrollbars inside the workspace panels. */
 @utility scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgb(92 112 128 / 0.35) transparent;
+  scrollbar-color: rgb(100 116 139 / 0.35) transparent;
 }
 
 /* Blueprint button surfaces (see components/ui/button.tsx). */

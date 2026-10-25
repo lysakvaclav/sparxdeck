@@ -257,7 +257,7 @@ function KindTable({
         {rows.map((child, index) => (
           <TableRow
             key={child.id}
-            className="cursor-pointer hover:bg-[rgb(191_204_214/0.3)]"
+            className="cursor-pointer hover:bg-accent"
             onClick={() => onFocus(child.id)}
           >
             {kind === "location" && (
@@ -386,7 +386,7 @@ function ObjectList({
             return (
               <TableRow
                 key={node.id}
-                className="cursor-pointer hover:bg-[rgb(191_204_214/0.3)]"
+                className="cursor-pointer hover:bg-accent"
                 onClick={() => onFocus(node.id)}
               >
                 <TableCell>

@@ -126,7 +126,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
       />
       <PageBody>
         <div className="mb-2.5 flex flex-col gap-2.5 sm:mb-[15px] lg:flex-row lg:items-center lg:justify-between">
-          <nav aria-label={t("views")} className="flex self-start rounded-md bg-muted p-0.5">
+          <nav aria-label={t("views")} className="flex self-start rounded-lg bg-canvas p-0.5">
             {(["month", "workload"] as const).map((option) => (
               <Link
                 key={option}
@@ -135,7 +135,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                 className={cn(
                   "flex min-h-[26px] items-center rounded-md px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                   view === option
-                    ? "bg-segment-active font-semibold text-segment-active-foreground"
+                    ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

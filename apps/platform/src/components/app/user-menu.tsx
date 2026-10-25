@@ -23,12 +23,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+/** "Olga Devatenáctá" → "OD"; a single word gives its first letter. */
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length > 1 ? [words[0]!, words.at(-1)!] : words.slice(0, 1);
+  return letters.map((word) => word[0]!.toLocaleUpperCase()).join("") || "?";
+}
+
 type UserMenuProps = {
   name: string;
   email: string;
   /**
-   * "rail": person icon with name and e-mail in the expanded desktop rail;
-   * "railCompact": icon only in the collapsed rail; "compact": icon only in the
+   * "rail": initials with name and e-mail in the expanded desktop rail;
+   * "railCompact": initials only in the collapsed rail; "compact": initials only in the
    * phone top bar.
    */
   variant?: "rail" | "railCompact" | "compact";
@@ -70,7 +77,15 @@ export function UserMenu({ name, email, variant = "rail" }: UserMenuProps) {
             variant === "compact" && "size-11 justify-center",
           )}
         >
-          <PersonIcon />
+          <span
+            aria-hidden
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-full bg-primary text-[11px] leading-none font-semibold text-primary-foreground",
+              variant === "compact" ? "size-7" : "size-6",
+            )}
+          >
+            {initials(name)}
+          </span>
           {variant === "rail" && (
             <span className="min-w-0 flex-1">
               <span className="block truncate text-ui text-white">{name}</span>

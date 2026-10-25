@@ -103,7 +103,7 @@ export default async function FloorPlanPage({ params, searchParams }: Props) {
       <PageBody>
         {plans.length > 1 && (
           <nav aria-label={t("detail.plans")} className="mb-2.5 sm:mb-[15px]">
-            <ul className="flex scrollbar-thin gap-1 overflow-x-auto rounded-md bg-muted p-0.5">
+            <ul className="flex scrollbar-thin gap-1 overflow-x-auto rounded-lg bg-canvas p-0.5">
               {plans.map((item) => (
                 <li key={item.id} className="shrink-0">
                   <Link
@@ -112,7 +112,7 @@ export default async function FloorPlanPage({ params, searchParams }: Props) {
                     className={cn(
                       "flex min-h-[30px] items-center gap-1.5 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       item.id === plan.id
-                        ? "bg-segment-active font-semibold text-segment-active-foreground"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >

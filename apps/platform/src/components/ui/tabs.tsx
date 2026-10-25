@@ -4,7 +4,7 @@ import * as React from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
-// Blueprint tabs: 30px tall, selected tab blue with a 3px indicator.
+// Tabs: 30px tall, selected tab blue and medium weight over a 2px indicator.
 const Tabs = TabsPrimitive.Root;
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
@@ -23,7 +23,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 text-ui whitespace-nowrap text-foreground outline-none hover:text-link focus-visible:text-link data-[state=active]:text-link data-[state=active]:shadow-[inset_0_-3px_0_var(--primary)]",
+        "inline-flex cursor-pointer items-center gap-1 text-ui whitespace-nowrap text-foreground outline-none hover:text-link focus-visible:text-link data-[state=active]:font-medium data-[state=active]:text-link data-[state=active]:shadow-[inset_0_-2px_0_var(--primary)]",
         className,
       )}
       {...props}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto } from "next/font/google";
+import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { headers } from "next/headers";
@@ -20,10 +20,9 @@ const helveticaNow = localFont({
 });
 
 // The workspace typeface (self-hosted by Next.js, no request to Google at runtime).
-const roboto = Roboto({
+const inter = Inter({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "700"],
-  variable: "--font-roboto",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -57,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={locale}
       dir={dir}
-      className={`${helveticaNow.variable} ${roboto.variable}`}
+      className={`${helveticaNow.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
       <body>

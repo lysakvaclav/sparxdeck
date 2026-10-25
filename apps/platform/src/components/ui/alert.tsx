@@ -9,17 +9,17 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-// Blueprint callout: tinted block with an intent icon and optional bold title.
+// Callout: lightly tinted block with a thin border, an intent icon and optional bold title.
 const alertVariants = cva(
-  "flex gap-2.5 rounded-md px-3 py-2.5 text-ui text-foreground [.brand_&]:border [.brand_&]:text-sm",
+  "flex gap-2.5 rounded-md px-3 py-2.5 text-ui text-foreground [.brand_&]:border [.brand_&]:text-sm [.brand_&]:shadow-none",
   {
     variants: {
       variant: {
-        info: "bg-primary/15 [&>svg]:text-link [.brand_&]:border-border [.brand_&]:bg-muted [.brand_&]:[&>svg]:text-muted-foreground",
-        success: "bg-success/15 [&>svg]:text-success-text [.brand_&]:border-success/30",
-        error: "bg-destructive/15 [&>svg]:text-destructive-text [.brand_&]:border-destructive/30",
-        warning: "bg-warning/15 [&>svg]:text-warning-text",
-        neutral: "bg-[rgb(138_155_168/0.15)] [&>svg]:text-muted-foreground",
+        info: "bg-primary/10 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--primary)_28%,transparent)] [&>svg]:text-link [.brand_&]:border-border [.brand_&]:bg-muted [.brand_&]:[&>svg]:text-muted-foreground",
+        success: "bg-success/10 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--success)_28%,transparent)] [&>svg]:text-success-text [.brand_&]:border-success/30",
+        error: "bg-destructive/10 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--destructive)_28%,transparent)] [&>svg]:text-destructive-text [.brand_&]:border-destructive/30",
+        warning: "bg-warning/10 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--warning)_28%,transparent)] [&>svg]:text-warning-text",
+        neutral: "bg-accent shadow-[inset_0_0_0_1px_var(--border)] [&>svg]:text-muted-foreground",
       },
     },
     defaultVariants: { variant: "info" },

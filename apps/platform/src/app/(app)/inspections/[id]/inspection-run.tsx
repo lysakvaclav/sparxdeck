@@ -354,7 +354,7 @@ export function InspectionRun({
             <div
               role="radiogroup"
               aria-label={tPlans("run.view")}
-              className="flex flex-1 rounded-md bg-muted p-0.5 sm:flex-none"
+              className="flex flex-1 rounded-lg bg-canvas p-0.5 sm:flex-none"
             >
               {(["list", "plan"] as const).map((id) => (
                 <button
@@ -366,7 +366,7 @@ export function InspectionRun({
                   className={cn(
                     "min-h-[30px] flex-1 rounded-[3px] px-4 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                     mode === id
-                      ? "bg-segment-active font-semibold text-segment-active-foreground"
+                      ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                       : "text-muted-foreground",
                   )}
                 >
@@ -426,7 +426,7 @@ export function InspectionRun({
         ) : (
           <>
             <div className="flex flex-col gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)] sm:flex-row sm:items-center sm:justify-between">
-              <div role="tablist" className="flex rounded-md bg-muted p-0.5">
+              <div role="tablist" className="flex rounded-lg bg-canvas p-0.5">
                 {(
                   [
                     ["remaining", t("run.remaining"), devices.length - done.length],
@@ -443,7 +443,7 @@ export function InspectionRun({
                     className={cn(
                       "min-h-[30px] flex-1 rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       tab === id
-                        ? "bg-segment-active font-semibold text-segment-active-foreground"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                         : "text-muted-foreground",
                     )}
                   >
@@ -505,7 +505,7 @@ export function InspectionRun({
                                 event.preventDefault();
                                 onOpen(device.id);
                               }}
-                              className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-[rgb(191_204_214/0.3)]"
+                              className="flex min-h-14 items-center gap-3 px-[15px] py-2 shadow-[inset_0_-1px_0_var(--border)] hover:bg-accent"
                             >
                               <status.icon size={20} className={cn("shrink-0", status.tone)} />
                               <span className="min-w-0 flex-1">

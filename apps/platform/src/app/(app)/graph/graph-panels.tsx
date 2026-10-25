@@ -419,7 +419,7 @@ export function GraphTree({
             twoLine ? "min-h-[38px] py-[3px]" : "min-h-[26px] pointer-coarse:min-h-11",
             isSelected
               ? "bg-primary text-primary-foreground"
-              : "hover:bg-[rgb(191_204_214/0.4)] dark:hover:bg-[rgb(92_112_128/0.3)]",
+              : "hover:bg-accent-strong dark:hover:bg-[rgb(92_112_128/0.3)]",
           )}
           style={{ paddingInlineStart: `${4 + level * 18}px` }}
         >
@@ -924,7 +924,7 @@ function RelationRow({
     <button
       type="button"
       onClick={() => onFocus(node.id)}
-      className="flex min-h-[34px] w-full items-center gap-[7px] px-[15px] text-start transition-colors hover:bg-[rgb(191_204_214/0.3)] pointer-coarse:min-h-11"
+      className="flex min-h-[34px] w-full items-center gap-[7px] px-[15px] text-start transition-colors hover:bg-accent pointer-coarse:min-h-11"
     >
       <TypeIcon kind={node.kind} color={color} />
       <span className="min-w-0 flex-1 truncate">{node.label}</span>

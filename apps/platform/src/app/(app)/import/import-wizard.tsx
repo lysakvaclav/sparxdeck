@@ -469,7 +469,7 @@ export function ImportWizard() {
 
           <Card>
             <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 shadow-[inset_0_-1px_0_var(--border)]">
-              <div role="tablist" className="flex rounded-md bg-muted p-0.5">
+              <div role="tablist" className="flex rounded-lg bg-canvas p-0.5">
                 {(
                   [
                     ["all", rows.length],
@@ -486,7 +486,7 @@ export function ImportWizard() {
                     className={cn(
                       "min-h-[30px] rounded-[3px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
                       filter === id
-                        ? "bg-segment-active font-semibold text-segment-active-foreground"
+                        ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
                         : "text-muted-foreground",
                     )}
                   >

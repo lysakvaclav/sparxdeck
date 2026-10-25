@@ -22,7 +22,7 @@ import { UserMenu } from "./user-menu";
 const tabClass =
   "relative flex min-h-14 flex-col items-center justify-center gap-1 text-[10.5px] transition-colors";
 const tabActive =
-  "text-link before:absolute before:inset-x-3 before:top-0 before:h-[3px] before:bg-primary";
+  "text-link before:absolute before:inset-x-5 before:top-0 before:h-[3px] before:rounded-b-full before:bg-primary";
 const moreItems = NAV_ITEMS.filter((item) => item.phone === "more");
 
 type AppShellProps = {
@@ -35,7 +35,7 @@ type AppShellProps = {
 };
 
 /**
- * Workspace frame, as in Foundry: a dark navigation rail with coloured app icons
+ * Workspace frame: a slate navigation rail with app icons
  * (expandable to show labels) and the page on the right, which brings its own
  * header (PageHeader) and scrolling body (PageBody). Phones get a dark top bar and
  * a bottom tab bar. Logical properties keep right-to-left locales mirrored.
@@ -100,7 +100,7 @@ export function AppShell({
             {/* Desktop rail */}
             <aside
               className={cn(
-                "hidden shrink-0 flex-col bg-rail shadow-[inset_-3px_0_0_var(--primary)] transition-[width] duration-150 lg:flex",
+                "hidden shrink-0 flex-col bg-rail transition-[width] duration-150 lg:flex",
                 expanded ? "w-[220px]" : "w-11",
               )}
             >
@@ -153,7 +153,7 @@ export function AppShell({
 
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Mobile top bar */}
-              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] shadow-[inset_0_-2px_0_var(--primary)] lg:hidden">
+              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
                 <Link href="/" className="flex min-h-12 min-w-0 flex-col justify-center">
                   <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
                   <span className="truncate text-ui-xs text-rail-foreground">
