@@ -36,7 +36,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 11 | Hledání, průvodce a export | S (hledání), X, R | Hotovo |
 | 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na portal.sparxdeck.com (landing sparxdeck.com); zbývá Resend, Sentry, zálohy v produkci a test na iPhonu |
 | 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno; z části 17 čekají 4 položky na zpětnou vazbu z pilotu |
-| 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nenasazeno |
+| 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
