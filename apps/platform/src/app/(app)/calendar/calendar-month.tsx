@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { AddIcon, CalendarIcon, FlameIcon } from "@/components/icons";
+import { AddIcon, CalendarIcon } from "@/components/icons";
+import { OBJECT_TYPES } from "@/components/app/object-types";
 import {
   PlanDialog,
   type PlanMember,
@@ -18,6 +19,9 @@ import type { CalendarPlan, DueSite } from "@/lib/calendar-data";
 import { calendarDate } from "@/lib/due";
 import { cn } from "@/lib/utils";
 import { StartInspectionButton } from "../inspections/start-button";
+
+/** The device square that marks devices coming due. */
+const DeviceMark = OBJECT_TYPES.device.icon;
 
 /** Colour of a plan's dot: blue ahead, orange running, green done, red missed. */
 const STATE_DOT: Record<PlanState, string> = {
@@ -163,7 +167,7 @@ export function CalendarMonth({
                       )}
                       {devices > 0 && (
                         <span className="mt-auto flex items-center gap-1 text-ui-sm text-muted-foreground">
-                          <FlameIcon size={12} className="shrink-0" />
+                          <DeviceMark size={12} className={cn("shrink-0", OBJECT_TYPES.device.text)} />
                           {t("devicesDue", { count: devices })}
                         </span>
                       )}
@@ -182,7 +186,7 @@ export function CalendarMonth({
             </li>
           ))}
           <li className="flex items-center gap-1.5">
-            <FlameIcon size={12} />
+            <DeviceMark size={12} className={OBJECT_TYPES.device.text} />
             {t("legendDue")}
           </li>
         </ul>
@@ -223,7 +227,7 @@ export function CalendarMonth({
                     ))}
                     {devices > 0 && (
                       <span className="flex items-center gap-1 text-ui-sm text-muted-foreground">
-                        <FlameIcon size={12} />
+                        <DeviceMark size={12} className={OBJECT_TYPES.device.text} />
                         {t("devicesDue", { count: devices })}
                       </span>
                     )}

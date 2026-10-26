@@ -2,15 +2,15 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /*
- * Blueprint card used as a section: white surface with a hairline elevation, an
- * optional header bar (title, small description, actions) and content below.
+ * A section of a page: no frame, a hairline rule above it, an optional heading
+ * row (title, small description, actions on the right) and the content below.
  */
 
 function Card({ className, ...props }: React.ComponentProps<"section">) {
   return (
     <section
       className={cn(
-        "relative min-w-0 rounded-lg bg-card text-card-foreground shadow-elevation-0",
+        "relative min-w-0 border-t border-border text-card-foreground",
         className,
       )}
       {...props}
@@ -27,7 +27,7 @@ function CardHeader({
   return (
     <div
       className={cn(
-        "flex min-h-10 items-center gap-2.5 px-[15px] py-1.5 shadow-[0_1px_0_var(--border)]",
+        "flex min-h-11 items-center gap-2.5 px-[15px] pt-2.5 pb-1",
         className,
       )}
       {...props}

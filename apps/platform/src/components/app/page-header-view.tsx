@@ -13,7 +13,7 @@ export type PageHeaderProps = {
   title: string;
   /** Ancestors of this page; the title is the last, bold crumb. */
   breadcrumbs?: Crumb[];
-  /** App or object icon, drawn in its colour before the path. */
+  /** App or object icon (not drawn: pictures are kept for the sidebar). */
   icon?: IconComponent;
   /** Colour class of the icon. */
   iconClassName?: string;
@@ -27,15 +27,12 @@ export type PageHeaderProps = {
 };
 
 /**
- * Page header: coloured app icon, the path ("Section / Page") ending in the bold
- * page title, optional application menus below, actions on the right.
+ * Page header: the path ("Section / Page") ending in the bold page title, optional application menus below, actions on the right.
  * Server pages use PageHeader, client views ClientPageHeader; both draw this.
  */
 export function PageHeaderView({
   title,
   breadcrumbs,
-  icon: Icon,
-  iconClassName,
   meta,
   actions,
   menus = false,
@@ -46,7 +43,6 @@ export function PageHeaderView({
     <>
       <header className="relative z-10 shrink-0 border-b border-border bg-background">
         <div className="flex min-h-[50px] flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5">
-          {Icon && <Icon size={20} className={cn("text-muted-foreground", iconClassName)} />}
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1.5">
               {breadcrumbs && breadcrumbs.length > 0 && (

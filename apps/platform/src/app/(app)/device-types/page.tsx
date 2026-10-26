@@ -92,7 +92,6 @@ export default async function DeviceTypesPage() {
                     <TableRow key={type.id}>
                       <TableCell className="w-full max-w-0 sm:w-[28%]">
                         <span className="flex min-w-0 items-center gap-2">
-                          <CubeIcon className={app.tone} />
                           <RowLink href={`/device-types/${type.id}`} className="truncate">
                             {type.name}
                           </RowLink>

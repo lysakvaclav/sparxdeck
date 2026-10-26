@@ -49,7 +49,7 @@ function TableHeaderCell({ className, ...props }: React.ComponentProps<"th">) {
     <th
       scope="col"
       className={cn(
-        "h-9 px-3 text-start align-middle text-ui-sm font-medium whitespace-nowrap text-foreground/80",
+        "h-10 px-3 text-start align-middle text-[13px] font-semibold whitespace-nowrap text-foreground",
         cellBorders,
         className,
       )}

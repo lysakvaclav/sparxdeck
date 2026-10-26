@@ -4,9 +4,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /*
- * Buttons: 30px tall, flat with a thin border and a soft shadow, medium-weight
- * labels, grey icons in neutral buttons. 44px on touch screens; the landing
- * page shape on the sign-in screens (.brand).
+ * Buttons: 32px tall with 6px corners, medium-weight labels: solid blue for the
+ * main action, white with a thin grey border for the others, plain text for
+ * quiet ones. Text buttons show no icon (icons belong to the sidebar and to
+ * icon-only buttons, which carry an aria-label); a menu's chevron stays. 44px on
+ * touch screens; the landing page shape on the sign-in screens (.brand).
  */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center rounded-md leading-none font-medium whitespace-nowrap transition-[background-color,box-shadow] duration-100 select-none disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [.brand_&]:font-medium",
@@ -26,11 +28,11 @@ const buttonVariants = cva(
         link: "h-auto min-w-0 px-0 text-link underline-offset-2 hover:underline",
       },
       size: {
-        sm: "h-6 min-w-6 gap-[5px] px-[7px] text-ui pointer-coarse:h-11 pointer-coarse:px-3",
-        md: "h-[30px] min-w-[30px] gap-[7px] px-2.5 text-ui pointer-coarse:h-11 pointer-coarse:px-4 [.brand_&]:h-11 [.brand_&]:gap-2 [.brand_&]:px-4 [.brand_&]:text-sm",
-        lg: "h-10 min-w-10 gap-[7px] px-[15px] text-ui-lg pointer-coarse:h-12",
-        icon: "size-[30px] p-0 pointer-coarse:size-11 [.brand_&]:size-11",
-        iconSm: "size-6 p-0 pointer-coarse:size-11",
+        sm: "h-7 min-w-7 gap-1.5 px-2.5 text-ui pointer-coarse:h-11 pointer-coarse:px-3 [&:not([aria-label])>svg:not([data-icon$=down])]:hidden",
+        md: "h-8 min-w-8 gap-1.5 px-3 text-ui pointer-coarse:h-11 pointer-coarse:px-4 [.brand_&]:h-11 [.brand_&]:gap-2 [.brand_&]:px-4 [.brand_&]:text-sm [&:not([aria-label])>svg:not([data-icon$=down])]:hidden",
+        lg: "h-10 min-w-10 gap-2 px-4 text-ui-lg pointer-coarse:h-12 [&:not([aria-label])>svg:not([data-icon$=down])]:hidden",
+        icon: "size-8 p-0 pointer-coarse:size-11 [.brand_&]:size-11",
+        iconSm: "size-7 p-0 pointer-coarse:size-11",
       },
     },
     compoundVariants: [{ variant: "link", className: "h-auto px-0" }],
