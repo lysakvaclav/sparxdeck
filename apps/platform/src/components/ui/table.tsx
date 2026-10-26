@@ -4,14 +4,14 @@ import { CaretDownIcon, CaretUpIcon, DoubleCaretVerticalIcon } from "@/component
 import { cn } from "@/lib/utils";
 
 /*
- * Condensed table: grey column labels on a light band, horizontal hairlines,
- * row hover. A row links to a detail page through `RowLink` (a
+ * Table: column labels on a pale band, hairlines under the rows, light dashed
+ * rules between columns, row hover. A row links to a detail page through `RowLink` (a
  * stretched link in the first cell), so the whole row is clickable and accessible.
  */
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="w-full scrollbar-thin overflow-x-auto">
+    <div className="w-full scrollbar-thin overflow-x-auto rounded-[inherit]">
       <table
         className={cn("w-full border-separate border-spacing-0 text-ui", className)}
         {...props}
@@ -32,7 +32,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       className={cn(
-        "relative transition-colors [&:has([data-row-link]:focus-visible)]:bg-selected [&:has([data-row-link]:hover)]:bg-[rgb(191_204_214/0.3)]",
+        "relative transition-colors [&:has([data-row-link]:focus-visible)]:bg-selected [&:has([data-row-link]:hover)]:bg-muted",
         className,
       )}
       {...props}
@@ -40,15 +40,16 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
-// Horizontal dividers only.
-const cellBorders = "shadow-[inset_0_-1px_0_var(--border)]";
+// A hairline under every row; a light dashed rule between columns (none after the last).
+const cellBorders =
+  "border-e border-dashed border-border shadow-[inset_0_-1px_0_var(--border)] last:border-e-0";
 
 function TableHeaderCell({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       scope="col"
       className={cn(
-        "h-[30px] px-2.5 text-start align-middle text-ui font-medium whitespace-nowrap text-muted-foreground",
+        "h-9 px-3 text-start align-middle text-ui-sm font-medium whitespace-nowrap text-foreground/80",
         cellBorders,
         className,
       )}
@@ -99,7 +100,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       className={cn(
-        "h-[34px] px-2.5 align-middle pointer-coarse:h-12",
+        "h-10 px-3 align-middle pointer-coarse:h-12",
         cellBorders,
         "[tr:last-child>&]:shadow-none",
         className,

@@ -14,7 +14,7 @@ import {
 import { ToastProvider } from "@/components/ui/toast";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, RAIL_COOKIE, isActive } from "./nav-items";
+import { NAV_ITEMS, RAIL_COOKIE, isActive, type NavGroup } from "./nav-items";
 import { MobileSearchButton, OmnibarProvider, RailSearchButton } from "./omnibar";
 import { TextLogo } from "./text-logo";
 import { UserMenu } from "./user-menu";
@@ -22,8 +22,16 @@ import { UserMenu } from "./user-menu";
 const tabClass =
   "relative flex min-h-14 flex-col items-center justify-center gap-1 text-[10.5px] transition-colors";
 const tabActive =
-  "text-link before:absolute before:inset-x-5 before:top-0 before:h-[3px] before:rounded-b-full before:bg-primary";
+  "text-link before:absolute before:inset-x-5 before:top-0 before:h-0.5 before:rounded-b-full before:bg-primary";
 const moreItems = NAV_ITEMS.filter((item) => item.phone === "more");
+
+/** Sidebar sections in order, with their headings (the first has none). */
+const GROUPS: { group: NavGroup; heading?: "groupWork" | "groupRecords" | "groupAdmin" }[] = [
+  { group: "main" },
+  { group: "work", heading: "groupWork" },
+  { group: "records", heading: "groupRecords" },
+  { group: "admin", heading: "groupAdmin" },
+];
 
 type AppShellProps = {
   organizationName: string;
@@ -35,10 +43,11 @@ type AppShellProps = {
 };
 
 /**
- * Workspace frame: a slate navigation rail with app icons
- * (expandable to show labels) and the page on the right, which brings its own
- * header (PageHeader) and scrolling body (PageBody). Phones get a dark top bar and
- * a bottom tab bar. Logical properties keep right-to-left locales mirrored.
+ * Workspace frame: a pale sidebar (company and fold button on top, search,
+ * sections with headings, the account at the foot; folds to icons) and the page
+ * on the right, which brings its own header (PageHeader) and scrolling body
+ * (PageBody). Phones get a white top bar and a bottom tab bar. Logical
+ * properties keep right-to-left locales mirrored.
  */
 export function AppShell({
   organizationName,
@@ -58,8 +67,6 @@ export function AppShell({
     document.cookie = `${RAIL_COOKIE}=${next ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
   }
 
-  const [home, ...apps] = NAV_ITEMS;
-
   const railItem = (item: (typeof NAV_ITEMS)[number]) => {
     const active = isActive(pathname, item);
     const Icon = item.icon;
@@ -69,13 +76,14 @@ export function AppShell({
         aria-current={active ? "page" : undefined}
         aria-label={expanded ? undefined : t(item.label)}
         className={cn(
-          "mx-1.5 flex h-[30px] items-center gap-2.5 rounded-md px-[7px] text-ui transition-colors",
+          "flex h-[30px] items-center gap-2.5 rounded-md text-ui transition-colors",
+          expanded ? "px-2" : "mx-auto w-[30px] justify-center",
           active
-            ? "bg-rail-active text-white"
-            : "text-rail-foreground hover:bg-rail-hover hover:text-white",
+            ? "bg-rail-active font-medium text-foreground"
+            : "text-rail-foreground hover:bg-rail-hover hover:text-foreground",
         )}
       >
-        <Icon className={item.railTone} />
+        <Icon className={active ? "text-foreground" : "text-muted-foreground"} />
         {expanded && <span className="truncate">{t(item.label)}</span>}
       </Link>
     );
@@ -97,52 +105,70 @@ export function AppShell({
       <ToastProvider closeLabel={tCommon("close")}>
         <OmnibarProvider>
           <div className="flex h-dvh overflow-hidden bg-page">
-            {/* Desktop rail */}
+            {/* Desktop sidebar */}
             <aside
               className={cn(
-                "hidden shrink-0 flex-col bg-rail transition-[width] duration-150 lg:flex",
-                expanded ? "w-[220px]" : "w-11",
+                "hidden shrink-0 flex-col border-e border-border bg-rail transition-[width] duration-150 lg:flex",
+                expanded ? "w-[248px]" : "w-[52px]",
               )}
             >
-              {/* The brand on top in both widths (the mark alone when collapsed). */}
+              {/* The company on top, with the button that folds the sidebar. */}
               <div
                 className={cn(
-                  "flex h-[50px] shrink-0 items-center",
-                  expanded ? "ps-[13px] pe-2.5" : "justify-center",
+                  "flex h-[50px] shrink-0 items-center gap-2",
+                  expanded ? "ps-3 pe-2" : "justify-center",
                 )}
               >
-                {expanded ? (
-                  <div className="min-w-0">
-                    <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
-                    <p
-                      className="truncate text-ui-xs text-rail-foreground"
+                {expanded && (
+                  <>
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                      <TextLogo label="SparxDeck" className="aspect-square h-3.5" />
+                    </span>
+                    <span
+                      className="min-w-0 flex-1 truncate text-ui font-semibold"
                       title={organizationName}
                     >
                       {organizationName}
-                    </p>
-                  </div>
-                ) : (
-                  <TextLogo label="SparxDeck" className="aspect-square h-[18px] text-white" />
+                    </span>
+                  </>
                 )}
-              </div>
-
-              <div className="pb-1.5">
-                <RailSearchButton expanded={expanded} />
-              </div>
-              <nav aria-label={t("mainNavigation")} className="flex-1 overflow-y-auto pb-2">
-                <ul className="space-y-0.5">{home && railItem(home)}</ul>
-                <div aria-hidden className="mx-2.5 my-2 h-px bg-white/10" />
-                <ul className="space-y-0.5">{apps.map(railItem)}</ul>
-              </nav>
-
-              <div className="shrink-0 px-1.5 pb-1.5">
                 <RailToggle
                   expanded={expanded}
                   label={expanded ? t("collapseRail") : t("expandRail")}
                   onClick={toggleRail}
                 />
               </div>
-              <div className="shrink-0 p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]">
+
+              <div className={cn("pb-1", expanded ? "px-2" : "px-0")}>
+                <RailSearchButton expanded={expanded} />
+              </div>
+              <nav
+                aria-label={t("mainNavigation")}
+                className={cn("flex-1 scrollbar-thin overflow-y-auto pb-3", expanded ? "px-2" : "px-0")}
+              >
+                {GROUPS.map(({ group, heading }) => (
+                  <div key={group} className={heading ? "mt-3" : "mt-1"}>
+                    {heading &&
+                      (expanded ? (
+                        <p className="px-2 pb-1 text-ui-sm font-medium text-muted-foreground">
+                          {t(heading)}
+                        </p>
+                      ) : (
+                        <div aria-hidden className="mx-auto mb-2 h-px w-6 bg-border" />
+                      ))}
+                    <ul className="space-y-px">
+                      {NAV_ITEMS.filter((item) => item.group === group).map(railItem)}
+                    </ul>
+                  </div>
+                ))}
+              </nav>
+
+              <div
+                className={cn(
+                  "shrink-0 border-t border-border py-2",
+                  expanded ? "px-2" : "flex justify-center",
+                )}
+              >
                 <UserMenu
                   name={userName}
                   email={userEmail}
@@ -153,12 +179,12 @@ export function AppShell({
 
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Mobile top bar */}
-              <header className="flex shrink-0 items-center justify-between gap-3 bg-rail ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
-                <Link href="/" className="flex min-h-12 min-w-0 flex-col justify-center">
-                  <TextLogo label="SparxDeck" className="mb-1 h-4 text-white" />
-                  <span className="truncate text-ui-xs text-rail-foreground">
-                    {organizationName}
+              <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
+                <Link href="/" className="flex min-h-12 min-w-0 items-center gap-2">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <TextLogo label="SparxDeck" className="aspect-square h-3.5" />
                   </span>
+                  <span className="truncate text-ui font-semibold">{organizationName}</span>
                 </Link>
                 <div className="flex shrink-0 items-center">
                   <MobileSearchButton />
@@ -247,7 +273,7 @@ function RailToggle({
       onClick={onClick}
       aria-label={label}
       aria-expanded={expanded}
-      className="flex size-[30px] shrink-0 items-center justify-center rounded-md text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
+      className="flex size-[30px] shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-rail-hover hover:text-foreground"
     >
       <Icon />
     </button>

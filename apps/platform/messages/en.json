@@ -129,7 +129,10 @@
     "more": "More",
     "defects": "Defects",
     "search": "Search",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "groupWork": "Work",
+    "groupRecords": "Records",
+    "groupAdmin": "Administration"
   },
   "dashboard": {
     "title": "Overview",

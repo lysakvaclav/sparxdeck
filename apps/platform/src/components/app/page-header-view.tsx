@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon, type IconComponent } from "@/components/icons";
+import type { IconComponent } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export type Crumb = {
@@ -27,7 +27,8 @@ export type PageHeaderProps = {
 };
 
 /**
- * Page header: coloured app icon, breadcrumb path ending in the bold page title, optional application menus below, actions on the right.
+ * Page header: coloured app icon, the path ("Section / Page") ending in the bold
+ * page title, optional application menus below, actions on the right.
  * Server pages use PageHeader, client views ClientPageHeader; both draw this.
  */
 export function PageHeaderView({
@@ -43,40 +44,42 @@ export function PageHeaderView({
 }: PageHeaderProps & { breadcrumbsLabel: string }) {
   return (
     <>
-      <header className="relative z-10 shrink-0 bg-background shadow-[0_1px_0_var(--border)]">
+      <header className="relative z-10 shrink-0 border-b border-border bg-background">
         <div className="flex min-h-[50px] flex-wrap items-center gap-x-2.5 gap-y-1.5 px-[15px] py-1.5">
           {Icon && <Icon size={20} className={cn("text-muted-foreground", iconClassName)} />}
           <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-1">
+            <div className="flex min-w-0 items-center gap-1.5">
               {breadcrumbs && breadcrumbs.length > 0 && (
                 <nav
                   aria-label={breadcrumbsLabel}
                   className="max-w-[45%] min-w-0 shrink-[10] sm:max-w-none"
                 >
-                  <ol className="flex min-w-0 items-center gap-1">
+                  <ol className="flex min-w-0 items-center gap-1.5">
                     {breadcrumbs.map((crumb, index) => (
                       <li
                         key={crumb.href}
                         // Phones keep only the parent, so the title (e.g. a label number) fits.
                         className={cn(
-                          "flex min-w-0 shrink items-center gap-1",
+                          "flex min-w-0 shrink items-center gap-1.5",
                           index < breadcrumbs.length - 1 && "hidden sm:flex",
                         )}
                       >
                         <Link
                           href={crumb.href}
                           onClick={crumb.onClick}
-                          className="truncate text-ui text-muted-foreground hover:text-foreground hover:underline pointer-coarse:block pointer-coarse:leading-[44px]"
+                          className="truncate text-ui font-medium text-foreground/75 hover:text-foreground pointer-coarse:block pointer-coarse:leading-[44px]"
                         >
                           {crumb.label}
                         </Link>
-                        <ChevronRightIcon className="text-subtle rtl:rotate-180" />
+                        <span aria-hidden className="text-subtle">
+                          /
+                        </span>
                       </li>
                     ))}
                   </ol>
                 </nav>
               )}
-              <h1 className="min-w-0 truncate text-ui-lg font-semibold">{title}</h1>
+              <h1 className="min-w-0 truncate text-ui-lg font-semibold tracking-tight">{title}</h1>
               {meta && (
                 <div className="ms-1 hidden shrink-0 items-center gap-1.5 sm:flex">{meta}</div>
               )}

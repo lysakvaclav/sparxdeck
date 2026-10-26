@@ -129,7 +129,10 @@
     "more": "Více",
     "defects": "Závady",
     "search": "Hledat",
-    "calendar": "Kalendář"
+    "calendar": "Kalendář",
+    "groupWork": "Práce",
+    "groupRecords": "Evidence",
+    "groupAdmin": "Správa"
   },
   "dashboard": {
     "title": "Přehled",

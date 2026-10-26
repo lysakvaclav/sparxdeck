@@ -13,6 +13,9 @@ import {
   type IconComponent,
 } from "@/components/icons";
 
+/** Sidebar sections; the heading of each is "nav.group…" (none for the first). */
+export type NavGroup = "main" | "work" | "records" | "admin";
+
 export type NavItem = {
   href: string;
   /** Key under "nav" in messages. */
@@ -29,8 +32,8 @@ export type NavItem = {
     | "team"
     | "settings";
   icon: IconComponent;
-  /** Icon colour on the dark rail (the same muted grey for every app). */
-  railTone: string;
+  /** Section of the desktop sidebar. */
+  group: NavGroup;
   /** Icon colour in the page header (light and dark surfaces). */
   headerTone: string;
   /** Other path prefixes that belong to this item (a site's page is under Customers). */
@@ -50,7 +53,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/",
     label: "dashboard",
     icon: HomeIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "main",
     headerTone: "text-[#5c7080] dark:text-[#a7b6c2]",
     phone: "tab",
   },
@@ -58,7 +61,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/inspections",
     label: "inspections",
     icon: FormIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "work",
     headerTone: "text-[#00a396] dark:text-[#2ee6d6]",
     phone: "tab",
   },
@@ -66,7 +69,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/calendar",
     label: "calendar",
     icon: CalendarIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "work",
     headerTone: "text-[#728c23] dark:text-[#b6d94c]",
     phone: "more",
   },
@@ -74,7 +77,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/defects",
     label: "defects",
     icon: IssueIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "work",
     headerTone: "text-[#db3737] dark:text-[#ff7373]",
     phone: "tab",
   },
@@ -82,7 +85,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/customers",
     label: "customers",
     icon: BriefcaseIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "records",
     headerTone: "text-[#137cbd] dark:text-[#48aff0]",
     also: ["/sites"],
     phone: "more",
@@ -91,7 +94,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/devices",
     label: "devices",
     icon: FlameIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "records",
     headerTone: "text-[#db2c6f] dark:text-[#f5498b]",
     phone: "tab",
   },
@@ -99,7 +102,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/plans",
     label: "plans",
     icon: LayersIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "records",
     headerTone: "text-[#d99e0b] dark:text-[#ffc940]",
     match: SITE_PLAN,
     phone: "more",
@@ -108,7 +111,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/graph",
     label: "graph",
     icon: DataLineageIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "records",
     headerTone: "text-[#d9822b] dark:text-[#f29d49]",
     phone: "more",
   },
@@ -116,7 +119,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/device-types",
     label: "deviceTypes",
     icon: ClipboardIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "admin",
     headerTone: "text-[#7157d9] dark:text-[#ad99ff]",
     phone: "more",
   },
@@ -124,7 +127,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/team",
     label: "team",
     icon: PeopleIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "admin",
     headerTone: "text-[#0f9960] dark:text-[#3dcc91]",
     phone: "more",
   },
@@ -132,7 +135,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/settings",
     label: "settings",
     icon: CogIcon,
-    railTone: "text-[#a7b6c2]",
+    group: "admin",
     headerTone: "text-[#5c7080] dark:text-[#a7b6c2]",
     phone: "more",
   },
@@ -161,5 +164,5 @@ export function isActive(pathname: string, item: Pick<NavItem, "href" | "also" |
   return [item.href, ...(item.also ?? [])].some((prefix) => matches(pathname, prefix));
 }
 
-/** Cookie that remembers whether the desktop rail shows labels. */
+/** Cookie that remembers a folded sidebar ("0"); it shows labels otherwise. */
 export const RAIL_COOKIE = "sd_rail";

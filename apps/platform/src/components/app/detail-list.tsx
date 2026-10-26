@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export type DetailItem = { label: string; value?: React.ReactNode };
 
-/** Object properties as two columns (label | value) with hairlines, as on Foundry object views. */
+/** Object properties as two columns: a grey label and its value. */
 export async function DetailList({
   items,
   className,
@@ -13,11 +13,11 @@ export async function DetailList({
 }) {
   const t = await getTranslations("common");
   return (
-    <dl className={cn("text-ui", className)}>
+    <dl className={cn("py-2 text-ui", className)}>
       {items.map((item) => (
         <div
           key={item.label}
-          className="grid grid-cols-[minmax(0,38%)_minmax(0,1fr)] gap-3 px-[15px] py-[7px] shadow-[inset_0_-1px_0_var(--border)] last:shadow-none"
+          className="grid grid-cols-[minmax(0,38%)_minmax(0,1fr)] gap-3 px-[15px] py-1.5"
         >
           <dt className="text-muted-foreground">{item.label}</dt>
           <dd className="break-words whitespace-pre-line">

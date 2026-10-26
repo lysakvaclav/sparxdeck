@@ -5,12 +5,18 @@ import { OfflineSupport } from "@/components/app/offline-support";
 import { RAIL_COOKIE } from "@/components/app/nav-items";
 import { requireMembership } from "@/lib/auth";
 
-// The phone's status bar matches the app's dark top bar.
-export const viewport: Viewport = { themeColor: "#2b3a4b" };
+// The phone's status bar matches the white top bar (near black in dark mode).
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#17191d" },
+  ],
+};
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { membership, organization } = await requireMembership();
-  const railExpanded = (await cookies()).get(RAIL_COOKIE)?.value === "1";
+  // The sidebar shows labels unless the user folded it.
+  const railExpanded = (await cookies()).get(RAIL_COOKIE)?.value !== "0";
 
   return (
     <>

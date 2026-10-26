@@ -247,7 +247,7 @@ function Omnibar({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** The search entry in the desktop rail (icon, or the word and shortcut when expanded). */
+/** The search entry in the desktop sidebar (icon, or the word and shortcut when expanded). */
 export function RailSearchButton({ expanded }: { expanded: boolean }) {
   const t = useTranslations("nav");
   const open = useOmnibar();
@@ -258,13 +258,18 @@ export function RailSearchButton({ expanded }: { expanded: boolean }) {
       onClick={open}
       aria-label={expanded ? undefined : `${t("search")} (${shortcut})`}
       aria-keyshortcuts="Control+K Meta+K /"
-      className="mx-1.5 flex h-[30px] w-[calc(100%-12px)] items-center gap-2.5 rounded-md px-[7px] text-ui text-rail-foreground transition-colors hover:bg-rail-hover hover:text-white"
+      className={cn(
+        "flex h-[30px] items-center gap-2.5 rounded-md text-ui text-muted-foreground transition-colors hover:bg-rail-hover hover:text-foreground",
+        expanded ? "w-full px-2" : "mx-auto w-[30px] justify-center",
+      )}
     >
       <SearchIcon />
       {expanded && (
         <>
           <span className="flex-1 truncate text-start">{t("search")}</span>
-          <kbd className="font-sans text-ui-xs text-rail-foreground">{shortcut}</kbd>
+          <kbd className="rounded-sm px-1 font-sans text-ui-xs text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">
+            {shortcut}
+          </kbd>
         </>
       )}
     </button>
@@ -287,7 +292,7 @@ export function MobileSearchButton() {
       type="button"
       onClick={open}
       aria-label={t("search")}
-      className="flex size-11 items-center justify-center rounded-md text-rail-foreground hover:bg-rail-hover hover:text-white"
+      className="flex size-11 items-center justify-center rounded-md text-foreground hover:bg-accent"
     >
       <SearchIcon size={20} />
     </button>

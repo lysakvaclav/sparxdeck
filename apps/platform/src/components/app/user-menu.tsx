@@ -71,8 +71,8 @@ export function UserMenu({ name, email, variant = "rail" }: UserMenuProps) {
         <DropdownMenuTrigger
           aria-label={t("openMenu")}
           className={cn(
-            "flex items-center gap-2.5 rounded-md text-start text-rail-foreground transition-colors outline-none hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--focus)]",
-            variant === "rail" && "w-full px-[7px] py-1.5 hover:bg-rail-hover",
+            "flex items-center gap-2.5 rounded-md text-start text-foreground transition-colors outline-none focus-visible:outline-2 focus-visible:outline-[var(--focus)]",
+            variant === "rail" && "w-full px-2 py-1.5 hover:bg-rail-hover",
             variant === "railCompact" && "mx-auto size-[30px] justify-center hover:bg-rail-hover",
             variant === "compact" && "size-11 justify-center",
           )}
@@ -88,8 +88,8 @@ export function UserMenu({ name, email, variant = "rail" }: UserMenuProps) {
           </span>
           {variant === "rail" && (
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-ui text-white">{name}</span>
-              <span className="block truncate text-ui-xs text-rail-foreground">{email}</span>
+              <span className="block truncate text-ui font-medium">{name}</span>
+              <span className="block truncate text-ui-xs text-muted-foreground">{email}</span>
             </span>
           )}
         </DropdownMenuTrigger>

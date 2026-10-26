@@ -10,7 +10,6 @@ import {
   HistoryIcon,
   IssueIcon,
   NewPersonIcon,
-  PeopleIcon,
   PersonIcon,
   PlayIcon,
   type IconComponent,
@@ -202,15 +201,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, RECENT_LIMIT);
 
-  const stats: { label: string; value: number; kind?: NodeKind; href: string }[] = [
+  const stats: { label: string; value: number; href: string }[] = [
     {
       label: t("stats.customers"),
       value: customers.count ?? 0,
-      kind: "customer",
       href: "/customers",
     },
-    { label: t("stats.sites"), value: sites.count ?? 0, kind: "site", href: "/graph" },
-    { label: t("stats.devices"), value: devices.count ?? 0, kind: "device", href: "/devices" },
+    { label: t("stats.sites"), value: sites.count ?? 0, href: "/graph" },
+    { label: t("stats.devices"), value: devices.count ?? 0, href: "/devices" },
     { label: t("stats.members"), value: members.count ?? 0, href: "/team" },
   ];
 
@@ -285,26 +283,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
         {manager && <GettingStarted organization={organization} />}
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-[15px] lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.kind ? OBJECT_TYPES[stat.kind].icon : PeopleIcon;
-            const tone = stat.kind ? OBJECT_TYPES[stat.kind].text : appIcon("team").tone;
-            return (
-              <Link
-                key={stat.label}
-                href={stat.href}
-                className="group rounded-lg bg-card p-[15px] shadow-elevation-0 transition-shadow hover:shadow-elevation-2"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-ui text-muted-foreground">{stat.label}</span>
-                  <Icon className={tone} />
-                </div>
-                <p className="mt-1.5 text-[28px] leading-8 font-semibold tabular-nums">
-                  {stat.value}
-                </p>
-              </Link>
-            );
-          })}
+        {/* One strip of figures with thin dividers (two rows of two on phones). */}
+        <div className="grid grid-cols-2 overflow-hidden rounded-lg bg-card shadow-elevation-0 lg:grid-cols-4">
+          {stats.map((stat, index) => (
+            <Link
+              key={stat.label}
+              href={stat.href}
+              className={cn(
+                "px-[15px] py-3 transition-colors hover:bg-muted",
+                index % 2 === 1 && "shadow-[inset_1px_0_0_var(--border)]",
+                index === 2 && "shadow-[inset_0_1px_0_var(--border)] lg:shadow-[inset_1px_0_0_var(--border)]",
+                index === 3 &&
+                  "shadow-[inset_1px_0_0_var(--border),inset_0_1px_0_var(--border)] lg:shadow-[inset_1px_0_0_var(--border)]",
+              )}
+            >
+              <span className="block truncate text-ui-sm text-muted-foreground">{stat.label}</span>
+              <span className="mt-0.5 block text-2xl leading-8 font-semibold tracking-tight tabular-nums">
+                {stat.value}
+              </span>
+            </Link>
+          ))}
         </div>
 
         <MyWork organizationId={organization.id} userId={membership.user_id} today={today} />
