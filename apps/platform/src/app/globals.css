@@ -6,8 +6,9 @@
 /*
  * Workspace design, in the manner of modern planning tools: a pale sidebar with
  * section headings and a soft grey selection, a white work area with a thin top
- * bar ("Section / Page"), bordered white buttons and one saturated blue, tables
- * with a grey header band and light column rules, neutral greys, Inter at 14px.
+ * bar ("Section / Page"), bordered white buttons and dark slate (#29333C) for
+ * the main action and selection, tables with bold headers and column rules,
+ * neutral greys, Inter at 14px.
  * Object types carry their own colour.
  *
  * The sign-in screens keep the landing page look: see `.brand`, applied by the
@@ -23,9 +24,9 @@
   --card-foreground: #18181b;
   --popover: #ffffff;
   --popover-foreground: #18181b;
-  --primary: #2563eb;
-  --primary-hover: #1d4fd8;
-  --primary-active: #1e43b4;
+  --primary: #29333c;
+  --primary-hover: #1f282f;
+  --primary-active: #161d23;
   --primary-foreground: #ffffff;
   --link: #1d5bd6;
   --secondary: #f4f4f5;
@@ -36,12 +37,12 @@
   --accent: rgb(24 24 27 / 0.04);
   --accent-strong: rgb(24 24 27 / 0.07);
   --accent-foreground: #18181b;
-  --selected: rgb(37 99 235 / 0.08);
+  --selected: rgb(41 51 60 / 0.07);
   --border: #e4e4e7;
   --border-strong: #d4d4d8;
   --input: #e4e4e7;
-  --ring: #2563eb;
-  --focus: rgb(37 99 235 / 0.35);
+  --ring: #29333c;
+  --focus: rgb(41 51 60 / 0.35);
   --destructive: #d64545;
   --destructive-hover: #c03a3a;
   --destructive-active: #a83232;
@@ -87,9 +88,9 @@
   --elevation-3: 0 0 0 1px rgb(17 24 39 / 0.08), 0 10px 30px rgb(17 24 39 / 0.12);
   --elevation-4: 0 0 0 1px rgb(17 24 39 / 0.08), 0 20px 50px rgb(17 24 39 / 0.2);
   --gradient-heading: linear-gradient(to bottom, #111111 0%, #5c5c5c 45%, #b3b3b3 100%);
-  --segment-active: #e8f0fe;
-  --segment-active-foreground: #1d4ed8;
-  --segment-shadow: inset 0 0 0 1px rgb(37 99 235 / 0.35);
+  --segment-active: #eef0f2;
+  --segment-active-foreground: #29333c;
+  --segment-shadow: inset 0 0 0 1px #c9ced4;
   color-scheme: light;
 }
 
@@ -111,12 +112,12 @@
   --accent: rgb(255 255 255 / 0.05);
   --accent-strong: rgb(255 255 255 / 0.09);
   --accent-foreground: #e8eaed;
-  --selected: rgb(122 167 255 / 0.14);
+  --selected: rgb(255 255 255 / 0.07);
   --border: #2a2e34;
   --border-strong: #383d45;
   --input: #383d45;
-  --ring: #7aa7ff;
-  --focus: rgb(122 167 255 / 0.5);
+  --ring: #c9ced4;
+  --focus: rgb(201 206 212 / 0.45);
   --destructive-text: #ff8a8a;
   --success-text: #3dcc91;
   --warning-text: #ffb366;
@@ -146,13 +147,14 @@
   --elevation-3: 0 0 0 1px #383d45, 0 10px 30px rgb(0 0 0 / 0.5);
   --elevation-4: 0 0 0 1px #383d45, 0 20px 50px rgb(0 0 0 / 0.65);
   --gradient-heading: linear-gradient(to bottom, #ffffff 0%, #bdbdbd 45%, #5c5c5c 100%);
-  --segment-active: rgb(122 167 255 / 0.16);
-  --segment-active-foreground: #9cc0ff;
+  --segment-active: rgb(255 255 255 / 0.1);
+  --segment-active-foreground: #f2f4f6;
   --btn-intent-shadow: none;
-  --segment-shadow: inset 0 0 0 1px rgb(122 167 255 / 0.4);
-  --primary: #2f66e0;
-  --primary-hover: #2a5bcc;
-  --primary-active: #2550b5;
+  --segment-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+  --primary: #e6e9ec;
+  --primary-hover: #d4d9de;
+  --primary-active: #c2c8cf;
+  --primary-foreground: #17191d;
   color-scheme: dark;
 }
 

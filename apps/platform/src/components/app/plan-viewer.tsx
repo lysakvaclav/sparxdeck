@@ -470,9 +470,9 @@ export function PlanViewer({
                 <span
                   className={cn(
                     "flex items-center gap-1 rounded-full bg-white py-[3px] ps-[5px] pe-1.5 font-mono text-[11px] leading-none font-semibold text-[#182026] tabular-nums shadow-[0_0_0_1px_rgb(16_22_26/0.25),0_1px_3px_rgb(16_22_26/0.35)] transition-transform",
-                    selected && "scale-110 shadow-[0_0_0_2px_#137cbd,0_2px_6px_rgb(16_22_26/0.4)]",
+                    selected && "scale-110 shadow-[0_0_0_2px_#29333c,0_2px_6px_rgb(16_22_26/0.4)]",
                     dragged && "scale-110",
-                    "[button:focus-visible>&]:shadow-[0_0_0_2px_#137cbd,0_0_0_4px_rgb(19_124_189/0.35)]",
+                    "[button:focus-visible>&]:shadow-[0_0_0_2px_#29333c,0_0_0_4px_rgb(41_51_60/0.35)]",
                   )}
                 >
                   <span aria-hidden className={cn("size-2.5 rounded-full", TONE[marker.tone])} />

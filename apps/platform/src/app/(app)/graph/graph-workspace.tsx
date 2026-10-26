@@ -418,7 +418,7 @@ function Workspace({ data, organizationId, canEdit, focusId }: Props) {
 
   const edges = useMemo<Edge[]>(() => {
     const base = dark ? "#5c7080" : "#8a9ba8";
-    const accent = dark ? "#48aff0" : "#137cbd";
+    const accent = dark ? "#e6e9ec" : "#29333c";
     return visible.flatMap((id) => {
       const parentId = graph.nodes.get(id)?.parentId;
       if (!parentId || !visibleSet.has(parentId)) return [];

@@ -14,9 +14,9 @@ import {
 import { ToastProvider } from "@/components/ui/toast";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "./brand-mark";
 import { NAV_ITEMS, RAIL_COOKIE, isActive, type NavGroup } from "./nav-items";
 import { MobileSearchButton, OmnibarProvider, RailSearchButton } from "./omnibar";
-import { TextLogo } from "./text-logo";
 import { UserMenu } from "./user-menu";
 
 const tabClass =
@@ -121,9 +121,7 @@ export function AppShell({
               >
                 {expanded && (
                   <>
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                      <TextLogo label="SparxDeck" className="aspect-square h-3.5" />
-                    </span>
+                    <BrandMark label="SparxDeck" className="size-6" />
                     <span
                       className="min-w-0 flex-1 truncate text-ui font-semibold"
                       title={organizationName}
@@ -181,9 +179,7 @@ export function AppShell({
               {/* Mobile top bar */}
               <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
                 <Link href="/" className="flex min-h-12 min-w-0 items-center gap-2">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                    <TextLogo label="SparxDeck" className="aspect-square h-3.5" />
-                  </span>
+                  <BrandMark label="SparxDeck" className="size-6" />
                   <span className="truncate text-ui font-semibold">{organizationName}</span>
                 </Link>
                 <div className="flex shrink-0 items-center">
