@@ -2,8 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
+  AddIcon,
   ChevronRightIcon,
+  CogIcon,
+  DataLineageIcon,
+  FormIcon,
   HistoryIcon,
+  IssueIcon,
+  NewPersonIcon,
+  PersonIcon,
+  PlayIcon,
+  type IconComponent,
 } from "@/components/icons";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
@@ -203,43 +212,57 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     { label: t("stats.members"), value: members.count ?? 0, href: "/team" },
   ];
 
-  const actions: { label: string; href: string }[] = [
+  const actions: { label: string; href: string; icon: IconComponent; tone: string }[] = [
     {
       label: tInspections("start"),
       href: "/inspections/new",
+      icon: PlayIcon,
+      tone: appIcon("inspections").tone,
     },
     {
       label: tDefects("new"),
       href: "/defects/new",
+      icon: IssueIcon,
+      tone: appIcon("defects").tone,
     },
     ...(manager
       ? [
           {
             label: t("actions.newCustomer"),
             href: "/customers/new",
+            icon: AddIcon,
+            tone: "text-node-customer",
           },
           {
             label: t("actions.newDevice"),
             href: "/devices/new",
+            icon: AddIcon,
+            tone: "text-node-device",
           },
         ]
       : []),
-    { label: tNav("graph"), href: "/graph" },
+    { label: tNav("graph"), href: "/graph", icon: DataLineageIcon, tone: appIcon("graph").tone },
     ...(manager
       ? [
           {
             label: t("actions.invite"),
             href: "/team",
+            icon: NewPersonIcon,
+            tone: appIcon("team").tone,
           },
         ]
       : []),
     {
       label: t("actions.settings"),
       href: "/settings",
+      icon: CogIcon,
+      tone: "text-muted-foreground",
     },
     {
       label: t("actions.account"),
       href: "/account",
+      icon: PersonIcon,
+      tone: "text-muted-foreground",
     },
   ];
 
@@ -296,6 +319,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                     href={`/inspections/${inspection.id}`}
                     className="flex min-h-[30px] items-center gap-[7px] rounded-sm px-[7px] text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
                   >
+                    <FormIcon className={appIcon("inspections").tone} />
                     <span className="min-w-0 flex-1 truncate">
                       {inspection.site?.name}
                       <span className="text-muted-foreground">
@@ -402,6 +426,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                       href={action.href}
                       className="flex min-h-[30px] items-center gap-[7px] rounded-sm px-[7px] text-ui transition-colors hover:bg-accent pointer-coarse:min-h-11"
                     >
+                      <action.icon className={cn(action.tone)} />
                       <span className="min-w-0 flex-1 truncate">{action.label}</span>
                       <ChevronRightIcon className="text-subtle rtl:rotate-180" />
                     </Link>

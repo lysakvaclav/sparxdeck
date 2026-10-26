@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { ChevronRightIcon } from "@/components/icons";
+import { CalendarIcon, ChevronRightIcon, IssueIcon } from "@/components/icons";
+import { appIcon } from "@/components/app/nav-items";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { loadUpcomingPlans } from "@/lib/calendar-data";
 import { CALENDAR_FORMAT, addDays, calendarDate } from "@/lib/due";
@@ -47,6 +48,8 @@ export async function MyWork({
 
   const t = await getTranslations("dashboard.myWork");
   const format = await getFormatter();
+  const calendar = appIcon("calendar");
+  const defectsApp = appIcon("defects");
 
   return (
     <Card className="mt-2.5 sm:mt-[15px]" data-testid="my-work">
@@ -57,6 +60,7 @@ export async function MyWork({
         {soon.map((plan) => (
           <li key={plan.id}>
             <Link href={`/sites/${plan.siteId}`} className={rowLink}>
+              <CalendarIcon className={calendar.tone} />
               <span className="min-w-0 flex-1 truncate">
                 <span className="tabular-nums">
                   {plan.plannedOn === today
@@ -74,6 +78,7 @@ export async function MyWork({
         {!!defects && (
           <li>
             <Link href="/defects?assignee=me&sort=due" className={rowLink}>
+              <IssueIcon className={defectsApp.tone} />
               <span className="min-w-0 flex-1 py-1">
                 {t("defects", { count: defects })}
                 {!!overdue && (

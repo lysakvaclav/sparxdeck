@@ -1,155 +1,163 @@
-// Generates src/components/icons.tsx from a list of Blueprint icon names.
-// Run from apps/platform: node scripts/generate-icons.mjs
+// Generates src/components/icons.tsx: the app's icon names mapped to Lucide
+// (ISC licence) line icons. Run from apps/platform: node scripts/generate-icons.mjs
+// Add an icon by adding a line below (our name -> Lucide component name).
 import fs from "node:fs";
+import * as lucide from "lucide-react";
 
-const icons = [
-  "add",
-  "application",
-  "arrow-down",
-  "arrow-up",
-  "briefcase",
-  "build",
-  "calendar",
-  "caret-down",
-  "caret-right",
-  "caret-up",
-  "chevron-down",
-  "chevron-left",
-  "chevron-right",
-  "chevron-up",
-  "clipboard",
-  "cog",
-  "collapse-all",
-  "cross",
-  "small-cross",
-  "crown",
-  "data-lineage",
-  "desktop",
-  "disable",
-  "document",
-  "dot",
-  "double-caret-vertical",
-  "drag-handle-vertical",
-  "duplicate",
-  "edit",
-  "envelope",
-  "eraser",
-  "error",
-  "expand-all",
-  "export",
-  "eye-off",
-  "eye-open",
-  "filter",
-  "filter-list",
-  "flame",
-  "flash",
-  "flows",
-  "globe",
-  "grid-view",
-  "help",
-  "history",
-  "home",
-  "horizontal-distribution",
-  "id-number",
-  "info-sign",
-  "key",
-  "key-command",
-  "layout-auto",
-  "link",
-  "layers",
-  "locate",
-  "lock",
-  "log-out",
-  "map-marker",
-  "map",
-  "maximize",
-  "media",
-  "menu-closed",
-  "menu-open",
-  "minimize",
-  "minus",
-  "mobile-phone",
-  "moon",
-  "more",
-  "move",
-  "new-object",
-  "new-person",
-  "office",
-  "panel-table",
-  "people",
-  "person",
-  "phone",
-  "pin",
-  "properties",
-  "redo",
-  "refresh",
-  "remove",
-  "search",
-  "select",
-  "share",
-  "shield",
-  "small-tick",
-  "tag",
-  "th",
-  "tick",
-  "tick-circle",
-  "time",
-  "tint",
-  "translate",
-  "trash",
-  "undo",
-  "upload",
-  "user",
-  "vertical-distribution",
-  "warning-sign",
-  "wrench",
-  "zoom-in",
-  "zoom-out",
-  "zoom-to-fit",
-  "alignment-left",
-  "alignment-top",
-  "list-detail-view",
-  "column-layout",
-  "diagram-tree",
-  "selection",
-  "cube",
-  "barcode",
-  "label",
-  "print",
-  "camera",
-  "form",
-  "annotation",
-  "offline",
-  "cloud-upload",
-  "play",
-  "confirm",
-  "issue",
-  "issue-closed",
-  "download",
-  "document-open",
-];
+const icons = {
+  add: "Plus",
+  application: "AppWindow",
+  "arrow-down": "ArrowDown",
+  "arrow-up": "ArrowUp",
+  briefcase: "BriefcaseBusiness",
+  build: "Hammer",
+  calendar: "CalendarDays",
+  "caret-down": "ChevronDown",
+  "caret-right": "ChevronRight",
+  "caret-up": "ChevronUp",
+  "chevron-down": "ChevronDown",
+  "chevron-left": "ChevronLeft",
+  "chevron-right": "ChevronRight",
+  "chevron-up": "ChevronUp",
+  clipboard: "ClipboardList",
+  cog: "Settings",
+  "collapse-all": "ChevronsDownUp",
+  cross: "X",
+  "small-cross": "X",
+  crown: "Crown",
+  "data-lineage": "Network",
+  desktop: "Monitor",
+  disable: "Ban",
+  document: "FileText",
+  dot: "Dot",
+  "double-caret-vertical": "ChevronsUpDown",
+  "drag-handle-vertical": "GripVertical",
+  duplicate: "Copy",
+  edit: "Pencil",
+  envelope: "Mail",
+  eraser: "Eraser",
+  error: "CircleAlert",
+  "expand-all": "ChevronsUpDown",
+  export: "Upload",
+  "eye-off": "EyeOff",
+  "eye-open": "Eye",
+  filter: "ListFilter",
+  "filter-list": "ListFilter",
+  flame: "FireExtinguisher",
+  flash: "Zap",
+  flows: "Workflow",
+  globe: "Globe",
+  "grid-view": "LayoutGrid",
+  help: "CircleHelp",
+  history: "History",
+  home: "House",
+  "horizontal-distribution": "AlignHorizontalDistributeCenter",
+  "id-number": "IdCard",
+  "info-sign": "Info",
+  key: "Key",
+  "key-command": "Command",
+  "layout-auto": "Sparkles",
+  link: "Link",
+  layers: "Layers",
+  locate: "LocateFixed",
+  lock: "Lock",
+  "log-out": "LogOut",
+  "map-marker": "MapPin",
+  map: "Map",
+  maximize: "Maximize2",
+  media: "Image",
+  "menu-closed": "PanelLeftClose",
+  "menu-open": "PanelLeftOpen",
+  minimize: "Minimize2",
+  minus: "Minus",
+  "mobile-phone": "Smartphone",
+  moon: "Moon",
+  more: "Ellipsis",
+  move: "Move",
+  "new-object": "SquarePlus",
+  "new-person": "UserPlus",
+  office: "Building2",
+  "panel-table": "Table2",
+  people: "Users",
+  person: "User",
+  phone: "Phone",
+  pin: "Pin",
+  properties: "List",
+  redo: "Redo2",
+  refresh: "RefreshCw",
+  remove: "CircleMinus",
+  search: "Search",
+  select: "MousePointer2",
+  share: "ExternalLink",
+  shield: "Shield",
+  "small-tick": "Check",
+  tag: "Tag",
+  th: "Table",
+  tick: "Check",
+  "tick-circle": "CircleCheck",
+  time: "Clock",
+  tint: "Droplet",
+  translate: "Languages",
+  trash: "Trash2",
+  undo: "Undo2",
+  upload: "Upload",
+  user: "CircleUser",
+  "vertical-distribution": "AlignVerticalDistributeCenter",
+  "warning-sign": "TriangleAlert",
+  wrench: "Wrench",
+  "zoom-in": "ZoomIn",
+  "zoom-out": "ZoomOut",
+  "zoom-to-fit": "Scan",
+  "alignment-left": "AlignStartVertical",
+  "alignment-top": "AlignStartHorizontal",
+  "list-detail-view": "PanelRight",
+  "column-layout": "Columns3",
+  "diagram-tree": "GitFork",
+  selection: "CircleDot",
+  cube: "Box",
+  barcode: "Barcode",
+  label: "Tag",
+  print: "Printer",
+  camera: "Camera",
+  form: "ClipboardCheck",
+  annotation: "MessageSquareText",
+  offline: "WifiOff",
+  "cloud-upload": "CloudUpload",
+  play: "Play",
+  confirm: "CircleCheckBig",
+  issue: "CircleAlert",
+  "issue-closed": "CircleCheck",
+  download: "Download",
+  "document-open": "FileSymlink",
+};
 
-const pascal = (name) => name.replace(/(^|-)([a-z0-9])/g, (_, __, c) => c.toUpperCase()) + "Icon";
+const pascal = (name) =>
+  name
+    .split("-")
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join("");
 
-const base = "@blueprintjs/icons/lib/esm/generated";
-const lines = [];
-lines.push(`/*
- * Icons: Blueprint's open-source glyph set (Apache-2.0, Palantir Technologies),
- * drawn as plain SVGs in the current text colour. 16px grid below 20px, the 20px
- * grid from 20px up. Generated by scripts/generate-icons.mjs: add the icon name
- * there and run it again.
+const missing = Object.entries(icons).filter(([, target]) => !lucide[target]);
+if (missing.length) {
+  console.error("Not in lucide-react:", missing.map(([n, t]) => `${n} -> ${t}`).join(", "));
+  process.exit(1);
+}
+
+const targets = [...new Set(Object.values(icons))].sort();
+let out = `/*
+ * Icons: Lucide line icons (ISC licence) under the app's own names, drawn in the
+ * current text colour with a 1.75px stroke. Generated by
+ * scripts/generate-icons.mjs: add the name there and run it again.
  */
 import type { SVGProps } from "react";
+import {
+${targets.map((t) => `  ${t} as Lucide${t},`).join("\n")}
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-`);
-for (const name of icons) {
-  const id = name.replace(/-/g, "_");
-  lines.push(`import p16_${id} from "${base}/16px/paths/${name}";`);
-  lines.push(`import p20_${id} from "${base}/20px/paths/${name}";`);
-}
-lines.push(`
-export type IconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
-  /** Pixel size; 20 and above uses the 20px drawing. */
+
+export type IconProps = Omit<SVGProps<SVGSVGElement>, "children" | "ref"> & {
+  /** Pixel size; 16 by default. */
   size?: number;
   /** Accessible name; without it the icon is decorative (aria-hidden). */
   title?: string;
@@ -157,37 +165,28 @@ export type IconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
 
 export type IconComponent = ((props: IconProps) => React.ReactElement) & { displayName?: string };
 
-function createIcon(name: string, small: string[], large: string[]): IconComponent {
+function createIcon(name: string, Glyph: LucideIcon): IconComponent {
   function Icon({ size = 16, title, className, ...props }: IconProps) {
-    const paths = size >= 20 ? large : small;
-    const grid = size >= 20 ? 20 : 16;
     return (
-      <svg
+      <Glyph
         data-icon={name}
-        viewBox={\`0 0 \${grid} \${grid}\`}
-        width={size}
-        height={size}
-        fill="currentColor"
+        size={size}
+        strokeWidth={1.75}
         role={title ? "img" : undefined}
         aria-label={title}
         aria-hidden={title ? undefined : true}
         focusable="false"
         className={cn("shrink-0", className)}
         {...props}
-      >
-        {paths.map((d, index) => (
-          <path key={index} d={d} fillRule="evenodd" />
-        ))}
-      </svg>
+      />
     );
   }
   Icon.displayName = name;
   return Icon;
 }
-`);
-for (const name of icons) {
-  const id = name.replace(/-/g, "_");
-  lines.push(`export const ${pascal(name)} = createIcon("${name}", p16_${id}, p20_${id});`);
-}
-fs.writeFileSync("src/components/icons.tsx", lines.join("\n") + "\n");
-console.log(`${icons.length} icons`);
+
+`;
+for (const [name, target] of Object.entries(icons))
+  out += `export const ${pascal(name)}Icon = createIcon(${JSON.stringify(name)}, Lucide${target});\n`;
+fs.writeFileSync("src/components/icons.tsx", out);
+console.log(`${Object.keys(icons).length} icons`);

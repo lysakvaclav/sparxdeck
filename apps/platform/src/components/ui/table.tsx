@@ -4,8 +4,8 @@ import { CaretDownIcon, CaretUpIcon, DoubleCaretVerticalIcon } from "@/component
 import { cn } from "@/lib/utils";
 
 /*
- * Table: column labels on a pale band, hairlines under the rows, light dashed
- * rules between columns, row hover. A row links to a detail page through `RowLink` (a
+ * Table: bold column labels, 48px rows, hairlines under the rows and between
+ * columns, row hover. A row links to a detail page through `RowLink` (a
  * stretched link in the first cell), so the whole row is clickable and accessible.
  */
 
@@ -21,7 +21,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 }
 
 function TableHead({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead className={cn("bg-muted", className)} {...props} />;
+  return <thead className={cn("bg-background", className)} {...props} />;
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
@@ -40,16 +40,16 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
-// A hairline under every row; a light dashed rule between columns (none after the last).
+// A hairline under every row and between columns (none after the last).
 const cellBorders =
-  "border-e border-dashed border-border shadow-[inset_0_-1px_0_var(--border)] last:border-e-0";
+  "border-e border-border shadow-[inset_0_-1px_0_var(--border)] last:border-e-0";
 
 function TableHeaderCell({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       scope="col"
       className={cn(
-        "h-10 px-3 text-start align-middle text-[13px] font-semibold whitespace-nowrap text-foreground",
+        "h-11 px-4 text-start align-middle text-ui font-semibold whitespace-nowrap text-foreground",
         cellBorders,
         className,
       )}
@@ -100,7 +100,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       className={cn(
-        "h-10 px-3 align-middle pointer-coarse:h-12",
+        "h-12 px-4 align-middle pointer-coarse:h-12",
         cellBorders,
         "[tr:last-child>&]:shadow-none",
         className,

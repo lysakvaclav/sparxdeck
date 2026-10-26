@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 // Tags: 20px, 12px text, slightly rounded corners. "Minimal" variants are tinted.
 const badgeVariants = cva(
-  "inline-flex min-h-5 max-w-full items-center gap-1 rounded-[5px] px-1.5 text-ui-sm font-medium whitespace-nowrap",
+  "inline-flex min-h-5 max-w-full items-center gap-1 rounded-md px-1.5 text-ui-sm font-medium whitespace-nowrap",
   {
     variants: {
       variant: {

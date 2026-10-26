@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * on phones so iOS doesn't zoom in.
  */
 export const controlClass =
-  "surface-input w-full min-w-0 rounded-md border-0 text-base text-foreground transition-[box-shadow] duration-100 outline-none focus-visible:outline-none focus:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_var(--focus)] disabled:cursor-not-allowed disabled:bg-[var(--btn-disabled-bg)] disabled:text-[var(--btn-disabled-fg)] disabled:shadow-none aria-invalid:shadow-[inset_0_0_0_1px_var(--destructive)] aria-invalid:focus:shadow-[inset_0_0_0_1px_var(--destructive),0_0_0_3px_rgb(214_69_69/0.3)] sm:text-ui [.brand_&]:focus:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_var(--focus)] [.brand_&]:sm:text-sm";
+  "surface-input w-full min-w-0 rounded-lg border-0 text-base text-foreground transition-[box-shadow] duration-100 outline-none focus-visible:outline-none focus:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_var(--focus)] disabled:cursor-not-allowed disabled:bg-[var(--btn-disabled-bg)] disabled:text-[var(--btn-disabled-fg)] disabled:shadow-none aria-invalid:shadow-[inset_0_0_0_1px_var(--destructive)] aria-invalid:focus:shadow-[inset_0_0_0_1px_var(--destructive),0_0_0_3px_rgb(214_69_69/0.3)] sm:text-ui [.brand_&]:focus:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_var(--focus)] [.brand_&]:sm:text-sm";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
