@@ -132,7 +132,8 @@
     "calendar": "Calendar",
     "groupWork": "Work",
     "groupRecords": "Records",
-    "groupAdmin": "Administration"
+    "groupAdmin": "Administration",
+    "map": "Building map"
   },
   "dashboard": {
     "title": "Overview",
@@ -2248,5 +2249,54 @@
     "summary": "The location at scanning matched the building for {matches} of {total} devices.",
     "distanceM": "{distance} m from the building's point",
     "distanceKm": "{distance} km from the building's point"
+  },
+  "siteMap": {
+    "title": "Building map",
+    "mapLabel": "Map of buildings with their inspection state",
+    "listTitle": "Buildings by urgency",
+    "legend": "Legend",
+    "status": {
+      "critical": "Overdue or a critical defect",
+      "warning": "Due soon, never inspected or a defect",
+      "ok": "In order",
+      "none": "No devices"
+    },
+    "filters": {
+      "customer": "Customer",
+      "allCustomers": "All customers",
+      "technician": "Technician",
+      "allTechnicians": "All technicians",
+      "type": "Device type",
+      "allTypes": "All types",
+      "status": "State",
+      "allStatuses": "All states"
+    },
+    "counts": {
+      "overdue": "{count} overdue",
+      "soon": "{count} due soon",
+      "never": "{count} never inspected",
+      "critical": "{count, plural, one {# critical defect} other {# critical defects}}",
+      "defects": "{count, plural, one {# defect} other {# defects}}",
+      "noDevices": "no active device",
+      "fine": "all in order"
+    },
+    "panel": {
+      "overdue": "Overdue",
+      "soon": "Due soon",
+      "defects": "Open defects",
+      "nextDue": "Next due date",
+      "open": "Open building",
+      "start": "Start inspection"
+    },
+    "closePanel": "Close the building panel",
+    "showAll": "Show all buildings",
+    "viewMap": "Map",
+    "viewList": "List ({count})",
+    "unlocated": "Without a location ({count})",
+    "unlocatedHint": "Buildings without coordinates aren't on the map. Add them in the building's form.",
+    "addPoint": "Add coordinates",
+    "emptyNoSites": "The company has no buildings yet. Add a customer and their buildings.",
+    "emptyFiltered": "No building matches the filters.",
+    "emptyNoPoints": "No building has coordinates yet. Add them to the buildings under Without a location."
   }
 }

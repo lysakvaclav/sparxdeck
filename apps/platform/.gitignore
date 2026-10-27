@@ -1,3 +1,5 @@
 next-env.d.ts
 .e2e-output/
 *.tsbuildinfo
+# Copied from node_modules before dev and build (scripts/copy-map-worker.mjs).
+public/vendor/

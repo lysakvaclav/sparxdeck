@@ -132,7 +132,8 @@
     "calendar": "Kalendář",
     "groupWork": "Práce",
     "groupRecords": "Evidence",
-    "groupAdmin": "Správa"
+    "groupAdmin": "Správa",
+    "map": "Mapa budov"
   },
   "dashboard": {
     "title": "Přehled",
@@ -2248,5 +2249,54 @@
     "summary": "Poloha při skenu odpovídala budově u {matches} z {total} zařízení.",
     "distanceM": "{distance} m od bodu budovy",
     "distanceKm": "{distance} km od bodu budovy"
+  },
+  "siteMap": {
+    "title": "Mapa budov",
+    "mapLabel": "Mapa budov se stavem revizí",
+    "listTitle": "Budovy podle naléhavosti",
+    "legend": "Legenda",
+    "status": {
+      "critical": "Po termínu nebo kritická závada",
+      "warning": "Brzy termín, bez revize nebo závada",
+      "ok": "V pořádku",
+      "none": "Bez zařízení"
+    },
+    "filters": {
+      "customer": "Zákazník",
+      "allCustomers": "Všichni zákazníci",
+      "technician": "Technik",
+      "allTechnicians": "Všichni technici",
+      "type": "Typ zařízení",
+      "allTypes": "Všechny typy",
+      "status": "Stav",
+      "allStatuses": "Všechny stavy"
+    },
+    "counts": {
+      "overdue": "{count, plural, one {# po termínu} few {# po termínu} other {# po termínu}}",
+      "soon": "{count, plural, one {# brzy} few {# brzy} other {# brzy}}",
+      "never": "{count, plural, one {# bez revize} few {# bez revize} other {# bez revize}}",
+      "critical": "{count, plural, one {# kritická závada} few {# kritické závady} other {# kritických závad}}",
+      "defects": "{count, plural, one {# závada} few {# závady} other {# závad}}",
+      "noDevices": "žádné aktivní zařízení",
+      "fine": "vše v pořádku"
+    },
+    "panel": {
+      "overdue": "Po termínu",
+      "soon": "Brzy termín",
+      "defects": "Otevřené závady",
+      "nextDue": "Nejbližší termín",
+      "open": "Otevřít budovu",
+      "start": "Zahájit kontrolu"
+    },
+    "closePanel": "Zavřít panel budovy",
+    "showAll": "Ukázat všechny budovy",
+    "viewMap": "Mapa",
+    "viewList": "Seznam ({count})",
+    "unlocated": "Bez polohy ({count})",
+    "unlocatedHint": "Budovy bez souřadnic na mapě nejsou. Doplňte je ve formuláři budovy.",
+    "addPoint": "Doplnit souřadnice",
+    "emptyNoSites": "Firma zatím nemá žádné budovy. Přidejte zákazníka a jeho budovy.",
+    "emptyFiltered": "Filtrům neodpovídá žádná budova.",
+    "emptyNoPoints": "Žádná budova zatím nemá souřadnice. Doplňte je u budov v seznamu Bez polohy."
   }
 }

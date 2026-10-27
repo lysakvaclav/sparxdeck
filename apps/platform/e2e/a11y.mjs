@@ -174,6 +174,7 @@ try {
     ["offline", "/offline"],
     ["calendar", "/calendar"],
     ["calendar-workload", "/calendar?view=workload"],
+    ["map", "/map"],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 

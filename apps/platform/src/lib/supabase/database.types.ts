@@ -988,6 +988,35 @@ export type Database = {
         Returns: Json;
       };
       undo_import: { Args: { p_import: string }; Returns: undefined };
+      due_state: {
+        Args: { p_next_due: string | null; p_today: string; p_soon_days: number };
+        Returns: "never" | "overdue" | "soon" | "ok";
+      };
+      site_map_statuses: {
+        Args: {
+          p_customer?: string | null;
+          p_device_type?: string | null;
+          p_technician?: string | null;
+        };
+        Returns: {
+          site_id: string;
+          name: string;
+          address: string | null;
+          customer_id: string;
+          customer_name: string;
+          latitude: number | null;
+          longitude: number | null;
+          status: "critical" | "warning" | "ok" | "none";
+          devices: number;
+          overdue: number;
+          soon: number;
+          never: number;
+          defects_critical: number;
+          defects_major: number;
+          defects_minor: number;
+          next_due: string | null;
+        }[];
+      };
       record_scan_location: {
         Args: {
           p_inspection: string;

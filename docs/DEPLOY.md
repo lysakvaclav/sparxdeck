@@ -112,3 +112,16 @@ Klíče z vývoje nikdy nepoužívejte v produkci. Kdyby klíč unikl (např. do
 3. Starý klíč zrušte.
 
 Stejně se mění `CRON_SECRET`, Resend a Sentry token.
+
+## 10. Podkladová mapa pro mapu budov (volitelné)
+
+Mapa budov (část 21) funguje bez podkladové mapy: obrys Česka (Natural Earth, volné dílo, `src/assets/map/cz-outline.json`) a mřížka. Žádný veřejný server dlaždic se nepoužívá. Ulice a města lze přidat z vlastního souboru PMTiles. **Nic z toho se nestahuje bez souhlasu majitele.**
+
+1. **Data:** výřez Česka z OpenStreetMap ve formátu Protomaps. Jednorázově příkazem z nástroje [`pmtiles`](https://github.com/protomaps/go-pmtiles): `pmtiles extract <aktuální denní build Protomaps>.pmtiles cesko.pmtiles --bbox=12.09,48.55,18.86,51.06 --maxzoom=15`. Soubor má řádově 0,5–1 GB; s `--maxzoom=13` asi čtvrtinu (bez detailu ulic).
+2. **Písmo pro popisky (glyphs):** volně licencovaná písma Protomaps (`basemaps-assets`, OFL) jako PBF soubory, nahrát vedle mapy. Bez nich mapa ukáže ulice a plochy bez názvů.
+3. **Uložení:** veřejný bucket v Supabase Storage (např. `map`), soubory `cesko.pmtiles` a `fonts/{fontstack}/{range}.pbf`. Supabase Storage podporuje čtení po částech (HTTP Range), které PMTiles potřebuje. Pozor na kvótu: free plán má 1 GB úložiště a omezený přenos dat; při provozu spíš placený plán.
+4. **Proměnné ve Vercelu:** `NEXT_PUBLIC_MAP_PMTILES_URL=https://<projekt>.supabase.co/storage/v1/object/public/map/cesko.pmtiles` a `NEXT_PUBLIC_MAP_GLYPHS_URL=https://<projekt>.supabase.co/storage/v1/object/public/map/fonts/{fontstack}/{range}.pbf`. Adresa Supabase už v CSP je; jiný host by se musel přidat do `connect-src` (`src/lib/security-headers.ts`).
+5. **Licence:** mapa musí uvádět „© OpenStreetMap“ (ODbL); aplikace to dělá sama, když je podklad nastavený.
+6. **Aktualizace:** data stačí obnovit jednou za čas (nové ulice), stejným postupem.
+
+Bez těchto proměnných mapa funguje dál bez podkladu.

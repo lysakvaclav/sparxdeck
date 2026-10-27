@@ -348,7 +348,17 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [ ] P2 Zásady ochrany osobních údajů a zpracovatelská smlouva doplněné o polohu při skenu (texty od právníka)
 - [ ] P3 Výběr bodu budovy kliknutím do mapy (s podkladovou mapou v části 21)
 
-**Mapa budov se semaforem (část 21)**, **Editor protokolů (část 22)**, **Trasy pro techniky (část 23)**: položky se doplní s plánem každé části.
+**Mapa budov se semaforem (část 21)**
+- [x] P2 Mapa budov se stavem (červená, žlutá, zelená, šedá) z jediného pravidla termínů, i tvarem a legendou (část 21: `site_map_statuses`, `due_state`)
+- [x] P2 Shlukování blízkých budov s barvou nejhoršího stavu (část 21)
+- [x] P2 Panel budovy s počty, nejbližším termínem, „Otevřít budovu“ a „Zahájit kontrolu“ (část 21)
+- [x] P2 Filtry zákazník, technik, stav, typ zařízení; v adrese, zapamatované (část 21)
+- [x] P2 Seznam synchronizovaný s mapou (přístupná náhrada) a seznam „Bez polohy“ (část 21)
+- [x] P2 Mapa bez veřejných dlaždic; obrys Česka a mřížka (část 21)
+- [ ] P3 Podkladová mapa z vlastního PMTiles (podpora hotová v kódu, data podle DEPLOY.md bod 10 po souhlasu majitele)
+- [ ] P3 „Přidat do plánu trasy“ z panelu budovy (část 23)
+
+**Editor protokolů (část 22)**, **Trasy pro techniky (část 23)**: položky se doplní s plánem každé části.
 
 ---
 

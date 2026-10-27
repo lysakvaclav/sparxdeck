@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "src/lib/supabase/database.types.ts",
+    // MapLibre's worker, copied from node_modules (scripts/copy-map-worker.mjs).
+    "public/vendor/**",
   ]),
 ]);
 

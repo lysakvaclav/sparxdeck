@@ -9,6 +9,7 @@ import {
   HomeIcon,
   IssueIcon,
   LayersIcon,
+  MapIcon,
   PeopleIcon,
   type IconComponent,
 } from "@/components/icons";
@@ -26,6 +27,7 @@ export type NavItem = {
     | "defects"
     | "customers"
     | "devices"
+    | "map"
     | "plans"
     | "graph"
     | "deviceTypes"
@@ -97,6 +99,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     group: "records",
     headerTone: "text-[#db2c6f] dark:text-[#f5498b]",
     phone: "tab",
+  },
+  {
+    href: "/map",
+    label: "map",
+    icon: MapIcon,
+    group: "records",
+    headerTone: "text-[#0d8050] dark:text-[#3dcc91]",
+    phone: "more",
   },
   {
     href: "/plans",

@@ -38,7 +38,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno; z části 17 čekají 4 položky na zpětnou vazbu z pilotu |
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
-| 21 | Mapa budov se semaforem | Fáze 3 | Čeká na plán |
+| 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 22 | Editor protokolů (etapy A–D) | Fáze 3 | Čeká na plán |
 | 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
@@ -637,6 +637,20 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Ověření:** jednotkové testy pravidla, vzdálenosti a čtení souřadnic; databázové testy (shoda s TypeScriptem, vyhodnocení, hodiny telefonu, odmítnutí špatných hodnot, cizí kontroly a cizí firmy, vypnutí, uzavřená revize, oprávnění k bodu budovy); testy protokolu; `e2e/part20.mjs` (bod budovy z polohy telefonu, sken u budovy, daleko s vysvětlením, bez polohy, bez signálu, filtr, tmavý režim a angličtina); audit přístupnosti.
 
 **Ke schválení majitelem / právníkem:** doplnit zpracování polohy do zásad ochrany osobních údajů (účel, doba uložení, právní základ), do zpracovatelské smlouvy a případně informaci pro zaměstnance servisních firem. Texty aplikace nevymýšlí.
+
+### Část 21: Mapa budov se semaforem
+
+**Stav (2026-10-28): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Stránka `/map` „Mapa budov“** (Evidence): vlevo filtry, legenda a seznam budov od nejnaléhavějších (stejná data jako mapa, přístupná náhrada pro klávesnici a čtečky), vpravo mapa. Klik na budovu (v seznamu i na mapě) otevře panel: adresa, zákazník, počty po termínu a brzy, otevřené závady, nejbližší termín, „Otevřít budovu“ a „Zahájit kontrolu“. Na telefonu přepínač Mapa / Seznam.
+- **Stavy** (jediný zdroj pravdy v databázi, `site_map_statuses`): červená = zařízení po termínu nebo otevřená kritická závada; žlutá = termín do „brzy“ (Nastavení → Termíny, výchozí 30 dní), zařízení bez revize, nebo otevřená závažná či drobná závada; zelená = vše v pořádku; šedá = bez aktivního zařízení. Každý stav má i vlastní tvar (kosočtverec, trojúhelník, kroužek, prázdný kroužek) a slovní legendu.
+- **Shlukování** blízkých budov (MapLibre); shluk má barvu a tvar nejhorší budovy uvnitř a počet. Tlačítko „Ukázat všechny budovy“, měřítko.
+- **Filtry** zákazník, technik (naplánovaná revize od dneška nebo poslední dokončená revize budovy), stav, typ zařízení; v adrese stránky, telefon si pamatuje poslední.
+- **Budovy bez souřadnic** v seznamu „Bez polohy“ s odkazem na doplnění. Prázdné stavy s návodem. Světlý i tmavý režim.
+- **Mapa bez cizí služby:** MapLibre GL 6.14 (BSD-3), neutrální pozadí, obrys Česka (Natural Earth, volné dílo) a mřížka stupňů; volitelný podklad z vlastního PMTiles (`NEXT_PUBLIC_MAP_PMTILES_URL`, postup v DEPLOY.md, bod 10). Pracovní vlákno MapLibre se kopíruje do `public/vendor` před `dev` a `build`.
+- **Bez signálu:** mapa potřebuje spojení; revize v terénu se to netýká.
+- **Technicky:** migrace `20261028090000_site_map.sql` (`due_state`, sdílené pravidlo termínu shodné s `dueState()`; `site_map_statuses` s právy volajícího, takže RLS platí), `src/lib/site-map.ts`, `src/app/(app)/map`.
+- **Ověření:** testy pravidla termínu proti databázi na hraničních dnech, stavy budov (přesně 30 a 31 dní, bez zařízení, kritická, vyřešená závada, vyřazené zařízení), filtry, RLS; jednotkové testy řazení, filtrů a dat pro mapu; `e2e/part21.mjs` (seznam, shluk, panel a zahájení revize, filtry a zapamatování, telefon, tmavý režim a angličtina); audit přístupnosti.
 
 ---
 

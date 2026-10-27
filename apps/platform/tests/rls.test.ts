@@ -4718,6 +4718,220 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("map of buildings (a fresh organization)", () => {
+    let hana: TestUser;
+    let karel: TestUser;
+    let org: string;
+    let customerX: string;
+    let customerY: string;
+    let typeA: string;
+    let typeB: string;
+    let months: number;
+    const sites: Record<string, string> = {};
+    const today = () => todayInTimeZone("Europe/Prague");
+    const shift = (days: number) => {
+      const date = new Date(`${today()}T00:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days);
+      return date.toISOString().slice(0, 10);
+    };
+
+    /** A device whose next due date is exactly `due` (null: never inspected). */
+    async function device(site: string, due: string | null, patch: Record<string, unknown> = {}) {
+      const { addMonths } = await import("@/lib/due");
+      const { data, error } = await hana.client
+        .from("devices")
+        .insert({
+          organization_id: org,
+          site_id: site,
+          device_type_id: typeA,
+          last_inspection_on: due ? addMonths(due, -months) : null,
+          ...patch,
+        })
+        .select("id, next_due_on")
+        .single();
+      expect(error).toBeNull();
+      expect(data!.next_due_on).toBe(due);
+      return data!.id;
+    }
+
+    async function statuses(client: Client, args: Record<string, string> = {}) {
+      const { data, error } = await client.rpc("site_map_statuses", args);
+      expect(error).toBeNull();
+      return new Map((data ?? []).map((row) => [row.name, row]));
+    }
+
+    beforeAll(async () => {
+      hana = await createUser("hana");
+      karel = await createUser("karel");
+      org = await createOrg(hana, `RLS map ${run}`);
+      const token = generateToken();
+      await hana.client.from("invitations").insert({
+        organization_id: org,
+        email: karel.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: hana.id,
+      });
+      const { error: joined } = await karel.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Karel",
+      });
+      expect(joined).toBeNull();
+      const { data: customers } = await hana.client
+        .from("customers")
+        .insert([
+          { organization_id: org, name: "X" },
+          { organization_id: org, name: "Y" },
+        ])
+        .select("id, name")
+        .order("name");
+      customerX = customers![0]!.id;
+      customerY = customers![1]!.id;
+      const names = [
+        "overdue",
+        "soon30",
+        "ok31",
+        "empty",
+        "critical",
+        "resolved",
+        "retired",
+        "never",
+        "major",
+      ];
+      const { data: rows } = await hana.client
+        .from("sites")
+        .insert(
+          names.map((name, index) => ({
+            organization_id: org,
+            customer_id: name === "major" ? customerY : customerX,
+            name,
+            ...(index < 6 ? { latitude: 50 + index / 100, longitude: 14 + index / 100 } : {}),
+          })),
+        )
+        .select("id, name");
+      for (const site of rows ?? []) sites[site.name] = site.id;
+      const { data: type } = await hana.client
+        .from("device_types")
+        .select("id, inspection_interval_months")
+        .single();
+      typeA = type!.id;
+      months = type!.inspection_interval_months;
+      const { data: other } = await hana.client
+        .from("device_types")
+        .insert({
+          organization_id: org,
+          code: `hydrant_${run}`,
+          name: "Hydrant",
+          inspection_interval_months: 12,
+        })
+        .select("id")
+        .single();
+      typeB = other!.id;
+
+      await device(sites.overdue!, shift(-1));
+      await device(sites.overdue!, shift(200));
+      await device(sites.soon30!, shift(30));
+      await device(sites.ok31!, shift(31));
+      const withCritical = await device(sites.critical!, shift(100));
+      await device(sites.resolved!, shift(100));
+      await device(sites.retired!, shift(-10), { status: "removed" });
+      await device(sites.never!, null);
+      const withMajor = await device(sites.major!, shift(100));
+      await device(sites.major!, shift(-5), { device_type_id: typeB });
+      for (const [deviceId, severity] of [
+        [withCritical, "critical"],
+        [withMajor, "major"],
+      ] as const) {
+        const { error } = await hana.client.rpc("create_defect", {
+          p_device: deviceId,
+          p_description: `Závada ${severity}`,
+          p_severity: severity,
+        });
+        expect(error).toBeNull();
+      }
+      const resolvedDevice = (
+        await hana.client.from("devices").select("id").eq("site_id", sites.resolved!).single()
+      ).data!.id;
+      const { data: defect } = await hana.client.rpc("create_defect", {
+        p_device: resolvedDevice,
+        p_description: "Vyřešená",
+        p_severity: "critical",
+      });
+      const { error: resolved } = await hana.client.rpc("change_defect_status", {
+        p_defect: defect!,
+        p_status: "resolved",
+        p_note: "Opraveno",
+      });
+      expect(resolved).toBeNull();
+    });
+
+    it("keeps the same due-date rule as the app", async () => {
+      const { DUE_STATE_CASES } = await import("./fixtures/site-map-cases");
+      for (const [next, day, soon, state] of DUE_STATE_CASES) {
+        const { data } = await hana.client.rpc("due_state", {
+          p_next_due: next,
+          p_today: day,
+          p_soon_days: soon,
+        });
+        expect(data).toBe(state);
+      }
+    });
+
+    it("gives each building its state, as the app's rule does", async () => {
+      const { siteStatus } = await import("@/lib/site-map");
+      const rows = await statuses(hana.client);
+      const state = (name: string) => rows.get(name)?.status;
+      expect(state("overdue")).toBe("critical");
+      // Exactly the company's 30 days away is "soon"; a day later is fine.
+      expect(state("soon30")).toBe("warning");
+      expect(state("ok31")).toBe("ok");
+      expect(state("empty")).toBe("none");
+      expect(state("critical")).toBe("critical");
+      // A resolved defect doesn't count; a retired device doesn't either.
+      expect(state("resolved")).toBe("ok");
+      expect(state("retired")).toBe("none");
+      expect(state("never")).toBe("warning");
+      expect(rows.get("major")).toMatchObject({ status: "critical", defects_major: 1, overdue: 1 });
+      for (const row of rows.values()) expect(row.status).toBe(siteStatus(row));
+      expect(rows.get("overdue")).toMatchObject({
+        devices: 2,
+        overdue: 1,
+        next_due: shift(-1),
+        latitude: 50,
+        longitude: 14,
+      });
+      // Buildings without a point are listed too (for "without a location").
+      expect(rows.get("never")).toMatchObject({ latitude: null, longitude: null });
+    });
+
+    it("filters by customer, device type and technician", async () => {
+      const byCustomer = await statuses(hana.client, { p_customer: customerY });
+      expect([...byCustomer.keys()]).toEqual(["major"]);
+      // Only the type's devices and their defects count.
+      const byType = await statuses(hana.client, { p_device_type: typeB });
+      expect([...byType.keys()]).toEqual(["major"]);
+      expect(byType.get("major")).toMatchObject({ devices: 1, defects_major: 0, overdue: 1 });
+      expect(await statuses(hana.client, { p_technician: karel.id })).toEqual(new Map());
+      const { error } = await hana.client.from("inspection_plans").insert({
+        organization_id: org,
+        site_id: sites.soon30!,
+        planned_on: shift(3),
+        technician_id: karel.id,
+      });
+      expect(error).toBeNull();
+      expect([...(await statuses(hana.client, { p_technician: karel.id })).keys()]).toEqual([
+        "soon30",
+      ]);
+    });
+
+    it("shows a technician the same map, and another company nothing", async () => {
+      expect((await statuses(karel.client)).size).toBe(9);
+      expect((await statuses(bob.client)).has("overdue")).toBe(false);
+      const foreign = await statuses(bob.client, { p_customer: customerX });
+      expect(foreign.size).toBe(0);
+    });
+  });
+
   describe("member management", () => {
     async function membershipOf(user: TestUser) {
       const { data } = await admin
