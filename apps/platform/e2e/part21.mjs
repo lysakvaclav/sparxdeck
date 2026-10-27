@@ -131,6 +131,13 @@ try {
       ),
     );
     await page.screenshot(`${OUT}/p21-01-map.png`);
+    // A click on the cluster zooms to the streets of Karlín (our own base map).
+    await page.evaluate(`[...document.querySelectorAll(".site-cluster")].find((c) => c.textContent === "◆ 3").click()`);
+    await until("the cluster opens", () =>
+      page.evaluate(`![...document.querySelectorAll(".site-cluster")].some((c) => c.textContent === "◆ 3")`),
+    );
+    await sleep(2500);
+    await page.screenshot(`${OUT}/p21-01b-streets.png`);
   });
 
   await step("a building from the list opens its panel; the inspection starts from it", async () => {

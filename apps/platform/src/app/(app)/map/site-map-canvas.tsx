@@ -9,6 +9,7 @@ import type {
   StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useLocale } from "next-intl";
 import czOutline from "@/assets/map/cz-outline.json";
 import {
   SITE_STATUSES,
@@ -19,11 +20,12 @@ import {
   type SiteStatus,
 } from "@/lib/site-map";
 
-// The map of buildings (part 21), drawn by MapLibre GL. Without a base map:
-// a neutral background, the outline of Czechia (Natural Earth, public domain)
-// and a grid of degrees. A self-hosted PMTiles file can add streets and towns
-// (NEXT_PUBLIC_MAP_PMTILES_URL; labels need NEXT_PUBLIC_MAP_GLYPHS_URL). No
-// public tile server is ever asked for anything.
+// The map of buildings (part 21), drawn by MapLibre GL. The base map is our own
+// (NEXT_PUBLIC_MAP_BASE_URL): OpenStreetMap data cut by Protomaps into two
+// PMTiles files, the whole world to zoom 6 and Czechia in full detail, with
+// fonts and sprites beside them (docs/DEPLOY.md, part 10). No public tile
+// server is ever asked for anything. Without the folder: a neutral background,
+// the outline of Czechia (Natural Earth, public domain) and a grid of degrees.
 
 /** The colour and the shape of each state: never the colour alone. */
 export const STATUS_STYLE: Record<SiteStatus, { color: string; shape: "diamond" | "triangle" | "circle" | "ring"; glyph: string }> = {
@@ -33,8 +35,9 @@ export const STATUS_STYLE: Record<SiteStatus, { color: string; shape: "diamond" 
   none: { color: "#8b929b", shape: "ring", glyph: "○" },
 };
 
-const PMTILES_URL = process.env.NEXT_PUBLIC_MAP_PMTILES_URL;
-const GLYPHS_URL = process.env.NEXT_PUBLIC_MAP_GLYPHS_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_MAP_BASE_URL?.replace(/\/$/, "");
+/** World lines and labels give way to the detail of Czechia from this zoom on. */
+const WORLD_DETAIL_ZOOM = 9;
 /** Czechia, for a first view without any building yet. */
 const CZECHIA: [number, number, number, number] = [12.09, 48.55, 18.86, 51.06];
 
@@ -89,32 +92,46 @@ function shapeImage(status: SiteStatus, outline: string) {
   return ctx.getImageData(0, 0, size, size);
 }
 
-async function baseLayers(dark: boolean): Promise<{
+type BaseMap = {
   sources: StyleSpecification["sources"];
   layers: LayerSpecification[];
   glyphs?: string;
-  attribution?: string;
-}> {
-  if (!PMTILES_URL) return { sources: {}, layers: [] };
+  sprite?: string;
+};
+
+async function baseMap(dark: boolean, lang: string): Promise<BaseMap> {
+  if (!BASE_URL) return { sources: {}, layers: [] };
   const [{ Protocol }, maplibre, { layers, namedFlavor }] = await Promise.all([
     import("pmtiles"),
     import("maplibre-gl"),
     import("@protomaps/basemaps"),
   ]);
+  // MapLibre wants absolute addresses (a folder of our own origin is relative).
+  const base = new URL(BASE_URL, location.origin).href;
   const protocol = new Protocol();
   maplibre.addProtocol("pmtiles", protocol.tile);
-  const all = layers("basemap", namedFlavor(dark ? "dark" : "light"), { lang: "cs" });
+  const flavor = namedFlavor(dark ? "dark" : "light");
+  const attribution =
+    '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>, <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>';
+  // The world below, Czechia on top. Where both have a place, its labels
+  // collide and only the detail's stays; the world's simplified roads and
+  // labels stop at WORLD_DETAIL_ZOOM, so streets are never drawn twice.
+  const world = layers("world", flavor, { lang }).map((layer) => ({
+    ...layer,
+    id: `world-${layer.id}`,
+    ...(layer.type === "line" || layer.type === "symbol" ? { maxzoom: WORLD_DETAIL_ZOOM } : {}),
+  })) as LayerSpecification[];
+  const detail = layers("detail", flavor, { lang })
+    .filter((layer) => layer.type !== "background")
+    .map((layer) => ({ ...layer, id: `detail-${layer.id}` })) as LayerSpecification[];
   return {
     sources: {
-      basemap: {
-        type: "vector",
-        url: `pmtiles://${PMTILES_URL}`,
-        attribution: "© OpenStreetMap, Protomaps",
-      },
+      world: { type: "vector", url: `pmtiles://${base}/world.pmtiles`, attribution },
+      detail: { type: "vector", url: `pmtiles://${base}/detail.pmtiles`, attribution },
     },
-    // Labels need glyphs; without them only the shapes of streets and towns.
-    layers: GLYPHS_URL ? all : all.filter((layer) => layer.type !== "symbol"),
-    glyphs: GLYPHS_URL,
+    layers: [...world, ...detail],
+    glyphs: `${base}/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${base}/sprites/v4/${dark ? "dark" : "light"}`,
   };
 }
 
@@ -139,6 +156,7 @@ export function SiteMapCanvas({
   const onSelectRef = useRef(onSelect);
   const [ready, setReady] = useState(false);
   const [dark, setDark] = useState(false);
+  const locale = useLocale();
 
   useEffect(() => {
     rowsRef.current = rows;
@@ -183,7 +201,7 @@ export function SiteMapCanvas({
       const maplibre = await import("maplibre-gl");
       // The worker is served from our own origin (scripts/copy-map-worker.mjs).
       maplibre.setWorkerUrl(`/vendor/maplibre-gl-worker.mjs?v=${maplibre.getVersion()}`);
-      const base = await baseLayers(dark);
+      const base = await baseMap(dark, locale);
       if (cancelled || !container.current) return;
       const background = cssVar("--canvas", dark ? "#0e1013" : "#f6f7f9");
       const land = cssVar("--background", dark ? "#17191d" : "#ffffff");
@@ -195,43 +213,45 @@ export function SiteMapCanvas({
         container: container.current,
         bounds,
         fitBoundsOptions: { padding: 48, maxZoom: 15 },
-        attributionControl: { compact: true, customAttribution: "Natural Earth" },
+        attributionControl: {
+          compact: true,
+          ...(base.layers.length ? {} : { customAttribution: "Natural Earth" }),
+        },
         dragRotate: false,
         pitchWithRotate: false,
         style: {
           version: 8,
           ...(base.glyphs ? { glyphs: base.glyphs } : {}),
-          sources: {
-            ...base.sources,
-            outline: { type: "geojson", data: czOutline as GeoJSON.FeatureCollection },
-            grid: { type: "geojson", data: graticule(1) as GeoJSON.FeatureCollection },
-          },
-          layers: [
-            { id: "background", type: "background", paint: { "background-color": background } },
-            ...(base.layers.length
-              ? base.layers
-              : ([
-                  { id: "land", type: "fill", source: "outline", paint: { "fill-color": land } },
-                  {
-                    id: "grid",
-                    type: "line",
-                    source: "grid",
-                    paint: { "line-color": grid, "line-width": 1 },
-                  },
-                ] satisfies LayerSpecification[])),
-            {
-              id: "border",
-              type: "line",
-              source: "outline",
-              paint: { "line-color": border, "line-width": 1.5 },
-            },
-          ],
+          ...(base.sprite ? { sprite: base.sprite } : {}),
+          sources: base.layers.length
+            ? base.sources
+            : {
+                outline: { type: "geojson", data: czOutline as GeoJSON.FeatureCollection },
+                grid: { type: "geojson", data: graticule(1) as GeoJSON.FeatureCollection },
+              },
+          layers: base.layers.length
+            ? base.layers
+            : [
+                { id: "background", type: "background", paint: { "background-color": background } },
+                { id: "land", type: "fill", source: "outline", paint: { "fill-color": land } },
+                { id: "grid", type: "line", source: "grid", paint: { "line-color": grid, "line-width": 1 } },
+                {
+                  id: "border",
+                  type: "line",
+                  source: "outline",
+                  paint: { "line-color": border, "line-width": 1.5 },
+                },
+              ],
         },
       });
       mapRef.current = map;
       map.touchZoomRotate.disableRotation();
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
       map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+      // An icon the sprite sheet lacks stays blank instead of a console warning.
+      map.setMissingStyleImageResolver((id) => {
+        if (!map?.hasImage(id)) map?.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) });
+      });
 
       map.on("load", () => {
         if (!map) return;
@@ -328,7 +348,7 @@ export function SiteMapCanvas({
       mapRef.current = null;
       setReady(false);
     };
-  }, [dark]);
+  }, [dark, locale]);
 
   // New rows (filters changed): the points follow, the view fits them.
   useEffect(() => {

@@ -49,6 +49,8 @@ function redirectWithCookies(url: URL, from: NextResponse) {
 export const config = {
   matcher: [
     // Everything except static files, images and metadata files.
-    "/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    // vendor/: the map worker, base map tiles, fonts and sprites (public files,
+    // read in byte ranges; a sign-in redirect would break them).
+    "/((?!_next/static|_next/image|vendor/|favicon.ico|icon|apple-icon|manifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

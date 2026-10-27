@@ -113,15 +113,40 @@ Klíče z vývoje nikdy nepoužívejte v produkci. Kdyby klíč unikl (např. do
 
 Stejně se mění `CRON_SECRET`, Resend a Sentry token.
 
-## 10. Podkladová mapa pro mapu budov (volitelné)
+## 10. Podkladová mapa pro mapu budov
 
-Mapa budov (část 21) funguje bez podkladové mapy: obrys Česka (Natural Earth, volné dílo, `src/assets/map/cz-outline.json`) a mřížka. Žádný veřejný server dlaždic se nepoužívá. Ulice a města lze přidat z vlastního souboru PMTiles. **Nic z toho se nestahuje bez souhlasu majitele.**
+Mapa budov (část 21) kreslí skutečnou mapu z vlastních souborů. Žádný veřejný server dlaždic ani geokódování se nepoužívá; prohlížeč čte jen z naší adresy (lokálně) nebo ze Supabase Storage (produkce). Bez nastavené složky ukáže obrys Česka (Natural Earth, `src/assets/map/cz-outline.json`) a mřížku.
 
-1. **Data:** výřez Česka z OpenStreetMap ve formátu Protomaps. Jednorázově příkazem z nástroje [`pmtiles`](https://github.com/protomaps/go-pmtiles): `pmtiles extract <aktuální denní build Protomaps>.pmtiles cesko.pmtiles --bbox=12.09,48.55,18.86,51.06 --maxzoom=15`. Soubor má řádově 0,5–1 GB; s `--maxzoom=13` asi čtvrtinu (bez detailu ulic).
-2. **Písmo pro popisky (glyphs):** volně licencovaná písma Protomaps (`basemaps-assets`, OFL) jako PBF soubory, nahrát vedle mapy. Bez nich mapa ukáže ulice a plochy bez názvů.
-3. **Uložení:** veřejný bucket v Supabase Storage (např. `map`), soubory `cesko.pmtiles` a `fonts/{fontstack}/{range}.pbf`. Supabase Storage podporuje čtení po částech (HTTP Range), které PMTiles potřebuje. Pozor na kvótu: free plán má 1 GB úložiště a omezený přenos dat; při provozu spíš placený plán.
-4. **Proměnné ve Vercelu:** `NEXT_PUBLIC_MAP_PMTILES_URL=https://<projekt>.supabase.co/storage/v1/object/public/map/cesko.pmtiles` a `NEXT_PUBLIC_MAP_GLYPHS_URL=https://<projekt>.supabase.co/storage/v1/object/public/map/fonts/{fontstack}/{range}.pbf`. Adresa Supabase už v CSP je; jiný host by se musel přidat do `connect-src` (`src/lib/security-headers.ts`).
-5. **Licence:** mapa musí uvádět „© OpenStreetMap“ (ODbL); aplikace to dělá sama, když je podklad nastavený.
-6. **Aktualizace:** data stačí obnovit jednou za čas (nové ulice), stejným postupem.
+**Obsah složky** (`NEXT_PUBLIC_MAP_BASE_URL`), asi 920 MB:
 
-Bez těchto proměnných mapa funguje dál bez podkladu.
+| Soubor | Co to je | Velikost |
+|---|---|---|
+| `world.pmtiles` | celý svět, přiblížení 0–6 (státy, řeky, velká města) | 45 MB |
+| `detail.pmtiles` | Česko (obdélník 12,09–18,86 / 48,55–51,06) do přiblížení 14: ulice, budovy, názvy | 875 MB |
+| `fonts/Noto Sans {Regular,Medium,Italic}/*.pbf` + `fonts/OFL.txt` | písmo popisků (OFL) | 30 MB |
+| `sprites/v4/{light,dark}[@2x].{json,png}` | ikony míst (MIT) | 0,1 MB |
+
+Mimo Česko je při větším přiblížení vidět jen pevnina a voda; další země = další výřez a třetí zdroj v `site-map-canvas.tsx`.
+
+**Příprava souborů** (data OpenStreetMap ve formátu Protomaps, ODbL):
+
+1. Nástroj [`pmtiles`](https://github.com/protomaps/go-pmtiles/releases) (ověřit kontrolní součet SHA256 z vydání).
+2. Denní build Protomaps je na `https://build.protomaps.com/YYYYMMDD.pmtiles` (aktuální v `https://build-metadata.protomaps.dev/builds.json`). Celý soubor se nestahuje, `extract` čte jen potřebné části:
+   - `pmtiles extract https://build.protomaps.com/<datum>.pmtiles world.pmtiles --maxzoom=6`
+   - `pmtiles extract https://build.protomaps.com/<datum>.pmtiles detail.pmtiles --bbox=12.09,48.55,18.86,51.06 --maxzoom=14`
+3. Písma a ikony z repozitáře [`protomaps/basemaps-assets`](https://github.com/protomaps/basemaps-assets): složky `fonts/Noto Sans Regular`, `Noto Sans Medium`, `Noto Sans Italic` (+ `OFL.txt`) a `sprites/v4/light*`, `dark*`.
+
+Použitá verze: build 2026-10-27 (tiles v4.15.2), `@protomaps/basemaps` 5.7.2. Styl (`layers()` z `@protomaps/basemaps`) musí odpovídat verzi dlaždic (v4); při přechodu na v5 aktualizovat obojí.
+
+**Lokálně:** soubory do `apps/platform/public/vendor/map/` (ignoruje git i `.vercelignore`) a do `.env.local` `NEXT_PUBLIC_MAP_BASE_URL=/vendor/map`. Proxy na `/vendor/` nepouští (čtení po částech, HTTP Range, nesmí skončit přesměrováním na přihlášení).
+
+**Produkce:**
+
+1. Veřejný bucket `map` v produkčním Supabase (soubory jsou veřejná data OpenStreetMap, nic firemního). Soubor 875 MB vyžaduje placený plán: free plán má limit 50 MB na soubor a 1 GB úložiště. Nahrávat přes resumable upload (TUS), např. Supabase CLI `supabase storage cp -r ./map ss:///map --experimental` nebo v Dashboardu.
+2. Ve Vercelu `NEXT_PUBLIC_MAP_BASE_URL=https://<projekt>.supabase.co/storage/v1/object/public/map` a nové nasazení (proměnná se vkládá při buildu). Adresa Supabase už v CSP je; jiný host by se musel přidat do `connect-src` (`src/lib/security-headers.ts`).
+3. Ověřit: `curl -r 0-126 <adresa>/world.pmtiles -o /dev/null -w "%{http_code}"` vrací `206`.
+4. Přenos: mapa načítá jen dlaždice zobrazeného výřezu (desítky až stovky kB na zobrazení), prohlížeč je drží v cache.
+
+**Licence:** mapa sama ukazuje „© OpenStreetMap, Protomaps“ (ODbL vyžaduje uvedení). Písmo Noto Sans je OFL, ikony MIT.
+
+**Aktualizace:** jednou za čas (nové ulice) stejným postupem a nahrát přes staré soubory.

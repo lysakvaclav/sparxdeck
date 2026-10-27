@@ -355,7 +355,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P2 Filtry zákazník, technik, stav, typ zařízení; v adrese, zapamatované (část 21)
 - [x] P2 Seznam synchronizovaný s mapou (přístupná náhrada) a seznam „Bez polohy“ (část 21)
 - [x] P2 Mapa bez veřejných dlaždic; obrys Česka a mřížka (část 21)
-- [ ] P3 Podkladová mapa z vlastního PMTiles (podpora hotová v kódu, data podle DEPLOY.md bod 10 po souhlasu majitele)
+- [x] P3 Podkladová mapa z vlastního PMTiles: svět + detail Česka, písma a ikony u nás (část 21; produkce: nahrát do Supabase podle DEPLOY.md bod 10)
 - [ ] P3 „Přidat do plánu trasy“ z panelu budovy (část 23)
 
 **Editor protokolů (část 22)**, **Trasy pro techniky (část 23)**: položky se doplní s plánem každé části.

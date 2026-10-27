@@ -1,0 +1,22 @@
+# Files `vercel deploy` from the repository root never uploads. The same as the
+# .gitignore files, so the result does not depend on whether the CLI reads them.
+node_modules
+.next
+.turbo
+.vercel
+backups
+coverage
+playwright-report
+test-results
+*.tsbuildinfo
+
+# Secrets: the build gets its variables from the Vercel project.
+.env
+.env.*
+!.env.example
+
+# Platform: test screenshots; the map worker and the base map (part 21), about
+# 1 GB, which production serves from Supabase Storage (docs/DEPLOY.md, part 10).
+# The worker is copied again by prebuild.
+apps/platform/.e2e-output
+apps/platform/public/vendor
