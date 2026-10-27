@@ -34,7 +34,6 @@ export async function pdfLayout(pdf: Buffer | Uint8Array): Promise<PageLayout[]>
   const task = getDocument({
     data: new Uint8Array(pdf),
     useSystemFonts: false,
-    isEvalSupported: false,
     verbosity: 0,
   });
   const document = await task.promise;
