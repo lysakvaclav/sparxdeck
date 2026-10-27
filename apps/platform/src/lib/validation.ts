@@ -19,6 +19,7 @@ import {
   type SheetLayout,
   type SheetPreset,
 } from "@/lib/labels";
+import { SCAN_LOCATION_RULES, parseCoordinates } from "@/lib/scan-location";
 
 // Messages are error codes (see lib/errors.ts) translated in the UI. The same
 // schemas validate in the browser (React Hook Form) and again on the server.
@@ -157,7 +158,11 @@ export type DeadlineSettingsInput = z.input<typeof deadlineSettingsSchema>;
 
 export const digestSettingsSchema = z.object({ weeklyDigest: z.boolean() });
 
+/** Record the phone's position when a label is scanned (part 20). */
+export const scanLocationSettingsSchema = z.object({ scanLocation: z.boolean() });
+
 export type DigestSettingsInput = z.input<typeof digestSettingsSchema>;
+export type ScanLocationSettingsInput = z.input<typeof scanLocationSettingsSchema>;
 
 // ---------------------------------------------------------------------------
 // Customers, sites, locations
@@ -179,6 +184,21 @@ export const siteSchema = z.object({
   address: optional(z.string().max(500, "tooLong")),
   accessNotes: optional(z.string().max(2000, "tooLong")),
   notes: optional(z.string().max(5000, "tooLong")),
+  // The building's point as typed or pasted from a map application
+  // ("50.0755, 14.4378"); empty clears it. Read by parseCoordinates.
+  coordinates: z
+    .string()
+    .trim()
+    .max(100, "tooLong")
+    .refine((value) => value === "" || parseCoordinates(value) !== null, "invalidCoordinates")
+    .optional(),
+  radius: z.coerce
+    .number<string | number>("invalidRadius")
+    .int("invalidRadius")
+    .min(SCAN_LOCATION_RULES.minRadiusM, "invalidRadius")
+    .max(SCAN_LOCATION_RULES.maxRadiusM, "invalidRadius")
+    .optional(),
+  locationSource: z.enum(["map", "manual", "device"]).optional(),
 });
 
 export const locationNameSchema = z.object({ name: name(200) });

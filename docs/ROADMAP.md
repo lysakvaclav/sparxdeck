@@ -37,6 +37,10 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 12 | Kvalita a spuštění | T (PWA), V, Y | Nasazeno na portal.sparxdeck.com (landing sparxdeck.com); zbývá Resend, Sentry, zálohy v produkci a test na iPhonu |
 | 13–18 | Fáze 2: půdorysy, import, revize v terénu 2, offline, zařízení a šablony 2, protokol 2 | viz Fáze 2 níže | Hotovo a nasazeno; z části 17 čekají 4 položky na zpětnou vazbu z pilotu |
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
+| 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
+| 21 | Mapa budov se semaforem | Fáze 3 | Čeká na plán |
+| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Čeká na plán |
+| 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -352,7 +356,7 @@ Zbývá:
 
 ---
 
-## Fáze 2: po MVP (části 13–26)
+## Fáze 2: po MVP (části 13–19 a 24–30)
 
 **Stav na začátku (2026-10-16):** P1 104 ze 118, P2 3 z 83, P3 0 ze 41. Zbylých 14 položek P1 je hotových v kódu a čeká na doménu, e-maily (Resend), placené plány a zkoušku na skutečném telefonu. To se udělá před prvním zákazníkem (viz DEPLOY.md), nezávisle na částech níže.
 
@@ -367,13 +371,13 @@ Pořadí je podle hodnoty pro první firmy. Platí stejná pravidla jako u čás
 | 17 | Zařízení a šablony 2 | E: vlastní typy, vlastní údaje podle typu, kopie šablony, výběr z možností, povinná fotka; F: fotky zařízení, rok výroby a konec životnosti, přesun s historií, hromadné úpravy | položky šablon pro další typy jen od revizního technika |
 | 18 | Protokol 2 a podpis | N: podpis zákazníka prstem, jméno a čas; J: fotky závad v protokolu, nová verze po opravě, souhrnný protokol; Q: formát číslování | ověřit s technikem, co má podpis v protokolu obsahovat |
 | 19 | Plánování a závady 2 | K: kalendář revizí, vytížení techniků; I: přiřazení závady člověku, termín odstranění | nic |
-| 20 | Tým a přihlášení 2 | B: technik vidí jen své zákazníky, jedna osoba ve více firmách; A: Google, dvoufázové ověření, aktivní zařízení a odhlášení všude | účet Google Cloud pro přihlášení přes Google |
-| 21 | Zákazníci a budovy 2 | C: více kontaktů, štítky, slučování duplicit; D: mapa a navigace; S: koš a obnovení smazaného | nic |
-| 22 | Upozornění a e-maily 2 ✉ | L: připomínky zákazníkům, nastavení upozornění, šablony e-mailů; J+Q: vlastní text a více příjemců | doména a Resend |
-| 23 | Portál pro správce budov ✉ | O: přístup jen ke svým budovám, stav zařízení, protokoly, pozvání | doména a Resend |
-| 24 | Provoz, bezpečnost a GDPR | V: záznam změn (audit log), omezení požadavků, export a výmaz osobních údajů; R: úplný export firmy; W: přehled firem pro provozovatele, pozastavení účtu, vstup podpory se záznamem; Y: hlídání dostupnosti | zpracovatelská smlouva a texty od právníka |
-| 25 | Předplatné a platby | P: zkušební doba, plány a limity, platba kartou, faktury, neúspěšné platby, zrušení | cena, plány, účet u platební brány (např. Stripe), fakturační údaje |
-| 26 | Nápověda a zpětná vazba | X: nápověda a návody, kontakt na podporu, zpětná vazba v aplikaci | kontaktní e-mail podpory, případně videa |
+| 24 | Tým a přihlášení 2 | B: technik vidí jen své zákazníky, jedna osoba ve více firmách; A: Google, dvoufázové ověření, aktivní zařízení a odhlášení všude | účet Google Cloud pro přihlášení přes Google |
+| 25 | Zákazníci a budovy 2 | C: více kontaktů, štítky, slučování duplicit; D: mapa a navigace; S: koš a obnovení smazaného | nic |
+| 26 | Upozornění a e-maily 2 ✉ | L: připomínky zákazníkům, nastavení upozornění, šablony e-mailů; J+Q: vlastní text a více příjemců | doména a Resend |
+| 27 | Portál pro správce budov ✉ | O: přístup jen ke svým budovám, stav zařízení, protokoly, pozvání | doména a Resend |
+| 28 | Provoz, bezpečnost a GDPR | V: záznam změn (audit log), omezení požadavků, export a výmaz osobních údajů; R: úplný export firmy; W: přehled firem pro provozovatele, pozastavení účtu, vstup podpory se záznamem; Y: hlídání dostupnosti | zpracovatelská smlouva a texty od právníka |
+| 29 | Předplatné a platby | P: zkušební doba, plány a limity, platba kartou, faktury, neúspěšné platby, zrušení | cena, plány, účet u platební brány (např. Stripe), fakturační údaje |
+| 30 | Nápověda a zpětná vazba | X: nápověda a návody, kontakt na podporu, zpětná vazba v aplikaci | kontaktní e-mail podpory, případně videa |
 
 **P2 hotové v kódu, odškrtnou se po ověření** (v rámci nejbližší části, která se jich týká):
 - Přihlášení odkazem v e-mailu (část 1) ✉.
@@ -605,7 +609,34 @@ Zbylé počkají na zpětnou vazbu z pilotu:
 - **Technicky:** migrace `20261024120000_planning.sql` (sloupce `defects.assigned_to`/`due_on` s klíčem na členství, `assign_defect`, `set_defect_due`, události `assignee` a `due`, tabulka `inspection_plans` s RLS a právy sloupců, triggery spojení s revizí a smazané budovy). `src/lib/calendar.ts` (mřížka měsíce, stav plánu, vytížení, testy), `src/lib/calendar-data.ts`, `src/components/app/plan-dialog.tsx`, `src/app/(app)/calendar`.
 - **Ověření:** RLS testy (přiřazení jen členovi, cizí firma nic, technik plány jen čte, spojení s revizí a uvolnění po zrušení, odebrání člena, smazaná budova), jednotkové testy kalendáře, `e2e/part19.mjs` (kalendář, plán ze dne, vytížení, budova, závada po termínu, „Moje práce“ technika na telefonu, tmavý režim a angličtina), audit přístupnosti rozšířen o kalendář a vytížení.
 
-**Odloženo:** e-mailové upozornění na blížící se termín odstranění a přiřazení (s Resend v části 22), export kalendáře ICS (P3).
+**Odloženo:** e-mailové upozornění na blížící se termín odstranění a přiřazení (s Resend v části 26), export kalendáře ICS (P3).
+
+---
+
+## Fáze 3: před spuštěním (části 20–23)
+
+Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připravený na spuštění (pak už jen technické věci: Resend, produkční účty). Pravidla nad rámec části 1–12: před každou částí plán ke schválení, migrace jen přidávají a uvádějí, jak se vrací, žádné placené ani cizí služby (žádné veřejné mapové dlaždice ani převod adres na souřadnice), nic se nenasazuje ani nepushuje bez souhlasu majitele. Původní body 20–26 fáze 2 se posunuly na 24–30.
+
+| # | Část | Pořadí podle zadání |
+|---|---|---|
+| 20 | Poloha při skenu QR a souřadnice budov (Díl 2) | první |
+| 21 | Mapa budov se semaforem (Díl 3) | druhá |
+| 22 | Editor protokolů, etapy A–D (Díl 1) | třetí |
+| 23 | Trasy pro techniky (Díl 4) | čtvrtá |
+
+### Část 20: Poloha při skenu QR a souřadnice budov
+
+**Stav (2026-10-27): hotovo** (zatím jen lokálně, nenasazeno).
+
+- **Souřadnice budovy:** ve formuláři budovy sekce „Poloha budovy“: souřadnice zadané nebo vložené z mapové aplikace („50.0755, 14.4378“, i „50.0755N, 14.4378E“), tlačítko „Použít moji polohu“ (u budovy) a poloměr (výchozí 150 m, 10–5000 m). Kdo a kdy bod nastavil a odkud (ručně, poloha telefonu) zapisuje databáze. Budova bez bodu to říká na své stránce s odkazem na doplnění. Výběr kliknutím do mapy přijde s podkladovou mapou v části 21.
+- **Při skenu štítku v revizi:** zařízení se otevře hned a poloha telefonu se zjišťuje na pozadí (limit 8 s, nejvýš 30 s stará). Před prvním skenem na telefonu krátké vysvětlení, k čemu poloha je. Bez signálu čeká v telefonu a odešle se se synchronizací. Poloha nikdy neblokuje kontrolu; ukládá se jen v okamžiku skenu.
+- **Vyhodnocení na serveru** ze syrových hodnot: nezjištěno (bez polohy, přesnost horší než 100 m, budova bez bodu), odpovídá (vzdálenost − přesnost ≤ poloměr), neodpovídá. Konstanty na jednom místě (`scan_location_rules()`, stejné v `src/lib/scan-location.ts`).
+- **Zobrazení:** neutrální štítek u zařízení v revizi i v detailu revize, důvod u „nezjištěno“, vzdálenost u „neodpovídá“, vysvětlení (každý člen firmy, dokud revize běží). V protokolu sloupec „Poloha skenu“, souhrnný řádek a poznámka „Poloha je orientační…“. Seznam revizí má filtr „Poloha neodpovídá“ a počet takových kontrol.
+- **Vypínač pro firmu** v Nastavení (výchozí zapnuto); vypnutá funkce nic nezjišťuje ani neukládá.
+- **Technicky:** migrace `20261027090000_site_location.sql` (PostGIS, sloupce bodu budovy, generovaný `location geography`, index) a `20261027100000_scan_location.sql` (sloupce skenu u `inspection_items`, `organizations.scan_location_enabled`, `scan_location_distance`, `scan_location_verdict`, `record_scan_location`, `explain_scan_location`); hlavička `Permissions-Policy: geolocation=(self)`.
+- **Ověření:** jednotkové testy pravidla, vzdálenosti a čtení souřadnic; databázové testy (shoda s TypeScriptem, vyhodnocení, hodiny telefonu, odmítnutí špatných hodnot, cizí kontroly a cizí firmy, vypnutí, uzavřená revize, oprávnění k bodu budovy); testy protokolu; `e2e/part20.mjs` (bod budovy z polohy telefonu, sken u budovy, daleko s vysvětlením, bez polohy, bez signálu, filtr, tmavý režim a angličtina); audit přístupnosti.
+
+**Ke schválení majitelem / právníkem:** doplnit zpracování polohy do zásad ochrany osobních údajů (účel, doba uložení, právní základ), do zpracovatelské smlouvy a případně informaci pro zaměstnance servisních firem. Texty aplikace nevymýšlí.
 
 ---
 

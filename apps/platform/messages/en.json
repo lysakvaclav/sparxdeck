@@ -289,6 +289,7 @@
     "deviceInactive": "The device is out of service or removed; it isn't checked in inspections.",
     "noTemplate": "The device type has no checklist.",
     "invalidAnswer": "The answer isn't in the right form.",
+    "invalidLocation": "The location isn't in the right form.",
     "tooManyPhotos": "A device can have at most 20 photos.",
     "photoFailed": "The photo couldn't be processed. Try taking it again.",
     "invalidDefect": "Check the defect description.",
@@ -317,7 +318,9 @@
     "fieldKeyDuplicate": "Two fields can't share a key.",
     "anotherInspectionOpen": "Another inspection is already in progress at this building.",
     "correctionInProgress": "A completed inspection of this building is being corrected. Complete the correction, then start a new inspection.",
-    "correctionNotCancellable": "A correction can't be cancelled: that would delete the original inspection too. Complete the correction."
+    "correctionNotCancellable": "A correction can't be cancelled: that would delete the original inspection too. Complete the correction.",
+    "invalidCoordinates": "The coordinates aren't in the right form. Enter latitude and longitude, e.g. 50.0755, 14.4378.",
+    "invalidRadius": "The radius must be a whole number from 10 to 5000 metres."
   },
   "email": {
     "invite": {
@@ -431,6 +434,11 @@
       "subject": "Subject",
       "emailDisabled": "Sending e-mails isn't set up yet, so the summary isn't sent for now.",
       "lastSent": "Last sent {date} ({count, plural, one {# recipient} other {# recipients}})."
+    },
+    "scanLocation": {
+      "title": "Location at scanning",
+      "description": "When a label is scanned during an inspection, the phone's location is recorded and the protocol says whether it matches the building. Only at the moment of a scan, never continuously. Technicians are told so in the app.",
+      "enabled": "Record the phone's location when labels are scanned"
     }
   },
   "customers": {
@@ -495,7 +503,23 @@
       "createTitle": "New building",
       "createSubtitle": "A building of {customer}.",
       "editTitle": "Edit building",
-      "create": "Create building"
+      "create": "Create building",
+      "locationTitle": "Building location",
+      "locationHint": "The building's point is compared with the phone's location when labels are scanned. The app doesn't convert addresses to coordinates.",
+      "coordinates": "Coordinates",
+      "coordinatesHint": "Latitude and longitude. Copy them from a map application, or use the phone's location at the building.",
+      "useMyLocation": "Use my location",
+      "locating": "Finding the location…",
+      "located": "Phone location with an accuracy of ±{accuracy} m. Save the form.",
+      "locatedImprecise": "The phone's location is imprecise (±{accuracy} m). Try outside or by a window.",
+      "locateFailed": {
+        "denied": "The browser has no permission to use the location.",
+        "unavailable": "The location couldn't be found.",
+        "timeout": "The location wasn't found in time.",
+        "unsupported": "This browser doesn't support location."
+      },
+      "radius": "Building radius (m)",
+      "radiusHint": "How far from the point a scan still counts as at the building. Large sites need more."
     },
     "detail": {
       "customer": "Customer",
@@ -505,7 +529,11 @@
       "notes": "Notes",
       "deleteTitle": "Delete this building?",
       "deleteBody": "The building and its devices will disappear from lists. The data stays stored for the inspection history.",
-      "properties": "Properties"
+      "properties": "Properties",
+      "point": "Building location",
+      "radius": "radius {radius} m",
+      "noPoint": "No coordinates, scan locations can't be compared.",
+      "addPoint": "Add"
     },
     "type": "Building",
     "columns": {
@@ -1702,6 +1730,12 @@
         "inspections": "Inspections",
         "openDefects": "Open defects"
       }
+    },
+    "locationFilter": {
+      "label": "Location at scanning",
+      "all": "All inspections",
+      "mismatch": "Location doesn't match",
+      "count": "{count, plural, one {# location doesn't match} other {# locations don't match}}"
     }
   },
   "defects": {
@@ -1883,7 +1917,16 @@
       "signHint": "Name, signature and date",
       "page": "Report {number} · page {page} of {pages}",
       "version": "Version",
-      "versionReplaces": "{version}, replaces the issue of {date}"
+      "versionReplaces": "{version}, replaces the issue of {date}",
+      "scanColumn": "Scan location",
+      "scanState": {
+        "matches": "Matches",
+        "mismatch": "Doesn't match",
+        "unknown": "Not determined"
+      },
+      "scanSummary": "The location at scanning matched the building for {matches} of {total} devices.",
+      "scanDisclaimer": "The location is indicative. GPS accuracy inside buildings and in basements can be low.",
+      "scanNote": "Explanation of the location"
     },
     "email": {
       "subject": "Inspection report {number} – {site}",
@@ -2170,5 +2213,40 @@
       "plan": "Plan",
       "empty": "No inspection planned yet."
     }
+  },
+  "scanLocation": {
+    "state": {
+      "matches": "Location matches the building",
+      "mismatch": "Location doesn't match the building",
+      "unknown": "Location not determined",
+      "waiting": "Location waiting to be sent"
+    },
+    "reason": {
+      "denied": "location permission refused",
+      "unavailable": "location wasn't available",
+      "timeout": "location wasn't found in time",
+      "unsupported": "the phone doesn't support location",
+      "notScanned": "the device wasn't scanned",
+      "noSitePoint": "the building has no coordinates",
+      "imprecise": "low accuracy"
+    },
+    "introTitle": "Location at scanning",
+    "introText": "When you scan a label, the app records the phone's location and its accuracy. The protocol then says for each device whether the location matches the building. The location is recorded only at the moment of a scan, never continuously, and it never limits the check.",
+    "introPermission": "The phone will now ask for permission to use its location. If you don't allow it, the check goes on all the same and the protocol says “location not determined”.",
+    "introOk": "Got it, scan",
+    "noteAdd": "Explain the location",
+    "noteEdit": "Edit the explanation",
+    "noteTitle": "Explanation of the location",
+    "noteLabel": "Explanation",
+    "notePlaceholder": "E.g. basement, no GPS signal",
+    "noteHint": "Shown in the protocol next to the device.",
+    "noteSave": "Save",
+    "noteSaved": "The explanation is saved.",
+    "noteOffline": "The explanation can be saved only with a signal.",
+    "noSitePoint": "The building has no coordinates, so scan locations can't be compared.",
+    "addSitePoint": "Add coordinates",
+    "summary": "The location at scanning matched the building for {matches} of {total} devices.",
+    "distanceM": "{distance} m from the building's point",
+    "distanceKm": "{distance} km from the building's point"
   }
 }

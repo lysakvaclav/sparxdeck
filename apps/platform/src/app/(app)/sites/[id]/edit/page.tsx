@@ -48,6 +48,12 @@ export default async function EditSitePage({ params }: Props) {
               address: site.address ?? "",
               accessNotes: site.access_notes ?? "",
               notes: site.notes ?? "",
+              coordinates:
+                site.latitude !== null && site.longitude !== null
+                  ? `${site.latitude}, ${site.longitude}`
+                  : "",
+              radius: String(site.location_radius_m),
+              locationSource: site.location_source ?? undefined,
             }}
           />
         </Card>

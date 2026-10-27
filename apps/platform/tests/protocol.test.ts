@@ -358,3 +358,64 @@ describe("protocol PDF", () => {
     }
   });
 });
+
+describe("location of QR scans in the protocol", () => {
+  const located: ProtocolInput = {
+    ...input,
+    scanLocation: true,
+    checks: [
+      check({ labelNumber: 1, scanLocation: { state: "matches", note: null } }),
+      check({
+        labelNumber: 2,
+        scanLocation: { state: "mismatch", note: "  Sklep, bez signálu GPS " },
+      }),
+      check({ labelNumber: 3, scanLocation: { state: "unknown", note: null } }),
+      // Opened without a scan.
+      check({ labelNumber: 4, scanLocation: { state: null, note: null } }),
+    ],
+  };
+
+  it("adds a column, a summary line and the note on accuracy", () => {
+    const model = buildProtocol(located, translate("cs"));
+    expect(model.scan).toEqual({
+      column: "Poloha skenu",
+      summary: "Poloha při skenu odpovídala budově u 1 z 4 zařízení.",
+      disclaimer:
+        "Poloha je orientační. Přesnost GPS uvnitř budov a ve sklepech může být nízká.",
+    });
+    expect(model.devices.map((device) => device.scan)).toEqual([
+      "Odpovídá",
+      "Neodpovídá",
+      "Nezjištěna",
+      "Nezjištěna",
+    ]);
+    expect(model.devices[1]!.details).toContain("Vysvětlení polohy: Sklep, bez signálu GPS");
+  });
+
+  it("speaks English", () => {
+    const model = buildProtocol(located, translate("en"));
+    expect(model.scan?.summary).toBe(
+      "The location at scanning matched the building for 1 of 4 devices.",
+    );
+    expect(model.devices[0]!.scan).toBe("Matches");
+  });
+
+  it("is left out when the company doesn't record it and no check has a position", () => {
+    const model = buildProtocol(
+      { ...input, scanLocation: false, checks: [check({ labelNumber: 1 })] },
+      translate("cs"),
+    );
+    expect(model.scan).toBeNull();
+    expect(model.devices[0]!.scan).toBe("");
+  });
+
+  it("keeps positions recorded before the company switched it off", () => {
+    const model = buildProtocol({ ...located, scanLocation: false }, translate("cs"));
+    expect(model.scan?.summary).toContain("u 1 z 4");
+  });
+
+  it("renders into the PDF", async () => {
+    const pdf = await renderProtocolPdf(buildProtocol(located, translate("cs")));
+    expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
+  });
+});

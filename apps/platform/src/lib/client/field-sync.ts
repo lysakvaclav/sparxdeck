@@ -5,13 +5,16 @@ import { databaseErrorCode, type ErrorCode } from "@/lib/errors";
 import {
   answersPayload,
   draftPending,
+  scanPending,
   waitsForTechnician,
   type CheckConflict,
   type CheckDraft,
+  type FieldLocationResult,
   type FieldPack,
 } from "@/lib/field";
+import type { ScanCapture } from "@/lib/scan-location";
 import type { AnswerDraft, Question } from "@/lib/inspections";
-import type { CheckOutcome, Database } from "@/lib/supabase/database.types";
+import type { CheckOutcome, Database, ScanLocationState } from "@/lib/supabase/database.types";
 import {
   devicesWithDrafts,
   draftKey,
@@ -22,9 +25,10 @@ import {
 } from "./check-drafts";
 import { queuedPhotoCounts, queuedPhotos, removePhoto } from "./photo-queue";
 
-// Sending what the phone did to the server. Each device's check goes in three
-// steps, each safe to repeat after a lost signal: claim it (and learn about a
-// colleague's check meanwhile), upload its photos, submit everything at once.
+// Sending what the phone did to the server. Each device's check goes in steps,
+// each safe to repeat after a lost signal: claim it (and learn about a
+// colleague's check meanwhile), upload its photos, send the position of its
+// scan, submit everything else at once.
 // Nothing is dropped on a failure: without a signal, with an expired sign-in or
 // a passing server error it waits for the next try; a refusal for good (device
 // removed, …) waits for the technician.
@@ -226,6 +230,55 @@ export async function submitCheck(
   return { kind: "ok", outcome: result.outcome, checkedAt: result.checkedAt };
 }
 
+export type ScanSent = { kind: "ok"; location: FieldLocationResult } | Failure;
+
+/**
+ * Sends the position of a device's scan; the server decides how it relates to
+ * the building. A refusal for good (malformed reading) drops the position: it
+ * never holds up the check.
+ */
+export async function recordScan(
+  supabase: Client,
+  args: { key: string; inspectionId: string; deviceId: string; scan: ScanCapture },
+): Promise<ScanSent> {
+  const { scan } = args;
+  const position = "latitude" in scan ? scan : null;
+  const { data, error } = await supabase
+    .rpc("record_scan_location", {
+      p_inspection: args.inspectionId,
+      p_device: args.deviceId,
+      p_latitude: position?.latitude ?? null,
+      p_longitude: position?.longitude ?? null,
+      p_accuracy_m: position?.accuracyM ?? null,
+      p_captured_at: scan.capturedAt,
+      p_error: "error" in scan ? scan.error : null,
+    })
+    .abortSignal(requestTimeout());
+  if (error) {
+    const failure = failureOf(error);
+    if (failure.kind === "error" && failure.error !== "checkTakenOver") settleScan(args.key, scan);
+    return failure;
+  }
+  settleScan(args.key, scan);
+  const result = data as { state: ScanLocationState | null; distanceM: number | null };
+  return {
+    kind: "ok",
+    location: {
+      state: result.state,
+      distanceM: result.distanceM,
+      error: result.state && "error" in scan ? scan.error : null,
+      note: null,
+    },
+  };
+}
+
+/** Removes the sent position from the draft, unless a newer scan replaced it. */
+function settleScan(key: string, sent: ScanCapture) {
+  updateDraft(key, (draft) =>
+    draft.scan?.capturedAt === sent.capturedAt ? { ...draft, scan: undefined } : draft,
+  );
+}
+
 const sameAnswer = (a: AnswerDraft | undefined, b: AnswerDraft) =>
   !!a &&
   a.pass === b.pass &&
@@ -270,6 +323,7 @@ export type DeviceSync =
       sent: CheckDraft | null;
       outcome: CheckOutcome | null;
       checkedAt: string | null;
+      location?: FieldLocationResult;
     }
   | { kind: "idle" }
   | { kind: "waiting" }
@@ -296,7 +350,7 @@ export async function syncDevice(
   const key = draftKey(inspectionId, deviceId);
   const draft = readDraft(key);
   const photos = await queuedPhotos(inspectionId, deviceId);
-  if (!draftPending(draft) && photos.length === 0) return { kind: "idle" };
+  if (!draftPending(draft) && !scanPending(draft) && photos.length === 0) return { kind: "idle" };
   if (waitsForTechnician(draft)) return { kind: "waiting" };
 
   const item = pack.items[deviceId];
@@ -328,6 +382,14 @@ export async function syncDevice(
   if (uploaded.kind === "error") return refused(key, uploaded.error);
   if (uploaded.kind !== "ok") return uploaded;
 
+  let location: FieldLocationResult | undefined;
+  const scan = readDraft(key)?.scan;
+  if (scan) {
+    const sent = await recordScan(supabase, { key, inspectionId, deviceId, scan });
+    if (sent.kind === "ok") location = sent.location;
+    else if (sent.kind === "offline" || sent.kind === "auth" || sent.kind === "retry") return sent;
+  }
+
   const current = readDraft(key);
   const questions = pack.templates[claim.template] ?? [];
   if (!draftPending(current)) {
@@ -342,6 +404,7 @@ export async function syncDevice(
       sent: null,
       outcome: null,
       checkedAt: null,
+      location,
     };
   }
   const submitted = await submitCheck(supabase, {
@@ -360,6 +423,7 @@ export async function syncDevice(
     sent: current,
     outcome: submitted.outcome,
     checkedAt: submitted.checkedAt,
+    location,
   };
 }
 

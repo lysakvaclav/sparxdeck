@@ -23,9 +23,11 @@ import {
   type PlanMarker,
 } from "@/components/app/plan-viewer";
 import { QrScanner } from "@/components/app/qr-scanner";
+import { ScanLocationBadge } from "@/components/app/scan-location-badge";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { labelQuery } from "@/lib/devices";
@@ -38,6 +40,7 @@ import {
   type FieldState,
 } from "@/lib/field";
 import { readScan } from "@/lib/inspections";
+import { markScanLocationExplained, scanLocationExplained } from "@/lib/client/scan-location";
 import { cn } from "@/lib/utils";
 import { AddDeviceButton } from "./add-device-dialog";
 
@@ -81,7 +84,9 @@ export type RunPlan = {
 /**
  * The inspection on the phone: progress, the scanner and the building's devices
  * in route order, each with its state in the phone (also what waits to be sent).
- * Opening a device, scanning and the plan work without a signal.
+ * Opening a device, scanning and the plan work without a signal. With the
+ * company's scan location on, a scan also records the phone's position (the
+ * first scan on a phone explains why).
  */
 export function InspectionRun({
   inspectionId,
@@ -94,7 +99,9 @@ export function InspectionRun({
   addDevice,
   offline,
   status,
+  scanLocation,
   onOpen,
+  onScanned,
   onComplete,
   onAdded,
   onReloadPlan,
@@ -111,7 +118,11 @@ export function InspectionRun({
   offline: boolean;
   /** The connection and sending card, under the progress. */
   status: React.ReactNode;
+  /** The company records the position of scans. */
+  scanLocation: boolean;
   onOpen: (deviceId: string) => void;
+  /** A device was opened by scanning its label (its position is recorded). */
+  onScanned: (deviceId: string) => void;
   onComplete: () => void;
   onAdded: (deviceId: string) => void;
   onReloadPlan: () => void;
@@ -119,10 +130,13 @@ export function InspectionRun({
   const t = useTranslations("inspections");
   const tSites = useTranslations("sites.detail");
   const tPlans = useTranslations("plans");
+  const tLocation = useTranslations("scanLocation");
+  const tCommon = useTranslations("common");
   const [tab, setTab] = useState<Tab>("remaining");
   const [query, setQuery] = useState("");
   const [scanning, setScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [intro, setIntro] = useState(false);
   const remembered = useSyncExternalStore(subscribeView, storedView, () => "list" as const);
   const [chosen, setChosen] = useState<ViewMode | null>(null);
   const mode: ViewMode = plans.length ? (chosen ?? remembered) : "list";
@@ -147,6 +161,8 @@ export function InspectionRun({
       error: null,
       heldBy: null,
       checkedBy: null,
+      location: null,
+      locationNote: null,
     };
   const finished = (id: string) => isHandled(viewOf(id));
   const done = devices.filter((device) => finished(device.id));
@@ -165,12 +181,13 @@ export function InspectionRun({
       if (device) {
         setScanMessage(null);
         setScanning(false);
+        onScanned(device.id);
         onOpen(device.id);
         return;
       }
       setScanMessage(result ? t("run.notInSite") : t("run.unknownCode"));
     },
-    [appUrl, devices, onOpen, t],
+    [appUrl, devices, onOpen, onScanned, t],
   );
 
   const number = labelQuery(query);
@@ -318,7 +335,9 @@ export function InspectionRun({
             size="lg"
             onClick={() => {
               setScanMessage(null);
-              setScanning(true);
+              // Before the first scan on this phone: why the position is recorded.
+              if (scanLocation && !scanLocationExplained()) setIntro(true);
+              else setScanning(true);
             }}
           >
             <CameraIcon />
@@ -517,6 +536,12 @@ export function InspectionRun({
                                     .filter(Boolean)
                                     .join(" · ")}
                                 </span>
+                                {viewOf(device.id).location && (
+                                  <ScanLocationBadge
+                                    state={viewOf(device.id).location!}
+                                    className="mt-1"
+                                  />
+                                )}
                               </span>
                               <span className={cn("shrink-0 text-end text-ui-sm", status.tone)}>
                                 {status.text}
@@ -541,6 +566,29 @@ export function InspectionRun({
         onResult={onScan}
         message={scanMessage}
       />
+
+      <Dialog
+        open={intro}
+        onOpenChange={setIntro}
+        title={tLocation("introTitle")}
+        closeLabel={tCommon("close")}
+      >
+        <div className="space-y-3 text-ui">
+          <p>{tLocation("introText")}</p>
+          <p className="text-muted-foreground">{tLocation("introPermission")}</p>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => {
+                markScanLocationExplained();
+                setIntro(false);
+                setScanning(true);
+              }}
+            >
+              {tLocation("introOk")}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

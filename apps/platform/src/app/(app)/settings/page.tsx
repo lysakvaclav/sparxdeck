@@ -14,6 +14,7 @@ import {
   CompanyForm,
   DeadlinesForm,
   DigestForm,
+  ScanLocationForm,
   LogoForm,
   ProtocolForm,
   RegionalForm,
@@ -187,6 +188,16 @@ export default async function SettingsPage() {
                 defaults={{ weeklyDigest: organization.weekly_digest }}
               />
               <DigestPreview organization={organization} />
+            </SettingsCard>
+            <SettingsCard
+              id="scan-location"
+              title={t("scanLocation.title")}
+              description={t("scanLocation.description")}
+            >
+              <ScanLocationForm
+                disabled={disabled}
+                defaults={{ scanLocation: organization.scan_location_enabled }}
+              />
             </SettingsCard>
             <SettingsCard
               id="device-types"

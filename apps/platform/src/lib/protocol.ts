@@ -1,12 +1,14 @@
 import { formatLabel } from "@/lib/devices";
 import { defectNumber } from "@/lib/defects";
 import { CALENDAR_FORMAT, calendarDate } from "@/lib/due";
+import { scanLocationSummary } from "@/lib/scan-location";
 import type {
   CheckOutcome,
   CheckSkipReason,
   ChecklistItemType,
   DefectSeverity,
   ProtocolNumberFormat,
+  ScanLocationState,
 } from "@/lib/supabase/database.types";
 
 // What an inspection protocol says, assembled from the inspection's records.
@@ -61,6 +63,8 @@ export type ProtocolCheck = {
   checkedBy: string | null;
   note: string | null;
   answers: ProtocolAnswer[];
+  /** The position of the device's scan (part 20): null state = not scanned. */
+  scanLocation?: { state: ScanLocationState | null; note: string | null } | null;
 };
 
 export type ProtocolDefect = {
@@ -107,6 +111,8 @@ export type ProtocolInput = {
   customerSignature: { name: string | null; signedAt: string | null } | null;
   /** For a reissued protocol (version > 1): when the version it replaces was issued. */
   previousIssuedAt?: string | null;
+  /** The company records the position of scans: the protocol reports it. */
+  scanLocation?: boolean;
 };
 
 /** Translated texts, as next-intl's `t` for the "protocol" namespace gives them. */
@@ -132,8 +138,12 @@ export type ProtocolModel = {
     result: string;
     failed: boolean;
     nextDue: string;
+    /** The scan's position in a word (only with `scan`). */
+    scan: string;
     details: string[];
   }[];
+  /** The scan-location column, summary and the note on its accuracy; null without it. */
+  scan: { column: string; summary: string; disclaimer: string } | null;
   defectsTitle: string;
   defectColumns: Record<"number" | "device" | "description" | "severity", string>;
   defects: {
@@ -190,6 +200,10 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
   if (technicians.length === 0 && input.completedBy) technicians.push(input.completedBy);
   const count = (outcome: CheckOutcome) =>
     checks.filter((check) => check.outcome === outcome).length;
+  // The position of scans: when the company records it, or a check carries one.
+  const withScan =
+    !!input.scanLocation || checks.some((check) => check.scanLocation?.state != null);
+  const scanStates = scanLocationSummary(checks.map((check) => check.scanLocation?.state ?? null));
 
   const details = (check: ProtocolCheck) => {
     const found = [...check.answers]
@@ -211,7 +225,12 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
         return [`${answer.question}: ${[value, note && `(${note})`].filter(Boolean).join(" ")}`];
       });
     const note = check.note?.trim();
-    return note ? [...found, `${t("finding.deviceNote")}: ${note}`] : found;
+    const located = withScan ? check.scanLocation?.note?.trim() : null;
+    return [
+      ...found,
+      ...(note ? [`${t("finding.deviceNote")}: ${note}`] : []),
+      ...(located ? [`${t("scanNote")}: ${located}`] : []),
+    ];
   };
 
   return {
@@ -287,8 +306,16 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
         check.outcome === "passed" && check.nextDueOn
           ? calendar.format(calendarDate(check.nextDueOn))
           : dash,
+      scan: withScan ? t(`scanState.${check.scanLocation?.state ?? "unknown"}`) : "",
       details: details(check),
     })),
+    scan: withScan
+      ? {
+          column: t("scanColumn"),
+          summary: t("scanSummary", { matches: scanStates.matches, total: scanStates.total }),
+          disclaimer: t("scanDisclaimer"),
+        }
+      : null,
     defectsTitle: t("defectsTitle"),
     defectColumns: {
       number: t("defectColumns.number"),

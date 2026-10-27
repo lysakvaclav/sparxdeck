@@ -9,6 +9,7 @@ import {
   fullAnswers,
   isHandled,
   mergePack,
+  scanPending,
   newerPack,
   templateOf,
   type CheckDraft,
@@ -358,5 +359,60 @@ describe("what waits in the phone", () => {
         { id: "d9", number: null },
       ],
     });
+  });
+});
+
+describe("the position of a scan", () => {
+  const scan = {
+    latitude: 50.0875,
+    longitude: 14.4213,
+    accuracyM: 12,
+    capturedAt: "2026-10-27T09:00:00.000Z",
+  };
+
+  it("waits in the draft without making a finished check open again", () => {
+    const draft: CheckDraft = { answers: {}, scan };
+    expect(draftIsEmpty(draft)).toBe(false);
+    expect(draftPending(draft)).toBe(false);
+    expect(scanPending(draft)).toBe(true);
+    const view = deviceView(pack({ d1: item({ outcome: "passed" }) }), device, draft);
+    expect(view).toMatchObject({ state: "passed", pending: false, location: "waiting" });
+  });
+
+  it("shows the server's verdict and the explanation once sent", () => {
+    const sent = item({
+      outcome: "passed",
+      location: { state: "mismatch", distanceM: 820, error: null, note: "Sklep" },
+    });
+    expect(deviceView(pack({ d1: sent }), device, null)).toMatchObject({
+      location: "mismatch",
+      locationNote: "Sklep",
+    });
+    // Not scanned, or a pack from before scans had positions.
+    expect(deviceView(pack({ d1: item() }), device, null).location).toBeNull();
+  });
+
+  it("keeps a verdict from the same sending pass, and an earlier one otherwise", () => {
+    const before = pack({
+      d1: item({ location: { state: "unknown", distanceM: null, error: "denied", note: null } }),
+    });
+    const verdict = { state: "matches" as const, distanceM: 40, error: null, note: null };
+    const synced = applySynced(before, "d1", {
+      item: "item-1",
+      template: "t1",
+      sent: null,
+      outcome: null,
+      checkedAt: null,
+      location: verdict,
+    });
+    expect(synced.items.d1?.location).toEqual(verdict);
+    const later = applySynced(synced, "d1", {
+      item: "item-1",
+      template: "t1",
+      sent: { answers: {}, action: { type: "finish" } },
+      outcome: "passed",
+      checkedAt: "2026-10-27T09:05:00.000Z",
+    });
+    expect(later.items.d1?.location).toEqual(verdict);
   });
 });

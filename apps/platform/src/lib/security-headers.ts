@@ -57,10 +57,12 @@ export const SECURITY_HEADERS: { key: string; value: string }[] = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  // The camera is for scanning labels and taking photos, on this site only.
+  // The camera is for scanning labels and taking photos, the position for the
+  // moment of a scan and a building's point; on this site only.
   {
     key: "Permissions-Policy",
-    value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+    value:
+      "camera=(self), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()",
   },
   // Browsers ignore it over plain http (local development).
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },

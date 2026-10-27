@@ -21,11 +21,13 @@ import {
   companyDetailsSchema,
   deadlineSettingsSchema,
   digestSettingsSchema,
+  scanLocationSettingsSchema,
   protocolSettingsSchema,
   regionalSettingsSchema,
   type CompanyDetailsInput,
   type DeadlineSettingsInput,
   type DigestSettingsInput,
+  type ScanLocationSettingsInput,
   type ProtocolSettingsInput,
   type RegionalSettingsValues,
 } from "@/lib/validation";
@@ -34,6 +36,7 @@ import {
   saveCompanyDetails,
   saveDeadlineSettings,
   saveDigestSettings,
+  saveScanLocationSettings,
   saveProtocolSettings,
   saveRegionalSettings,
   uploadLogo,
@@ -398,6 +401,48 @@ export function DeadlinesForm({
             {...form.register("dueSoonDays")}
           />
         </Field>
+        <FormFooter error={error} done={done} pending={pending} disabled={disabled} />
+      </fieldset>
+    </form>
+  );
+}
+
+export function ScanLocationForm({
+  defaults,
+  disabled,
+}: { defaults: ScanLocationSettingsInput } & Editable) {
+  const t = useTranslations("settings.scanLocation");
+  const form = useForm<
+    ScanLocationSettingsInput,
+    unknown,
+    z.output<typeof scanLocationSettingsSchema>
+  >({
+    resolver: zodResolver(scanLocationSettingsSchema),
+    defaultValues: defaults,
+  });
+  const { error, done, pending, run } = useActionForm(form);
+
+  return (
+    <form
+      noValidate
+      onSubmit={form.handleSubmit((values) => run(() => saveScanLocationSettings(values)))}
+    >
+      <fieldset disabled={disabled} className="space-y-4">
+        <label className="flex min-h-[30px] cursor-pointer items-center gap-2.5 pointer-coarse:min-h-11">
+          <Controller
+            control={form.control}
+            name="scanLocation"
+            render={({ field }) => (
+              <Checkbox
+                id="scanLocation"
+                checked={field.value}
+                disabled={disabled}
+                onCheckedChange={(value) => field.onChange(value === true)}
+              />
+            )}
+          />
+          <span>{t("enabled")}</span>
+        </label>
         <FormFooter error={error} done={done} pending={pending} disabled={disabled} />
       </fieldset>
     </form>

@@ -172,6 +172,34 @@ export default async function SitePage({ params }: Props) {
                   },
                   { label: t("detail.address"), value: site.address },
                   {
+                    label: t("detail.point"),
+                    value:
+                      site.latitude !== null && site.longitude !== null ? (
+                        <span className="tabular-nums">
+                          {site.latitude.toFixed(6)}, {site.longitude.toFixed(6)}
+                          <span className="text-muted-foreground">
+                            {" · "}
+                            {t("detail.radius", { radius: site.location_radius_m })}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {t("detail.noPoint")}
+                          {manager && (
+                            <>
+                              {" "}
+                              <Link
+                                href={`/sites/${site.id}/edit`}
+                                className="text-link underline underline-offset-2"
+                              >
+                                {t("detail.addPoint")}
+                              </Link>
+                            </>
+                          )}
+                        </span>
+                      ),
+                  },
+                  {
                     label: tCustomers("columns.added"),
                     value: format.dateTime(new Date(site.created_at), { dateStyle: "medium" }),
                   },

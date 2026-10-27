@@ -39,6 +39,7 @@ import {
 } from "@/lib/client/check-drafts";
 import {
   claimCheck,
+  recordScan,
   failureOf,
   requestTimeout,
   settleDraft,
@@ -376,6 +377,32 @@ export function DeviceCheck({
     answersQueue.current = answersQueue.current.then(sendChanges, sendChanges);
     return answersQueue.current;
   }, [sendChanges]);
+
+  // ---------------------------------------------------------------------------
+  // The position of the scan that opened the device: sent once the check is
+  // held; without a signal it waits in the draft for the sync queue.
+  // ---------------------------------------------------------------------------
+
+  const scan = draft?.scan;
+  const sendingScan = useRef<string | null>(null);
+  useEffect(() => {
+    if (!heldItem || !scan || sendingScan.current === scan.capturedAt) return;
+    sendingScan.current = scan.capturedAt;
+    void recordScan(supabase, { key, inspectionId, deviceId, scan }).then((result) => {
+      if (result.kind !== "ok") {
+        sendingScan.current = null;
+        return;
+      }
+      onSent({
+        item: heldItem,
+        template: templateId,
+        sent: null,
+        outcome: null,
+        checkedAt: null,
+        location: result.location,
+      });
+    });
+  }, [heldItem, scan, supabase, key, inspectionId, deviceId, templateId, onSent]);
 
   // ---------------------------------------------------------------------------
   // Photos: compressed in the phone, queued in IndexedDB, then uploaded

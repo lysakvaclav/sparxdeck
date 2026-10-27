@@ -11,6 +11,7 @@ import {
   companyDetailsSchema,
   deadlineSettingsSchema,
   digestSettingsSchema,
+  scanLocationSettingsSchema,
   protocolSettingsSchema,
   regionalSettingsSchema,
 } from "@/lib/validation";
@@ -85,6 +86,12 @@ export async function saveDigestSettings(input: unknown): Promise<ActionResult> 
   const parsed = digestSettingsSchema.safeParse(input);
   if (!parsed.success) return fieldErrors(parsed.error);
   return updateOrganization({ weekly_digest: parsed.data.weeklyDigest });
+}
+
+export async function saveScanLocationSettings(input: unknown): Promise<ActionResult> {
+  const parsed = scanLocationSettingsSchema.safeParse(input);
+  if (!parsed.success) return fieldErrors(parsed.error);
+  return updateOrganization({ scan_location_enabled: parsed.data.scanLocation });
 }
 
 export async function uploadLogo(formData: FormData): Promise<ActionResult> {

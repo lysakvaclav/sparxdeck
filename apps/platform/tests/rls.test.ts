@@ -4360,6 +4360,364 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 
+  describe("location of QR scans (a fresh organization)", () => {
+    let pavla: TestUser;
+    let tomas: TestUser;
+    let rita: TestUser;
+    let org: string;
+    let site: string;
+    let siteWithoutPoint: string;
+    let devices: string[];
+    let bare: string;
+    let inspection: string;
+    let bareInspection: string;
+    // Prague, Old Town Square.
+    const building = { latitude: 50.087465, longitude: 14.421254 };
+
+    async function join(user: TestUser, name: string) {
+      const token = generateToken();
+      await pavla.client.from("invitations").insert({
+        organization_id: org,
+        email: user.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: pavla.id,
+      });
+      const { error } = await user.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: name,
+      });
+      expect(error).toBeNull();
+    }
+
+    async function claim(user: TestUser, insp: string, device: string) {
+      const { data, error } = await user.client.rpc("claim_device_check", {
+        p_inspection: insp,
+        p_device: device,
+      });
+      expect(error).toBeNull();
+      return (data as { item: string }).item;
+    }
+
+    async function item(insp: string, device: string) {
+      const { data } = await admin
+        .from("inspection_items")
+        .select("*")
+        .eq("inspection_id", insp)
+        .eq("device_id", device)
+        .single();
+      return data!;
+    }
+
+    beforeAll(async () => {
+      pavla = await createUser("pavla");
+      tomas = await createUser("tomas");
+      rita = await createUser("rita");
+      org = await createOrg(pavla, `RLS scan location ${run}`);
+      await join(tomas, "Tomáš");
+      await join(rita, "Rita");
+      const { data: customer } = await pavla.client
+        .from("customers")
+        .insert({ organization_id: org, name: "C" })
+        .select("id")
+        .single();
+      const { data: sites } = await pavla.client
+        .from("sites")
+        .insert([
+          { organization_id: org, customer_id: customer!.id, name: "A", ...building },
+          { organization_id: org, customer_id: customer!.id, name: "B" },
+        ])
+        .select("id, name")
+        .order("name");
+      site = sites![0]!.id;
+      siteWithoutPoint = sites![1]!.id;
+      const { data: type } = await pavla.client.from("device_types").select("id").single();
+      const { data: rows } = await pavla.client
+        .from("devices")
+        .insert(
+          [1, 2, 3, 4, 5, 6].map(() => ({
+            organization_id: org,
+            site_id: site,
+            device_type_id: type!.id,
+          })),
+        )
+        .select("id, label_number")
+        .order("label_number");
+      devices = rows!.map((row) => row.id);
+      const { data: other } = await pavla.client
+        .from("devices")
+        .insert({ organization_id: org, site_id: siteWithoutPoint, device_type_id: type!.id })
+        .select("id")
+        .single();
+      bare = other!.id;
+      const { data: started } = await tomas.client.rpc("start_inspection", { p_site: site });
+      inspection = started!;
+      const { data: startedBare } = await tomas.client.rpc("start_inspection", {
+        p_site: siteWithoutPoint,
+      });
+      bareInspection = startedBare!;
+    });
+
+    it("keeps the same rule as the app (rules, distance, verdict)", async () => {
+      const { SCAN_LOCATION_RULES } = await import("@/lib/scan-location");
+      const { DISTANCE_CASES, VERDICT_CASES } = await import("./fixtures/scan-location-cases");
+      const { data: rules } = await tomas.client.rpc("scan_location_rules");
+      expect(rules).toEqual(SCAN_LOCATION_RULES);
+      for (const [latA, lngA, latB, lngB, metres] of DISTANCE_CASES) {
+        const { data } = await tomas.client.rpc("scan_location_distance", {
+          p_latitude_a: latA,
+          p_longitude_a: lngA,
+          p_latitude_b: latB,
+          p_longitude_b: lngB,
+        });
+        expect(Math.round(data!)).toBe(metres);
+      }
+      for (const [distance, accuracy, radius, state] of VERDICT_CASES) {
+        const { data } = await tomas.client.rpc("scan_location_verdict", {
+          p_distance_m: distance,
+          p_accuracy_m: accuracy,
+          p_radius_m: radius,
+        });
+        expect(data).toBe(state);
+      }
+    });
+
+    it("stores a building's point with who set it, and a default radius", async () => {
+      const { data } = await admin
+        .from("sites")
+        .select(
+          "latitude, longitude, location_radius_m, location_source, location_set_by, location_set_at, location",
+        )
+        .eq("id", site)
+        .single();
+      expect(data).toMatchObject({
+        ...building,
+        location_radius_m: 150,
+        location_source: "manual",
+        location_set_by: pavla.id,
+      });
+      expect(data!.location_set_at).not.toBeNull();
+      expect(data!.location).not.toBeNull();
+    });
+
+    it("refuses coordinates out of range, half a point and a radius out of range", async () => {
+      for (const patch of [
+        { latitude: 91, longitude: 14 },
+        { latitude: 50, longitude: -181 },
+        { latitude: 50, longitude: null },
+        { location_radius_m: 5 },
+        { location_radius_m: 6000 },
+      ]) {
+        const { error } = await pavla.client.from("sites").update(patch).eq("id", siteWithoutPoint);
+        expect(error).not.toBeNull();
+      }
+    });
+
+    it("lets only owners and admins set a building's point; another company can't see it", async () => {
+      const { data: updated } = await tomas.client
+        .from("sites")
+        .update({ latitude: 49, longitude: 16 })
+        .eq("id", site)
+        .select("id");
+      expect(updated ?? []).toEqual([]);
+      const { data: seen } = await bob.client.from("sites").select("latitude").eq("id", site);
+      expect(seen).toEqual([]);
+      await bob.client.from("sites").update({ latitude: 1, longitude: 1 }).eq("id", site);
+      const { data: kept } = await admin.from("sites").select("latitude").eq("id", site).single();
+      expect(kept!.latitude).toBe(building.latitude);
+    });
+
+    it("decides on the server: at the building, far away, imprecise", async () => {
+      await claim(tomas, inspection, devices[0]!);
+      const { data: near, error } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+        // About 60 m from the building's point.
+        p_latitude: building.latitude + 0.0005,
+        p_longitude: building.longitude + 0.0002,
+        p_accuracy_m: 12,
+        p_captured_at: new Date().toISOString(),
+      });
+      expect(error).toBeNull();
+      expect(near).toMatchObject({ state: "matches" });
+      const stored = await item(inspection, devices[0]!);
+      expect(stored).toMatchObject({ location_state: "matches", scan_accuracy_m: 12 });
+      expect(stored.location_distance_m).toBeGreaterThan(40);
+      expect(stored.location_distance_m).toBeLessThan(80);
+
+      await claim(tomas, inspection, devices[1]!);
+      const { data: far } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[1]!,
+        // Brno.
+        p_latitude: 49.1951,
+        p_longitude: 16.6068,
+        p_accuracy_m: 8,
+      });
+      expect(far).toMatchObject({ state: "mismatch" });
+
+      await claim(tomas, inspection, devices[2]!);
+      const { data: vague } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[2]!,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 350,
+      });
+      expect(vague).toMatchObject({ state: "unknown" });
+    });
+
+    it("records why there is no position; a building without a point stays unknown", async () => {
+      await claim(tomas, inspection, devices[3]!);
+      const { data } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[3]!,
+        p_error: "denied",
+      });
+      expect(data).toMatchObject({ state: "unknown" });
+      expect(await item(inspection, devices[3]!)).toMatchObject({
+        scan_location_error: "denied",
+        scan_latitude: null,
+        location_state: "unknown",
+      });
+
+      await claim(tomas, bareInspection, bare);
+      const { data: noPoint } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: bareInspection,
+        p_device: bare,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 5,
+      });
+      expect(noPoint).toMatchObject({ state: "unknown", distanceM: null });
+    });
+
+    it("keeps the phone's clock within the inspection, and the latest scan wins", async () => {
+      const { data } = await admin
+        .from("inspections")
+        .select("started_at")
+        .eq("id", inspection)
+        .single();
+      await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[3]!,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 10,
+        p_captured_at: "2020-01-01T00:00:00Z",
+      });
+      const row = await item(inspection, devices[3]!);
+      expect(row).toMatchObject({ location_state: "matches", scan_location_error: null });
+      expect(Date.parse(row.scan_captured_at!)).toBe(Date.parse(data!.started_at));
+    });
+
+    it("refuses a malformed reading, a colleague's check and another company", async () => {
+      for (const args of [
+        { p_latitude: 50, p_longitude: null, p_accuracy_m: 5 },
+        { p_latitude: 95, p_longitude: 14, p_accuracy_m: 5 },
+        { p_latitude: 50, p_longitude: 14, p_accuracy_m: -1 },
+        {},
+      ]) {
+        const { error } = await tomas.client.rpc("record_scan_location", {
+          p_inspection: inspection,
+          p_device: devices[0]!,
+          ...args,
+        } as never);
+        expect(error?.message).toContain("invalid_location");
+      }
+      // Tomáš holds the check of device 5: Rita can't add a position to it.
+      await claim(tomas, inspection, devices[4]!);
+      const { error: taken } = await rita.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[4]!,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 5,
+      });
+      expect(taken?.message).toContain("check_taken_over");
+      const { error: foreign } = await bob.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[0]!,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 5,
+      });
+      expect(foreign?.message).toContain("not_found");
+    });
+
+    it("explains a location: any member of the company, not another company", async () => {
+      const row = await item(inspection, devices[1]!);
+      const { error } = await tomas.client.rpc("explain_scan_location", {
+        p_item: row.id,
+        p_note: "Sklep, bez signálu GPS",
+      });
+      expect(error).toBeNull();
+      expect(await item(inspection, devices[1]!)).toMatchObject({
+        location_note: "Sklep, bez signálu GPS",
+        location_note_by: tomas.id,
+      });
+      const { error: colleague } = await rita.client.rpc("explain_scan_location", {
+        p_item: row.id,
+        p_note: "Sklep pod schodištěm",
+      });
+      expect(colleague).toBeNull();
+      const { error: manager } = await pavla.client.rpc("explain_scan_location", {
+        p_item: row.id,
+        p_note: "  ",
+      });
+      expect(manager).toBeNull();
+      expect(await item(inspection, devices[1]!)).toMatchObject({
+        location_note: null,
+        location_note_by: null,
+      });
+      const { error: tooLong } = await tomas.client.rpc("explain_scan_location", {
+        p_item: row.id,
+        p_note: "x".repeat(501),
+      });
+      expect(tooLong?.message).toContain("invalid_location");
+      const { error: foreign } = await bob.client.rpc("explain_scan_location", {
+        p_item: row.id,
+        p_note: "x",
+      });
+      expect(foreign?.message).toContain("not_found");
+    });
+
+    it("stores nothing when the company switched the feature off", async () => {
+      const { error } = await pavla.client
+        .from("organizations")
+        .update({ scan_location_enabled: false })
+        .eq("id", org);
+      expect(error).toBeNull();
+      await claim(tomas, inspection, devices[5]!);
+      const { data } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: inspection,
+        p_device: devices[5]!,
+        p_latitude: building.latitude,
+        p_longitude: building.longitude,
+        p_accuracy_m: 5,
+      });
+      expect(data).toEqual({ state: null, distanceM: null });
+      expect(await item(inspection, devices[5]!)).toMatchObject({
+        scan_latitude: null,
+        location_state: null,
+      });
+      await pavla.client.from("organizations").update({ scan_location_enabled: true }).eq("id", org);
+    });
+
+    it("refuses a reading once the inspection is closed", async () => {
+      const { error: cancelled } = await tomas.client.rpc("cancel_inspection", {
+        p_inspection: bareInspection,
+      });
+      expect(cancelled).toBeNull();
+      const { error } = await tomas.client.rpc("record_scan_location", {
+        p_inspection: bareInspection,
+        p_device: bare,
+        p_error: "timeout",
+      });
+      expect(error?.message).toMatch(/not_found|inspection_closed/);
+    });
+  });
+
   describe("member management", () => {
     async function membershipOf(user: TestUser) {
       const { data } = await admin

@@ -95,7 +95,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
           supabase
             .from("inspection_items")
             .select(
-              "id, outcome, skip_reason, notes, checked_by, original_checked_by, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
+              "id, outcome, skip_reason, notes, checked_by, original_checked_by, location_state, location_note, device:devices(label_number, serial_number, next_due_on, location:locations(name, sort_order), type:device_types(name))",
             )
             .eq("inspection_id", inspectionId)
             .order("id")
@@ -166,6 +166,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
               checkedBy: name(item.original_checked_by ?? item.checked_by),
               note: item.notes,
               answers: answersOf.get(item.id) ?? [],
+              scanLocation: { state: item.location_state, note: item.location_note },
             },
           ]
         : [],
@@ -277,6 +278,7 @@ export async function generateProtocol(protocolId: string): Promise<Protocol | n
             ? { name: inspection.customer_signer_name, signedAt: inspection.customer_signed_at }
             : null,
         previousIssuedAt,
+        scanLocation: organization.scan_location_enabled,
       },
       t,
     );

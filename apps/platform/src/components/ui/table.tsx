@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { CaretDownIcon, CaretUpIcon, DoubleCaretVerticalIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { ScrollX } from "./scroll-x";
 
 /*
  * Table: bold column labels, 48px rows, hairlines under the rows and between
@@ -11,12 +12,13 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="w-full scrollbar-thin overflow-x-auto rounded-[inherit]">
+    // Keyboard-scrollable when wider than the screen; clips to a card's corners.
+    <ScrollX className="w-full scrollbar-thin rounded-[inherit]">
       <table
         className={cn("w-full border-separate border-spacing-0 text-ui", className)}
         {...props}
       />
-    </div>
+    </ScrollX>
   );
 }
 

@@ -289,6 +289,7 @@
     "deviceInactive": "Zařízení je vyřazené nebo odstraněné, v revizi se nekontroluje.",
     "noTemplate": "Typ zařízení nemá šablonu kontroly.",
     "invalidAnswer": "Odpověď není ve správném tvaru.",
+    "invalidLocation": "Poloha není ve správném tvaru.",
     "tooManyPhotos": "K jednomu zařízení lze přidat nejvýš 20 fotek.",
     "photoFailed": "Fotku se nepodařilo zpracovat. Zkuste ji pořídit znovu.",
     "invalidDefect": "Zkontrolujte popis závady.",
@@ -317,7 +318,9 @@
     "fieldKeyDuplicate": "Dvě pole nemohou mít stejný klíč.",
     "anotherInspectionOpen": "Na této budově právě běží jiná revize.",
     "correctionInProgress": "Na této budově právě probíhá oprava dokončené revize. Dokončete ji, pak můžete začít novou revizi.",
-    "correctionNotCancellable": "Opravu dokončené revize nejde zrušit, smazal by se i původní záznam. Opravu dokončete."
+    "correctionNotCancellable": "Opravu dokončené revize nejde zrušit, smazal by se i původní záznam. Opravu dokončete.",
+    "invalidCoordinates": "Souřadnice nejsou ve správném tvaru. Zadejte zeměpisnou šířku a délku, např. 50.0755, 14.4378.",
+    "invalidRadius": "Poloměr musí být celé číslo od 10 do 5000 metrů."
   },
   "email": {
     "invite": {
@@ -431,6 +434,11 @@
       "subject": "Předmět",
       "emailDisabled": "Odesílání e-mailů zatím není nastavené, souhrn se proto zatím neposílá.",
       "lastSent": "Naposledy odesláno {date} ({count, plural, one {# příjemci} other {# příjemcům}})."
+    },
+    "scanLocation": {
+      "title": "Poloha při skenu",
+      "description": "Při naskenování štítku v revizi se uloží poloha telefonu a protokol uvede, zda odpovídá budově. Jen v okamžiku skenu, žádné průběžné sledování. Technici o tom vědí z aplikace.",
+      "enabled": "Ukládat polohu telefonu při skenu štítků"
     }
   },
   "customers": {
@@ -495,7 +503,23 @@
       "createTitle": "Nová budova",
       "createSubtitle": "Budova zákazníka {customer}.",
       "editTitle": "Upravit budovu",
-      "create": "Vytvořit budovu"
+      "create": "Vytvořit budovu",
+      "locationTitle": "Poloha budovy",
+      "locationHint": "Bod budovy slouží k porovnání polohy telefonu při skenu štítků. Aplikace adresu na souřadnice nepřevádí.",
+      "coordinates": "Souřadnice",
+      "coordinatesHint": "Zeměpisná šířka a délka. Zkopírujte je z mapové aplikace, nebo u budovy použijte polohu telefonu.",
+      "useMyLocation": "Použít moji polohu",
+      "locating": "Zjišťuji polohu…",
+      "located": "Poloha telefonu s přesností ±{accuracy} m. Formulář uložte.",
+      "locatedImprecise": "Poloha telefonu je nepřesná (±{accuracy} m). Zkuste to venku nebo u okna.",
+      "locateFailed": {
+        "denied": "Prohlížeč nemá oprávnění k poloze.",
+        "unavailable": "Polohu se nepodařilo zjistit.",
+        "timeout": "Poloha se nezjistila včas.",
+        "unsupported": "Tento prohlížeč polohu nepodporuje."
+      },
+      "radius": "Poloměr budovy (m)",
+      "radiusHint": "Do jaké vzdálenosti od bodu se sken počítá k budově. Velké areály potřebují víc."
     },
     "detail": {
       "customer": "Zákazník",
@@ -505,7 +529,11 @@
       "notes": "Poznámky",
       "deleteTitle": "Smazat budovu?",
       "deleteBody": "Budova i její zařízení zmizí ze seznamů. Data zůstanou uložená kvůli historii revizí.",
-      "properties": "Vlastnosti"
+      "properties": "Vlastnosti",
+      "point": "Poloha budovy",
+      "radius": "poloměr {radius} m",
+      "noPoint": "Bez souřadnic, polohu skenů nejde porovnat.",
+      "addPoint": "Doplnit"
     },
     "type": "Budova",
     "columns": {
@@ -1702,6 +1730,12 @@
         "inspections": "Revizí",
         "openDefects": "Otevřených závad"
       }
+    },
+    "locationFilter": {
+      "label": "Poloha při skenu",
+      "all": "Všechny revize",
+      "mismatch": "Poloha neodpovídá",
+      "count": "{count, plural, one {# poloha neodpovídá} few {# polohy neodpovídají} other {# poloh neodpovídá}}"
     }
   },
   "defects": {
@@ -1883,7 +1917,16 @@
       "signHint": "Jméno, podpis a datum",
       "page": "Protokol {number} · strana {page} z {pages}",
       "version": "Verze",
-      "versionReplaces": "{version}, nahrazuje vydání z {date}"
+      "versionReplaces": "{version}, nahrazuje vydání z {date}",
+      "scanColumn": "Poloha skenu",
+      "scanState": {
+        "matches": "Odpovídá",
+        "mismatch": "Neodpovídá",
+        "unknown": "Nezjištěna"
+      },
+      "scanSummary": "Poloha při skenu odpovídala budově u {matches} z {total} zařízení.",
+      "scanDisclaimer": "Poloha je orientační. Přesnost GPS uvnitř budov a ve sklepech může být nízká.",
+      "scanNote": "Vysvětlení polohy"
     },
     "email": {
       "subject": "Protokol o revizi {number} – {site}",
@@ -2170,5 +2213,40 @@
       "plan": "Naplánovat",
       "empty": "Zatím žádná naplánovaná revize."
     }
+  },
+  "scanLocation": {
+    "state": {
+      "matches": "Poloha odpovídá budově",
+      "mismatch": "Poloha neodpovídá budově",
+      "unknown": "Poloha nezjištěna",
+      "waiting": "Poloha čeká na odeslání"
+    },
+    "reason": {
+      "denied": "oprávnění k poloze zamítnuto",
+      "unavailable": "poloha nebyla dostupná",
+      "timeout": "poloha se nezjistila včas",
+      "unsupported": "telefon polohu nepodporuje",
+      "notScanned": "zařízení nebylo naskenováno",
+      "noSitePoint": "budova nemá souřadnice",
+      "imprecise": "nízká přesnost"
+    },
+    "introTitle": "Poloha při skenu",
+    "introText": "Při naskenování štítku aplikace uloží polohu telefonu a její přesnost. V protokolu se u zařízení uvede, zda poloha odpovídá budově. Poloha se ukládá jen v okamžiku skenu, nikdy průběžně, a kontrolu nijak neomezuje.",
+    "introPermission": "Telefon se teď zeptá na oprávnění k poloze. Když ho nepovolíte, kontrola proběhne stejně a v protokolu bude „poloha nezjištěna“.",
+    "introOk": "Rozumím, skenovat",
+    "noteAdd": "Vysvětlit polohu",
+    "noteEdit": "Upravit vysvětlení",
+    "noteTitle": "Vysvětlení polohy",
+    "noteLabel": "Vysvětlení",
+    "notePlaceholder": "Např. sklep, bez signálu GPS",
+    "noteHint": "Zobrazí se v protokolu u zařízení.",
+    "noteSave": "Uložit",
+    "noteSaved": "Vysvětlení je uložené.",
+    "noteOffline": "Vysvětlení jde uložit, jen když je signál.",
+    "noSitePoint": "Budova nemá souřadnice, polohu skenů proto nejde porovnat.",
+    "addSitePoint": "Doplnit souřadnice",
+    "summary": "Poloha při skenu odpovídala budově u {matches} z {total} zařízení.",
+    "distanceM": "{distance} m od bodu budovy",
+    "distanceKm": "{distance} km od bodu budovy"
   }
 }

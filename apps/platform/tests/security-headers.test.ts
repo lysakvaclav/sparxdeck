@@ -52,8 +52,10 @@ describe("content security policy", () => {
         "Strict-Transport-Security",
       ]),
     );
-    expect(SECURITY_HEADERS.find((h) => h.key === "Permissions-Policy")?.value).toContain(
-      "camera=(self)",
-    );
+    const permissions = SECURITY_HEADERS.find((h) => h.key === "Permissions-Policy")?.value;
+    expect(permissions).toContain("camera=(self)");
+    // The position of a QR scan and a building's point, on this site only.
+    expect(permissions).toContain("geolocation=(self)");
+    expect(permissions).toContain("microphone=()");
   });
 });

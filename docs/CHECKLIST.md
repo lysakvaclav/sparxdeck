@@ -335,6 +335,23 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 
 ---
 
+## Z. Před spuštěním (zadání majitele 2026-10-27, části 20–23)
+
+**Poloha při skenu QR a souřadnice budov (část 20)**
+- [x] P2 Souřadnice budovy: zadání nebo vložení z mapové aplikace, poloha telefonu u budovy, poloměr, kdo a kdy nastavil (část 20: `sites.latitude/longitude/location_radius_m`, generovaný `location geography`, `stamp_site_location`)
+- [x] P2 Poloha telefonu při skenu štítku v revizi, na pozadí, bez blokování kontroly, s vysvětlením před prvním skenem (část 20: `captureScanLocation`, `record_scan_location`)
+- [x] P2 Vyhodnocení na serveru (odpovídá, neodpovídá, nezjištěno) i u dat odeslaných po práci bez signálu (část 20: `scan_location_verdict`, `scan_location_rules`, testy shody s TypeScriptem)
+- [x] P2 Štítek polohy u zařízení v revizi a v detailu revize, vysvětlení polohy (část 20: `ScanLocationPanel`, `explain_scan_location`)
+- [x] P2 Poloha v protokolu: sloupec, souhrnný řádek a poznámka o přesnosti (část 20: `buildProtocol`, `src/lib/pdf/protocol.tsx`)
+- [x] P2 Přehled revizí s polohou mimo budovu (část 20: filtr `/inspections?location=mismatch`)
+- [x] P2 Vypnutí funkce pro firmu (část 20: `organizations.scan_location_enabled`, Nastavení)
+- [ ] P2 Zásady ochrany osobních údajů a zpracovatelská smlouva doplněné o polohu při skenu (texty od právníka)
+- [ ] P3 Výběr bodu budovy kliknutím do mapy (s podkladovou mapou v části 21)
+
+**Mapa budov se semaforem (část 21)**, **Editor protokolů (část 22)**, **Trasy pro techniky (část 23)**: položky se doplní s plánem každé části.
+
+---
+
 ## Co zatím nedělat (neodškrtávat a nestavět)
 
 - Žádný vlastní fakturační systém ani účetnictví.

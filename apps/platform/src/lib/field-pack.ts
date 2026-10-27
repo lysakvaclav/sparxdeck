@@ -27,8 +27,20 @@ export async function loadFieldPack(
   const locale = await getLocale();
   const siteId = inspection.site_id;
 
-  const [devices, items, answers, photos, names, plans, placements, types, locations, actives] =
-    await Promise.all([
+  const [
+    devices,
+    items,
+    answers,
+    photos,
+    names,
+    plans,
+    placements,
+    types,
+    locations,
+    actives,
+    organization,
+    site,
+  ] = await Promise.all([
       fetchAll((from, to) =>
         supabase
           .from("devices")
@@ -45,7 +57,7 @@ export async function loadFieldPack(
         supabase
           .from("inspection_items")
           .select(
-            "id, device_id, template_id, outcome, skip_reason, notes, editing_by, editing_at, checked_by, checked_at",
+            "id, device_id, template_id, outcome, skip_reason, notes, editing_by, editing_at, checked_by, checked_at, location_state, location_distance_m, scan_location_error, location_note",
           )
           .eq("inspection_id", inspection.id)
           .order("id")
@@ -91,6 +103,12 @@ export async function loadFieldPack(
         .select("id, device_type_id")
         .eq("organization_id", inspection.organization_id)
         .eq("active", true),
+      supabase
+        .from("organizations")
+        .select("scan_location_enabled")
+        .eq("id", inspection.organization_id)
+        .single(),
+      supabase.from("sites").select("latitude").eq("id", siteId).single(),
     ]);
 
   // Checklists: the active version of each type, and any version a check uses.
@@ -194,6 +212,12 @@ export async function loadFieldPack(
       checkedById: item.checked_by,
       checkedAt: item.checked_at,
       answers: answersByItem.get(item.id) ?? {},
+      location: {
+        state: item.location_state,
+        distanceM: item.location_distance_m,
+        error: item.scan_location_error,
+        note: item.location_note,
+      },
       photos: photos
         .map((photo, index) => ({ photo, url: signed[index] ?? "" }))
         .filter(({ photo }) => photo.item_id === item.id)
@@ -232,6 +256,8 @@ export async function loadFieldPack(
         inspection.reopened_at === null &&
         (inspection.started_by === member.userId || isManager(member.role)),
       correction: inspection.reopened_at !== null,
+      // Without a point the scan's position can't be compared (shown as a hint).
+      sitePoint: site.data?.latitude != null,
     },
     devices: ordered.map((device) => ({
       id: device.id,
@@ -270,5 +296,6 @@ export async function loadFieldPack(
       customFields: deviceTypeFields(type.custom_fields),
     })),
     locations: locations.data ?? [],
+    scanLocation: organization.data?.scan_location_enabled ?? false,
   };
 }

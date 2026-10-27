@@ -7,6 +7,7 @@ import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
 import { DetailList } from "@/components/app/detail-list";
 import { PageBody, PageHeader } from "@/components/app/page-header";
+import { ScanLocationBadge } from "@/components/app/scan-location-badge";
 import { PrintIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
 import { isManager, requireMembership } from "@/lib/auth";
 import { formatLabel } from "@/lib/devices";
 import { serverEnv } from "@/lib/env";
+import { scanLocationSummary } from "@/lib/scan-location";
 import { loadFieldPack } from "@/lib/field-pack";
 import { getInspection, memberNames } from "@/lib/inspection-data";
 import type { CheckOutcome } from "@/lib/supabase/database.types";
@@ -94,6 +96,7 @@ export default async function InspectionPage({ params }: Props) {
   const format = await getFormatter();
   const tDevices = await getTranslations("devices");
   const tDefects = await getTranslations("defects");
+  const tLocation = await getTranslations("scanLocation");
   const supabase = await createClient();
   const defectColumns =
     "id, number, description, severity, status, device:devices(label_number, type:device_types(name))";
@@ -103,7 +106,7 @@ export default async function InspectionPage({ params }: Props) {
         supabase
           .from("inspection_items")
           .select(
-            "id, device_id, outcome, skip_reason, checked_by, original_checked_by, checked_at, notes, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
+            "id, device_id, outcome, skip_reason, checked_by, original_checked_by, checked_at, notes, location_state, location_note, device:devices(label_number, location:locations(name, sort_order), type:device_types(name))",
           )
           .eq("inspection_id", inspection.id)
           .order("id")
@@ -152,6 +155,9 @@ export default async function InspectionPage({ params }: Props) {
     value ? format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" }) : null;
   const name = (user: string | null) => (user ? (names.get(user) ?? null) : null);
   const DeviceIcon = OBJECT_TYPES.device.icon;
+  // The position of scans, when any device was scanned with it recorded.
+  const scanned = items.filter((item) => item.location_state !== null);
+  const scanSummary = scanLocationSummary(items.map((item) => item.location_state));
 
   return (
     <>
@@ -166,6 +172,14 @@ export default async function InspectionPage({ params }: Props) {
                   {t("result.results")}{" "}
                   <span className="font-normal text-muted-foreground">({items.length})</span>
                 </CardTitle>
+                {scanned.length > 0 && (
+                  <p className="text-ui-sm text-muted-foreground">
+                    {tLocation("summary", {
+                      matches: scanSummary.matches,
+                      total: scanSummary.total,
+                    })}
+                  </p>
+                )}
               </CardHeader>
               <Table>
                 <TableHead>
@@ -200,6 +214,14 @@ export default async function InspectionPage({ params }: Props) {
                             {item.skip_reason && item.notes && (
                               <span className="block text-ui-sm break-words whitespace-pre-line text-muted-foreground sm:max-w-72">
                                 {item.notes}
+                              </span>
+                            )}
+                            {item.location_state && (
+                              <ScanLocationBadge state={item.location_state} className="mt-1" />
+                            )}
+                            {item.location_note && (
+                              <span className="block text-ui-sm break-words text-muted-foreground sm:max-w-72">
+                                {item.location_note}
                               </span>
                             )}
                           </span>

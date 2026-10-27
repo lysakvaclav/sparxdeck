@@ -24,6 +24,8 @@ import { requireMembership } from "@/lib/auth";
 import { protocolNumber } from "@/lib/protocol";
 import { memberNames } from "@/lib/inspection-data";
 import { pageParam } from "@/lib/search";
+import { cn } from "@/lib/utils";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,28 +42,54 @@ function activeProtocol<T extends { active: boolean }>(protocols: T[] | null | u
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-/** Inspections in progress (to continue) and completed ones (newest first). */
+/**
+ * Inspections in progress (to continue) and completed ones (newest first).
+ * ?location=mismatch keeps those where a scan's position didn't match the
+ * building (for the office to look at).
+ */
 export default async function InspectionsPage({ searchParams }: { searchParams: SearchParams }) {
   const { organization } = await requireMembership();
   const t = await getTranslations("inspections");
   const tCommon = await getTranslations("common");
   const format = await getFormatter();
-  const page = pageParam((await searchParams).page);
+  const params = await searchParams;
+  const page = pageParam(params.page);
+  const mismatchOnly = params.location === "mismatch";
   const from = (page - 1) * PAGE_SIZE;
   const supabase = await createClient();
   const select =
-    "id, status, started_at, started_by, completed_at, completed_by, site:sites(id, name, customer:customers(name)), inspection_items(outcome), protocol:protocols(year, number, number_format, active)";
+    "id, status, started_at, started_by, completed_at, completed_by, site:sites(id, name, customer:customers(name)), inspection_items(outcome, location_state), protocol:protocols(year, number, number_format, active)";
+  // Inspections with a scan whose position didn't match (a small, indexed set).
+  const mismatched = mismatchOnly
+    ? [
+        ...new Set(
+          (
+            await fetchAll((from, to) =>
+              supabase
+                .from("inspection_items")
+                .select("inspection_id")
+                .eq("organization_id", organization.id)
+                .eq("location_state", "mismatch")
+                .order("inspection_id")
+                .range(from, to),
+            )
+          ).map((row) => row.inspection_id),
+        ),
+      ]
+    : null;
+  const inspections = (count?: "exact") => {
+    const query = supabase
+      .from("inspections")
+      .select(select, count ? { count } : undefined)
+      .eq("organization_id", organization.id);
+    // An impossible id keeps the query valid when nothing matches.
+    return mismatched
+      ? query.in("id", mismatched.length ? mismatched : ["00000000-0000-0000-0000-000000000000"])
+      : query;
+  };
   const [open, done, names] = await Promise.all([
-    supabase
-      .from("inspections")
-      .select(select)
-      .eq("organization_id", organization.id)
-      .eq("status", "in_progress")
-      .order("started_at", { ascending: false }),
-    supabase
-      .from("inspections")
-      .select(select, { count: "exact" })
-      .eq("organization_id", organization.id)
+    inspections().eq("status", "in_progress").order("started_at", { ascending: false }),
+    inspections("exact")
       .eq("status", "completed")
       .order("completed_at", { ascending: false })
       .order("id")
@@ -69,8 +97,13 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
     memberNames(organization.id),
   ]);
   const pages = Math.max(1, Math.ceil((done.count ?? 0) / PAGE_SIZE));
+  const listParams: Record<string, string> = mismatchOnly ? { location: "mismatch" } : {};
   if (page > 1 && !done.data?.length)
-    redirect(pages > 1 ? `/inspections?page=${pages}` : "/inspections");
+    redirect(
+      pages > 1
+        ? `/inspections?${new URLSearchParams({ ...listParams, page: String(pages) }).toString()}`
+        : `/inspections${mismatchOnly ? "?location=mismatch" : ""}`,
+    );
 
   // Progress of open inspections: finished checks of the building's active devices.
   const openSites = (open.data ?? []).map((inspection) => inspection.site?.id ?? "");
@@ -96,7 +129,31 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
   );
   const app = appIcon("inspections");
   const SiteIcon = OBJECT_TYPES.site.icon;
-  const nothing = !open.data?.length && !done.count;
+  const nothing = !mismatchOnly && !open.data?.length && !done.count;
+  const mismatches = (items: { location_state: string | null }[]) =>
+    items.filter((item) => item.location_state === "mismatch").length;
+  const locationFilter = (
+    <nav aria-label={t("locationFilter.label")} className="flex rounded-lg bg-canvas p-0.5">
+      {(["all", "mismatch"] as const).map((value) => {
+        const active = (value === "mismatch") === mismatchOnly;
+        return (
+          <Link
+            key={value}
+            href={value === "mismatch" ? "/inspections?location=mismatch" : "/inspections"}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex min-h-[26px] items-center rounded-[5px] px-3 text-ui whitespace-nowrap pointer-coarse:min-h-11",
+              active
+                ? "bg-segment-active font-semibold text-segment-active-foreground shadow-segment"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t(`locationFilter.${value}`)}
+          </Link>
+        );
+      })}
+    </nav>
+  );
   const time = (value: string) =>
     format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" });
 
@@ -139,6 +196,7 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
           </Card>
         ) : (
           <div className="space-y-2.5 sm:space-y-[15px]">
+            {locationFilter}
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -309,6 +367,13 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                                     {notChecked} × {t("outcome.not_checked")}
                                   </Badge>
                                 )}
+                                {mismatches(inspection.inspection_items) > 0 && (
+                                  <Badge variant="outline">
+                                    {t("locationFilter.count", {
+                                      count: mismatches(inspection.inspection_items),
+                                    })}
+                                  </Badge>
+                                )}
                               </span>
                             </TableCell>
                           </TableRow>
@@ -316,7 +381,12 @@ export default async function InspectionsPage({ searchParams }: { searchParams: 
                       })}
                     </TableBody>
                   </Table>
-                  <Pagination pathname="/inspections" params={{}} page={page} pages={pages} />
+                  <Pagination
+                    pathname="/inspections"
+                    params={listParams}
+                    page={page}
+                    pages={pages}
+                  />
                 </>
               ) : (
                 <p className="px-[15px] py-3 text-ui text-muted-foreground">{t("noneCompleted")}</p>

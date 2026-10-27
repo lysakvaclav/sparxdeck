@@ -4,14 +4,30 @@ import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/auth";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
+import { parseCoordinates } from "@/lib/scan-location";
 import { idListSchema, idSchema, locationNameSchema, siteSchema } from "@/lib/validation";
 
 function siteColumns(input: ReturnType<typeof siteSchema.parse>) {
+  // The point only when the form sent it; an empty field clears it. Who set it
+  // and when, the database stamps.
+  const point =
+    input.coordinates === undefined
+      ? {}
+      : (() => {
+          const parsed = parseCoordinates(input.coordinates);
+          return {
+            latitude: parsed?.latitude ?? null,
+            longitude: parsed?.longitude ?? null,
+            location_source: parsed ? (input.locationSource ?? "manual") : null,
+          };
+        })();
   return {
     name: input.name,
     address: input.address,
     access_notes: input.accessNotes,
     notes: input.notes,
+    ...point,
+    ...(input.radius === undefined ? {} : { location_radius_m: input.radius }),
   };
 }
 

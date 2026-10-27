@@ -236,21 +236,41 @@ export function ProtocolDocument({
 
         <Section title={model.devicesTitle}>
           <Text style={{ marginBottom: 2 * MM }}>{model.summary}</Text>
+          {model.scan && (
+            <Text style={{ marginBottom: 2 * MM }}>{model.scan.summary}</Text>
+          )}
           {devices.length > 0 && (
             <Table
-              columns={[
-                { key: "label", title: model.columns.label, width: "9%" },
-                { key: "type", title: model.columns.type, width: "23%" },
-                { key: "location", title: model.columns.location, width: "19%" },
-                { key: "serial", title: model.columns.serial, width: "17%" },
-                { key: "result", title: model.columns.result, width: "16%" },
-                { key: "nextDue", title: model.columns.nextDue, width: "16%" },
-              ]}
+              columns={
+                model.scan
+                  ? [
+                      { key: "label", title: model.columns.label, width: "9%" },
+                      { key: "type", title: model.columns.type, width: "19%" },
+                      { key: "location", title: model.columns.location, width: "16%" },
+                      { key: "serial", title: model.columns.serial, width: "15%" },
+                      { key: "result", title: model.columns.result, width: "14%" },
+                      { key: "nextDue", title: model.columns.nextDue, width: "14%" },
+                      { key: "scan", title: model.scan.column, width: "13%" },
+                    ]
+                  : [
+                      { key: "label", title: model.columns.label, width: "9%" },
+                      { key: "type", title: model.columns.type, width: "23%" },
+                      { key: "location", title: model.columns.location, width: "19%" },
+                      { key: "serial", title: model.columns.serial, width: "17%" },
+                      { key: "result", title: model.columns.result, width: "16%" },
+                      { key: "nextDue", title: model.columns.nextDue, width: "16%" },
+                    ]
+              }
               rows={devices}
               cell={(row, key) => row[key as keyof typeof row] as string}
               below={(row) => row.details}
               emphasis={(row, key) => key === "label" || (key === "result" && row.failed)}
             />
+          )}
+          {model.scan && (
+            <Text style={{ fontSize: 7, color: MUTED, marginTop: 1.5 * MM }}>
+              {model.scan.disclaimer}
+            </Text>
           )}
         </Section>
 

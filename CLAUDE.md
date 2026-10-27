@@ -13,7 +13,7 @@ Webová a mobilní aplikace (SaaS, měsíční předplatné) pro servisní firmy
 
 | Soubor | Obsah |
 |---|---|
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Pořadí práce: části 1–12, stav každé části. **Pracuje se vždy jen na jedné části.** |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Pořadí práce: části 1–30 (fáze 3 před spuštěním: 20–23), stav každé části. **Pracuje se vždy jen na jedné části.** |
 | [docs/CHECKLIST.md](docs/CHECKLIST.md) | Všechny funkce s prioritou P1/P2/P3. Odškrtávat až po otestování, s odkazem na commit. |
 | [docs/SPEC.md](docs/SPEC.md) | Datový model, role, pravidla pro termíny, bezpečnost. |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Spuštění: účty, produkční Supabase, Vercel, Resend, Sentry, zálohy, vydávání změn. |
@@ -125,6 +125,13 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - `inspection_plans` (budova, den, technik, poznámka): RLS jako u zákazníků (zapisuje vlastník/admin), `inspection_id` nastavuje jen trigger `link_inspection_plan` při vložení revize (nejbližší otevřený plán budovy v okně −60/+14 dní), zrušení revize ho uvolní (`on delete set null`). Technik plánu i řešitel závady mají klíč na `memberships (organization_id, user_id)` s `on delete set null`, takže odebrání člena přiřazení zruší.
   - `defects.assigned_to`, `defects.due_on` jen přes `assign_defect` a `set_defect_due` (každý člen), události `assignee`/`due`. Stav termínu `defectDueState()` v `src/lib/defects.ts` (do 7 dní „brzy“).
   - Kalendář `/calendar` (měsíc, `?view=workload`), výpočty v `src/lib/calendar.ts` (testy), data `src/lib/calendar-data.ts`, dialog `src/components/app/plan-dialog.tsx` (i na stránce budovy, `site-plans-card.tsx`), „Moje práce“ na přehledu (`(app)/my-work.tsx`).
+- Poloha při skenu QR a souřadnice budov (část 20, migrace `20261027090000_site_location.sql` a `20261027100000_scan_location.sql`):
+  - PostGIS je zapnutý (schéma `extensions`). Budova má `latitude`/`longitude` (obě, nebo žádná), z nich generovaný `location geography(Point,4326)` s indexem, `location_radius_m` (výchozí z `scan_location_rules()`), `location_source`; `location_set_by/_at` razí trigger `stamp_site_location`, klient je neposílá. Zápis přes formulář budovy (`siteSchema.coordinates` čte `parseCoordinates`, „Použít moji polohu“). Adresy se na souřadnice nepřevádějí (žádná cizí služba).
+  - Pravidlo na jednom místě: `scan_location_rules()`, `scan_location_distance()` (koule PostGIS, stejný poloměr jako haversine v `src/lib/scan-location.ts`), `scan_location_verdict()`; testy (`tests/fixtures/scan-location-cases.ts`) hlídají shodu SQL a TypeScriptu.
+  - Telefon: po skenu v revizi (`InspectionRun.onScanned`, i ruční zadání čísla ve skeneru) `captureScanLocation()` na pozadí uloží `ScanCapture` do konceptu (`CheckDraft.scan`); otevření zařízení na polohu nikdy nečeká. Poloha není součást `draftPending` (nesmí znovu „otevřít“ hotovou kontrolu), čeká přes `scanPending`. Odesílá ji `recordScan` → `record_scan_location`: otevřené zařízení hned, jak drží kontrolu (`device-check.tsx`), ostatní fronta `syncDevice` po převzetí kontroly. Server vyhodnotí stav (`inspection_items.location_state`, vzdálenost) při příjmu; odmítnutá poloha se zahodí a kontrolu nezdrží. Vysvětlení `explain_scan_location` smí každý člen, dokud revize běží.
+  - Firma funkci vypne v Nastavení (`organizations.scan_location_enabled`): telefon nic nezjišťuje a server nic neuloží. Hlavička `Permissions-Policy` povoluje `geolocation=(self)`.
+  - Zobrazení: `ScanLocationBadge`, `ScanLocationPanel` (důvod, vzdálenost, vysvětlení), detail revize, filtr `/inspections?location=mismatch`, v protokolu sloupec „Poloha skenu“, souhrn a poznámka o přesnosti (`ProtocolModel.scan`, jen když firma polohu ukládá nebo ji některá kontrola má).
+  - E2E: `page.send("Emulation.setGeolocationOverride", …)` a `Browser.grantPermissions` (bez souřadnic = poloha nedostupná).
 - Přehled termínů na úvodní stránce:
   - Co propadá za 30/60/90 dní po budovách: `src/lib/due-plan.ts` (`duePlan`, `horizonWindow`, testy hranic), `src/app/(app)/due-overview.tsx`.
   - Filtr zákazníka a budovy je v adrese (`overview-filters.tsx`).

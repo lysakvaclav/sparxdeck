@@ -150,6 +150,7 @@ try {
     ["customer", `/customers/${customer.id}`],
     ["customer-edit", `/customers/${customer.id}/edit`],
     ["site", `/sites/${site.id}`],
+    ["site-edit", `/sites/${site.id}/edit`],
     ["devices", "/devices"],
     ["device", `/devices/${device.id}`],
     ["device-new", `/devices/new?site=${site.id}`],
@@ -195,6 +196,22 @@ try {
   await page.waitForText("Uloženo");
   await audit(page, "phone check");
   await touchTargets(page, "phone check");
+  // Part 20: the position of a scan that didn't match, with its explanation button.
+  const inspection = run.split("/")[2];
+  await updateRows("inspection_items", `inspection_id=eq.${inspection}&device_id=eq.${device.id}`, {
+    scan_latitude: 49.1951,
+    scan_longitude: 16.6068,
+    scan_accuracy_m: 12,
+    scan_captured_at: new Date().toISOString(),
+    location_state: "mismatch",
+    location_distance_m: 186033,
+  });
+  await page.goto(`${APP}${run}`);
+  await page.waitForText("Zkontrolováno 0 z");
+  await page.goto(`${APP}${run}/check/${device.id}`);
+  await page.waitForText("Poloha neodpovídá budově", 30000);
+  await audit(page, "phone check location");
+  await touchTargets(page, "phone check location");
   await page.clickText("Nelze zkontrolovat", "button");
   await page.waitForText("Proč zařízení nejde zkontrolovat?");
   await audit(page, "phone skip");

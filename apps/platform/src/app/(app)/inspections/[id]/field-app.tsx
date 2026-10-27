@@ -7,6 +7,7 @@ import { ClientPageHeader } from "@/components/app/client-page-header";
 import { appIcon } from "@/components/app/nav-items";
 import { OBJECT_TYPES } from "@/components/app/object-types";
 import { PageBody } from "@/components/app/page-header-view";
+import { ScanLocationPanel } from "@/components/app/scan-location-panel";
 import {
   CloudUploadIcon,
   ErrorIcon,
@@ -28,6 +29,7 @@ import {
   opsSnapshot,
   removeDraft,
   subscribeDrafts,
+  updateDraft,
 } from "@/lib/client/check-drafts";
 import { devicesWithWork, requestTimeout, syncInspection } from "@/lib/client/field-sync";
 import {
@@ -39,6 +41,7 @@ import {
   savePlanImage,
 } from "@/lib/client/offline-store";
 import { queuedPhotoCounts, removeQueuedPhotos, subscribePhotos } from "@/lib/client/photo-queue";
+import { captureScanLocation } from "@/lib/client/scan-location";
 import { deviceName } from "@/lib/devices";
 import { CALENDAR_FORMAT, calendarDate } from "@/lib/due";
 import {
@@ -491,6 +494,18 @@ export function FieldApp({
     [inspectionId],
   );
 
+  // A device opened by its label: the phone's position, asked in the background
+  // (opening never waits for it) and kept in the device's draft until sent.
+  const scanLocation = !!pack.scanLocation;
+  const scanned = useCallback(
+    (deviceId: string) => {
+      if (!scanLocation) return;
+      const key = draftKey(inspectionId, deviceId);
+      void captureScanLocation().then((scan) => updateDraft(key, (draft) => ({ ...draft, scan })));
+    },
+    [scanLocation, inspectionId],
+  );
+
   const current = device ? pack.devices.find((item) => item.id === device) : undefined;
   useEffect(() => {
     document.title = current
@@ -609,6 +624,32 @@ export function FieldApp({
           {closedAlert}
           {facts.length > 0 && (
             <p className="mb-2.5 text-ui text-muted-foreground sm:mb-[15px]">{facts.join(" · ")}</p>
+          )}
+          {pack.scanLocation && (
+            <ScanLocationPanel
+              itemId={pack.items[current.id]?.id ?? null}
+              state={view?.location ?? null}
+              location={pack.items[current.id]?.location}
+              sitePoint={pack.inspection.sitePoint ?? true}
+              siteId={pack.inspection.siteId}
+              offline={isOffline}
+              onNoteSaved={(note) =>
+                setPack((previous) => {
+                  const item = previous.items[current.id];
+                  if (!item) return previous;
+                  const location = item.location ?? {
+                    state: null,
+                    distanceM: null,
+                    error: null,
+                    note: null,
+                  };
+                  return {
+                    ...previous,
+                    items: { ...previous.items, [current.id]: { ...item, location: { ...location, note } } },
+                  };
+                })
+              }
+            />
           )}
           <DeviceCheck
             key={`${current.id}:${templateId}`}
@@ -735,7 +776,9 @@ export function FieldApp({
             addDevice={{ types: pack.types, locations: pack.locations }}
             offline={isOffline}
             status={status}
+            scanLocation={!!pack.scanLocation}
             onOpen={go}
+            onScanned={scanned}
             onComplete={complete}
             onAdded={(id) => void added(id)}
             onReloadPlan={() => void refresh()}

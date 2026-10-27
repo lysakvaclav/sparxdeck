@@ -64,6 +64,9 @@ export type ErrorCode =
   | "deviceInactive"
   | "noTemplate"
   | "invalidAnswer"
+  | "invalidLocation"
+  | "invalidCoordinates"
+  | "invalidRadius"
   | "tooManyPhotos"
   | "photoFailed"
   | "invalidDefect"
@@ -160,6 +163,7 @@ export function databaseErrorCode(
   if (message.includes("device_inactive")) return "deviceInactive";
   if (message.includes("no_template")) return "noTemplate";
   if (message.includes("invalid_answer")) return "invalidAnswer";
+  if (message.includes("invalid_location")) return "invalidLocation";
   if (message.includes("too_many_photos")) return "tooManyPhotos";
   if (message.includes("invalid_defect")) return "invalidDefect";
   if (message.includes("resolution_required")) return "resolutionRequired";

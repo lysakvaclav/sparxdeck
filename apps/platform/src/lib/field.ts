@@ -8,11 +8,14 @@ import {
   type AnswerDraft,
   type Question,
 } from "@/lib/inspections";
+import type { ScanCapture } from "@/lib/scan-location";
 import type {
   CheckOutcome,
   CheckSkipReason,
   DefectSeverity,
   Json,
+  ScanLocationError,
+  ScanLocationState,
 } from "@/lib/supabase/database.types";
 
 // An inspection in the field: everything the phone needs to do it without a
@@ -50,6 +53,17 @@ export type FieldItem = {
   checkedAt: string | null;
   answers: Record<string, AnswerDraft>;
   photos: FieldPhoto[];
+  /** Where the device was scanned, as the server judged it (absent in older packs). */
+  location?: FieldLocationResult | null;
+};
+
+/** The server's verdict on the position of a device's scan. */
+export type FieldLocationResult = {
+  /** Null: not scanned in this check. */
+  state: ScanLocationState | null;
+  distanceM: number | null;
+  error: ScanLocationError | null;
+  note: string | null;
 };
 
 /** An unresolved defect of the device; a "no" to its question is added to it. */
@@ -101,6 +115,8 @@ export type FieldPack = {
     canCancel: boolean;
     /** A completed inspection reopened for a correction (absent in older packs). */
     correction?: boolean;
+    /** The building has a point to compare scans with (absent in older packs). */
+    sitePoint?: boolean;
   };
   /** Active devices in route order. */
   devices: FieldDevice[];
@@ -117,6 +133,8 @@ export type FieldPack = {
   locations: FieldLocation[];
   /** Kept by the phone, not sent by the server. */
   gone?: GoneDevice[];
+  /** The company records the position of scans (absent in older packs: no). */
+  scanLocation?: boolean;
 };
 
 /** What a colleague did meanwhile, as claim_device_check reports it. */
@@ -151,6 +169,8 @@ export type CheckDraft = {
   heldBy?: string;
   /** The server refused it for good (device removed, …): shown until discarded. */
   error?: string;
+  /** The position at the device's latest scan, until the server has it. */
+  scan?: ScanCapture;
 };
 
 /** Nothing left to send or to show: the draft can go. */
@@ -160,8 +180,17 @@ export function draftIsEmpty(draft: CheckDraft): boolean {
     draft.notes === undefined &&
     !draft.action &&
     !draft.conflict &&
-    !draft.error
+    !draft.error &&
+    !draft.scan
   );
+}
+
+/**
+ * A scan's position waits to be sent. Kept apart from draftPending: a position
+ * alone doesn't make a finished check "open" again.
+ */
+export function scanPending(draft: CheckDraft | null | undefined): boolean {
+  return !!draft?.scan;
 }
 
 /** Something waits to be sent (conflicts and errors wait for the technician instead). */
@@ -240,6 +269,10 @@ export type DeviceView = {
   /** A colleague's name: filling it in now. */
   heldBy: string | null;
   checkedBy: string | null;
+  /** The position of the device's scan: "waiting" until the phone has sent it. */
+  location: ScanLocationState | "waiting" | null;
+  /** The technician's or a manager's explanation of the position. */
+  locationNote: string | null;
 };
 
 /** A device's state in the phone: the server's, with what the phone hasn't sent on top. */
@@ -254,6 +287,8 @@ export function deviceView(
     error: draft?.error ?? null,
     heldBy: draft?.heldBy ?? item?.heldBy ?? null,
     checkedBy: item?.checkedBy ?? null,
+    location: draft?.scan ? ("waiting" as const) : (item?.location?.state ?? null),
+    locationNote: item?.location?.note ?? null,
   };
   if (draft?.action?.type === "skip")
     return { ...base, state: "skipped", skipReason: draft.action.reason, pending: true };
@@ -342,6 +377,8 @@ export type SyncedCheck = {
   sent: CheckDraft | null;
   outcome: CheckOutcome | null;
   checkedAt: string | null;
+  /** The server's verdict on a scan's position sent in the same pass. */
+  location?: FieldLocationResult;
 };
 
 /**
@@ -373,6 +410,7 @@ export function applySynced(pack: FieldPack, deviceId: string, synced: SyncedChe
     answers:
       sent?.force && sent.action ? { ...sent.answers } : { ...previous?.answers, ...sent?.answers },
     photos: previous?.photos ?? [],
+    location: synced.location ?? previous?.location ?? null,
   };
   return { ...pack, items: { ...pack.items, [deviceId]: item } };
 }

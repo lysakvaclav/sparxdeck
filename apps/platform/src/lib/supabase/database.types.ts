@@ -16,6 +16,12 @@ export type CheckOutcome = "passed" | "failed" | "not_checked";
 
 /** Why a device was left out of an inspection (outcome not_checked). */
 export type CheckSkipReason = "inaccessible" | "missing";
+/** How a scan's position relates to the building (decided by the server). */
+export type ScanLocationState = "matches" | "mismatch" | "unknown";
+/** Why the phone had no position at a scan. */
+export type ScanLocationError = "denied" | "unavailable" | "timeout" | "unsupported";
+/** How a building's point was set. */
+export type SiteLocationSource = "map" | "manual" | "device";
 
 export type DefectSeverity = "minor" | "major" | "critical";
 
@@ -54,6 +60,7 @@ export type Database = {
           timezone: string;
           due_soon_days: number;
           weekly_digest: boolean;
+          scan_location_enabled: boolean;
           labels_printed_at: string | null;
           guide_dismissed_at: string | null;
         } & Timestamps;
@@ -74,6 +81,7 @@ export type Database = {
           timezone: string;
           due_soon_days: number;
           weekly_digest: boolean;
+          scan_location_enabled: boolean;
           guide_dismissed_at: string | null;
         }>;
         Relationships: [];
@@ -191,6 +199,14 @@ export type Database = {
           created_by: string | null;
           deleted_at: string | null;
           import_id: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          location_radius_m: number;
+          location_source: SiteLocationSource | null;
+          location_set_by: string | null;
+          location_set_at: string | null;
+          /** PostGIS point generated from latitude and longitude (read only). */
+          location: unknown;
         } & Timestamps;
         Insert: {
           organization_id: string;
@@ -200,6 +216,10 @@ export type Database = {
           access_notes?: string | null;
           notes?: string | null;
           created_by?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          location_radius_m?: number;
+          location_source?: SiteLocationSource | null;
         };
         Update: Partial<{
           name: string;
@@ -207,6 +227,10 @@ export type Database = {
           access_notes: string | null;
           notes: string | null;
           deleted_at: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          location_radius_m: number;
+          location_source: SiteLocationSource | null;
         }>;
         Relationships: [
           {
@@ -625,6 +649,17 @@ export type Database = {
           device_last_known: boolean;
           editing_by: string | null;
           editing_at: string | null;
+          scan_latitude: number | null;
+          scan_longitude: number | null;
+          scan_accuracy_m: number | null;
+          scan_captured_at: string | null;
+          scan_location_error: ScanLocationError | null;
+          /** Null: the device was not scanned in this check. */
+          location_state: ScanLocationState | null;
+          location_distance_m: number | null;
+          location_note: string | null;
+          location_note_by: string | null;
+          location_note_at: string | null;
         } & Timestamps;
         Insert: never;
         Update: never;
@@ -953,6 +988,39 @@ export type Database = {
         Returns: Json;
       };
       undo_import: { Args: { p_import: string }; Returns: undefined };
+      record_scan_location: {
+        Args: {
+          p_inspection: string;
+          p_device: string;
+          p_latitude?: number | null;
+          p_longitude?: number | null;
+          p_accuracy_m?: number | null;
+          p_captured_at?: string | null;
+          p_error?: ScanLocationError | null;
+        };
+        Returns: Json;
+      };
+      explain_scan_location: {
+        Args: { p_item: string; p_note: string | null };
+        Returns: undefined;
+      };
+      scan_location_distance: {
+        Args: {
+          p_latitude_a: number;
+          p_longitude_a: number;
+          p_latitude_b: number;
+          p_longitude_b: number;
+        };
+        Returns: number;
+      };
+      scan_location_verdict: {
+        Args: { p_distance_m: number | null; p_accuracy_m: number | null; p_radius_m: number | null };
+        Returns: ScanLocationState;
+      };
+      scan_location_rules: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
       skip_device_check: {
         Args: { p_item: string; p_reason: CheckSkipReason; p_note?: string | null };
         Returns: undefined;
@@ -1091,6 +1159,8 @@ export type Database = {
     };
     Enums: {
       member_role: MemberRole;
+      scan_location_state: ScanLocationState;
+      scan_location_error: ScanLocationError;
       checklist_item_type: ChecklistItemType;
       device_status: DeviceStatus;
       inspection_status: InspectionStatus;
