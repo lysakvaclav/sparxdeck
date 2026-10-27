@@ -1884,7 +1884,11 @@
         "location": "Location",
         "serial": "Serial number",
         "result": "Result",
-        "nextDue": "Next inspection"
+        "nextDue": "Next inspection",
+        "manufacturer": "Manufacturer",
+        "model": "Model",
+        "year": "Year made",
+        "checkedBy": "Checked by"
       },
       "result": {
         "passed": "Passed",
@@ -1895,7 +1899,8 @@
       },
       "finding": {
         "failed": "failed",
-        "deviceNote": "Note"
+        "deviceNote": "Note",
+        "passed": "passed"
       },
       "defectsTitle": "Defects found",
       "defectColumns": {
@@ -1927,7 +1932,25 @@
       },
       "scanSummary": "The location at scanning matched the building for {matches} of {total} devices.",
       "scanDisclaimer": "The location is indicative. GPS accuracy inside buildings and in basements can be low.",
-      "scanNote": "Explanation of the location"
+      "scanNote": "Explanation of the location",
+      "overall": {
+        "passed": "All inspected devices passed.",
+        "failed": "{count, plural, one {# device failed} other {# devices failed}}.",
+        "none": "No device was inspected."
+      },
+      "counts": {
+        "total": "Devices",
+        "passed": "Passed",
+        "failed": "Failed",
+        "notChecked": "Not inspected",
+        "defects": "Defects found",
+        "result": "Overall result"
+      },
+      "summaryTitle": "Summary",
+      "checklistTitle": "Checklist results",
+      "galleryTitle": "Photos",
+      "noAnswers": "No answers recorded.",
+      "signOther": "Signature"
     },
     "email": {
       "subject": "Inspection report {number} – {site}",

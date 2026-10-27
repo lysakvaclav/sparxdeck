@@ -1,5 +1,5 @@
 import "server-only";
-import { Document, Page, Path, Svg, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Path, Svg, Text, View } from "@react-pdf/renderer";
 import {
   labelContent,
   placeLabels,
@@ -8,7 +8,7 @@ import {
   type SheetLayout,
 } from "@/lib/labels";
 import { QR_QUIET_ZONE, qrMatrix, qrPath } from "@/lib/qr";
-import { FONT, registerFonts } from "./fonts";
+import { FONT, renderPdf } from "./fonts";
 
 // A4 sheets of device labels as a vector PDF: crisp QR codes at any printer
 // resolution, Czech characters from an embedded font (Noto Sans, OFL).
@@ -126,12 +126,11 @@ export async function renderLabelsPdf({
   organizationName: string;
   title: string;
 }): Promise<Buffer> {
-  registerFonts();
   const placed = placeLabels(layout, labels.length, startAt);
   const pages = sheetCount(layout, labels.length, startAt);
   const content = labelContent(layout.labelWidth, layout.labelHeight);
 
-  return renderToBuffer(
+  return renderPdf(
     <Document title={title} author={organizationName} creator="SparxDeck" producer="SparxDeck">
       {Array.from({ length: pages }, (_, page) => (
         <Page key={page} size="A4" style={{ fontFamily: FONT }}>

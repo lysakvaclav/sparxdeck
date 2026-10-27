@@ -154,6 +154,7 @@ describe("a reissued protocol and the customer's signature", () => {
     );
     expect(model.number).toBe("2026-0007");
     expect(model.facts.at(-1)).toEqual({
+      key: "version",
       label: "Verze",
       value: "2, nahrazuje vydání z 13. 10. 2026",
     });
@@ -166,7 +167,7 @@ describe("a reissued protocol and the customer's signature", () => {
       { ...input, customerSignature: { name: "Jana Malá", signedAt: "2026-10-13T09:31:00Z" } },
       translate("cs"),
     );
-    expect(model.signatures[1]).toEqual({
+    expect(model.signatures.customer).toEqual({
       label: "Převzal(a) za zákazníka",
       name: "Jana Malá",
       signedAt: "13. 10. 2026",
@@ -181,12 +182,13 @@ describe("a reissued protocol and the customer's signature", () => {
       },
       translate("en"),
     );
-    expect(english.signatures[1]).toEqual({
+    expect(english.signatures.customer).toEqual({
       label: "Received for the customer",
       name: null,
       signedAt: "Oct 13, 2026",
     });
     expect(english.facts.at(-1)).toEqual({
+      key: "version",
       label: "Version",
       value: "3, replaces the issue of Oct 14, 2026",
     });
@@ -201,20 +203,22 @@ describe("protocol content", () => {
     expect(model.fileName).toBe("Protokol-2026-0007.pdf");
     expect(model.organization).toEqual({
       name: "Revize Novák s.r.o.",
-      lines: ["Lipová 1", "110 00 Praha 1", "IČO: 12345678", "info@revize-novak.cz"],
+      address: ["Lipová 1", "110 00 Praha 1"],
+      ids: "IČO: 12345678",
+      contact: "info@revize-novak.cz",
     });
-    expect(model.parties).toEqual([
-      {
-        label: "Zákazník",
-        name: "Bytové družstvo Lipová",
-        lines: ["Lipová 12, Praha", "Kontaktní osoba: Jana Malá"],
-      },
-      { label: "Budova", name: "Lipová 12", lines: ["Lipová 12", "Praha 2"] },
-    ]);
+    expect(model.customer).toEqual({
+      label: "Zákazník",
+      name: "Bytové družstvo Lipová",
+      billingAddress: ["Lipová 12, Praha"],
+      ids: "",
+      contact: "Kontaktní osoba: Jana Malá",
+    });
+    expect(model.site).toEqual({ label: "Budova", name: "Lipová 12", address: ["Lipová 12", "Praha 2"] });
     expect(model.facts).toEqual([
-      { label: "Datum revize", value: "12. 10. 2026 – 13. 10. 2026" },
-      { label: "Revizi provedl(a)", value: "Tomáš Technik, Jan Kolega" },
-      { label: "Vystaveno", value: "13. 10. 2026" },
+      { key: "date", label: "Datum revize", value: "12. 10. 2026 – 13. 10. 2026" },
+      { key: "technician", label: "Revizi provedl(a)", value: "Tomáš Technik, Jan Kolega" },
+      { key: "issued", label: "Vystaveno", value: "13. 10. 2026" },
     ]);
   });
 
@@ -281,10 +285,11 @@ describe("protocol content", () => {
       },
     ]);
     expect(model.notes).toBe("Klíče vráceny správci.");
-    expect(model.signatures).toEqual([
-      { label: "Revizi provedl(a)", name: "Tomáš Technik", signedAt: null },
-      { label: "Převzal(a) za zákazníka", name: null, signedAt: null },
-    ]);
+    expect(model.signatures).toEqual({
+      technician: { label: "Revizi provedl(a)", name: "Tomáš Technik", signedAt: null },
+      customer: { label: "Převzal(a) za zákazníka", name: null, signedAt: null },
+      otherLabel: "Podpis",
+    });
     expect(model.footer).toBe("Zapsáno v obchodním rejstříku.");
     expect(model.page(1, 2)).toBe("Protokol 2026-0007 · strana 1 z 2");
   });
@@ -303,12 +308,18 @@ describe("protocol content", () => {
       translate("en"),
     );
     expect(english.fileName).toBe("Report-2026-0007.pdf");
-    expect(english.facts).toEqual([
+    expect(english.facts.map(({ label, value }) => ({ label, value }))).toEqual([
       { label: "Inspection date", value: "Oct 13, 2026" },
       { label: "Inspected by", value: "Petr Novák" },
       { label: "Issued", value: "Oct 13, 2026" },
     ]);
-    expect(english.parties[0]).toEqual({ label: "Customer", name: "—", lines: [] });
+    expect(english.customer).toEqual({
+      label: "Customer",
+      name: "—",
+      billingAddress: [],
+      ids: "",
+      contact: "",
+    });
     expect(english.noDefects).toBe("The inspection found no defects.");
     expect(english.notes).toBeNull();
   });
@@ -377,8 +388,8 @@ describe("location of QR scans in the protocol", () => {
 
   it("adds a column, a summary line and the note on accuracy", () => {
     const model = buildProtocol(located, translate("cs"));
+    expect(model.columns.scan).toBe("Poloha skenu");
     expect(model.scan).toEqual({
-      column: "Poloha skenu",
       summary: "Poloha při skenu odpovídala budově u 1 z 4 zařízení.",
       disclaimer:
         "Poloha je orientační. Přesnost GPS uvnitř budov a ve sklepech může být nízká.",
@@ -406,7 +417,7 @@ describe("location of QR scans in the protocol", () => {
       translate("cs"),
     );
     expect(model.scan).toBeNull();
-    expect(model.devices[0]!.scan).toBe("");
+    expect(model.devices[0]!.scan).toBe("—");
   });
 
   it("keeps positions recorded before the company switched it off", () => {

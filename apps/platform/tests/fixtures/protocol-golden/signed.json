@@ -52,7 +52,7 @@
     "size": 13
    },
    {
-    "s": "USTOMER",
+    "s": "CUSTOMER",
     "x": 42.5,
     "y": 709.4,
     "size": 7
@@ -106,7 +106,7 @@
     "size": 8.5
    },
    {
-    "s": "INSPE)TION DATE",
+    "s": "INSPECTION DATE",
     "x": 390.2,
     "y": 709.4,
     "size": 7
@@ -118,7 +118,7 @@
     "size": 8.5
    },
    {
-    "s": "INSPE)TED BY",
+    "s": "INSPECTED BY",
     "x": 390.2,
     "y": 684.1,
     "size": 7
@@ -478,7 +478,7 @@
     "size": 8.5
    },
    {
-    "s": "INSPE)TED BY",
+    "s": "INSPECTED BY",
     "x": 42.5,
     "y": 148.4,
     "size": 7
@@ -496,7 +496,7 @@
     "size": 7
    },
    {
-    "s": "RE)EIVED FOR THE )USTOMER",
+    "s": "RECEIVED FOR THE CUSTOMER",
     "x": 311.8,
     "y": 148.4,
     "size": 7

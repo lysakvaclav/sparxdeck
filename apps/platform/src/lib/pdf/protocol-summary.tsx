@@ -1,7 +1,7 @@
 import "server-only";
-import { Document, Page, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
 import type { ProtocolSummaryModel } from "@/lib/protocol-summary";
-import { FONT, registerFonts } from "./fonts";
+import { FONT, renderPdf } from "./fonts";
 import { INK, MM, MUTED, Section, Table } from "./protocol";
 
 // A compact, unsigned overview across many inspections: one or two lines per
@@ -118,6 +118,5 @@ export function ProtocolSummaryDocument({ model }: { model: ProtocolSummaryModel
 }
 
 export async function renderProtocolSummaryPdf(model: ProtocolSummaryModel): Promise<Buffer> {
-  registerFonts();
-  return renderToBuffer(<ProtocolSummaryDocument model={model} />);
+  return renderPdf(<ProtocolSummaryDocument model={model} />);
 }

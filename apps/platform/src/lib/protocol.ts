@@ -12,8 +12,10 @@ import type {
 } from "@/lib/supabase/database.types";
 
 // What an inspection protocol says, assembled from the inspection's records.
-// Pure, so the wording and order can be tested without rendering a PDF; the
-// PDF (src/lib/pdf/protocol.tsx) only lays the model out.
+// Pure, so the wording and order can be tested without rendering a PDF. The
+// model offers every field a protocol template can show, already translated
+// and formatted; the template (src/lib/protocol-template) picks and orders
+// them, the PDF (src/lib/pdf/protocol.tsx) lays them out.
 
 export type ProtocolLocale = "cs" | "en";
 
@@ -56,6 +58,9 @@ export type ProtocolCheck = {
   /** The location's place on the technician's route; null without a location. */
   locationOrder: number | null;
   serialNumber: string | null;
+  manufacturer?: string | null;
+  model?: string | null;
+  manufactureYear?: number | null;
   outcome: CheckOutcome;
   /** Left out (inaccessible, missing): the result says why. */
   skipReason?: CheckSkipReason | null;
@@ -76,6 +81,11 @@ export type ProtocolDefect = {
   again: boolean;
 };
 
+/**
+ * Everything a protocol is made from. Plain data (JSON): it is also stored
+ * with the issued protocol (its snapshot), so the protocol can be drawn again
+ * exactly as it was issued.
+ */
 export type ProtocolInput = {
   locale: ProtocolLocale;
   timeZone: string;
@@ -118,33 +128,65 @@ export type ProtocolInput = {
 /** Translated texts, as next-intl's `t` for the "protocol" namespace gives them. */
 export type Translate = (key: string, values?: Record<string, string | number>) => string;
 
+export type FactKey = "date" | "technician" | "issued" | "version";
+export type DeviceColumn =
+  | "label"
+  | "type"
+  | "location"
+  | "serial"
+  | "manufacturer"
+  | "model"
+  | "year"
+  | "result"
+  | "nextDue"
+  | "checkedBy"
+  | "scan";
+
+export type ProtocolDeviceRow = Record<DeviceColumn, string> & {
+  failed: boolean;
+  /** Findings, notes and the explanation of the scan's position, one per line. */
+  details: string[];
+  /** Every question of its checklist with the answer, in order. */
+  answers: { question: string; value: string; failed: boolean }[];
+};
+
 export type ProtocolModel = {
   locale: ProtocolLocale;
   fileName: string;
   title: string;
   numberLabel: string;
   number: string;
-  organization: { name: string; lines: string[] };
-  parties: { label: string; name: string; lines: string[] }[];
-  facts: { label: string; value: string }[];
-  summary: string;
-  devicesTitle: string;
-  columns: Record<"label" | "type" | "location" | "serial" | "result" | "nextDue", string>;
-  devices: {
+  organization: {
+    /** The legal name when the company has one (it identifies the issuer). */
+    name: string;
+    address: string[];
+    /** "IČO: … · DIČ: …", empty without them. */
+    ids: string;
+    /** E-mail and phone, empty without them. */
+    contact: string;
+  };
+  customer: {
     label: string;
-    type: string;
-    location: string;
-    serial: string;
-    result: string;
-    failed: boolean;
-    nextDue: string;
-    /** The scan's position in a word (only with `scan`). */
-    scan: string;
-    details: string[];
-  }[];
-  /** The scan-location column, summary and the note on its accuracy; null without it. */
-  scan: { column: string; summary: string; disclaimer: string } | null;
-  defectsTitle: string;
+    /** "—" when the inspection has no customer. */
+    name: string;
+    billingAddress: string[];
+    ids: string;
+    contact: string;
+  };
+  site: { label: string; name: string; address: string[] };
+  /** Only the facts that apply (the version from the second issue on). */
+  facts: { key: FactKey; label: string; value: string }[];
+  counts: { total: number; passed: number; failed: number; notChecked: number; defects: number };
+  /** "Devices: 4. Passed: 2, …" */
+  summary: string;
+  /** The overall result in a sentence. */
+  result: string;
+  countLabels: Record<"total" | "passed" | "failed" | "notChecked" | "defects" | "result", string>;
+  titles: Record<"summary" | "devices" | "checklist" | "defects" | "gallery" | "notes", string>;
+  columns: Record<DeviceColumn, string>;
+  devices: ProtocolDeviceRow[];
+  /** The scan-location summary and the note on its accuracy; null when not reported. */
+  scan: { summary: string; disclaimer: string } | null;
   defectColumns: Record<"number" | "device" | "description" | "severity", string>;
   defects: {
     number: string;
@@ -154,12 +196,15 @@ export type ProtocolModel = {
     severity: string;
   }[];
   noDefects: string;
-  notesTitle: string;
+  noAnswers: string;
   notes: string | null;
-  signatures: { label: string; name: string | null; signedAt: string | null }[];
+  signatures: Record<
+    "technician" | "customer",
+    { label: string; name: string | null; signedAt: string | null }
+  > & { otherLabel: string };
   signatureHint: string;
   footer: string | null;
-  /** "Page 1 of 2" with the numbers filled in at render time. */
+  /** "Protocol 2026-0007 · page 1 of 2" with the numbers filled in at render time. */
   page: (page: number, pages: number) => string;
 };
 
@@ -200,30 +245,38 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
   if (technicians.length === 0 && input.completedBy) technicians.push(input.completedBy);
   const count = (outcome: CheckOutcome) =>
     checks.filter((check) => check.outcome === outcome).length;
+  const counts = {
+    total: checks.length,
+    passed: count("passed"),
+    failed: count("failed"),
+    notChecked: count("not_checked"),
+    defects: input.defects.length,
+  };
   // The position of scans: when the company records it, or a check carries one.
   const withScan =
     !!input.scanLocation || checks.some((check) => check.scanLocation?.state != null);
   const scanStates = scanLocationSummary(checks.map((check) => check.scanLocation?.state ?? null));
 
+  const answerValue = (answer: ProtocolAnswer) => {
+    if (answer.type === "pass_fail")
+      return answer.pass === null ? null : t(answer.pass ? "finding.passed" : "finding.failed");
+    if (answer.type === "number")
+      return answer.number === null ? null : decimal.format(answer.number);
+    return answer.text?.trim() || null;
+  };
+  const sorted = (check: ProtocolCheck) => [...check.answers].sort((a, b) => a.order - b.order);
   const details = (check: ProtocolCheck) => {
-    const found = [...check.answers]
-      .sort((a, b) => a.order - b.order)
-      .flatMap((answer) => {
-        const note = answer.note?.trim();
-        if (answer.type === "pass_fail") {
-          if (answer.pass === false)
-            return [`${answer.question}: ${t("finding.failed")}${note ? ` (${note})` : ""}`];
-          return note ? [`${answer.question}: ${note}`] : [];
-        }
-        const value =
-          answer.type === "number"
-            ? answer.number === null
-              ? null
-              : decimal.format(answer.number)
-            : answer.text?.trim() || null;
-        if (!value && !note) return [];
-        return [`${answer.question}: ${[value, note && `(${note})`].filter(Boolean).join(" ")}`];
-      });
+    const found = sorted(check).flatMap((answer) => {
+      const note = answer.note?.trim();
+      if (answer.type === "pass_fail") {
+        if (answer.pass === false)
+          return [`${answer.question}: ${t("finding.failed")}${note ? ` (${note})` : ""}`];
+        return note ? [`${answer.question}: ${note}`] : [];
+      }
+      const value = answerValue(answer);
+      if (!value && !note) return [];
+      return [`${answer.question}: ${[value, note && `(${note})`].filter(Boolean).join(" ")}`];
+    });
     const note = check.note?.trim();
     const located = withScan ? check.scanLocation?.note?.trim() : null;
     return [
@@ -232,6 +285,36 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
       ...(located ? [`${t("scanNote")}: ${located}`] : []),
     ];
   };
+  const answers = (check: ProtocolCheck) =>
+    sorted(check).map((answer) => {
+      const note = answer.note?.trim();
+      return {
+        question: answer.question,
+        value: [answerValue(answer) ?? dash, note && `(${note})`].filter(Boolean).join(" "),
+        failed: answer.type === "pass_fail" && answer.pass === false,
+      };
+    });
+
+  const facts: ProtocolModel["facts"] = [
+    {
+      key: "date",
+      label: t("date"),
+      value: started === completed ? completed : `${started} – ${completed}`,
+    },
+    { key: "technician", label: t("technician"), value: technicians.join(", ") || dash },
+    { key: "issued", label: t("issued"), value: day.format(new Date(input.generatedAt)) },
+  ];
+  if (input.version > 1)
+    facts.push({
+      key: "version",
+      label: t("version"),
+      value: input.previousIssuedAt
+        ? t("versionReplaces", {
+            version: input.version,
+            date: day.format(new Date(input.previousIssuedAt)),
+          })
+        : String(input.version),
+    });
 
   return {
     locale: input.locale,
@@ -241,64 +324,69 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
     number,
     organization: {
       name: organization.legalName || organization.name,
-      lines: [
-        ...lines(organization.address),
-        ids(organization.companyId, organization.vatId),
-        joined([organization.email, organization.phone]),
-      ].filter(Boolean),
+      address: lines(organization.address),
+      ids: ids(organization.companyId, organization.vatId),
+      contact: joined([organization.email, organization.phone]),
     },
-    parties: [
-      {
-        label: t("customer"),
-        name: customer?.name ?? dash,
-        lines: customer
-          ? [
-              ...lines(customer.billingAddress),
-              ids(customer.companyId, customer.vatId),
-              customer.contactPerson ? `${t("contact")}: ${customer.contactPerson}` : "",
-            ].filter(Boolean)
-          : [],
-      },
-      { label: t("site"), name: site?.name ?? dash, lines: lines(site?.address) },
-    ],
-    facts: [
-      { label: t("date"), value: started === completed ? completed : `${started} – ${completed}` },
-      { label: t("technician"), value: technicians.join(", ") || dash },
-      { label: t("issued"), value: day.format(new Date(input.generatedAt)) },
-      ...(input.version > 1
-        ? [
-            {
-              label: t("version"),
-              value: input.previousIssuedAt
-                ? t("versionReplaces", {
-                    version: input.version,
-                    date: day.format(new Date(input.previousIssuedAt)),
-                  })
-                : String(input.version),
-            },
-          ]
-        : []),
-    ],
+    customer: {
+      label: t("customer"),
+      name: customer?.name ?? dash,
+      billingAddress: lines(customer?.billingAddress),
+      ids: customer ? ids(customer.companyId, customer.vatId) : "",
+      contact: customer?.contactPerson ? `${t("contact")}: ${customer.contactPerson}` : "",
+    },
+    site: { label: t("site"), name: site?.name ?? dash, address: lines(site?.address) },
+    facts,
+    counts,
     summary: t("summary", {
-      total: checks.length,
-      passed: count("passed"),
-      failed: count("failed"),
-      notChecked: count("not_checked"),
+      total: counts.total,
+      passed: counts.passed,
+      failed: counts.failed,
+      notChecked: counts.notChecked,
     }),
-    devicesTitle: t("devicesTitle"),
+    result:
+      counts.failed > 0
+        ? t("overall.failed", { count: counts.failed })
+        : counts.passed > 0
+          ? t("overall.passed")
+          : t("overall.none"),
+    countLabels: {
+      total: t("counts.total"),
+      passed: t("counts.passed"),
+      failed: t("counts.failed"),
+      notChecked: t("counts.notChecked"),
+      defects: t("counts.defects"),
+      result: t("counts.result"),
+    },
+    titles: {
+      summary: t("summaryTitle"),
+      devices: t("devicesTitle"),
+      checklist: t("checklistTitle"),
+      defects: t("defectsTitle"),
+      gallery: t("galleryTitle"),
+      notes: t("notesTitle"),
+    },
     columns: {
       label: t("columns.label"),
       type: t("columns.type"),
       location: t("columns.location"),
       serial: t("columns.serial"),
+      manufacturer: t("columns.manufacturer"),
+      model: t("columns.model"),
+      year: t("columns.year"),
       result: t("columns.result"),
       nextDue: t("columns.nextDue"),
+      checkedBy: t("columns.checkedBy"),
+      scan: t("scanColumn"),
     },
     devices: checks.map((check) => ({
       label: formatLabel(check.labelNumber),
       type: check.typeName,
       location: check.locationName ?? dash,
       serial: check.serialNumber ?? dash,
+      manufacturer: check.manufacturer?.trim() || dash,
+      model: check.model?.trim() || dash,
+      year: check.manufactureYear ? String(check.manufactureYear) : dash,
       result: check.skipReason ? t(`result.${check.skipReason}`) : t(`result.${check.outcome}`),
       failed: check.outcome === "failed",
       // A new date only where the check passed; elsewhere it didn't move.
@@ -306,17 +394,17 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
         check.outcome === "passed" && check.nextDueOn
           ? calendar.format(calendarDate(check.nextDueOn))
           : dash,
-      scan: withScan ? t(`scanState.${check.scanLocation?.state ?? "unknown"}`) : "",
+      checkedBy: check.checkedBy ?? dash,
+      scan: withScan ? t(`scanState.${check.scanLocation?.state ?? "unknown"}`) : dash,
       details: details(check),
+      answers: answers(check),
     })),
     scan: withScan
       ? {
-          column: t("scanColumn"),
           summary: t("scanSummary", { matches: scanStates.matches, total: scanStates.total }),
           disclaimer: t("scanDisclaimer"),
         }
       : null,
-    defectsTitle: t("defectsTitle"),
     defectColumns: {
       number: t("defectColumns.number"),
       device: t("defectColumns.device"),
@@ -335,18 +423,19 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
         severity: t(`severity.${defect.severity}`),
       })),
     noDefects: t("noDefects"),
-    notesTitle: t("notesTitle"),
+    noAnswers: t("noAnswers"),
     notes: input.notes?.trim() || null,
-    signatures: [
-      { label: t("signTechnician"), name: technicians[0] ?? null, signedAt: null },
-      {
+    signatures: {
+      technician: { label: t("signTechnician"), name: technicians[0] ?? null, signedAt: null },
+      customer: {
         label: t("signCustomer"),
         name: input.customerSignature?.name ?? null,
         signedAt: input.customerSignature?.signedAt
           ? day.format(new Date(input.customerSignature.signedAt))
           : null,
       },
-    ],
+      otherLabel: t("signOther"),
+    },
     signatureHint: t("signHint"),
     footer: organization.footer?.trim() || null,
     page: (page, pages) => t("page", { number, page, pages }),

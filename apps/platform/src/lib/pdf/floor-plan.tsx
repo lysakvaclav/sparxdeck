@@ -1,7 +1,7 @@
 import "server-only";
-import { Document, Image, Page, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
 import type { DueState } from "@/lib/due";
-import { FONT, registerFonts } from "./fonts";
+import { FONT, renderPdf } from "./fonts";
 
 // A floor plan on A4 (landscape for wide plans) with numbered markers, and the
 // list of the devices on it. Marker colours follow the app; the state is also
@@ -264,6 +264,5 @@ function FloorPlanDocument({ model }: { model: FloorPlanPdfModel }) {
 }
 
 export async function renderFloorPlanPdf(model: FloorPlanPdfModel): Promise<Buffer> {
-  registerFonts();
-  return renderToBuffer(<FloorPlanDocument model={model} />);
+  return renderPdf(<FloorPlanDocument model={model} />);
 }

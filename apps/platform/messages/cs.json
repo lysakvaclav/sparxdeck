@@ -1884,7 +1884,11 @@
         "location": "Umístění",
         "serial": "Výrobní číslo",
         "result": "Výsledek",
-        "nextDue": "Příští revize"
+        "nextDue": "Příští revize",
+        "manufacturer": "Výrobce",
+        "model": "Model",
+        "year": "Rok výroby",
+        "checkedBy": "Kontroloval(a)"
       },
       "result": {
         "passed": "Vyhovuje",
@@ -1895,7 +1899,8 @@
       },
       "finding": {
         "failed": "nevyhovuje",
-        "deviceNote": "Poznámka"
+        "deviceNote": "Poznámka",
+        "passed": "vyhovuje"
       },
       "defectsTitle": "Zjištěné závady",
       "defectColumns": {
@@ -1927,7 +1932,25 @@
       },
       "scanSummary": "Poloha při skenu odpovídala budově u {matches} z {total} zařízení.",
       "scanDisclaimer": "Poloha je orientační. Přesnost GPS uvnitř budov a ve sklepech může být nízká.",
-      "scanNote": "Vysvětlení polohy"
+      "scanNote": "Vysvětlení polohy",
+      "overall": {
+        "passed": "Všechna zkontrolovaná zařízení vyhovují.",
+        "failed": "{count, plural, one {# zařízení nevyhovuje} few {# zařízení nevyhovují} other {# zařízení nevyhovuje}}.",
+        "none": "Žádné zařízení nebylo zkontrolováno."
+      },
+      "counts": {
+        "total": "Zařízení celkem",
+        "passed": "Vyhovuje",
+        "failed": "Nevyhovuje",
+        "notChecked": "Nezkontrolováno",
+        "defects": "Zjištěné závady",
+        "result": "Celkový výsledek"
+      },
+      "summaryTitle": "Shrnutí",
+      "checklistTitle": "Výsledky kontrol",
+      "galleryTitle": "Fotografie",
+      "noAnswers": "Bez zaznamenaných odpovědí.",
+      "signOther": "Podpis"
     },
     "email": {
       "subject": "Protokol o revizi {number} – {site}",
