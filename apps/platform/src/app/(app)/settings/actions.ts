@@ -118,10 +118,8 @@ export async function uploadLogo(formData: FormData): Promise<ActionResult> {
     await supabase.storage.from(ORG_ASSETS_BUCKET).remove([path]);
     return result;
   }
-  // Old logo is no longer referenced; existing PDFs embed their own copy.
-  if (organization.logo_path) {
-    await supabase.storage.from(ORG_ASSETS_BUCKET).remove([organization.logo_path]);
-  }
+  // The old logo stays: issued protocols are drawn again with it (their
+  // snapshot names it, part 22).
   return { ok: true };
 }
 
@@ -130,9 +128,6 @@ export async function removeLogo(): Promise<ActionResult> {
   if (!organization) return { ok: false, error: "forbidden" };
   if (!organization.logo_path) return { ok: true };
 
-  const result = await updateOrganization({ logo_path: null });
-  if (!result.ok) return result;
-  const supabase = await createClient();
-  await supabase.storage.from(ORG_ASSETS_BUCKET).remove([organization.logo_path]);
-  return { ok: true };
+  // The file stays for the issued protocols that show it (part 22).
+  return updateOrganization({ logo_path: null });
 }

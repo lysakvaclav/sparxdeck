@@ -358,7 +358,19 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P3 Podkladová mapa z vlastního PMTiles: svět + detail Česka, Polska a Slovenska, písma a ikony u nás (část 21; produkce: nahrát do Supabase podle DEPLOY.md bod 10)
 - [ ] P3 „Přidat do plánu trasy“ z panelu budovy (část 23)
 
-**Editor protokolů (část 22)**, **Trasy pro techniky (část 23)**: položky se doplní s plánem každé části.
+**Editor protokolů (část 22)**
+- [x] P2 Šablona protokolu jako data se schématem a validací; žádné HTML, CSS ani skript (část 22 A)
+- [x] P2 Výchozí šablona = dosavadní vzhled protokolu, ověřeno porovnáním (část 22 A)
+- [x] P2 Verze šablon neměnné; protokol si ukládá verzi šablony a snímek dat, vykreslí se znovu stejně (část 22 A)
+- [x] P2 Výběr šablony: zákazník, typ zařízení, výchozí firmy; oprava revize ponechá verzi (část 22 A)
+- [x] P2 Zamčené prvky (číslo protokolu, identifikace firmy) a místo pro další povinné (část 22 A)
+- [x] P2 Stránkování dlouhého protokolu (300 zařízení) bez rozdělených řádků (část 22 A)
+- [ ] P2 Editor: bloky, pořadí tažením i klávesnicí, vlastnosti, živý náhled, zpět/znovu, automatické ukládání (část 22 B)
+- [ ] P2 Proměnné, podmínky bloků, styly, písma, jazyk šablony, logo šablony (část 22 C)
+- [ ] P2 Publikování s poznámkou, historie a porovnání verzí, obnovení, kopie, archivace (část 22 D)
+- [ ] P2 Export a import šablony (JSON), 3 ukázkové šablony cs/en, přiřazení zákazníkům a typům (část 22 D)
+
+**Trasy pro techniky (část 23)**: položky se doplní s plánem části.
 
 ---
 

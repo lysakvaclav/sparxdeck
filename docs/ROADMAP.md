@@ -39,7 +39,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Čeká na plán |
+| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapa A hotová (2026-10-27), nenasazeno; B–D čekají |
 | 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
@@ -651,6 +651,25 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Bez signálu:** mapa potřebuje spojení; revize v terénu se to netýká.
 - **Technicky:** migrace `20261028090000_site_map.sql` (`due_state`, sdílené pravidlo termínu shodné s `dueState()`; `site_map_statuses` s právy volajícího, takže RLS platí), `src/lib/site-map.ts`, `src/app/(app)/map`.
 - **Ověření:** testy pravidla termínu proti databázi na hraničních dnech, stavy budov (přesně 30 a 31 dní, bez zařízení, kritická, vyřešená závada, vyřazené zařízení), filtry, RLS; jednotkové testy řazení, filtrů a dat pro mapu; `e2e/part21.mjs` (seznam, shluk, panel a zahájení revize, filtry a zapamatování, telefon, tmavý režim a angličtina); audit přístupnosti.
+
+### Část 22: Editor protokolů (Díl 1)
+
+Čtyři etapy, po každé zpráva majiteli. Rozhodnutí majitele (2026-10-27, doporučení z plánu): oprava revize ponechá verzi šablony původního protokolu; pořadí výběru šablony zákazník → typ zařízení (jen když jsou v revizi všechna zařízení jednoho typu) → výchozí šablona firmy (typ kontroly v aplikaci není); ukázková „souhrnná“ šablona je pro souhrnný protokol; logo, patička a formát čísla zůstávají v Nastavení.
+
+**Etapa A, datový model a vykreslovací jádro. Stav (2026-10-27): hotovo** (lokálně, nenasazeno).
+
+- **Šablona jako data:** schéma Zod v `src/lib/protocol-template/schema.ts` (stránka, styl, 14 typů bloků, patička; žádné neznámé klíče, žádné HTML, odkazy jen `https:` a `mailto:`, limity délek a počtů). Formátovaný text je strom (odstavec, nadpis, seznam; tučně, kurzíva, odkaz).
+- **Zamčené prvky:** záhlaví s číslem protokolu a identifikací firmy (`requirements.ts`, jediné místo pro další povinné prvky, až je potvrdí odborník). Uložená šablona, která neprojde, se nikdy nevykreslí: použije se výchozí.
+- **Vykreslování po blocích** (`src/lib/pdf/protocol.tsx`); výchozí šablona (`default-template.ts`) dává přesně dosavadní vzhled: starý kód (každý případ v čistém procesu) a nový dávají stejný text, obrázky, čáry a stínování (`tests/protocol-golden.test.ts`, 5 protokolů včetně 120 zařízení a podepsaného v angličtině).
+- **Databáze** (migrace `20261029090000_protocol_templates.sql`): `protocol_templates` (koncept, stav, výchozí), `protocol_template_versions` (neměnné, trigger), `protocol_template_assignments` (zákazník, typ zařízení), `protocol_template_events`; `protocols.template_version_id` (razí trigger při očíslování, oprava přebírá verzi původního) a `protocols.snapshot` (data a obrázky, ze kterých PDF vzniklo). Každá firma má publikovanou „Výchozí protokol“ verze 1. Publikování `publish_protocol_template` (vlastník, admin, povinná poznámka).
+- **Překreslení:** `redrawProtocol` (a `/inspections/<id>/protocol?redraw` pro vlastníka a admina) vykreslí vydaný protokol znovu ze snímku a jeho verze šablony, stejně jako při vydání. Staré logo se při výměně nemaže; podpis zákazníka je přímo ve snímku.
+- **Oprava navíc:** react-pdf držel jedno načtené písmo pro celý proces a protokol vykreslený po jiném PDF mohl ztratit písmena („USTOMER“, „yhovuje“). Stávalo se to i v produkci. Každé PDF teď dostane vlastní kopii písma a vykreslují se po jednom (`renderPdf`).
+- **Bez signálu:** beze změny; šablona se vybírá v databázi při dokončení revize, které už signál potřebuje.
+- **Ověření:** schéma (nebezpečný a poškozený obsah), všechny bloky na šířku, 300 zařízení (záhlaví na každé stránce, žádný rozdělený řádek), písmena po jiném PDF i souběžně, RLS a role (cizí firma, technik, sloupce jen přes funkce, neměnné verze), výběr šablony a oprava; `e2e/part22.mjs` (snímek, překreslení = uložené PDF, nová verze nemění vydaný protokol); main flow, části 9, 11, 18.
+
+**Etapa B (editor), C (proměnné, podmínky, styly, jazyky, písma, logo šablony), D (verze, koncepty, publikování, import a export, ukázkové šablony, přiřazení):** čekají.
+
+**K ověření s odborníkem** (aplikace nic z toho nevymýšlí; doplní se do `requirements.ts`): co musí revizní protokol obsahovat (číslo osvědčení technika, výrobce, rok výroby, hasivo a množství, příští termín, lhůty závad, razítko, podpisy, prohlášení o provozuschopnosti, odkaz na předpisy) a zda platí pevné pořadí či nadpisy.
 
 ---
 

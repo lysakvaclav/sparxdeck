@@ -11,6 +11,18 @@ export type DeviceStatus = "active" | "out_of_service" | "removed";
 
 export type InspectionStatus = "in_progress" | "completed";
 export type ProtocolNumberFormat = "year_number" | "number_year" | "year_slash_number";
+export type ProtocolTemplateUsage = "inspection" | "summary";
+export type ProtocolTemplateStatus = "draft" | "published" | "archived";
+export type ProtocolTemplateEventKind =
+  | "created"
+  | "published"
+  | "renamed"
+  | "archived"
+  | "restored"
+  | "default"
+  | "copied"
+  | "imported"
+  | "assigned";
 
 export type CheckOutcome = "passed" | "failed" | "not_checked";
 
@@ -929,10 +941,14 @@ export type Database = {
           pdf_size: number | null;
           generated_at: string | null;
           created_at: string;
+          /** Set by the database when the protocol is numbered (part 22). */
+          template_version_id: string | null;
+          /** What the PDF was made from (ProtocolSnapshot), written with the PDF. */
+          snapshot: Json | null;
         };
         Insert: never;
         // Only the service role writes these (src/lib/protocols.ts); RLS has no update policy.
-        Update: { pdf_path?: string; pdf_size?: number; generated_at?: string };
+        Update: { pdf_path?: string; pdf_size?: number; generated_at?: string; snapshot?: Json };
         Relationships: [
           {
             foreignKeyName: "protocols_inspection_id_organization_id_fkey";
@@ -964,10 +980,107 @@ export type Database = {
           },
         ];
       };
+      protocol_templates: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          description: string | null;
+          usage: ProtocolTemplateUsage;
+          locale: "cs" | "en" | null;
+          status: ProtocolTemplateStatus;
+          is_default: boolean;
+          current_version_id: string | null;
+          draft: Json | null;
+          draft_updated_by: string | null;
+          draft_updated_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        // Status, default and current version only through functions.
+        Insert: {
+          organization_id: string;
+          name: string;
+          description?: string | null;
+          usage?: ProtocolTemplateUsage;
+          locale?: "cs" | "en" | null;
+          draft?: Json | null;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          locale?: "cs" | "en" | null;
+          draft?: Json | null;
+        };
+        Relationships: [];
+      };
+      protocol_template_versions: {
+        Row: {
+          id: string;
+          organization_id: string;
+          template_id: string;
+          version: number;
+          content: Json;
+          note: string;
+          published_by: string | null;
+          published_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "protocol_template_versions_template_id_organization_id_fkey";
+            columns: ["template_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "protocol_templates";
+            referencedColumns: ["id", "organization_id"];
+          },
+        ];
+      };
+      protocol_template_assignments: {
+        Row: {
+          id: string;
+          organization_id: string;
+          template_id: string;
+          customer_id: string | null;
+          device_type_id: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          template_id: string;
+          customer_id?: string | null;
+          device_type_id?: string | null;
+          created_by?: string | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      protocol_template_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          template_id: string;
+          kind: ProtocolTemplateEventKind;
+          version: number | null;
+          note: string | null;
+          actor: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       is_member: { Args: { p_org: string }; Returns: boolean };
+      publish_protocol_template: {
+        Args: { p_template: string; p_content: Json; p_note: string };
+        Returns: number;
+      };
       has_role: { Args: { p_org: string; p_roles: MemberRole[] }; Returns: boolean };
       create_organization: {
         Args: { p_name: string; p_display_name: string; p_locale?: string };
@@ -1197,6 +1310,8 @@ export type Database = {
       defect_severity: DefectSeverity;
       defect_status: DefectStatus;
       protocol_number_format: ProtocolNumberFormat;
+      protocol_template_usage: ProtocolTemplateUsage;
+      protocol_template_status: ProtocolTemplateStatus;
     };
     CompositeTypes: Record<string, never>;
   };

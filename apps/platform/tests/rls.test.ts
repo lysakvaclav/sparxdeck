@@ -5059,4 +5059,394 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect(data).toEqual([]);
     });
   });
+
+  describe("protocol templates (a fresh organization)", () => {
+    let olga: TestUser;
+    let tomas: TestUser;
+    let org: string;
+    let customerX: string;
+    let customerY: string;
+    let typeA: string;
+    let typeB: string;
+    let defaultTemplate: string;
+    let defaultVersion: string;
+    const sites: Record<string, string> = {};
+
+    async function device(site: string, type: string) {
+      const { data, error } = await olga.client
+        .from("devices")
+        .insert({ organization_id: org, site_id: site, device_type_id: type })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      return data!.id;
+    }
+
+    /** Inspects every device of the building (left out as inaccessible) and completes it. */
+    async function inspect(site: string, devices: string[]) {
+      const { data: inspection, error } = await olga.client.rpc("start_inspection", { p_site: site });
+      expect(error).toBeNull();
+      for (const id of devices) {
+        const { data: opened } = await olga.client.rpc("open_device_check", {
+          p_inspection: inspection!,
+          p_device: id,
+        });
+        const { error: skipped } = await olga.client.rpc("skip_device_check", {
+          p_item: (opened as { item: string }).item,
+          p_reason: "inaccessible",
+        });
+        expect(skipped).toBeNull();
+      }
+      const { error: completed } = await olga.client.rpc("complete_inspection", { p_inspection: inspection! });
+      expect(completed).toBeNull();
+      return inspection!;
+    }
+
+    async function protocolOf(inspection: string) {
+      const { data } = await olga.client
+        .from("protocols")
+        .select("id, version, template_version_id")
+        .eq("inspection_id", inspection)
+        .eq("active", true)
+        .single();
+      return data!;
+    }
+
+    /** A published template of the company (owner's own JSON). */
+    async function publishedTemplate(name: string) {
+      const { data, error } = await olga.client
+        .from("protocol_templates")
+        .insert({ organization_id: org, name })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      const { DEFAULT_PROTOCOL_TEMPLATE } = await import("@/lib/protocol-template/default-template");
+      const { error: published } = await olga.client.rpc("publish_protocol_template", {
+        p_template: data!.id,
+        p_content: { ...DEFAULT_PROTOCOL_TEMPLATE, style: { font: "noto-sans", size: 9 } } as unknown as Json,
+        p_note: `První verze ${name}`,
+      });
+      expect(published).toBeNull();
+      const { data: row } = await olga.client
+        .from("protocol_templates")
+        .select("current_version_id")
+        .eq("id", data!.id)
+        .single();
+      return { template: data!.id, version: row!.current_version_id! };
+    }
+
+    beforeAll(async () => {
+      olga = await createUser("template-owner");
+      tomas = await createUser("template-tech");
+      org = await createOrg(olga, `RLS templates ${run}`);
+      const token = generateToken();
+      await olga.client.from("invitations").insert({
+        organization_id: org,
+        email: tomas.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: olga.id,
+      });
+      const { error: joined } = await tomas.client.rpc("accept_invitation", {
+        p_token: token,
+        p_display_name: "Tomáš",
+      });
+      expect(joined).toBeNull();
+      const { data: customers } = await olga.client
+        .from("customers")
+        .insert([
+          { organization_id: org, name: "Zákazník X" },
+          { organization_id: org, name: "Zákazník Y" },
+        ])
+        .select("id, name");
+      customerX = customers!.find((row) => row.name === "Zákazník X")!.id;
+      customerY = customers!.find((row) => row.name === "Zákazník Y")!.id;
+      const { data: siteRows } = await olga.client
+        .from("sites")
+        .insert([
+          { organization_id: org, customer_id: customerX, name: "X1" },
+          { organization_id: org, customer_id: customerY, name: "Y1" },
+          { organization_id: org, customer_id: customerY, name: "Y2" },
+        ])
+        .select("id, name");
+      for (const row of siteRows ?? []) sites[row.name] = row.id;
+      const { data: types } = await olga.client
+        .from("device_types")
+        .select("id")
+        .eq("organization_id", org);
+      typeA = types![0]!.id;
+      const { data: second, error: typeError } = await olga.client
+        .from("device_types")
+        .insert({ organization_id: org, name: "Hydrant", code: "hydrant", inspection_interval_months: 12 })
+        .select("id")
+        .single();
+      expect(typeError).toBeNull();
+      typeB = second!.id;
+      const { error: checklist } = await olga.client.rpc("save_checklist_template", {
+        p_device_type: typeB,
+        p_name: "Hydrant",
+        p_items: [{ label: "Tlak vody", type: "pass_fail", required: true, failCreatesDefect: false }],
+      });
+      expect(checklist).toBeNull();
+      const { data: templates } = await olga.client
+        .from("protocol_templates")
+        .select("id, current_version_id")
+        .eq("organization_id", org);
+      defaultTemplate = templates![0]!.id;
+      defaultVersion = templates![0]!.current_version_id!;
+    });
+
+    it("a new company starts with the default template, published and in use", async () => {
+      const { DEFAULT_PROTOCOL_TEMPLATE } = await import("@/lib/protocol-template/default-template");
+      const { data: templates } = await olga.client
+        .from("protocol_templates")
+        .select("name, usage, status, is_default, current_version_id")
+        .eq("organization_id", org);
+      expect(templates).toEqual([
+        {
+          name: "Výchozí protokol",
+          usage: "inspection",
+          status: "published",
+          is_default: true,
+          current_version_id: defaultVersion,
+        },
+      ]);
+      const { data: version } = await olga.client
+        .from("protocol_template_versions")
+        .select("version, content, note")
+        .eq("id", defaultVersion)
+        .single();
+      // The database's copy of the default is the app's (default_protocol_template()).
+      expect(version).toEqual({ version: 1, content: DEFAULT_PROTOCOL_TEMPLATE, note: "Výchozí vzhled" });
+      const { data: events } = await olga.client
+        .from("protocol_template_events")
+        .select("kind, version")
+        .eq("template_id", defaultTemplate)
+        .order("kind");
+      expect(events).toEqual([
+        { kind: "created", version: null },
+        { kind: "published", version: 1 },
+      ]);
+    });
+
+    it("another company sees none of it and can change none of it", async () => {
+      for (const table of [
+        "protocol_templates",
+        "protocol_template_versions",
+        "protocol_template_events",
+        "protocol_template_assignments",
+      ] as const) {
+        const { data } = await bob.client.from(table).select("id").eq("organization_id", org);
+        expect(data, table).toEqual([]);
+      }
+      const { error: inserted } = await bob.client
+        .from("protocol_templates")
+        .insert({ organization_id: org, name: "Cizí" });
+      expect(inserted).not.toBeNull();
+      await bob.client.from("protocol_templates").update({ name: "Přejmenováno" }).eq("id", defaultTemplate);
+      const { data: kept } = await admin.from("protocol_templates").select("name").eq("id", defaultTemplate).single();
+      expect(kept!.name).toBe("Výchozí protokol");
+      const { error: published } = await bob.client.rpc("publish_protocol_template", {
+        p_template: defaultTemplate,
+        p_content: { schema: 1 },
+        p_note: "Cizí verze",
+      });
+      expect(published?.message).toMatch(/not_found/);
+      const { error: assigned } = await bob.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: defaultTemplate,
+        customer_id: customerX,
+      });
+      expect(assigned).not.toBeNull();
+      // Nor through its own company: the template and the customer must be of one company.
+      const { data: bobTemplates } = await bob.client.from("protocol_templates").select("id").limit(1);
+      const { error: crossed } = await bob.client.from("protocol_template_assignments").insert({
+        organization_id: orgB,
+        template_id: bobTemplates![0]!.id,
+        customer_id: customerX,
+      });
+      expect(crossed).not.toBeNull();
+    });
+
+    it("a technician uses templates but doesn't change them", async () => {
+      const { data } = await tomas.client.from("protocol_templates").select("id").eq("organization_id", org);
+      expect(data?.length).toBe(1);
+      const { error: inserted } = await tomas.client
+        .from("protocol_templates")
+        .insert({ organization_id: org, name: "Technikova" });
+      expect(inserted).not.toBeNull();
+      await tomas.client.from("protocol_templates").update({ draft: { schema: 1 } }).eq("id", defaultTemplate);
+      const { data: row } = await admin.from("protocol_templates").select("draft").eq("id", defaultTemplate).single();
+      expect(row!.draft).toBeNull();
+      const { error: published } = await tomas.client.rpc("publish_protocol_template", {
+        p_template: defaultTemplate,
+        p_content: { schema: 1 },
+        p_note: "Technik",
+      });
+      expect(published?.message).toMatch(/not_found/);
+      const { error: assigned } = await tomas.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: defaultTemplate,
+        customer_id: customerX,
+      });
+      expect(assigned).not.toBeNull();
+    });
+
+    it("the owner saves a draft (stamped), but status and version change only by publishing", async () => {
+      const { error } = await olga.client
+        .from("protocol_templates")
+        .update({ draft: { schema: 1, note: "rozpracováno" } })
+        .eq("id", defaultTemplate);
+      expect(error).toBeNull();
+      const { data: row } = await olga.client
+        .from("protocol_templates")
+        .select("draft_updated_by, draft_updated_at")
+        .eq("id", defaultTemplate)
+        .single();
+      expect(row!.draft_updated_by).toBe(olga.id);
+      expect(row!.draft_updated_at).not.toBeNull();
+      for (const patch of [{ status: "archived" }, { is_default: false }, { current_version_id: null }]) {
+        const { error: refused } = await olga.client
+          .from("protocol_templates")
+          .update(patch as never)
+          .eq("id", defaultTemplate);
+        expect(refused, JSON.stringify(patch)).not.toBeNull();
+      }
+      const { error: notJson } = await olga.client
+        .from("protocol_templates")
+        .update({ draft: ["seznam"] as unknown as Json })
+        .eq("id", defaultTemplate);
+      expect(notJson).not.toBeNull();
+    });
+
+    it("publishing needs a note and a template, and makes a new version", async () => {
+      const { data: draft } = await olga.client
+        .from("protocol_templates")
+        .insert({ organization_id: org, name: "Koncept" })
+        .select("id, status")
+        .single();
+      expect(draft!.status).toBe("draft");
+      const publish = (content: Json, note: string) =>
+        olga.client.rpc("publish_protocol_template", { p_template: draft!.id, p_content: content, p_note: note });
+      expect((await publish({ schema: 1 }, "  ")).error?.message).toMatch(/note_required/);
+      expect((await publish({ schema: 2 }, "Poznámka")).error?.message).toMatch(/invalid_template/);
+      expect((await publish(["x"], "Poznámka")).error?.message).toMatch(/invalid_template/);
+      const first = await publish({ schema: 1 }, "První");
+      expect(first.data).toBe(1);
+      const second = await publish({ schema: 1, page: "A4" }, "Druhá");
+      expect(second.data).toBe(2);
+      const { data: versions } = await olga.client
+        .from("protocol_template_versions")
+        .select("version, note, published_by")
+        .eq("template_id", draft!.id)
+        .order("version");
+      expect(versions).toEqual([
+        { version: 1, note: "První", published_by: olga.id },
+        { version: 2, note: "Druhá", published_by: olga.id },
+      ]);
+      const { data: template } = await olga.client
+        .from("protocol_templates")
+        .select("status, draft")
+        .eq("id", draft!.id)
+        .single();
+      expect(template).toEqual({ status: "published", draft: null });
+    });
+
+    it("a published version never changes, not even for the service role", async () => {
+      const { error } = await admin
+        .from("protocol_template_versions")
+        .update({ note: "Přepsáno" } as never)
+        .eq("id", defaultVersion);
+      expect(error?.message).toMatch(/version_immutable/);
+      const { error: user } = await olga.client
+        .from("protocol_template_versions")
+        .delete()
+        .eq("id", defaultVersion);
+      expect(user?.code).toBe("42501");
+      const { data } = await admin.from("protocol_template_versions").select("id").eq("id", defaultVersion);
+      expect(data?.length).toBe(1);
+    });
+
+    it("a protocol records its template version: customer, then device type, then the default", async () => {
+      const x1 = await device(sites.X1!, typeA);
+      const y1a = await device(sites.Y1!, typeB);
+      const y2a = await device(sites.Y2!, typeA);
+      const y2b = await device(sites.Y2!, typeB);
+
+      // Nothing assigned: the company's default.
+      const first = await protocolOf(await inspect(sites.X1!, [x1]));
+      expect(first.template_version_id).toBe(defaultVersion);
+
+      const forType = await publishedTemplate("Hydranty");
+      const forCustomer = await publishedTemplate("Pro zákazníka X");
+      const { error: typeAssigned } = await olga.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: forType.template,
+        device_type_id: typeB,
+      });
+      expect(typeAssigned).toBeNull();
+      const { error: customerAssigned } = await olga.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: forCustomer.template,
+        customer_id: customerX,
+      });
+      expect(customerAssigned).toBeNull();
+      // One template per customer.
+      const { error: twice } = await olga.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: forType.template,
+        customer_id: customerX,
+      });
+      expect(twice).not.toBeNull();
+
+      // The customer's template wins.
+      expect((await protocolOf(await inspect(sites.X1!, [x1]))).template_version_id).toBe(forCustomer.version);
+      // Only hydrants: the hydrants' template.
+      expect((await protocolOf(await inspect(sites.Y1!, [y1a]))).template_version_id).toBe(forType.version);
+      // Mixed device types: the default.
+      expect((await protocolOf(await inspect(sites.Y2!, [y2a, y2b]))).template_version_id).toBe(defaultVersion);
+    });
+
+    it("a correction keeps the template version of the protocol it replaces", async () => {
+      const x1 = await device(sites.X1!, typeA);
+      // X1 has the customer's template; drop it so the default applies.
+      await olga.client.from("protocol_template_assignments").delete().eq("customer_id", customerX);
+      const inspection = await inspect(sites.X1!, [x1]);
+      const original = await protocolOf(inspection);
+      expect(original.template_version_id).toBe(defaultVersion);
+
+      // The default gets a new version; the reissue still uses the original one.
+      const { DEFAULT_PROTOCOL_TEMPLATE } = await import("@/lib/protocol-template/default-template");
+      const { data: newVersion } = await olga.client.rpc("publish_protocol_template", {
+        p_template: defaultTemplate,
+        p_content: DEFAULT_PROTOCOL_TEMPLATE as unknown as Json,
+        p_note: "Druhá verze výchozího",
+      });
+      expect(newVersion).toBe(2);
+      const { error: reopened } = await olga.client.rpc("reopen_inspection", {
+        p_inspection: inspection,
+        p_reason: "Oprava údajů",
+      });
+      expect(reopened).toBeNull();
+      const { error: completed } = await olga.client.rpc("complete_inspection", { p_inspection: inspection });
+      expect(completed).toBeNull();
+      const reissued = await protocolOf(inspection);
+      expect(reissued.version).toBe(2);
+      expect(reissued.template_version_id).toBe(defaultVersion);
+
+      // A new inspection gets the new version.
+      const fresh = await protocolOf(await inspect(sites.X1!, [x1]));
+      expect(fresh.template_version_id).not.toBe(defaultVersion);
+    });
+
+    it("protocols' template version and snapshot are not the client's to write", async () => {
+      const { data: protocol } = await olga.client.from("protocols").select("id").limit(1).single();
+      await olga.client
+        .from("protocols")
+        .update({ snapshot: { forged: true } } as never)
+        .eq("id", protocol!.id);
+      const { data } = await admin.from("protocols").select("snapshot").eq("id", protocol!.id).single();
+      expect(data!.snapshot).toBeNull();
+    });
+  });
 });

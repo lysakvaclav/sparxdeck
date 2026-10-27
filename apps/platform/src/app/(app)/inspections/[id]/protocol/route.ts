@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getActiveMembership } from "@/lib/auth";
-import { protocolFileName, protocolHistoryOf, protocolOf } from "@/lib/protocols";
+import { getActiveMembership, requireManager } from "@/lib/auth";
+import { protocolFileName, protocolHistoryOf, protocolOf, redrawProtocol } from "@/lib/protocols";
 import { PROTOCOLS_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
@@ -14,7 +14,9 @@ const LINK_SECONDS = 60;
  * The inspection's protocol PDF: a fresh, short-lived signed link to the stored
  * file (RLS decides who may see it), downloaded under its own name.
  * `?inline` opens it in the browser instead (to print); `?version=N` opens a
- * superseded version instead of the current one.
+ * superseded version instead of the current one. `?redraw` (owner, admin)
+ * draws it again from its snapshot and template version, without storing it:
+ * it must look as issued (part 22).
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,6 +27,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     ? (await protocolHistoryOf(id)).find((entry) => entry.version === version)
     : await protocolOf(id);
   if (!protocol?.pdf_path) return new NextResponse(null, { status: 404 });
+
+  if (request.nextUrl.searchParams.has("redraw")) {
+    const pdf = (await requireManager()) ? await redrawProtocol(protocol) : null;
+    if (!pdf) return new NextResponse(null, { status: 404 });
+    return new NextResponse(new Uint8Array(pdf), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "inline",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
 
   const inline = request.nextUrl.searchParams.has("inline");
   const supabase = await createClient();
