@@ -198,7 +198,11 @@ export const siteSchema = z.object({
     .min(SCAN_LOCATION_RULES.minRadiusM, "invalidRadius")
     .max(SCAN_LOCATION_RULES.maxRadiusM, "invalidRadius")
     .optional(),
-  locationSource: z.enum(["map", "manual", "device"]).optional(),
+  // A hidden field: empty until coordinates are typed or taken from the phone.
+  locationSource: z
+    .enum(["map", "manual", "device", ""])
+    .optional()
+    .transform((value) => value || undefined),
 });
 
 export const locationNameSchema = z.object({ name: name(200) });

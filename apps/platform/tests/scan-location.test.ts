@@ -8,6 +8,7 @@ import {
   scanLocationVerdict,
   validCoordinates,
 } from "@/lib/scan-location";
+import { siteSchema } from "@/lib/validation";
 import { DISTANCE_CASES, VERDICT_CASES } from "./fixtures/scan-location-cases";
 
 describe("scan location: distance", () => {
@@ -68,6 +69,25 @@ describe("scan location: typed and pasted coordinates", () => {
     expect(validCoordinates(90.0001, 0)).toBe(false);
     expect(validCoordinates(0, -180.0001)).toBe(false);
     expect(validCoordinates(Number.NaN, 0)).toBe(false);
+  });
+
+  // The form's hidden source field is empty until a point is set; a building
+  // without coordinates once failed to save without any message.
+  it("saves a building without a point", () => {
+    const form = {
+      name: "Lipová 12",
+      address: "",
+      accessNotes: "",
+      notes: "",
+      coordinates: "",
+      radius: "150",
+      locationSource: "",
+    };
+    const parsed = siteSchema.safeParse(form);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.locationSource).toBeUndefined();
+    expect(siteSchema.parse({ ...form, locationSource: "device" }).locationSource).toBe("device");
+    expect(siteSchema.safeParse({ ...form, locationSource: "gps" }).success).toBe(false);
   });
 });
 
