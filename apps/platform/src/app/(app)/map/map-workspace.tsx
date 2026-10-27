@@ -76,7 +76,9 @@ export function MapWorkspace({
     () => sortSites(rows, locale).filter((row) => !filters.status || row.status === filters.status),
     [rows, locale, filters.status],
   );
-  const located = shown.filter((row) => row.latitude !== null);
+  // The same array until the rows change: the map fits its view to new rows,
+  // and a fresh array on every selection would undo the zoom to a building.
+  const located = useMemo(() => shown.filter((row) => row.latitude !== null), [shown]);
   const unlocated = shown.filter((row) => row.latitude === null);
   const current = shown.find((row) => row.site_id === selected) ?? null;
   const filtered = Object.values(filters).some(Boolean);

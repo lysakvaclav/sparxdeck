@@ -117,23 +117,23 @@ Stejně se mění `CRON_SECRET`, Resend a Sentry token.
 
 Mapa budov (část 21) kreslí skutečnou mapu z vlastních souborů. Žádný veřejný server dlaždic ani geokódování se nepoužívá; prohlížeč čte jen z naší adresy (lokálně) nebo ze Supabase Storage (produkce). Bez nastavené složky ukáže obrys Česka (Natural Earth, `src/assets/map/cz-outline.json`) a mřížku.
 
-**Obsah složky** (`NEXT_PUBLIC_MAP_BASE_URL`), asi 920 MB:
+**Obsah složky** (`NEXT_PUBLIC_MAP_BASE_URL`), asi 2,2 GB:
 
 | Soubor | Co to je | Velikost |
 |---|---|---|
 | `world.pmtiles` | celý svět, přiblížení 0–6 (státy, řeky, velká města) | 45 MB |
-| `detail.pmtiles` | Česko (obdélník 12,09–18,86 / 48,55–51,06) do přiblížení 14: ulice, budovy, názvy | 875 MB |
+| `detail.pmtiles` | Česko, Polsko a Slovensko (hranice států z `apps/platform/scripts/map-detail-region.geojson`, Natural Earth) do přiblížení 14: ulice, budovy, názvy | 2,15 GB |
 | `fonts/Noto Sans {Regular,Medium,Italic}/*.pbf` + `fonts/OFL.txt` | písmo popisků (OFL) | 30 MB |
 | `sprites/v4/{light,dark}[@2x].{json,png}` | ikony míst (MIT) | 0,1 MB |
 
-Mimo Česko je při větším přiblížení vidět jen pevnina a voda; další země = další výřez a třetí zdroj v `site-map-canvas.tsx`.
+Mimo tyto tři státy je při větším přiblížení vidět jen pevnina a voda. Další země: přidat její obrys do `map-detail-region.geojson` (MultiPolygon) a vyříznout `detail.pmtiles` znovu; kód se nemění.
 
 **Příprava souborů** (data OpenStreetMap ve formátu Protomaps, ODbL):
 
 1. Nástroj [`pmtiles`](https://github.com/protomaps/go-pmtiles/releases) (ověřit kontrolní součet SHA256 z vydání).
 2. Denní build Protomaps je na `https://build.protomaps.com/YYYYMMDD.pmtiles` (aktuální v `https://build-metadata.protomaps.dev/builds.json`). Celý soubor se nestahuje, `extract` čte jen potřebné části:
    - `pmtiles extract https://build.protomaps.com/<datum>.pmtiles world.pmtiles --maxzoom=6`
-   - `pmtiles extract https://build.protomaps.com/<datum>.pmtiles detail.pmtiles --bbox=12.09,48.55,18.86,51.06 --maxzoom=14`
+   - `pmtiles extract https://build.protomaps.com/<datum>.pmtiles detail.pmtiles --region=scripts/map-detail-region.geojson --maxzoom=14` (předem `--dry-run` ukáže velikost)
 3. Písma a ikony z repozitáře [`protomaps/basemaps-assets`](https://github.com/protomaps/basemaps-assets): složky `fonts/Noto Sans Regular`, `Noto Sans Medium`, `Noto Sans Italic` (+ `OFL.txt`) a `sprites/v4/light*`, `dark*`.
 
 Použitá verze: build 2026-10-27 (tiles v4.15.2), `@protomaps/basemaps` 5.7.2. Styl (`layers()` z `@protomaps/basemaps`) musí odpovídat verzi dlaždic (v4); při přechodu na v5 aktualizovat obojí.
@@ -142,7 +142,7 @@ Použitá verze: build 2026-10-27 (tiles v4.15.2), `@protomaps/basemaps` 5.7.2. 
 
 **Produkce:**
 
-1. Veřejný bucket `map` v produkčním Supabase (soubory jsou veřejná data OpenStreetMap, nic firemního). Soubor 875 MB vyžaduje placený plán: free plán má limit 50 MB na soubor a 1 GB úložiště. Nahrávat přes resumable upload (TUS), např. Supabase CLI `supabase storage cp -r ./map ss:///map --experimental` nebo v Dashboardu.
+1. Veřejný bucket `map` v produkčním Supabase (soubory jsou veřejná data OpenStreetMap, nic firemního). Soubor 2,15 GB vyžaduje placený plán: free plán má limit 50 MB na soubor a 1 GB úložiště. Nahrávat přes resumable upload (TUS), např. Supabase CLI `supabase storage cp -r ./map ss:///map --experimental` nebo v Dashboardu.
 2. Ve Vercelu `NEXT_PUBLIC_MAP_BASE_URL=https://<projekt>.supabase.co/storage/v1/object/public/map` a nové nasazení (proměnná se vkládá při buildu). Adresa Supabase už v CSP je; jiný host by se musel přidat do `connect-src` (`src/lib/security-headers.ts`).
 3. Ověřit: `curl -r 0-126 <adresa>/world.pmtiles -o /dev/null -w "%{http_code}"` vrací `206`.
 4. Přenos: mapa načítá jen dlaždice zobrazeného výřezu (desítky až stovky kB na zobrazení), prohlížeč je drží v cache.

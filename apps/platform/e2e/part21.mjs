@@ -148,6 +148,15 @@ try {
     );
     if (!panel.includes("Bytový dům Karlín") || !panel.includes("Brzy termín"))
       throw new Error(`panel ${panel}`);
+    // The map zooms to the building (and stays there): the Prague cluster opens.
+    await until("the zoom to the building", () =>
+      page.evaluate(
+        `![...document.querySelectorAll(".site-cluster")].some((c) => c.textContent === "◆ 3")`,
+      ),
+    );
+    await sleep(1500);
+    if (await page.evaluate(`[...document.querySelectorAll(".site-cluster")].some((c) => c.textContent === "◆ 3")`))
+      throw new Error("the map went back to all buildings");
     await page.screenshot(`${OUT}/p21-02-panel.png`);
     await page.clickText("Zahájit kontrolu", "button");
     await page.waitForText("Zkontrolováno 0 z 1", 30000);
