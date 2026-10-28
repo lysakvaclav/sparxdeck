@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { formatLabel } from "@/lib/devices";
 import { renderEmail, sendEmail } from "@/lib/email";
 import { memberNames } from "@/lib/inspection-data";
+import { pdfImage } from "@/lib/pdf/images";
 import { renderProtocolPdf, type ProtocolAssets, type ProtocolLogo } from "@/lib/pdf/protocol";
 import {
   buildProtocol,
@@ -19,7 +20,7 @@ import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-templ
 import { sampleInput, type SampleTexts } from "@/lib/protocol-template/sample-input";
 import { usableTemplate } from "@/lib/protocol-template/requirements";
 import type { ProtocolTemplate } from "@/lib/protocol-template/schema";
-import { ORG_ASSETS_BUCKET, PROTOCOLS_BUCKET, sniffImage } from "@/lib/storage";
+import { ORG_ASSETS_BUCKET, PROTOCOLS_BUCKET } from "@/lib/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
@@ -57,8 +58,9 @@ export async function protocolHistoryOf(inspectionId: string): Promise<Protocol[
 }
 
 /**
- * An org-assets image of the company as react-pdf takes it (PNG or JPEG);
- * WebP is converted. Null if unusable or outside the company's folder.
+ * An org-assets image of the company as react-pdf draws it (written anew by
+ * pdfImage: some JPEGs were skipped). Null if unusable or outside the
+ * company's folder.
  */
 async function loadOrgImage(organizationId: string, path: string): Promise<ProtocolLogo | null> {
   if (!path.startsWith(`${organizationId}/`)) return null;
@@ -66,12 +68,9 @@ async function loadOrgImage(organizationId: string, path: string): Promise<Proto
     const supabase = await createClient();
     const { data } = await supabase.storage.from(ORG_ASSETS_BUCKET).download(path);
     if (!data) return null;
-    const bytes = Buffer.from(await data.arrayBuffer());
-    const kind = sniffImage(bytes);
-    if (kind?.ext === "png") return { data: bytes, format: "png" };
-    if (kind?.ext === "jpg") return { data: bytes, format: "jpg" };
-    if (kind?.ext === "webp") return { data: await sharp(bytes).png().toBuffer(), format: "png" };
-    return null;
+    const image = await pdfImage(Buffer.from(await data.arrayBuffer()));
+    if (!image) console.error("Protocol image unusable", path);
+    return image;
   } catch (error) {
     console.error("Protocol image could not be loaded", path, error);
     return null;
@@ -517,7 +516,13 @@ export async function previewProtocol(
     {
       schema: SNAPSHOT_SCHEMA,
       input,
-      images: { logo: organization.logo_path, signature: null, defectPhotos: [], inspectionPhotos: [] },
+      // The template's own logo, else the company's (as a protocol drawn by it).
+      images: {
+        logo: logoOf(template, organization.logo_path),
+        signature: null,
+        defectPhotos: [],
+        inspectionPhotos: [],
+      },
     },
     template,
     {

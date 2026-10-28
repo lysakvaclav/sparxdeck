@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import sharp from "sharp";
 import { launch, sleep } from "./driver.mjs";
 import {
   APP,
@@ -62,6 +63,33 @@ async function previewPdf(page, template) {
   })()`);
   return Buffer.from(base64, "base64");
 }
+/** How many pictures the PDF draws, on all its pages. */
+async function pdfImages(bytes) {
+  const task = getDocument({ data: new Uint8Array(bytes), verbosity: 0 });
+  const document = await task.promise;
+  let count = 0;
+  for (let n = 1; n <= document.numPages; n++)
+    count += (await (await document.getPage(n)).getOperatorList()).fnArray.filter((fn) => fn === 85).length;
+  await task.destroy();
+  return count;
+}
+/** The template without its logo: what the logo adds is the difference. */
+const withoutLogo = (draft) => ({
+  ...draft,
+  blocks: draft.blocks.map((item) => (item.type === "header" ? { ...item, logo: { ...item.logo, show: false } } : item)),
+});
+/** A JPEG whose JFIF header is 4 bytes longer than usual ("AMPF"), as a logo that went missing. */
+async function oddJpeg() {
+  const base = await sharp({ create: { width: 600, height: 200, channels: 3, background: "#7a1f1f" } }).jpeg().toBuffer();
+  const jfif = Buffer.concat([
+    Buffer.from([0xff, 0xe0, 0x00, 0x14]),
+    Buffer.from("JFIF", "latin1"),
+    Buffer.from([0x00, 0x01, 0x01, 0x01, 0x01, 0x2c, 0x01, 0x2c, 0x00, 0x00]),
+    Buffer.from("AMPF"),
+  ]);
+  return Buffer.concat([base.subarray(0, 2), jfif, base.subarray(2)]);
+}
+
 async function pdfWords(bytes) {
   const task = getDocument({ data: new Uint8Array(bytes), verbosity: 0 });
   const document = await task.promise;
@@ -195,8 +223,25 @@ try {
     if (!/(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}/.test(words))
       throw new Error("no long English date");
     if (!pdf.includes("NotoSerif")) throw new Error("the serif font isn't embedded");
-    if (!pdf.includes("/Subtype /Image")) throw new Error("no logo image");
+    // The template's own logo is drawn (one picture more than without it).
+    const extra = (await pdfImages(pdf)) - (await pdfImages(await previewPdf(page, withoutLogo(draft))));
+    if (extra !== 1) throw new Error(`the template's logo adds ${extra} pictures`);
     await page.screenshot(`${OUT}/p22c-04-preview.png`);
+  });
+
+  await step("the company's logo from Settings shows too, even an odd JPEG", async () => {
+    const file = path.resolve(OUT, "p22c-odd-logo.jpg");
+    fs.writeFileSync(file, await oddJpeg());
+    await page.goto(`${APP}/settings`);
+    await page.waitFor("input[type=file]");
+    await page.setFile("input[type=file]", file);
+    await until("the company's logo stored", async () =>
+      Boolean((await selectRows("organizations", `id=eq.${org}&select=logo_path`))[0].logo_path),
+    );
+    const [template] = await selectRows("protocol_templates", `organization_id=eq.${org}&is_default=eq.true&select=current_version_id`);
+    const [version] = await selectRows("protocol_template_versions", `id=eq.${template.current_version_id}&select=content`);
+    const extra = (await pdfImages(await previewPdf(page, version.content))) - (await pdfImages(await previewPdf(page, withoutLogo(version.content))));
+    if (extra !== 1) throw new Error(`the company's logo adds ${extra} pictures`);
   });
 
   await step("dark mode and English", async () => {

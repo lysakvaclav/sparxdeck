@@ -150,6 +150,7 @@ Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3
   - Vzhled se ve `src/lib/pdf/protocol.tsx` předává parametrem `look` (Table, Section), ne React kontextem: server (RSC) `createContext` nemá.
   - Formátovaný text: TipTap (`rich-text-editor.tsx`, `immediatelyRender: false`), převod `fromEditor`/`toEditor` v `rich-text.ts`. Logo šablony: `uploadProtocolTemplateLogo` → `templateLogoPng` (`src/lib/protocol-template-logo.ts`) → PNG v `org-assets`.
   - Písma PDF: `FONT_FAMILIES` v `src/lib/pdf/fonts.ts` (Noto Sans, Noto Serif, Inter; každé 4 řezy).
+  - Obrázky do PDF (logo, podpis, fotky) vždy přes `pdfImage` (`src/lib/pdf/images.ts`: otočení podle EXIF, nejvýš 2000 px, nově uložený PNG/JPEG). react-pdf některé JPEGy (např. s delší hlavičkou JFIF „AMPF“) tiše vynechá; test `tests/pdf-images.test.ts`.
 - Přehled termínů na úvodní stránce:
   - Co propadá za 30/60/90 dní po budovách: `src/lib/due-plan.ts` (`duePlan`, `horizonWindow`, testy hranic), `src/app/(app)/due-overview.tsx`.
   - Filtr zákazníka a budovy je v adrese (`overview-filters.tsx`).
