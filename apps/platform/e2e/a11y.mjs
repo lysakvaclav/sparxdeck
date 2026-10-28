@@ -144,6 +144,12 @@ try {
     due_on: "2026-01-15",
   });
 
+  // Part 22: the company's default protocol template, in the editor.
+  const [protocolTemplate] = await selectRows(
+    "protocol_templates",
+    `organization_id=eq.${org}&select=id&limit=1`,
+  );
+
   const pages = [
     ["dashboard", "/"],
     ["customers", "/customers"],
@@ -175,6 +181,8 @@ try {
     ["calendar", "/calendar"],
     ["calendar-workload", "/calendar?view=workload"],
     ["map", "/map"],
+    ["protocol-templates", "/protocol-templates"],
+    ["protocol-template", `/protocol-templates/${protocolTemplate.id}`],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -227,6 +235,14 @@ try {
   await page.clickText("Zrušit", "button");
   await sleep(400);
   // Completing, with the customer's signature pad.
+  // Part 22: the template editor on a phone (the preview and the texts).
+  await page.goto(`${APP}/protocol-templates/${protocolTemplate.id}`);
+  await page.waitForText("Rozložení bloků upravíte na počítači.");
+  await audit(page, "phone template editor");
+  await touchTargets(page, "phone template editor");
+  await page.clickText("Texty", "button");
+  await audit(page, "phone template texts");
+  await touchTargets(page, "phone template texts");
   await page.goto(`${APP}${run}/complete`);
   await page.waitForText("Podpis zákazníka");
   await audit(page, "phone complete");

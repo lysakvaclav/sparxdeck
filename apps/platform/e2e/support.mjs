@@ -100,6 +100,16 @@ export async function cleanup() {
 
 export async function signIn(page, user, pwd = password) {
   await page.goto(`${APP}/login`);
+  // Typed before React takes over the form, the browser would send it as a
+  // plain GET (the password in the address) instead of signing in.
+  const end = Date.now() + 20_000;
+  while (
+    Date.now() < end &&
+    !(await page.evaluate(
+      `(() => { const el = document.querySelector("#email"); return !!el && Object.keys(el).some((key) => key.startsWith("__reactProps")); })()`,
+    ))
+  )
+    await new Promise((resolve) => setTimeout(resolve, 200));
   await page.type("#email", user.email);
   await page.type("#password", pwd);
   await page.clickText("Přihlásit se");

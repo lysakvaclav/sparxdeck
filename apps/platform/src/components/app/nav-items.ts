@@ -4,6 +4,7 @@ import {
   ClipboardIcon,
   CogIcon,
   DataLineageIcon,
+  DocumentIcon,
   FlameIcon,
   FormIcon,
   HomeIcon,
@@ -31,6 +32,7 @@ export type NavItem = {
     | "plans"
     | "graph"
     | "deviceTypes"
+    | "protocolTemplates"
     | "team"
     | "settings";
   icon: IconComponent;
@@ -131,6 +133,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: ClipboardIcon,
     group: "admin",
     headerTone: "text-[#7157d9] dark:text-[#ad99ff]",
+    phone: "more",
+  },
+  {
+    href: "/protocol-templates",
+    label: "protocolTemplates",
+    icon: DocumentIcon,
+    group: "admin",
+    headerTone: "text-[#2965cc] dark:text-[#669eff]",
     phone: "more",
   },
   {

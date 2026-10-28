@@ -39,7 +39,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapa A hotová (2026-10-27), nenasazeno; B–D čekají |
+| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapy A a B hotové (2026-10-28), nenasazeno; C–D čekají |
 | 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
@@ -667,7 +667,20 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Bez signálu:** beze změny; šablona se vybírá v databázi při dokončení revize, které už signál potřebuje.
 - **Ověření:** schéma (nebezpečný a poškozený obsah), všechny bloky na šířku, 300 zařízení (záhlaví na každé stránce, žádný rozdělený řádek), písmena po jiném PDF i souběžně, RLS a role (cizí firma, technik, sloupce jen přes funkce, neměnné verze), výběr šablony a oprava; `e2e/part22.mjs` (snímek, překreslení = uložené PDF, nová verze nemění vydaný protokol); main flow, části 9, 11, 18.
 
-**Etapa B (editor), C (proměnné, podmínky, styly, jazyky, písma, logo šablony), D (verze, koncepty, publikování, import a export, ukázkové šablony, přiřazení):** čekají.
+**Etapa B, editor. Stav (2026-10-28): hotovo** (lokálně, nenasazeno).
+
+- **Seznam** `/protocol-templates` (Správa → Šablony protokolů): název, použití, stav, výchozí, verze, změna. Nová šablona jako koncept z výchozího protokolu nebo kopie jiné šablony. Technik seznam jen vidí, editor ne.
+- **Editor** `/protocol-templates/<id>`: vlevo bloky (přidat za vybraný, skrýt, kopírovat, odebrat; záhlaví zamčené), uprostřed živý náhled, vpravo vlastnosti vybraného bloku nebo stránky a patičky (orientace, okraje, velikost písma, text patičky, čísla stran) a název šablony. Vlastnosti všech 14 bloků (sloupce tabulky zařízení s pořadím a šířkou, vlastní tabulka, podpisová pole, fotky, text po odstavcích).
+- **Přesun bloků** tažením (`@dnd-kit`, MIT), klávesnicí (úchyt, mezerník, šipky, mezerník; kroky hlásí čtečce) i tlačítky; Alt+šipka posune vybraný blok. Akce jsou jen u vybraného bloku (při najetí myší by se posunuly pod ukazatel).
+- **Zpět a znovu** (Ctrl+Z, Ctrl+Shift+Z/Ctrl+Y, psaní do jednoho pole je jeden krok, 100 kroků), **automatické ukládání konceptu** sekundu po změně (stav vidět v liště, Ctrl+S hned, upozornění před odchodem s neuloženou změnou), **zahození konceptu** u publikované šablony. Seznam problémů před publikováním (záhlaví).
+- **Náhled** kreslí server stejným kódem jako ostrý protokol (`POST /protocol-templates/preview`, jen vlastník a admin, nic neukládá), pdf.js ho v prohlížeči převede na obrázky stránek (s popisem pro čtečky) a dá stáhnout. Data: ukázková (identita firmy, smyšlená revize se zástupnými fotkami, `sample-input.ts`) nebo skutečná data dokončené revize firmy.
+- **Telefon:** náhled a záložka Texty (nadpisy a texty bloků), s vysvětlením, že rozložení se upravuje na počítači.
+- **Technicky:** `src/lib/protocol-template/editor.ts` (čisté funkce bloků, historie, problémy; testy), `src/app/(app)/protocol-templates`, akce `createProtocolTemplate`, `saveProtocolTemplateDraft`, `discardProtocolTemplateDraft`, `renameProtocolTemplate`. Publikování zůstává na etapu D.
+- **Opravy navíc:** sdílený `signIn` v e2e čeká, až React převezme přihlašovací formulář (jinak ho prohlížeč odeslal jako GET s heslem v adrese); tmavší `--success-text` (#0f7246) kvůli kontrastu zelených odznaků.
+- **Bez signálu:** editor potřebuje spojení (náhled kreslí server); revize v terénu beze změny.
+- **Ověření:** testy funkcí editoru a ukázkových dat; `e2e/part22-editor.mjs` (11 kroků: seznam, nová šablona, náhled, textový blok, přesun klávesnicí i tlačítkem, skrytí, zpět a znovu, uložení a obnovení, skutečná data, zahození, technik, telefon, tmavý režim a angličtina); audit přístupnosti seznamu a editoru (i telefon a dotykové plochy).
+
+**Etapa C (proměnné, podmínky, styly, jazyky, písma, logo šablony) a D (publikování, historie a porovnání verzí, import a export, ukázkové šablony, přiřazení):** čekají.
 
 **K ověření s odborníkem** (aplikace nic z toho nevymýšlí; doplní se do `requirements.ts`): co musí revizní protokol obsahovat (číslo osvědčení technika, výrobce, rok výroby, hasivo a množství, příští termín, lhůty závad, razítko, podpisy, prohlášení o provozuschopnosti, odkaz na předpisy) a zda platí pevné pořadí či nadpisy.
 

@@ -133,7 +133,8 @@
     "groupWork": "Work",
     "groupRecords": "Records",
     "groupAdmin": "Administration",
-    "map": "Building map"
+    "map": "Building map",
+    "protocolTemplates": "Protocol templates"
   },
   "dashboard": {
     "title": "Overview",
@@ -2321,5 +2322,287 @@
     "emptyNoSites": "The company has no buildings yet. Add a customer and their buildings.",
     "emptyFiltered": "No building matches the filters.",
     "emptyNoPoints": "No building has coordinates yet. Add them to the buildings under Without a location."
+  },
+  "protocolTemplates": {
+    "title": "Protocol templates",
+    "readOnly": "Protocol templates are edited by the owner and administrators. Technicians use them.",
+    "empty": "The company has no protocol template yet.",
+    "default": "Default",
+    "hasDraft": "Draft in progress",
+    "version": "version {version}",
+    "columns": {
+      "name": "Name",
+      "usage": "Used for",
+      "state": "State",
+      "version": "Version",
+      "changed": "Changed"
+    },
+    "usage": {
+      "inspection": "Inspection protocol",
+      "summary": "Summary report"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "create": {
+      "button": "New template",
+      "title": "New protocol template",
+      "name": "Template name",
+      "from": "Start from",
+      "fromHint": "The template is created as a draft. Protocols follow it only once it is published.",
+      "fromDefault": "SparxDeck default protocol",
+      "copyOf": "Copy of {name}",
+      "submit": "Create and edit"
+    },
+    "preview": {
+      "loading": "Drawing the preview…",
+      "failed": "The preview could not be drawn. Try the change again.",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "pagesShown": "Showing {shown} of {total} pages",
+      "download": "Download preview",
+      "label": "Protocol preview",
+      "pageAlt": "Protocol preview, page {page} of {pages}"
+    },
+    "editor": {
+      "removed": "Block removed. Undo brings it back.",
+      "undo": "Undo",
+      "redo": "Redo",
+      "undoShortcut": "Undo (Ctrl+Z)",
+      "redoShortcut": "Redo (Ctrl+Shift+Z)",
+      "save": {
+        "saved": "Draft saved",
+        "unchanged": "No changes",
+        "pending": "Unsaved changes",
+        "saving": "Saving the draft…",
+        "failed": "The draft could not be saved.",
+        "retry": "Try again"
+      },
+      "discard": "Discard draft",
+      "discardTitle": "Discard the draft?",
+      "discardDescription": "Changes that aren't published are deleted and the template goes back to its published version. Issued protocols don't change.",
+      "previewSource": "Preview data",
+      "sampleData": "Sample data",
+      "mobileNotice": "The layout of blocks is edited on a computer. On a phone you can check the preview and edit the texts.",
+      "mobileTabs": "Editor parts",
+      "tabs": {
+        "preview": "Preview",
+        "texts": "Texts"
+      },
+      "blocksLabel": "Protocol blocks",
+      "blocks": "Blocks",
+      "addBlock": "Add block",
+      "pageAndFooter": "Page and footer",
+      "issues": "Fix before publishing",
+      "issue": {
+        "headerMissing": "A protocol needs the header with the protocol number and the company's details.",
+        "headerHidden": "The header with the protocol number and the company's details can't be hidden.",
+        "headerTwice": "A protocol can have the header only once.",
+        "invalid": "{block}: a value is out of range"
+      },
+      "shortcuts": "Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z redo, Ctrl+S save, Alt+arrow moves the selected block, Esc clears the selection. Move a block also by dragging its handle, or with the keyboard: space on the handle, arrows, space.",
+      "previewLabel": "Preview",
+      "titleOf": "Heading: {block}",
+      "propertiesLabel": "Properties",
+      "name": "Template name",
+      "description": "Description",
+      "rename": "Save name",
+      "renamed": "Template name saved.",
+      "previewFile": "Preview-{number}.pdf"
+    },
+    "blocks": {
+      "types": {
+        "header": "Header",
+        "parties": "Customer and building",
+        "summary": "Result summary",
+        "devices": "Devices table",
+        "checklist": "Checklist results",
+        "defects": "Defects",
+        "gallery": "Photo gallery",
+        "notes": "Inspection note",
+        "text": "Text",
+        "table": "Custom table",
+        "signatures": "Signatures",
+        "divider": "Divider",
+        "spacer": "Space",
+        "pageBreak": "New page"
+      },
+      "label": "Order of blocks",
+      "drag": "Move block {name}",
+      "locked": "Locked block",
+      "hidden": "hidden",
+      "issue": "fix",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "show": "Show {name}",
+      "hide": "Hide {name}",
+      "duplicate": "Copy {name}",
+      "remove": "Remove {name}",
+      "dragStart": "Picked up block {name}, position {position} of {count}.",
+      "dragOver": "Block {name} at position {position} of {count}.",
+      "dragEnd": "Block {name} dropped at position {position} of {count}.",
+      "dragCancel": "Moving block {name} cancelled.",
+      "dragInstructions": "Press space to pick up a block, arrows to move it, space to drop it, Escape to cancel."
+    },
+    "properties": {
+      "outOfRange": "Enter a number from {min} to {max}.",
+      "outOfRangeWhole": "Enter a whole number from {min} to {max}.",
+      "title": "Heading",
+      "titleHint": "Empty = the default heading in the protocol's language.",
+      "titleOptional": "Heading (optional)",
+      "columnsHint": "The number of a column is its share of the line; columns always fill the full width.",
+      "columnFor": "Column {index}",
+      "widthFor": "Width of column {name}",
+      "columnUp": "Move column {name} left",
+      "columnDown": "Move column {name} right",
+      "columnRemove": "Remove column {name}",
+      "columnAdd": "Add column",
+      "headerLocked": "The protocol number and the company's name are always in the header. The header can't be removed or hidden.",
+      "documentTitle": "Document title",
+      "logoShow": "Company logo (from Settings)",
+      "logoPosition": "Logo position",
+      "logoPositions": {
+        "left": "Left",
+        "center": "Centred above the header",
+        "right": "Right"
+      },
+      "logoHeight": "Logo height",
+      "companyFields": "Company details under its name",
+      "companyField": {
+        "address": "Address",
+        "ids": "Company and VAT ID",
+        "contact": "E-mail and phone"
+      },
+      "headerDate": "Inspection date in the header",
+      "customerShow": "Customer",
+      "customerFields": "Customer details",
+      "customerField": {
+        "billingAddress": "Billing address",
+        "ids": "Company and VAT ID",
+        "contact": "Contact person"
+      },
+      "siteShow": "Building",
+      "siteAddress": "Building address",
+      "facts": "Inspection details",
+      "fact": {
+        "date": "Inspection date",
+        "technician": "Who inspected",
+        "issued": "Issue date",
+        "version": "Protocol version (after a correction)"
+      },
+      "emptyHint": "Details the customer or building doesn't have are left out of the protocol.",
+      "devicesSummary": "Sentence with the counts above the table",
+      "devicesDetails": "Findings and notes under each device",
+      "columns": "Columns",
+      "columnsWithScan": "Own columns when the protocol reports the scan location",
+      "columnsWithScanLegend": "Columns with the scan location",
+      "columnsWithScanHint": "When the company records scan locations, a \"Scan location\" column is added at the end and the widths are recalculated.",
+      "photosPerDefect": "Photos per defect",
+      "photoWidth": "Photo width",
+      "whenEmpty": "When the inspection finds no defects",
+      "whenEmptyOption": {
+        "text": "Say that no defects were found",
+        "hide": "Leave the block out"
+      },
+      "gallerySource": "Photos",
+      "gallerySources": {
+        "inspection": "From the device checks",
+        "defects": "From defects",
+        "all": "From checks and defects"
+      },
+      "perRow": "Photos per row",
+      "galleryMax": "Photos at most",
+      "captions": "Captions (label or defect number)",
+      "textVariant": "Look",
+      "textVariants": {
+        "normal": "Normal text",
+        "note": "Small print (notices, legal wording)"
+      },
+      "text": "Text",
+      "textHint": "Separate paragraphs with an empty line. Formatting and variables come in the next stage. The company writes its own legal wording.",
+      "tableColumns": "Columns",
+      "tableColumnTitle": "Name of column {index}",
+      "tableColumnWidth": "Width of column {index}",
+      "tableColumnRemove": "Remove column {index}",
+      "tableColumnAdd": "Add column",
+      "tableRows": "Rows",
+      "tableCell": "Row {row}, column {column}",
+      "tableRowRemove": "Remove row {index}",
+      "tableRowAdd": "Add row",
+      "signatureFields": "Signature fields",
+      "signatureRole": "Who signs, field {index}",
+      "signatureRoles": {
+        "technician": "Technician",
+        "customer": "Customer",
+        "other": "Another person"
+      },
+      "signatureRemove": "Remove signature field {index}",
+      "signatureLabel": "Label of field {index}",
+      "signatureAdd": "Add signature field",
+      "signatureCustomerHint": "The customer's field shows their finger signature if they gave one when the inspection was completed.",
+      "signatureHint": "Line \"Name, signature and date\" under the fields",
+      "summaryStyle": "Look",
+      "summaryStyles": {
+        "sentence": "Sentence",
+        "table": "Table with counts"
+      },
+      "checklistStyle": "Look",
+      "checklistStyles": {
+        "compact": "Brief (a line per device)",
+        "detailed": "Detailed (every question)"
+      },
+      "notesHint": "The note the technician wrote when completing the inspection. Without a note the block is left out.",
+      "spacerHeight": "Height of the space",
+      "dividerHint": "A horizontal line across the full width.",
+      "pageBreakHint": "The next block starts on a new page.",
+      "unreadable": "The stored template couldn't be read; the editor starts from the default protocol."
+    },
+    "page": {
+      "orientation": "Page orientation",
+      "orientations": {
+        "portrait": "Portrait",
+        "landscape": "Landscape"
+      },
+      "margins": "Margins",
+      "margin": {
+        "top": "Top",
+        "right": "Right",
+        "bottom": "Bottom",
+        "left": "Left"
+      },
+      "textSize": "Text size",
+      "footerText": "Footer text",
+      "footerTexts": {
+        "organization": "From the company's settings",
+        "custom": "The template's own text",
+        "none": "None"
+      },
+      "footerOrganizationHint": "The footer text is changed in Settings → Protocols.",
+      "footerCustom": "Footer text",
+      "pageNumbers": "Protocol and page number on every page"
+    },
+    "sample": {
+      "customer": "Linden Street Housing Cooperative",
+      "contact": "Jane Small",
+      "billingAddress": "12 Linden Street, Prague 2",
+      "site": "12 Linden Street",
+      "siteAddress": "12 Linden Street, Prague 2",
+      "technician": "Tom Technician",
+      "colleague": "John Colleague",
+      "signer": "Jane Small",
+      "type": "Fire extinguisher",
+      "typeHydrant": "Hydrant",
+      "basement": "Basement",
+      "floor": "1st floor",
+      "seal": "Seal",
+      "pressure": "Pressure (bar)",
+      "label": "Label legible",
+      "sealMissing": "missing",
+      "noteBlocked": "Boiler room locked",
+      "defectSeal": "Seal missing, replace the extinguisher",
+      "defectGauge": "Gauge outside the green zone",
+      "notes": "A sample note of the technician on the inspection."
+    }
   }
 }

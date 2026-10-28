@@ -11,10 +11,12 @@ import {
   protocolNumber,
   type ProtocolCheck,
   type ProtocolDefect,
+  type ProtocolLocale,
   type Translate,
 } from "@/lib/protocol";
 import { imageNeeds, readSnapshot, SNAPSHOT_SCHEMA, type ProtocolSnapshot } from "@/lib/protocol-snapshot";
 import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-template";
+import { sampleInput, type SampleTexts } from "@/lib/protocol-template/sample-input";
 import { usableTemplate } from "@/lib/protocol-template/requirements";
 import type { ProtocolTemplate } from "@/lib/protocol-template/schema";
 import { ORG_ASSETS_BUCKET, PROTOCOLS_BUCKET, sniffImage } from "@/lib/storage";
@@ -90,11 +92,12 @@ async function templateOf(versionId: string | null): Promise<ProtocolTemplate> {
   return template;
 }
 
-/** Draws a protocol's PDF from its snapshot and template. */
+/** Draws a protocol's PDF from its snapshot and template (`extra` replaces some of its images). */
 async function drawProtocol(
   organizationId: string,
   snapshot: ProtocolSnapshot,
   template: ProtocolTemplate,
+  extra: Partial<ProtocolAssets> = {},
 ): Promise<Buffer> {
   const { input, images } = snapshot;
   const load = (path: string) => loadOrgImage(organizationId, path);
@@ -122,6 +125,7 @@ async function drawProtocol(
       : null,
     defectPhotos: new Map(defectPhotos.filter(([, list]) => list.length > 0)),
     inspectionPhotos: inspectionPhotos.flat(),
+    ...extra,
   };
   const t = (await getTranslations({
     locale: input.locale,
@@ -425,6 +429,86 @@ export async function redrawProtocol(protocol: Protocol): Promise<Buffer | null>
     protocol.organization_id,
     snapshot,
     await templateOf(protocol.template_version_id),
+  );
+}
+
+/** A light grey photo stand-in for the preview's sample data. */
+async function samplePhoto(shade: string): Promise<ProtocolLogo> {
+  const data = await sharp({ create: { width: 160, height: 120, channels: 3, background: shade } })
+    .png()
+    .toBuffer();
+  return { data, format: "png" };
+}
+
+/**
+ * The template editor's preview (part 22): a template, not yet stored, drawn
+ * by the same code as an issued protocol. With sample data (the company's own
+ * identity, a made-up inspection), or with the records of a completed
+ * inspection of the company as they are now. Nothing is stored.
+ */
+export async function previewProtocol(
+  organizationId: string,
+  template: ProtocolTemplate,
+  inspectionId: string | null,
+): Promise<Buffer | null> {
+  const supabase = await createClient();
+  if (inspectionId) {
+    const protocol = await protocolOf(inspectionId);
+    if (!protocol || protocol.organization_id !== organizationId) return null;
+    const snapshot = await collectSnapshot(protocol, template);
+    return snapshot ? drawProtocol(organizationId, snapshot, template) : null;
+  }
+  const { data: organization } = await supabase
+    .from("organizations")
+    .select("*")
+    .eq("id", organizationId)
+    .single();
+  if (!organization) return null;
+  const locale: ProtocolLocale = organization.default_locale === "en" ? "en" : "cs";
+  const t = await getTranslations({ locale, namespace: "protocolTemplates" });
+  const keys = [
+    "customer", "contact", "billingAddress", "site", "siteAddress", "technician", "colleague",
+    "signer", "type", "typeHydrant", "basement", "floor", "seal", "pressure", "label",
+    "sealMissing", "noteBlocked", "defectSeal", "defectGauge", "notes",
+  ] as const;
+  const texts = Object.fromEntries(keys.map((key) => [key, t(`sample.${key}`)])) as SampleTexts;
+  const input = sampleInput(
+    {
+      name: organization.name,
+      legalName: organization.legal_name,
+      companyId: organization.company_id,
+      vatId: organization.vat_id,
+      address: organization.address,
+      email: organization.email,
+      phone: organization.phone,
+      footer: organization.protocol_footer_text,
+      timeZone: organization.timezone,
+      scanLocation: organization.scan_location_enabled,
+    },
+    locale,
+    texts,
+  );
+  const [first, second, third] = await Promise.all([
+    samplePhoto("#c9ced4"),
+    samplePhoto("#b4bcc5"),
+    samplePhoto("#dde1e5"),
+  ]);
+  return drawProtocol(
+    organizationId,
+    {
+      schema: SNAPSHOT_SCHEMA,
+      input,
+      images: { logo: organization.logo_path, signature: null, defectPhotos: [], inspectionPhotos: [] },
+    },
+    template,
+    {
+      defectPhotos: new Map([[17, [first, second]]]),
+      inspectionPhotos: [
+        { image: first, caption: "0001" },
+        { image: second, caption: "0002" },
+        { image: third, caption: "0003" },
+      ],
+    },
   );
 }
 

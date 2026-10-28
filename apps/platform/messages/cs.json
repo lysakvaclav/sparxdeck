@@ -133,7 +133,8 @@
     "groupWork": "Práce",
     "groupRecords": "Evidence",
     "groupAdmin": "Správa",
-    "map": "Mapa budov"
+    "map": "Mapa budov",
+    "protocolTemplates": "Šablony protokolů"
   },
   "dashboard": {
     "title": "Přehled",
@@ -2321,5 +2322,287 @@
     "emptyNoSites": "Firma zatím nemá žádné budovy. Přidejte zákazníka a jeho budovy.",
     "emptyFiltered": "Filtrům neodpovídá žádná budova.",
     "emptyNoPoints": "Žádná budova zatím nemá souřadnice. Doplňte je u budov v seznamu Bez polohy."
+  },
+  "protocolTemplates": {
+    "title": "Šablony protokolů",
+    "readOnly": "Šablony protokolů upravuje vlastník a administrátor. Technik je jen používá.",
+    "empty": "Firma zatím nemá žádnou šablonu protokolu.",
+    "default": "Výchozí",
+    "hasDraft": "Rozpracovaný koncept",
+    "version": "verze {version}",
+    "columns": {
+      "name": "Název",
+      "usage": "Použití",
+      "state": "Stav",
+      "version": "Verze",
+      "changed": "Změněno"
+    },
+    "usage": {
+      "inspection": "Protokol z revize",
+      "summary": "Souhrnný protokol"
+    },
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikovaná",
+      "archived": "Archivovaná"
+    },
+    "create": {
+      "button": "Nová šablona",
+      "title": "Nová šablona protokolu",
+      "name": "Název šablony",
+      "from": "Vychází z",
+      "fromHint": "Šablona se vytvoří jako koncept. Ostré protokoly se podle ní řídí až po publikování.",
+      "fromDefault": "Výchozí protokol SparxDeck",
+      "copyOf": "Kopie: {name}",
+      "submit": "Vytvořit a upravit"
+    },
+    "preview": {
+      "loading": "Kreslím náhled…",
+      "failed": "Náhled se nepodařilo vykreslit. Zkuste změnu zopakovat.",
+      "pages": "{count, plural, one {# strana} few {# strany} other {# stran}}",
+      "pagesShown": "Zobrazeno {shown} z {total} stran",
+      "download": "Stáhnout náhled",
+      "label": "Náhled protokolu",
+      "pageAlt": "Náhled protokolu, strana {page} z {pages}"
+    },
+    "editor": {
+      "removed": "Blok odebrán. Vrátíte ho tlačítkem Zpět.",
+      "undo": "Zpět",
+      "redo": "Znovu",
+      "undoShortcut": "Zpět (Ctrl+Z)",
+      "redoShortcut": "Znovu (Ctrl+Shift+Z)",
+      "save": {
+        "saved": "Koncept uložen",
+        "unchanged": "Beze změn",
+        "pending": "Neuložené změny",
+        "saving": "Ukládám koncept…",
+        "failed": "Koncept se nepodařilo uložit.",
+        "retry": "Zkusit znovu"
+      },
+      "discard": "Zahodit koncept",
+      "discardTitle": "Zahodit koncept?",
+      "discardDescription": "Úpravy, které nejsou publikované, se smažou a šablona se vrátí do publikované verze. Vydané protokoly se nemění.",
+      "previewSource": "Data náhledu",
+      "sampleData": "Ukázková data",
+      "mobileNotice": "Rozložení bloků upravíte na počítači. Na telefonu zkontrolujete náhled a upravíte texty.",
+      "mobileTabs": "Části editoru",
+      "tabs": {
+        "preview": "Náhled",
+        "texts": "Texty"
+      },
+      "blocksLabel": "Bloky protokolu",
+      "blocks": "Bloky",
+      "addBlock": "Přidat blok",
+      "pageAndFooter": "Stránka a patička",
+      "issues": "Před publikováním opravte",
+      "issue": {
+        "headerMissing": "Protokol musí mít záhlaví s číslem protokolu a údaji o firmě.",
+        "headerHidden": "Záhlaví s číslem protokolu a údaji o firmě nesmí být skryté.",
+        "headerTwice": "Záhlaví může být v protokolu jen jednou.",
+        "invalid": "{block}: hodnota mimo povolený rozsah"
+      },
+      "shortcuts": "Zkratky: Ctrl+Z zpět, Ctrl+Shift+Z znovu, Ctrl+S uložit, Alt+šipka posune vybraný blok, Esc zruší výběr. Blok přesunete také tažením za úchyt nebo klávesnicí: na úchytu mezerník, šipky, mezerník.",
+      "previewLabel": "Náhled",
+      "titleOf": "Nadpis: {block}",
+      "propertiesLabel": "Vlastnosti",
+      "name": "Název šablony",
+      "description": "Popis",
+      "rename": "Uložit název",
+      "renamed": "Název šablony uložen.",
+      "previewFile": "Nahled-{number}.pdf"
+    },
+    "blocks": {
+      "types": {
+        "header": "Záhlaví",
+        "parties": "Zákazník a budova",
+        "summary": "Shrnutí výsledku",
+        "devices": "Tabulka zařízení",
+        "checklist": "Výsledky kontrol",
+        "defects": "Závady",
+        "gallery": "Fotogalerie",
+        "notes": "Poznámka k revizi",
+        "text": "Text",
+        "table": "Vlastní tabulka",
+        "signatures": "Podpisy",
+        "divider": "Oddělovač",
+        "spacer": "Mezera",
+        "pageBreak": "Nová stránka"
+      },
+      "label": "Pořadí bloků",
+      "drag": "Přesunout blok {name}",
+      "locked": "Zamčený blok",
+      "hidden": "skrytý",
+      "issue": "opravit",
+      "moveUp": "Posunout {name} nahoru",
+      "moveDown": "Posunout {name} dolů",
+      "show": "Zobrazit {name}",
+      "hide": "Skrýt {name}",
+      "duplicate": "Kopírovat {name}",
+      "remove": "Odebrat {name}",
+      "dragStart": "Uchopen blok {name}, pozice {position} z {count}.",
+      "dragOver": "Blok {name} na pozici {position} z {count}.",
+      "dragEnd": "Blok {name} položen na pozici {position} z {count}.",
+      "dragCancel": "Přesun bloku {name} zrušen.",
+      "dragInstructions": "Mezerníkem blok uchopíte, šipkami ho posunete, mezerníkem položíte, klávesou Escape přesun zrušíte."
+    },
+    "properties": {
+      "outOfRange": "Zadejte číslo od {min} do {max}.",
+      "outOfRangeWhole": "Zadejte celé číslo od {min} do {max}.",
+      "title": "Nadpis",
+      "titleHint": "Prázdné pole = výchozí nadpis v jazyce protokolu.",
+      "titleOptional": "Nadpis (nepovinný)",
+      "columnsHint": "Číslo u sloupce je jeho podíl na šířce řádku; sloupce vždy vyplní celou šířku.",
+      "columnFor": "Sloupec {index}",
+      "widthFor": "Šířka sloupce {name}",
+      "columnUp": "Posunout sloupec {name} doleva",
+      "columnDown": "Posunout sloupec {name} doprava",
+      "columnRemove": "Odebrat sloupec {name}",
+      "columnAdd": "Přidat sloupec",
+      "headerLocked": "Číslo protokolu a název firmy jsou v záhlaví vždy. Záhlaví nejde odebrat ani skrýt.",
+      "documentTitle": "Název dokumentu",
+      "logoShow": "Logo firmy (z Nastavení)",
+      "logoPosition": "Umístění loga",
+      "logoPositions": {
+        "left": "Vlevo",
+        "center": "Uprostřed nad záhlavím",
+        "right": "Vpravo"
+      },
+      "logoHeight": "Výška loga",
+      "companyFields": "Údaje o firmě pod názvem",
+      "companyField": {
+        "address": "Adresa",
+        "ids": "IČO a DIČ",
+        "contact": "E-mail a telefon"
+      },
+      "headerDate": "Datum revize v záhlaví",
+      "customerShow": "Zákazník",
+      "customerFields": "Údaje o zákazníkovi",
+      "customerField": {
+        "billingAddress": "Fakturační adresa",
+        "ids": "IČO a DIČ",
+        "contact": "Kontaktní osoba"
+      },
+      "siteShow": "Budova",
+      "siteAddress": "Adresa budovy",
+      "facts": "Údaje o revizi",
+      "fact": {
+        "date": "Datum revize",
+        "technician": "Kdo revizi provedl",
+        "issued": "Datum vystavení",
+        "version": "Verze protokolu (u opravy)"
+      },
+      "emptyHint": "Údaj, který zákazník nebo budova nemá vyplněný, se v protokolu vynechá.",
+      "devicesSummary": "Věta s počty nad tabulkou",
+      "devicesDetails": "Zjištění a poznámky pod zařízením",
+      "columns": "Sloupce",
+      "columnsWithScan": "Vlastní sloupce, když protokol uvádí polohu skenu",
+      "columnsWithScanLegend": "Sloupce s polohou skenu",
+      "columnsWithScanHint": "Když firma ukládá polohu skenu, přidá se na konec sloupec „Poloha skenu“ a šířky se přepočítají.",
+      "photosPerDefect": "Fotek u každé závady",
+      "photoWidth": "Šířka fotky",
+      "whenEmpty": "Když revize nezjistí závady",
+      "whenEmptyOption": {
+        "text": "Napsat, že závady nebyly zjištěny",
+        "hide": "Blok vynechat"
+      },
+      "gallerySource": "Fotky",
+      "gallerySources": {
+        "inspection": "Z kontrol zařízení",
+        "defects": "Ze závad",
+        "all": "Z kontrol i závad"
+      },
+      "perRow": "Fotek na řádek",
+      "galleryMax": "Nejvýš fotek",
+      "captions": "Popisky (štítek nebo číslo závady)",
+      "textVariant": "Vzhled",
+      "textVariants": {
+        "normal": "Běžný text",
+        "note": "Drobné písmo (upozornění, právní text)"
+      },
+      "text": "Text",
+      "textHint": "Odstavce oddělte prázdným řádkem. Formátování a proměnné přibudou v další etapě. Právní texty si firma zadává sama.",
+      "tableColumns": "Sloupce",
+      "tableColumnTitle": "Název sloupce {index}",
+      "tableColumnWidth": "Šířka sloupce {index}",
+      "tableColumnRemove": "Odebrat sloupec {index}",
+      "tableColumnAdd": "Přidat sloupec",
+      "tableRows": "Řádky",
+      "tableCell": "Řádek {row}, sloupec {column}",
+      "tableRowRemove": "Odebrat řádek {index}",
+      "tableRowAdd": "Přidat řádek",
+      "signatureFields": "Podpisová pole",
+      "signatureRole": "Kdo podepisuje, pole {index}",
+      "signatureRoles": {
+        "technician": "Technik",
+        "customer": "Zákazník",
+        "other": "Jiná osoba"
+      },
+      "signatureRemove": "Odebrat podpisové pole {index}",
+      "signatureLabel": "Popisek pole {index}",
+      "signatureAdd": "Přidat podpisové pole",
+      "signatureCustomerHint": "Do pole zákazníka se vloží jeho podpis prstem, pokud ho při dokončení revize zadal.",
+      "signatureHint": "Pod poli řádek „Jméno, podpis a datum“",
+      "summaryStyle": "Podoba",
+      "summaryStyles": {
+        "sentence": "Věta",
+        "table": "Tabulka s počty"
+      },
+      "checklistStyle": "Podoba",
+      "checklistStyles": {
+        "compact": "Stručně (řádek na zařízení)",
+        "detailed": "Podrobně (každá otázka)"
+      },
+      "notesHint": "Poznámka, kterou technik napsal při dokončení revize. Bez poznámky se blok vynechá.",
+      "spacerHeight": "Výška mezery",
+      "dividerHint": "Vodorovná čára přes celou šířku.",
+      "pageBreakHint": "Další blok začne na nové stránce.",
+      "unreadable": "Uloženou šablonu nešlo načíst, editor začíná z výchozího protokolu."
+    },
+    "page": {
+      "orientation": "Orientace stránky",
+      "orientations": {
+        "portrait": "Na výšku",
+        "landscape": "Na šířku"
+      },
+      "margins": "Okraje",
+      "margin": {
+        "top": "Nahoře",
+        "right": "Vpravo",
+        "bottom": "Dole",
+        "left": "Vlevo"
+      },
+      "textSize": "Velikost písma",
+      "footerText": "Text v patičce",
+      "footerTexts": {
+        "organization": "Z nastavení firmy",
+        "custom": "Vlastní text šablony",
+        "none": "Žádný"
+      },
+      "footerOrganizationHint": "Text patičky se mění v Nastavení → Protokoly.",
+      "footerCustom": "Text patičky",
+      "pageNumbers": "Číslo protokolu a strany na každé stránce"
+    },
+    "sample": {
+      "customer": "Bytové družstvo Lipová",
+      "contact": "Jana Malá",
+      "billingAddress": "Lipová 12, 120 00 Praha 2",
+      "site": "Lipová 12",
+      "siteAddress": "Lipová 12, Praha 2",
+      "technician": "Tomáš Technik",
+      "colleague": "Jan Kolega",
+      "signer": "Jana Malá",
+      "type": "Hasicí přístroj",
+      "typeHydrant": "Hydrant",
+      "basement": "Suterén",
+      "floor": "1. patro",
+      "seal": "Plomba",
+      "pressure": "Tlak (bar)",
+      "label": "Štítek čitelný",
+      "sealMissing": "chybí",
+      "noteBlocked": "Kotelna zamčená",
+      "defectSeal": "Plomba chybí, přístroj vyměnit",
+      "defectGauge": "Tlakoměr mimo zelené pole",
+      "notes": "Ukázková poznámka technika k revizi."
+    }
   }
 }

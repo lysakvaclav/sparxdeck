@@ -207,6 +207,13 @@ export const siteSchema = z.object({
 
 export const locationNameSchema = z.object({ name: name(200) });
 
+/** A protocol template's name and description (part 22). */
+export const protocolTemplateNameSchema = z.object({
+  name: name(120),
+  description: z.string().trim().max(500, "tooLong").optional(),
+});
+export type ProtocolTemplateNameValues = z.infer<typeof protocolTemplateNameSchema>;
+
 export type CustomerInput = z.input<typeof customerSchema>;
 export type SiteInput = z.input<typeof siteSchema>;
 export type LocationNameValues = z.infer<typeof locationNameSchema>;
