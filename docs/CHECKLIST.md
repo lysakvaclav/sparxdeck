@@ -367,7 +367,7 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P2 Stránkování dlouhého protokolu (300 zařízení) bez rozdělených řádků (část 22 A)
 - [x] P2 Editor: bloky, pořadí tažením i klávesnicí, vlastnosti, živý náhled, zpět/znovu, automatické ukládání (část 22 B)
 - [x] P2 Proměnné, podmínky bloků, styly, písma, jazyk šablony, logo šablony (část 22 C)
-- [x] P2 Publikování s poznámkou, historie a porovnání verzí, obnovení, kopie, archivace (část 22 D: `e2e/part22-manage.mjs`, `tests/protocol-template-manage.test.ts`)
+- [x] P2 Publikování s poznámkou, historie a porovnání verzí, obnovení, kopie, archivace (část 22 D, commit 191306a: `e2e/part22-manage.mjs`, `tests/protocol-template-manage.test.ts`)
 - [x] P2 Export a import šablony (JSON), 3 ukázkové šablony cs/en, přiřazení zákazníkům a typům (část 22 D; „souhrnná“ ukázka je přehledový protokol revize, souhrnný protokol za více budov zůstává pevný)
 
 **Trasy pro techniky (část 23)**: položky se doplní s plánem části.
