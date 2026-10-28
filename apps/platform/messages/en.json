@@ -134,7 +134,8 @@
     "groupRecords": "Records",
     "groupAdmin": "Administration",
     "map": "Building map",
-    "protocolTemplates": "Protocol templates"
+    "protocolTemplates": "Protocol templates",
+    "routes": "Routes"
   },
   "dashboard": {
     "title": "Overview",
@@ -328,7 +329,10 @@
     "templateNotPublished": "The template isn't published yet.",
     "templateArchived": "The template is archived. Restore it first.",
     "templateFileInvalid": "The file isn't a SparxDeck protocol template.",
-    "noteRequired": "Write a short note on what changed in this version."
+    "noteRequired": "Write a short note on what changed in this version.",
+    "routeTooLong": "A route can have at most 30 stops.",
+    "routeChanged": "The route changed meanwhile. It has been reloaded, please try again.",
+    "planInRoute": "This visit belongs to a route. Change its day and technician in the route."
   },
   "email": {
     "invite": {
@@ -357,7 +361,12 @@
     "passwordDescription": "Enter your current password to set a new one.",
     "currentPassword": "Current password",
     "changePassword": "Change password",
-    "passwordChanged": "Your password has been changed."
+    "passwordChanged": "Your password has been changed.",
+    "home": {
+      "title": "Home",
+      "hint": "Your routes start here. Only you, the owner and admins see it, colleagues don't.",
+      "label": "Coordinates of your home"
+    }
   },
   "memberActions": {
     "menu": "Options for {name}",
@@ -447,6 +456,11 @@
       "title": "Location at scanning",
       "description": "When a label is scanned during an inspection, the phone's location is recorded and the protocol says whether it matches the building. Only at the moment of a scan, never continuously. Technicians are told so in the app.",
       "enabled": "Record the phone's location when labels are scanned"
+    },
+    "routeStart": {
+      "title": "Where routes start",
+      "hint": "The company's seat. Routes start here when the technician has no home set.",
+      "label": "Coordinates of the seat"
     }
   },
   "customers": {
@@ -2847,6 +2861,165 @@
       "now": "now: {template}",
       "save": "Save assignments",
       "saved": "Assignments saved."
+    }
+  },
+  "point": {
+    "hint": "Latitude and longitude. Copy them from a map application, or use the phone's location.",
+    "save": "Save",
+    "clear": "Remove",
+    "saved": "Saved.",
+    "cleared": "Removed."
+  },
+  "routes": {
+    "title": "Routes",
+    "straightLine": "Distances are in a straight line, without roads or traffic. This is not navigation.",
+    "distance": {
+      "m": "{value} m",
+      "km": "{value} km"
+    },
+    "empty": "No routes yet. Create the first one and add buildings to it.",
+    "emptyPast": "No past routes.",
+    "when": {
+      "upcoming": "Upcoming",
+      "past": "Past"
+    },
+    "views": "Which routes",
+    "filterTechnician": "Technician",
+    "allTechnicians": "All technicians",
+    "columns": {
+      "day": "Day",
+      "technician": "Technician",
+      "name": "Name",
+      "stops": "Stops",
+      "distance": "Straight line",
+      "state": "State"
+    },
+    "stopsCount": "{visited} of {count}",
+    "state": {
+      "planned": "Planned",
+      "underway": "Under way",
+      "done": "Done"
+    },
+    "unassigned": "No technician",
+    "formerMember": "Former member",
+    "untitled": "Route",
+    "new": {
+      "button": "New route",
+      "title": "New route",
+      "day": "Day",
+      "technician": "Technician",
+      "name": "Name (optional)",
+      "namePlaceholder": "e.g. Prague east",
+      "submit": "Create route"
+    },
+    "edit": {
+      "button": "Edit",
+      "title": "Edit the route",
+      "hint": "The visits in the calendar move with the route.",
+      "submit": "Save",
+      "saved": "Route saved."
+    },
+    "delete": {
+      "button": "Delete",
+      "title": "Delete the route?",
+      "description": "The route is deleted, with the calendar visits created with it. Inspections already done stay.",
+      "confirm": "Delete route",
+      "done": "Route deleted."
+    },
+    "summary": {
+      "label": "Route summary",
+      "total": "{distance} in total",
+      "totalHint": "straight line, no traffic",
+      "onSite": "{time} on site",
+      "visited": "{visited} of {count} visited",
+      "noPoints": "The distance is computed once the buildings on the route have a location.",
+      "hours": "{hours} h {minutes} min",
+      "minutes": "{minutes} min"
+    },
+    "start": {
+      "title": "Start point",
+      "label": "Where the route starts",
+      "kind": {
+        "company": "The company's seat",
+        "home": "The technician's home",
+        "here": "My location",
+        "custom": "A point of my own",
+        "none": "None (start at the first stop)"
+      },
+      "missing": "(not set)",
+      "setCompany": "The company's seat is set in Settings.",
+      "setHome": "Everyone sets their home in their account.",
+      "coordinates": "Coordinates of the point",
+      "apply": "Use",
+      "saved": "Start point saved."
+    },
+    "options": {
+      "title": "Ordering",
+      "returnToStart": "Return to the start point",
+      "lockFirst": "Keep the first stop",
+      "lockLast": "Keep the last stop",
+      "sort": "Order by distance",
+      "sorted": "Ordered: {before} → {after}.",
+      "sortedSame": "The app found no shorter order.",
+      "sortHint": "Nearest neighbour, then 2-opt improvement, in a straight line.",
+      "unlocated": "Buildings without a location stay at the end; place them by hand."
+    },
+    "stops": {
+      "title": "Stops",
+      "count": "{count} of {max}",
+      "empty": "The route has no stops yet.",
+      "add": "Add buildings",
+      "full": "A route has at most {max} stops.",
+      "noPoint": "no location",
+      "leg": "{distance} from the previous one",
+      "legFromStart": "{distance} from the start point",
+      "visited": "Visited",
+      "visitedName": "Visited: {name}",
+      "minutes": "Minutes on site",
+      "note": "Note",
+      "save": "Save",
+      "saved": "Saved.",
+      "start": "Start the check",
+      "openMap": "Open in the map app",
+      "remove": "Remove {name} from the route",
+      "removed": "Removed from the route.",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "drag": "Move {name}",
+      "label": "Stops in order",
+      "dragInstructions": "Pick a stop up with space, move it with the arrow keys and put it down with space. Escape cancels.",
+      "dragStart": "Picked up stop {name}, position {position} of {count}.",
+      "dragOver": "Stop {name} at position {position} of {count}.",
+      "dragEnd": "Stop {name} put down at position {position} of {count}.",
+      "dragCancel": "Moving stop {name} cancelled.",
+      "show": "Details of stop {name}",
+      "due": {
+        "overdue": "Overdue since {date}",
+        "soon": "Due {date}",
+        "later": "Due {date}",
+        "never": "Not inspected yet",
+        "noDevices": "No devices"
+      }
+    },
+    "add": {
+      "title": "Add buildings to the route",
+      "search": "Find a building or customer",
+      "none": "No building matches.",
+      "inRoute": "in the route",
+      "left": "{count} more can be added.",
+      "submit": "Add ({count})",
+      "added": "{count, plural, one {# building added} other {# buildings added}}.",
+      "noPoint": "no location"
+    },
+    "map": {
+      "label": "Map of the route",
+      "start": "Start point",
+      "add": "Add to the route",
+      "inRoute": "Stop {number} of the route.",
+      "showAll": "Whole route",
+      "viewList": "Stops ({count})",
+      "viewMap": "Map",
+      "close": "Close"
     }
   }
 }

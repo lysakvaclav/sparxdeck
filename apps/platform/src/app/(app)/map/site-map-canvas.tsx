@@ -39,7 +39,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_MAP_BASE_URL?.replace(/\/$/, "");
 /** World lines and labels give way to the detail of Czechia from this zoom on. */
 const WORLD_DETAIL_ZOOM = 9;
 /** Czechia, for a first view without any building yet. */
-const CZECHIA: [number, number, number, number] = [12.09, 48.55, 18.86, 51.06];
+export const CZECHIA: [number, number, number, number] = [12.09, 48.55, 18.86, 51.06];
 
 export type SiteMapHandle = {
   /** Fits the view to every building with a point. */
@@ -48,7 +48,7 @@ export type SiteMapHandle = {
   focus: (siteId: string) => void;
 };
 
-function cssVar(name: string, fallback: string) {
+export function cssVar(name: string, fallback: string) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return value || fallback;
 }
@@ -99,7 +99,7 @@ type BaseMap = {
   sprite?: string;
 };
 
-async function baseMap(dark: boolean, lang: string): Promise<BaseMap> {
+export async function baseMap(dark: boolean, lang: string): Promise<BaseMap> {
   if (!BASE_URL) return { sources: {}, layers: [] };
   const [{ Protocol }, maplibre, { layers, namedFlavor }] = await Promise.all([
     import("pmtiles"),

@@ -40,7 +40,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 22 | Editor protokolů (etapy A–D) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
+| 23 | Trasy pro techniky (etapy A–B) | Fáze 3 | Etapa A hotová (2026-10-28), nenasazeno; B čeká |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -705,6 +705,22 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Ověření:** testy porovnání, souboru šablony (poškozený, cizí formát, nebezpečný obsah, logo) a ukázkových šablon (projdou kontrolami v obou jazycích); RLS a role všech nových funkcí (cizí firma, technik, výchozí nejde archivovat, přiřazení jen vlastní firmy); `e2e/part22-manage.mjs` (10 kroků: ukázka, publikování s poznámkou, historie a porovnání, obnovení, export a import, kopie, přiřazení a protokol, který ho použije, výchozí a archivace, technik, tmavý režim a angličtina); celá sada části 22, audit přístupnosti, hlavní tok.
 
 **K ověření s odborníkem** (aplikace nic z toho nevymýšlí; doplní se do `requirements.ts`): co musí revizní protokol obsahovat (číslo osvědčení technika, výrobce, rok výroby, hasivo a množství, příští termín, lhůty závad, razítko, podpisy, prohlášení o provozuschopnosti, odkaz na předpisy) a zda platí pevné pořadí či nadpisy.
+
+### Část 23: Trasy pro techniky (Díl 4)
+
+Dvě etapy, po každé zpráva majiteli. Rozhodnutí majitele (2026-10-28, doporučení z plánu): každá zastávka je zároveň návštěva v kalendáři; budova bez polohy do trasy smí (na konec, pořadí ručně); technik si trasu založí i sám; zastávka se označí sama po dokončení revize zahájené z její návštěvy; ukazuje se jen čas na místě, žádný odhad jízdy. Všude „vzdušnou čarou, bez dopravy“, nejde o navigaci.
+
+**Etapa A, data, řazení, seznam a editor s mapou. Stav (2026-10-28): hotovo** (lokálně, nenasazeno).
+
+- **Databáze** (migrace `20261101090000_routes.sql`): `route_plans` (den, technik, název, výchozí bod jako kopie souřadnic a jeho druh, návrat, zamčení první a poslední), `route_plan_stops` (pořadí, minuty na místě, poznámka, navštíveno, návštěva v kalendáři), sídlo firmy `organizations.base_latitude/longitude`, domov člena v samostatné `member_homes` (vidí ho jen člen sám a vlastník či admin, kolegové ne). Stav trasy (naplánovaná, probíhá, hotová) se počítá ze zastávek. Odchylka od zadání: `company_id` je `organization_id`, `building` je `site`.
+- **Kalendář:** přidání zastávky propojí otevřenou návštěvu budovy na ten den, nebo ji vytvoří; změna dne nebo technika trasy návštěvy přesune; kalendář návštěvu z trasy přesunout nedovolí (`plan_in_route`), smazáním ji z trasy odebere; odebrání zastávky smaže jen návštěvu, která vznikla s ní.
+- **Funkce:** `create_route_plan`, `update_route_plan`, `add_route_stops` (nejvýš 30, jen budovy vlastní firmy), `remove_route_stop`, `reorder_route_stops` (celé pořadí, zastaralé odmítne), `set_route_stop_visited`; dokončení revize označí zastávku (trigger). Vlastník a admin plánují komukoli, technik sobě.
+- **Řazení** (`src/lib/route-plans.ts`, `DistanceProvider` se vzdáleností po kouli, vyměnitelný): nejbližší soused, pak 2-opt; bez výchozího bodu se zkusí každá zastávka jako první; budovy bez polohy na konci; zamčení první a poslední; při shodě rozhoduje pořadí, takže výsledek je vždy stejný. Hotové i funkce pro tip „poblíž“ a odkaz do mapové aplikace (`geo:` na Androidu, Apple Mapy na iPhonu, OpenStreetMap jinde).
+- **Obrazovky:** `/routes` (Práce → Trasy: nadcházející a proběhlé, filtr technika, vzdálenost a stav), `/routes/<id>` (souhrn, výchozí bod, řazení, zastávky s přesunem tažením, klávesnicí i tlačítky, minuty a poznámka, navštíveno, zahájení kontroly, odkaz do mapové aplikace, přidání ze seznamu s hledáním i kliknutím na mapě), mapa s očíslovanými zastávkami a čárkovanou spojnicí. Sídlo firmy v Nastavení, domov v Mém účtu (stejný formulář bodu, i poloha telefonu).
+- **Bez signálu:** zatím ne (etapa B).
+- **Ověření:** testy řazení (přímka, bez výchozího bodu, zámky, bez polohy, 30 zastávek do 0,5 s, porovnání s nejlepším pořadím hrubou silou, koule), vzdáleností, tipu „poblíž“ (okruh, hranice 30 dní, vyloučení), odkazů; RLS (6 testů: domov, viditelnost, sloupce, kalendář a limit, pořadí, navštíveno po revizi); `e2e/part23.mjs` (10 kroků); audit přístupnosti seznamu a trasy i na telefonu; části 19, 21, telefon a hlavní tok.
+
+**Etapa B (tip „poblíž končí revize“, Dnešní plán na telefonu a bez signálu, trasa v kalendáři a v Moje práce):** čeká.
 
 ---
 

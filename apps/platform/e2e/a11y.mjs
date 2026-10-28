@@ -171,6 +171,23 @@ try {
     },
   });
 
+  // Part 23: a route with the sample buildings, one of them visited and one opened.
+  const sampleSites = await selectRows("sites", `organization_id=eq.${org}&select=id&order=name`);
+  const [route] = await insertRows("route_plans", [
+    { organization_id: org, technician_id: owner.id, planned_on: soon.toISOString().slice(0, 10), name: "Přístupná" },
+  ]);
+  await insertRows(
+    "route_plan_stops",
+    sampleSites.slice(0, 3).map((row, index) => ({
+      organization_id: org,
+      route_id: route.id,
+      site_id: row.id,
+      position: index + 1,
+      minutes: 30,
+      ...(index === 0 ? { visited_at: new Date().toISOString() } : {}),
+    })),
+  );
+
   const pages = [
     ["dashboard", "/"],
     ["customers", "/customers"],
@@ -204,6 +221,8 @@ try {
     ["map", "/map"],
     ["protocol-templates", "/protocol-templates"],
     ["protocol-template", `/protocol-templates/${protocolTemplate.id}`],
+    ["routes", "/routes"],
+    ["route", `/routes/${route.id}`],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -216,6 +235,12 @@ try {
   await page.waitForText("Vítejte, Alena");
   await audit(page, "phone dashboard");
   await touchTargets(page, "phone dashboard");
+  await page.goto(`${APP}/routes/${route.id}`);
+  await page.waitFor("li[data-stop] [data-select]");
+  await page.click("li[data-stop] [data-select]");
+  await sleep(800);
+  await audit(page, "phone route");
+  await touchTargets(page, "phone route");
   await page.goto(`${APP}/sites/${site.id}`);
   await page.clickText("Zahájit revizi");
   await page.waitForText("Zkontrolováno 0 z");

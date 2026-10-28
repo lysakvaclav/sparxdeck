@@ -134,7 +134,8 @@
     "groupRecords": "Evidence",
     "groupAdmin": "Správa",
     "map": "Mapa budov",
-    "protocolTemplates": "Šablony protokolů"
+    "protocolTemplates": "Šablony protokolů",
+    "routes": "Trasy"
   },
   "dashboard": {
     "title": "Přehled",
@@ -328,7 +329,10 @@
     "templateNotPublished": "Šablona ještě není publikovaná.",
     "templateArchived": "Šablona je archivovaná. Nejdřív ji obnovte.",
     "templateFileInvalid": "Soubor není šablona protokolu ze SparxDecku.",
-    "noteRequired": "Napište krátkou poznámku, co se ve verzi změnilo."
+    "noteRequired": "Napište krátkou poznámku, co se ve verzi změnilo.",
+    "routeTooLong": "Trasa může mít nejvýš 30 zastávek.",
+    "routeChanged": "Trasa se mezitím změnila. Načetli jsme ji znovu, zkuste to prosím ještě jednou.",
+    "planInRoute": "Návštěva patří do trasy. Den a technika změňte v trase."
   },
   "email": {
     "invite": {
@@ -357,7 +361,12 @@
     "passwordDescription": "Pro změnu hesla zadejte i to současné.",
     "currentPassword": "Současné heslo",
     "changePassword": "Změnit heslo",
-    "passwordChanged": "Heslo bylo změněno."
+    "passwordChanged": "Heslo bylo změněno.",
+    "home": {
+      "title": "Domov",
+      "hint": "Vaše trasy z něj začínají. Vidíte ho jen vy, vlastník a administrátor, kolegové ne.",
+      "label": "Souřadnice domova"
+    }
   },
   "memberActions": {
     "menu": "Možnosti člena {name}",
@@ -447,6 +456,11 @@
       "title": "Poloha při skenu",
       "description": "Při naskenování štítku v revizi se uloží poloha telefonu a protokol uvede, zda odpovídá budově. Jen v okamžiku skenu, žádné průběžné sledování. Technici o tom vědí z aplikace.",
       "enabled": "Ukládat polohu telefonu při skenu štítků"
+    },
+    "routeStart": {
+      "title": "Výchozí bod tras",
+      "hint": "Sídlo firmy. Trasy z něj začínají, když technik nemá nastavený domov.",
+      "label": "Souřadnice sídla"
     }
   },
   "customers": {
@@ -2847,6 +2861,165 @@
       "now": "teď: {template}",
       "save": "Uložit přiřazení",
       "saved": "Přiřazení uloženo."
+    }
+  },
+  "point": {
+    "hint": "Zeměpisná šířka a délka. Zkopírujte je z mapové aplikace, nebo použijte polohu telefonu.",
+    "save": "Uložit",
+    "clear": "Odebrat",
+    "saved": "Uloženo.",
+    "cleared": "Odebráno."
+  },
+  "routes": {
+    "title": "Trasy",
+    "straightLine": "Vzdálenosti jsou vzdušnou čarou, bez silnic a dopravy. Nejde o navigaci.",
+    "distance": {
+      "m": "{value} m",
+      "km": "{value} km"
+    },
+    "empty": "Zatím žádná trasa. Založte první a přidejte do ní budovy.",
+    "emptyPast": "Žádné proběhlé trasy.",
+    "when": {
+      "upcoming": "Nadcházející",
+      "past": "Proběhlé"
+    },
+    "views": "Které trasy",
+    "filterTechnician": "Technik",
+    "allTechnicians": "Všichni technici",
+    "columns": {
+      "day": "Den",
+      "technician": "Technik",
+      "name": "Název",
+      "stops": "Zastávky",
+      "distance": "Vzdušnou čarou",
+      "state": "Stav"
+    },
+    "stopsCount": "{visited} z {count}",
+    "state": {
+      "planned": "Naplánovaná",
+      "underway": "Probíhá",
+      "done": "Hotová"
+    },
+    "unassigned": "Bez technika",
+    "formerMember": "Bývalý člen",
+    "untitled": "Trasa",
+    "new": {
+      "button": "Nová trasa",
+      "title": "Nová trasa",
+      "day": "Den",
+      "technician": "Technik",
+      "name": "Název (nepovinný)",
+      "namePlaceholder": "např. Praha východ",
+      "submit": "Vytvořit trasu"
+    },
+    "edit": {
+      "button": "Upravit",
+      "title": "Upravit trasu",
+      "hint": "Návštěvy v kalendáři se přesunou s trasou.",
+      "submit": "Uložit",
+      "saved": "Trasa uložena."
+    },
+    "delete": {
+      "button": "Smazat",
+      "title": "Smazat trasu?",
+      "description": "Smaže se trasa i návštěvy v kalendáři, které vznikly s ní. Proběhlé revize zůstávají.",
+      "confirm": "Smazat trasu",
+      "done": "Trasa smazána."
+    },
+    "summary": {
+      "label": "Souhrn trasy",
+      "total": "Celkem {distance}",
+      "totalHint": "vzdušnou čarou, bez dopravy",
+      "onSite": "Na místě {time}",
+      "visited": "Navštíveno {visited} z {count}",
+      "noPoints": "Vzdálenost se spočítá, až budou mít budovy na trase polohu.",
+      "hours": "{hours} h {minutes} min",
+      "minutes": "{minutes} min"
+    },
+    "start": {
+      "title": "Výchozí bod",
+      "label": "Odkud trasa začíná",
+      "kind": {
+        "company": "Sídlo firmy",
+        "home": "Domov technika",
+        "here": "Moje poloha",
+        "custom": "Vlastní bod",
+        "none": "Žádný (začít první zastávkou)"
+      },
+      "missing": "(nenastaveno)",
+      "setCompany": "Sídlo firmy se nastavuje v Nastavení.",
+      "setHome": "Domov si každý nastaví ve svém účtu.",
+      "coordinates": "Souřadnice bodu",
+      "apply": "Použít",
+      "saved": "Výchozí bod uložen."
+    },
+    "options": {
+      "title": "Řazení",
+      "returnToStart": "Vrátit se do výchozího bodu",
+      "lockFirst": "Ponechat první zastávku",
+      "lockLast": "Ponechat poslední zastávku",
+      "sort": "Seřadit podle vzdálenosti",
+      "sorted": "Seřazeno: {before} → {after}.",
+      "sortedSame": "Kratší pořadí aplikace nenašla.",
+      "sortHint": "Nejbližší soused a pak vylepšení 2-opt, vzdušnou čarou.",
+      "unlocated": "Budovy bez polohy zůstanou na konci, jejich místo určete ručně."
+    },
+    "stops": {
+      "title": "Zastávky",
+      "count": "{count} z {max}",
+      "empty": "Trasa zatím nemá zastávky.",
+      "add": "Přidat budovy",
+      "full": "Trasa má nejvýš {max} zastávek.",
+      "noPoint": "bez polohy",
+      "leg": "{distance} od předchozí",
+      "legFromStart": "{distance} od výchozího bodu",
+      "visited": "Navštíveno",
+      "visitedName": "Navštíveno: {name}",
+      "minutes": "Minut na místě",
+      "note": "Poznámka",
+      "save": "Uložit",
+      "saved": "Uloženo.",
+      "start": "Zahájit kontrolu",
+      "openMap": "Otevřít v mapové aplikaci",
+      "remove": "Odebrat {name} z trasy",
+      "removed": "Odebráno z trasy.",
+      "moveUp": "Posunout {name} výš",
+      "moveDown": "Posunout {name} níž",
+      "drag": "Přesunout {name}",
+      "label": "Zastávky v pořadí",
+      "dragInstructions": "Zastávku zvednete mezerníkem, šipkami posunete a mezerníkem položíte. Escape přesun zruší.",
+      "dragStart": "Zvednuta zastávka {name}, místo {position} z {count}.",
+      "dragOver": "Zastávka {name} na místě {position} z {count}.",
+      "dragEnd": "Zastávka {name} položena na místo {position} z {count}.",
+      "dragCancel": "Přesun zastávky {name} zrušen.",
+      "show": "Podrobnosti zastávky {name}",
+      "due": {
+        "overdue": "Po termínu od {date}",
+        "soon": "Termín {date}",
+        "later": "Termín {date}",
+        "never": "Zatím bez revize",
+        "noDevices": "Bez zařízení"
+      }
+    },
+    "add": {
+      "title": "Přidat budovy do trasy",
+      "search": "Hledat budovu nebo zákazníka",
+      "none": "Žádná budova neodpovídá.",
+      "inRoute": "v trase",
+      "left": "Přidat jde ještě {count}.",
+      "submit": "Přidat ({count})",
+      "added": "{count, plural, one {Přidána # budova} few {Přidány # budovy} other {Přidáno # budov}}.",
+      "noPoint": "bez polohy"
+    },
+    "map": {
+      "label": "Mapa trasy",
+      "start": "Výchozí bod",
+      "add": "Přidat do trasy",
+      "inRoute": "Je v trase jako {number}.",
+      "showAll": "Celá trasa",
+      "viewList": "Zastávky ({count})",
+      "viewMap": "Mapa",
+      "close": "Zavřít"
     }
   }
 }

@@ -99,6 +99,9 @@ export type ErrorCode =
   | "templateArchived"
   | "templateFileInvalid"
   | "noteRequired"
+  | "routeTooLong"
+  | "routeChanged"
+  | "planInRoute"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -185,6 +188,10 @@ export function databaseErrorCode(
   if (message.includes("protocol_missing")) return "protocolMissing";
   if (message.includes("sample_exists")) return "sampleExists";
   if (message.includes("no_device_type")) return "noDeviceType";
+  if (message.includes("route_too_long")) return "routeTooLong";
+  if (message.includes("route_changed")) return "routeChanged";
+  if (message.includes("plan_in_route")) return "planInRoute";
+  if (message.includes("invalid_route")) return "dateInvalid";
   if (message.includes("not_found")) return "notFound";
   if (error?.code === "42501") return "forbidden";
   if (error?.code === "23505") return "alreadyInvited";

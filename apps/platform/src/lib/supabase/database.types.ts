@@ -29,6 +29,9 @@ export type CheckOutcome = "passed" | "failed" | "not_checked";
 /** Why a device was left out of an inspection (outcome not_checked). */
 export type CheckSkipReason = "inaccessible" | "missing";
 /** How a scan's position relates to the building (decided by the server). */
+/** Where a route starts (part 23). */
+export type RouteStartKind = "company" | "home" | "here" | "custom" | "none";
+
 export type ScanLocationState = "matches" | "mismatch" | "unknown";
 /** Why the phone had no position at a scan. */
 export type ScanLocationError = "denied" | "unavailable" | "timeout" | "unsupported";
@@ -75,6 +78,8 @@ export type Database = {
           scan_location_enabled: boolean;
           labels_printed_at: string | null;
           guide_dismissed_at: string | null;
+          base_latitude: number | null;
+          base_longitude: number | null;
         } & Timestamps;
         Insert: never;
         Update: Partial<{
@@ -95,6 +100,8 @@ export type Database = {
           weekly_digest: boolean;
           scan_location_enabled: boolean;
           guide_dismissed_at: string | null;
+          base_latitude: number | null;
+          base_longitude: number | null;
         }>;
         Relationships: [];
       };
@@ -313,6 +320,86 @@ export type Database = {
             columns: ["inspection_id"];
             isOneToOne: false;
             referencedRelation: "inspections";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      member_homes: {
+        Row: {
+          organization_id: string;
+          user_id: string;
+          latitude: number;
+          longitude: number;
+        } & Timestamps;
+        Insert: { organization_id: string; user_id: string; latitude: number; longitude: number };
+        Update: Partial<{ latitude: number; longitude: number }>;
+        Relationships: [];
+      };
+      route_plans: {
+        Row: {
+          id: string;
+          organization_id: string;
+          technician_id: string | null;
+          planned_on: string;
+          name: string;
+          start_kind: RouteStartKind;
+          start_latitude: number | null;
+          start_longitude: number | null;
+          return_to_start: boolean;
+          lock_first: boolean;
+          lock_last: boolean;
+          created_by: string | null;
+        } & Timestamps;
+        // Created by create_route_plan; day and technician through update_route_plan.
+        Insert: never;
+        Update: Partial<{
+          name: string;
+          start_kind: RouteStartKind;
+          start_latitude: number | null;
+          start_longitude: number | null;
+          return_to_start: boolean;
+          lock_first: boolean;
+          lock_last: boolean;
+        }>;
+        Relationships: [];
+      };
+      route_plan_stops: {
+        Row: {
+          id: string;
+          organization_id: string;
+          route_id: string;
+          site_id: string;
+          position: number;
+          minutes: number | null;
+          note: string | null;
+          inspection_plan_id: string | null;
+          owns_plan: boolean;
+          visited_at: string | null;
+          visited_by: string | null;
+        } & Timestamps;
+        // Added, removed, ordered and visited through the route functions.
+        Insert: never;
+        Update: Partial<{ minutes: number | null; note: string | null }>;
+        Relationships: [
+          {
+            foreignKeyName: "route_plan_stops_route_id_organization_id_fkey";
+            columns: ["route_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "route_plans";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "route_plan_stops_site_id_organization_id_fkey";
+            columns: ["site_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "sites";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "route_plan_stops_inspection_plan_id_fkey";
+            columns: ["inspection_plan_id"];
+            isOneToOne: true;
+            referencedRelation: "inspection_plans";
             referencedColumns: ["id"];
           },
         ];
@@ -1077,6 +1164,18 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       is_member: { Args: { p_org: string }; Returns: boolean };
+      create_route_plan: {
+        Args: { p_organization: string; p_planned_on: string; p_technician: string | null; p_name?: string };
+        Returns: string;
+      };
+      update_route_plan: {
+        Args: { p_route: string; p_planned_on: string; p_technician: string | null };
+        Returns: undefined;
+      };
+      add_route_stops: { Args: { p_route: string; p_sites: string[] }; Returns: number };
+      remove_route_stop: { Args: { p_stop: string }; Returns: undefined };
+      reorder_route_stops: { Args: { p_route: string; p_stops: string[] }; Returns: undefined };
+      set_route_stop_visited: { Args: { p_stop: string; p_visited: boolean }; Returns: undefined };
       publish_protocol_template: {
         Args: { p_template: string; p_content: Json; p_note: string };
         Returns: number;
@@ -1314,6 +1413,7 @@ export type Database = {
     };
     Enums: {
       member_role: MemberRole;
+      route_start_kind: RouteStartKind;
       scan_location_state: ScanLocationState;
       scan_location_error: ScanLocationError;
       checklist_item_type: ChecklistItemType;

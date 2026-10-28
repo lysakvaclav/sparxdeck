@@ -12,6 +12,7 @@ import {
   LayersIcon,
   MapIcon,
   PeopleIcon,
+  RouteIcon,
   type IconComponent,
 } from "@/components/icons";
 
@@ -25,6 +26,7 @@ export type NavItem = {
     | "dashboard"
     | "inspections"
     | "calendar"
+    | "routes"
     | "defects"
     | "customers"
     | "devices"
@@ -75,6 +77,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: CalendarIcon,
     group: "work",
     headerTone: "text-[#728c23] dark:text-[#b6d94c]",
+    phone: "more",
+  },
+  {
+    href: "/routes",
+    label: "routes",
+    icon: RouteIcon,
+    group: "work",
+    headerTone: "text-[#a854a8] dark:text-[#d699d6]",
     phone: "more",
   },
   {

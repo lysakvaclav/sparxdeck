@@ -370,7 +370,13 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P2 Publikování s poznámkou, historie a porovnání verzí, obnovení, kopie, archivace (část 22 D, commit 191306a: `e2e/part22-manage.mjs`, `tests/protocol-template-manage.test.ts`)
 - [x] P2 Export a import šablony (JSON), 3 ukázkové šablony cs/en, přiřazení zákazníkům a typům (část 22 D; „souhrnná“ ukázka je přehledový protokol revize, souhrnný protokol za více budov zůstává pevný)
 
-**Trasy pro techniky (část 23)**: položky se doplní s plánem části.
+**Trasy pro techniky (část 23)**
+- [x] P2 Plán trasy: den, technik, výchozí bod (sídlo, domov, moje poloha, vlastní bod), zastávky ze seznamu i z mapy, nejvýš 30 (část 23 A, `e2e/part23.mjs`)
+- [x] P2 Řazení vzdušnou čarou (nejbližší soused a 2-opt), návrat, zamčení první a poslední, ruční pořadí tažením i klávesnicí, celková vzdálenost (část 23 A, `tests/route-plans.test.ts`)
+- [x] P2 Mapa trasy s očíslovanými zastávkami a spojnicí; zahájení kontroly a odkaz do mapové aplikace (část 23 A)
+- [x] P2 Zastávky jsou návštěvy v kalendáři; navštíveno ručně i po dokončení revize; RLS (část 23 A, `tests/rls.test.ts`)
+- [ ] P2 Tip „poblíž končí revize“ (okruh 3 km, termín do 30 dní nebo po termínu) (část 23 B)
+- [ ] P2 Dnešní plán na telefonu, dostupný bez signálu (část 23 B)
 
 ---
 

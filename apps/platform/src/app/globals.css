@@ -475,6 +475,39 @@
   cursor: pointer;
 }
 
+/* A route's stops (part 23): the number in its order; visited ones turn green. */
+.route-stop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 2px solid var(--background);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 700 12px/1 var(--ui-font);
+  box-shadow: var(--elevation-2);
+  cursor: pointer;
+}
+
+.route-stop[data-visited="true"] {
+  background: #0f7246;
+  color: #ffffff;
+}
+
+/* Where the route starts: a square, not a number. */
+.route-start {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 3px solid var(--background);
+  background: var(--foreground);
+  box-shadow: var(--elevation-2);
+}
+
 /* MapLibre's controls in the app's colours (light and dark). */
 .maplibregl-ctrl-group,
 .maplibregl-ctrl-group:not(:empty) {

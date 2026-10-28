@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isManager, requireMembership } from "@/lib/auth";
 import { signedUrl } from "@/lib/storage";
+import { PointForm } from "@/components/app/point-form";
+import { setCompanyStart } from "../routes/actions";
 import { DigestPreview } from "./digest-preview";
 import {
   CompanyForm,
@@ -88,6 +90,8 @@ export default async function SettingsPage() {
     { id: "regional", label: t("regional.title") },
     { id: "deadlines", label: t("deadlines.title") },
     { id: "digest", label: t("digest.title") },
+    { id: "scan-location", label: t("scanLocation.title") },
+    { id: "route-start", label: t("routeStart.title") },
     { id: "device-types", label: t("deviceTypes.title") },
   ];
 
@@ -197,6 +201,23 @@ export default async function SettingsPage() {
               <ScanLocationForm
                 disabled={disabled}
                 defaults={{ scanLocation: organization.scan_location_enabled }}
+              />
+            </SettingsCard>
+            <SettingsCard
+              id="route-start"
+              title={t("routeStart.title")}
+              description={t("routeStart.hint")}
+            >
+              <PointForm
+                id="route-start-point"
+                label={t("routeStart.label")}
+                disabled={disabled}
+                initial={
+                  organization.base_latitude != null && organization.base_longitude != null
+                    ? { latitude: organization.base_latitude, longitude: organization.base_longitude }
+                    : null
+                }
+                save={setCompanyStart}
               />
             </SettingsCard>
             <SettingsCard

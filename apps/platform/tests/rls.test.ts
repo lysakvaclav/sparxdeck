@@ -5571,4 +5571,299 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect(data!.snapshot).toBeNull();
     });
   });
+
+  describe("routes for technicians (a fresh organization)", () => {
+    let rita: TestUser;
+    let tom: TestUser;
+    let petr: TestUser;
+    let org: string;
+    let customer: string;
+    let deviceType: string;
+    const sites: string[] = [];
+    const today = () => todayInTimeZone("Europe/Prague");
+
+    async function join(user: TestUser, name: string) {
+      const token = generateToken();
+      await rita.client.from("invitations").insert({
+        organization_id: org,
+        email: user.email,
+        role: "technician",
+        token_hash: hashToken(token),
+        invited_by: rita.id,
+      });
+      const { error } = await user.client.rpc("accept_invitation", { p_token: token, p_display_name: name });
+      expect(error).toBeNull();
+    }
+
+    async function route(client: Client, technician: string | null, day = today()) {
+      const { data, error } = await client.rpc("create_route_plan", {
+        p_organization: org,
+        p_planned_on: day,
+        p_technician: technician,
+        p_name: "Trasa",
+      });
+      expect(error).toBeNull();
+      return data!;
+    }
+
+    async function stops(id: string) {
+      const { data } = await admin
+        .from("route_plan_stops")
+        .select("id, site_id, position, inspection_plan_id, owns_plan, visited_at")
+        .eq("route_id", id)
+        .order("position");
+      return data ?? [];
+    }
+
+    beforeAll(async () => {
+      rita = await createUser("route-rita");
+      tom = await createUser("route-tom");
+      petr = await createUser("route-petr");
+      org = await createOrg(rita, `RLS routes ${run}`);
+      await join(tom, "Tom");
+      await join(petr, "Petr");
+      const { data: c } = await rita.client
+        .from("customers")
+        .insert({ organization_id: org, name: "Trasy" })
+        .select("id")
+        .single();
+      customer = c!.id;
+      const { data: rows, error } = await rita.client
+        .from("sites")
+        .insert(
+          Array.from({ length: 32 }, (_, index) => ({
+            organization_id: org,
+            customer_id: customer,
+            name: `Budova ${String(index).padStart(2, "0")}`,
+            latitude: 50 + index / 100,
+            longitude: 14 + index / 100,
+          })),
+        )
+        .select("id, name")
+        .order("name");
+      expect(error).toBeNull();
+      sites.push(...rows!.map((row) => row.id));
+      const { data: type } = await rita.client
+        .from("device_types")
+        .select("id")
+        .eq("organization_id", org)
+        .limit(1)
+        .single();
+      deviceType = type!.id;
+    });
+
+    it("a route starts from the technician's home, else the company's seat", async () => {
+      await rita.client.from("organizations").update({ base_latitude: 50.08, base_longitude: 14.42 }).eq("id", org);
+      // Each member sets their own home; nobody else's, and colleagues don't see it.
+      expect(
+        (await tom.client.from("member_homes").upsert({ organization_id: org, user_id: tom.id, latitude: 49.2, longitude: 16.6 })).error,
+      ).toBeNull();
+      expect(
+        (await tom.client.from("member_homes").insert({ organization_id: org, user_id: petr.id, latitude: 1, longitude: 1 })).error,
+      ).not.toBeNull();
+      expect(
+        (await petr.client.from("member_homes").insert({ organization_id: org, user_id: petr.id, latitude: 50.1, longitude: 14.5 })).error,
+      ).toBeNull();
+      await tom.client.from("member_homes").update({ latitude: 1 }).eq("user_id", petr.id);
+      const homes = async (client: Client) =>
+        ((await client.from("member_homes").select("user_id, latitude").eq("organization_id", org)).data ?? [])
+          .map((row) => `${row.user_id === tom.id ? "tom" : "petr"}:${row.latitude}`)
+          .sort();
+      expect(await homes(tom.client)).toEqual(["tom:49.2"]);
+      expect(await homes(petr.client)).toEqual(["petr:50.1"]);
+      expect(await homes(rita.client)).toEqual(["petr:50.1", "tom:49.2"]);
+      expect(await homes(bob.client)).toEqual([]);
+      await petr.client.from("member_homes").delete().eq("user_id", petr.id);
+      // A technician can't move the company's seat.
+      await tom.client.from("organizations").update({ base_latitude: 1, base_longitude: 1 }).eq("id", org);
+      const { data: seat } = await admin.from("organizations").select("base_latitude").eq("id", org).single();
+      expect(seat!.base_latitude).toBe(50.08);
+
+      const own = await route(tom.client, tom.id);
+      const forPetr = await route(rita.client, petr.id);
+      const { data } = await admin
+        .from("route_plans")
+        .select("id, start_kind, start_latitude")
+        .in("id", [own, forPetr]);
+      const byId = new Map(data!.map((row) => [row.id, row]));
+      expect(byId.get(own)).toMatchObject({ start_kind: "home", start_latitude: 49.2 });
+      expect(byId.get(forPetr)).toMatchObject({ start_kind: "company", start_latitude: 50.08 });
+    });
+
+    it("technicians plan and see their own routes; owners and admins everyone's; other companies nothing", async () => {
+      const own = await route(tom.client, tom.id);
+      const forPetr = await route(rita.client, petr.id);
+      const { error: forOther } = await tom.client.rpc("create_route_plan", {
+        p_organization: org,
+        p_planned_on: today(),
+        p_technician: petr.id,
+      });
+      expect(forOther?.message).toMatch(/forbidden/);
+      const { error: stranger } = await rita.client.rpc("create_route_plan", {
+        p_organization: org,
+        p_planned_on: today(),
+        p_technician: bob.id,
+      });
+      expect(stranger?.message).toMatch(/member_not_found/);
+      const { error: foreignOrg } = await bob.client.rpc("create_route_plan", {
+        p_organization: org,
+        p_planned_on: today(),
+        p_technician: bob.id,
+      });
+      expect(foreignOrg?.message).toMatch(/not_found/);
+
+      const seen = async (client: Client) =>
+        new Set(((await client.from("route_plans").select("id").in("id", [own, forPetr])).data ?? []).map((row) => row.id));
+      expect(await seen(tom.client)).toEqual(new Set([own]));
+      expect(await seen(petr.client)).toEqual(new Set([forPetr]));
+      expect(await seen(rita.client)).toEqual(new Set([own, forPetr]));
+      expect(await seen(bob.client)).toEqual(new Set());
+
+      // Someone else's route: not even its stops, and no function reaches it.
+      await rita.client.rpc("add_route_stops", { p_route: forPetr, p_sites: [sites[0]!] });
+      expect((await tom.client.from("route_plan_stops").select("id").eq("route_id", forPetr)).data).toEqual([]);
+      expect((await bob.client.from("route_plan_stops").select("id").eq("route_id", forPetr)).data).toEqual([]);
+      for (const [name, args] of [
+        ["add_route_stops", { p_route: forPetr, p_sites: [sites[1]!] }],
+        ["reorder_route_stops", { p_route: forPetr, p_stops: [] }],
+        ["update_route_plan", { p_route: forPetr, p_planned_on: today(), p_technician: tom.id }],
+      ] as const) {
+        const { error } = await tom.client.rpc(name, args as never);
+        expect(error?.message, name).toMatch(/not_found/);
+      }
+      await tom.client.from("route_plans").delete().eq("id", forPetr);
+      await tom.client.from("route_plans").update({ name: "Moje" }).eq("id", forPetr);
+      const { data: still } = await admin.from("route_plans").select("name").eq("id", forPetr).single();
+      expect(still!.name).toBe("Trasa");
+    });
+
+    it("the client writes only names, start and options; day, technician and stops go through the functions", async () => {
+      const own = await route(tom.client, tom.id);
+      expect((await tom.client.from("route_plans").update({ name: "Středa", return_to_start: false }).eq("id", own)).error).toBeNull();
+      expect((await tom.client.from("route_plans").update({ planned_on: "2030-01-01" } as never).eq("id", own)).error).not.toBeNull();
+      expect((await tom.client.from("route_plans").update({ technician_id: petr.id } as never).eq("id", own)).error).not.toBeNull();
+      expect(
+        (await tom.client.from("route_plans").insert({ organization_id: org, planned_on: today() } as never)).error,
+      ).not.toBeNull();
+      expect(
+        (await tom.client.from("route_plan_stops").insert({ organization_id: org, route_id: own, site_id: sites[0], position: 1 } as never)).error,
+      ).not.toBeNull();
+      // A technician can't hand their route to a colleague either.
+      const { error: handed } = await tom.client.rpc("update_route_plan", { p_route: own, p_planned_on: today(), p_technician: petr.id });
+      expect(handed?.message).toMatch(/forbidden/);
+    });
+
+    it("stops are the calendar's visits: linked or created, moved with the route, at most 30", async () => {
+      const day = "2031-03-03";
+      // An unassigned visit in the calendar already, for building 1 that day.
+      const { data: planned } = await rita.client
+        .from("inspection_plans")
+        .insert({ organization_id: org, site_id: sites[1]!, planned_on: day, created_by: rita.id })
+        .select("id")
+        .single();
+      const id = await route(rita.client, tom.id, day);
+      const { data: added, error } = await rita.client.rpc("add_route_stops", {
+        p_route: id,
+        p_sites: [sites[0]!, sites[1]!, sites[0]!],
+      });
+      expect(error).toBeNull();
+      expect(added).toBe(2);
+      let list = await stops(id);
+      expect(list.map((stop) => [stop.site_id, stop.position, stop.owns_plan])).toEqual([
+        [sites[0], 1, true],
+        [sites[1], 2, false],
+      ]);
+      expect(list[1]!.inspection_plan_id).toBe(planned!.id);
+      const plans = async () =>
+        (await admin.from("inspection_plans").select("id, site_id, planned_on, technician_id").in("id", list.map((stop) => stop.inspection_plan_id!))).data!;
+      for (const plan of await plans()) expect(plan).toMatchObject({ planned_on: day, technician_id: tom.id });
+
+      // The calendar can't move a route's visit; the route moves them all.
+      const { error: moved } = await rita.client.from("inspection_plans").update({ planned_on: "2031-03-04" }).eq("id", planned!.id);
+      expect(moved?.message).toMatch(/plan_in_route/);
+      expect((await rita.client.rpc("update_route_plan", { p_route: id, p_planned_on: "2031-03-05", p_technician: petr.id })).error).toBeNull();
+      for (const plan of await plans()) expect(plan).toMatchObject({ planned_on: "2031-03-05", technician_id: petr.id });
+
+      // Other companies' and deleted buildings are refused; the 31st stop too.
+      const { data: bobCustomer } = await admin
+        .from("customers")
+        .insert({ organization_id: orgB, name: `Route stranger ${run}` })
+        .select("id")
+        .single();
+      const { data: bobSite } = await admin
+        .from("sites")
+        .insert({ organization_id: orgB, customer_id: bobCustomer!.id, name: "Cizí" })
+        .select("id")
+        .single();
+      expect((await rita.client.rpc("add_route_stops", { p_route: id, p_sites: [bobSite!.id] })).error?.message).toMatch(/not_found/);
+      const { data: gone } = await rita.client
+        .from("sites")
+        .insert({ organization_id: org, customer_id: customer, name: "Smazaná" })
+        .select("id")
+        .single();
+      await rita.client.from("sites").update({ deleted_at: new Date().toISOString() }).eq("id", gone!.id);
+      expect((await rita.client.rpc("add_route_stops", { p_route: id, p_sites: [gone!.id] })).error?.message).toMatch(/site_deleted/);
+      expect((await rita.client.rpc("add_route_stops", { p_route: id, p_sites: sites.slice(2, 30) })).data).toBe(28);
+      const { error: tooLong } = await rita.client.rpc("add_route_stops", { p_route: id, p_sites: [sites[30]!] });
+      expect(tooLong?.message).toMatch(/route_too_long/);
+      expect((await stops(id)).length).toBe(30);
+
+      // Removing stops: the visit made for it goes, the calendar's own stays; the rest move up.
+      list = await stops(id);
+      expect((await rita.client.rpc("remove_route_stop", { p_stop: list[0]!.id })).error).toBeNull();
+      expect((await rita.client.rpc("remove_route_stop", { p_stop: list[1]!.id })).error).toBeNull();
+      const { data: left } = await admin.from("inspection_plans").select("id").in("id", [list[0]!.inspection_plan_id!, planned!.id]);
+      expect(left!.map((row) => row.id)).toEqual([planned!.id]);
+      expect((await stops(id)).map((stop) => stop.position)).toEqual(Array.from({ length: 28 }, (_, index) => index + 1));
+
+      // Deleting a visit in the calendar removes its stop; deleting the route, its visits.
+      const third = (await stops(id))[0]!;
+      await rita.client.from("inspection_plans").delete().eq("id", third.inspection_plan_id!);
+      expect((await stops(id)).some((stop) => stop.id === third.id)).toBe(false);
+      const remaining = (await stops(id)).map((stop) => stop.inspection_plan_id!);
+      expect((await rita.client.from("route_plans").delete().eq("id", id).select("id")).data).toHaveLength(1);
+      expect((await admin.from("inspection_plans").select("id").in("id", remaining)).data).toEqual([]);
+    });
+
+    it("the order is saved whole; a stale order is refused", async () => {
+      const id = await route(tom.client, tom.id);
+      await tom.client.rpc("add_route_stops", { p_route: id, p_sites: [sites[0]!, sites[1]!, sites[2]!] });
+      const [a, b, c] = await stops(id);
+      expect((await tom.client.rpc("reorder_route_stops", { p_route: id, p_stops: [c!.id, a!.id, b!.id] })).error).toBeNull();
+      expect((await stops(id)).map((stop) => stop.id)).toEqual([c!.id, a!.id, b!.id]);
+      for (const order of [[a!.id, b!.id], [a!.id, a!.id, b!.id], [a!.id, b!.id, c!.id, sites[3]!]]) {
+        const { error } = await tom.client.rpc("reorder_route_stops", { p_route: id, p_stops: order });
+        expect(error?.message).toMatch(/route_changed/);
+      }
+      // Minutes and a note are the client's to write.
+      expect((await tom.client.from("route_plan_stops").update({ minutes: 45, note: "Klíče u správce" }).eq("id", a!.id)).error).toBeNull();
+      expect((await tom.client.from("route_plan_stops").update({ position: 9 } as never).eq("id", a!.id)).error).not.toBeNull();
+    });
+
+    it("a stop is visited by hand, or when the inspection that carried out its visit is completed", async () => {
+      const id = await route(tom.client, tom.id);
+      await tom.client.rpc("add_route_stops", { p_route: id, p_sites: [sites[5]!, sites[6]!] });
+      const [first, second] = await stops(id);
+      expect((await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true })).error).toBeNull();
+      expect((await stops(id))[0]!.visited_at).not.toBeNull();
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: false });
+      expect((await stops(id))[0]!.visited_at).toBeNull();
+      expect((await petr.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true })).error?.message).toMatch(/not_found/);
+
+      const { data: device } = await rita.client
+        .from("devices")
+        .insert({ organization_id: org, site_id: sites[6]!, device_type_id: deviceType })
+        .select("id")
+        .single();
+      const { data: inspection, error } = await tom.client.rpc("start_inspection", { p_site: sites[6]! });
+      expect(error).toBeNull();
+      const { data: plan } = await admin.from("inspection_plans").select("inspection_id").eq("id", second!.inspection_plan_id!).single();
+      expect(plan!.inspection_id).toBe(inspection);
+      const { data: opened } = await tom.client.rpc("open_device_check", { p_inspection: inspection!, p_device: device!.id });
+      await tom.client.rpc("skip_device_check", { p_item: (opened as { item: string }).item, p_reason: "inaccessible" });
+      expect((await stops(id))[1]!.visited_at).toBeNull();
+      expect((await tom.client.rpc("complete_inspection", { p_inspection: inspection! })).error).toBeNull();
+      expect((await stops(id))[1]!.visited_at).not.toBeNull();
+    });
+  });
 });

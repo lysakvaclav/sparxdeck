@@ -13,6 +13,7 @@ import {
   Archive as LucideArchive,
   ArchiveRestore as LucideArchiveRestore,
   ArrowDown as LucideArrowDown,
+  ArrowDownWideNarrow as LucideArrowDownWideNarrow,
   ArrowUp as LucideArrowUp,
   Ban as LucideBan,
   Barcode as LucideBarcode,
@@ -30,6 +31,7 @@ import {
   ChevronUp as LucideChevronUp,
   ChevronsDownUp as LucideChevronsDownUp,
   ChevronsUpDown as LucideChevronsUpDown,
+  Circle as LucideCircle,
   CircleAlert as LucideCircleAlert,
   CircleCheck as LucideCircleCheck,
   CircleCheckBig as LucideCircleCheckBig,
@@ -92,6 +94,7 @@ import {
   Moon as LucideMoon,
   MousePointer2 as LucideMousePointer2,
   Move as LucideMove,
+  Navigation as LucideNavigation,
   Network as LucideNetwork,
   PanelLeftClose as LucidePanelLeftClose,
   PanelLeftOpen as LucidePanelLeftOpen,
@@ -104,6 +107,7 @@ import {
   Printer as LucidePrinter,
   Redo2 as LucideRedo2,
   RefreshCw as LucideRefreshCw,
+  Route as LucideRoute,
   Scan as LucideScan,
   Search as LucideSearch,
   Send as LucideSend,
@@ -170,6 +174,10 @@ export const ArchiveRestoreIcon = createIcon("archive-restore", LucideArchiveRes
 export const FileImportIcon = createIcon("file-import", LucideFileInput);
 export const SendIcon = createIcon("send", LucideSend);
 export const StarIcon = createIcon("star", LucideStar);
+export const RouteIcon = createIcon("route", LucideRoute);
+export const NavigationIcon = createIcon("navigation", LucideNavigation);
+export const SortRouteIcon = createIcon("sort-route", LucideArrowDownWideNarrow);
+export const CircleIcon = createIcon("circle", LucideCircle);
 export const BoldIcon = createIcon("bold", LucideBold);
 export const BracesIcon = createIcon("braces", LucideBraces);
 export const Heading2Icon = createIcon("heading-2", LucideHeading2);

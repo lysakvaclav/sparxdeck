@@ -523,6 +523,60 @@ export const inspectionPlanSchema = z.object({
 
 export type InspectionPlanInput = z.input<typeof inspectionPlanSchema>;
 
+// ---------------------------------------------------------------------------
+// Routes (part 23)
+// ---------------------------------------------------------------------------
+
+/** A route's day, technician and name. */
+export const routeSchema = z.object({
+  plannedOn: z
+    .string()
+    .min(1, "required")
+    .refine(isIsoDate, { message: "dateInvalid", abort: true })
+    .refine((value) => value >= "2000-01-01", "dateInvalid"),
+  technicianId: optional(z.uuid("memberNotFound")),
+  name: optional(z.string().max(120, "tooLong")),
+});
+export type RouteInput = z.input<typeof routeSchema>;
+
+/** Where a route starts: a kind, and the point for "here" and "custom" (or a saved one). */
+export const routeStartSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.enum(["company", "home", "none"]) }),
+  z.object({
+    kind: z.enum(["here", "custom"]),
+    coordinates: z
+      .string()
+      .trim()
+      .max(100, "tooLong")
+      .refine((value) => parseCoordinates(value) !== null, "invalidCoordinates"),
+  }),
+]);
+
+/** The ordering options of a route. */
+export const routeOptionsSchema = z.object({
+  returnToStart: z.boolean(),
+  lockFirst: z.boolean(),
+  lockLast: z.boolean(),
+});
+
+/** What the technician notes at a stop. */
+export const routeStopSchema = z.object({
+  minutes: z.union([
+    z.literal(""),
+    z.coerce.number<string | number>("countInvalid").int("countInvalid").min(0, "countInvalid").max(720, "countInvalid"),
+  ]),
+  note: optional(z.string().max(500, "tooLong")),
+});
+
+/** A start point kept with the company or a member: coordinates, or empty to clear. */
+export const pointSchema = z.object({
+  coordinates: z
+    .string()
+    .trim()
+    .max(100, "tooLong")
+    .refine((value) => value === "" || parseCoordinates(value) !== null, "invalidCoordinates"),
+});
+
 export type DefectInput = z.input<typeof defectSchema>;
 
 // ---------------------------------------------------------------------------
