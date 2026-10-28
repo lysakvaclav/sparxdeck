@@ -93,6 +93,12 @@ export type ErrorCode =
   | "deviceInInspection"
   | "sampleMismatch"
   | "noChange"
+  | "templateProblems"
+  | "templateDefault"
+  | "templateNotPublished"
+  | "templateArchived"
+  | "templateFileInvalid"
+  | "noteRequired"
   | "unexpected";
 
 export type ActionResult<T = undefined> =
@@ -154,6 +160,11 @@ export function databaseErrorCode(
   if (message.includes("device_exists")) return "deviceExists";
   if (message.includes("device_in_inspection")) return "deviceInInspection";
   if (message.includes("sample_mismatch")) return "sampleMismatch";
+  if (message.includes("template_default")) return "templateDefault";
+  if (message.includes("template_not_published")) return "templateNotPublished";
+  if (message.includes("template_archived")) return "templateArchived";
+  if (message.includes("invalid_template")) return "templateInvalid";
+  if (message.includes("note_required")) return "noteRequired";
   if (message.includes("no_change")) return "noChange";
   if (message.includes("invalid_template")) return "templateInvalid";
   if (message.includes("checks_unfinished")) return "checksUnfinished";

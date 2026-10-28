@@ -7,7 +7,9 @@ import { isManager, requireMembership } from "@/lib/auth";
 import { protocolFileNumber, protocolNumber } from "@/lib/protocol";
 import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-template";
 import { DEVICE_COLUMNS, templateSchema } from "@/lib/protocol-template/schema";
+import { memberNames } from "@/lib/inspection-data";
 import { signedUrl } from "@/lib/storage";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
 import type { Placeholders } from "./block-properties";
@@ -39,7 +41,17 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
     .maybeSingle();
   if (!template || template.status === "archived") notFound();
 
-  const [{ data: version }, { data: protocols }, { data: deviceTypes }] = await Promise.all([
+  const [
+    { data: version },
+    { data: protocols },
+    { data: deviceTypes },
+    { data: versionRows },
+    { data: eventRows },
+    { data: assignments },
+    { data: templateNames },
+    customers,
+    names,
+  ] = await Promise.all([
     template.draft || !template.current_version_id
       ? { data: null }
       : supabase
@@ -57,10 +69,64 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
       .limit(25),
     supabase
       .from("device_types")
-      .select("name")
+      .select("id, name")
       .eq("organization_id", organization.id)
       .order("name"),
+    // The history (stage D): published versions and what was done.
+    supabase
+      .from("protocol_template_versions")
+      .select("id, version, note, published_by, published_at, content")
+      .eq("template_id", id)
+      .order("version", { ascending: false })
+      .limit(50),
+    supabase
+      .from("protocol_template_events")
+      .select("kind, version, note, actor, created_at")
+      .eq("template_id", id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("protocol_template_assignments")
+      .select("template_id, customer_id, device_type_id")
+      .eq("organization_id", organization.id),
+    supabase.from("protocol_templates").select("id, name").eq("organization_id", organization.id),
+    fetchAll((from, to) =>
+      supabase
+        .from("customers")
+        .select("id, name")
+        .eq("organization_id", organization.id)
+        .is("deleted_at", null)
+        .order("name")
+        .range(from, to),
+    ),
+    memberNames(organization.id),
   ]);
+  const nameOf = (user: string | null) => (user ? (names.get(user) ?? null) : null);
+  const templateName = new Map((templateNames ?? []).map((row) => [row.id, row.name]));
+  const assignedTo = new Map<string, string>();
+  for (const row of assignments ?? []) assignedTo.set(row.customer_id ?? row.device_type_id ?? "", row.template_id);
+  const option = (row: { id: string; name: string }) => {
+    const owner = assignedTo.get(row.id);
+    return {
+      id: row.id,
+      name: row.name,
+      mine: owner === id,
+      elsewhere: owner && owner !== id ? (templateName.get(owner) ?? null) : null,
+    };
+  };
+  const versions = (versionRows ?? []).flatMap((row) => {
+    const content = templateSchema.safeParse(row.content);
+    return content.success
+      ? [{ id: row.id, version: row.version, note: row.note, by: nameOf(row.published_by), at: row.published_at, content: content.data }]
+      : [];
+  });
+  const events = (eventRows ?? []).map((row) => ({
+    kind: row.kind,
+    version: row.version,
+    note: row.note,
+    by: nameOf(row.actor),
+    at: row.created_at,
+  }));
   const stored = templateSchema.safeParse(template.draft ?? version?.content);
   const initial = stored.success ? stored.data : DEFAULT_PROTOCOL_TEMPLATE;
   // The template's own logo, shown in the header's properties.
@@ -136,6 +202,11 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
         fileName={t("editor.previewFile", { number: protocolFileNumber(template.name).slice(0, 60) })}
         deviceTypes={(deviceTypes ?? []).map((type) => type.name)}
         logoUrls={logoPath && logoUrl ? { [logoPath]: logoUrl } : {}}
+        versions={versions}
+        events={events}
+        assignCustomers={customers.map(option)}
+        assignDeviceTypes={(deviceTypes ?? []).map(option)}
+        archived={false}
       />
     </>
   );

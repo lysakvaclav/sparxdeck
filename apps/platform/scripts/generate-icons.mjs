@@ -6,6 +6,11 @@ import * as lucide from "lucide-react";
 
 const icons = {
   add: "Plus",
+  archive: "Archive",
+  "archive-restore": "ArchiveRestore",
+  "file-import": "FileInput",
+  send: "Send",
+  star: "Star",
   bold: "Bold",
   braces: "Braces",
   "heading-2": "Heading2",

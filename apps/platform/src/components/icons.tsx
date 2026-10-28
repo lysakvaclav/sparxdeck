@@ -10,6 +10,8 @@ import {
   AlignStartVertical as LucideAlignStartVertical,
   AlignVerticalDistributeCenter as LucideAlignVerticalDistributeCenter,
   AppWindow as LucideAppWindow,
+  Archive as LucideArchive,
+  ArchiveRestore as LucideArchiveRestore,
   ArrowDown as LucideArrowDown,
   ArrowUp as LucideArrowUp,
   Ban as LucideBan,
@@ -51,6 +53,7 @@ import {
   ExternalLink as LucideExternalLink,
   Eye as LucideEye,
   EyeOff as LucideEyeOff,
+  FileInput as LucideFileInput,
   FileSymlink as LucideFileSymlink,
   FileText as LucideFileText,
   FireExtinguisher as LucideFireExtinguisher,
@@ -103,11 +106,13 @@ import {
   RefreshCw as LucideRefreshCw,
   Scan as LucideScan,
   Search as LucideSearch,
+  Send as LucideSend,
   Settings as LucideSettings,
   Shield as LucideShield,
   Smartphone as LucideSmartphone,
   Sparkles as LucideSparkles,
   SquarePlus as LucideSquarePlus,
+  Star as LucideStar,
   Table as LucideTable,
   Table2 as LucideTable2,
   Tag as LucideTag,
@@ -160,6 +165,11 @@ function createIcon(name: string, Glyph: LucideIcon): IconComponent {
 }
 
 export const AddIcon = createIcon("add", LucidePlus);
+export const ArchiveIcon = createIcon("archive", LucideArchive);
+export const ArchiveRestoreIcon = createIcon("archive-restore", LucideArchiveRestore);
+export const FileImportIcon = createIcon("file-import", LucideFileInput);
+export const SendIcon = createIcon("send", LucideSend);
+export const StarIcon = createIcon("star", LucideStar);
 export const BoldIcon = createIcon("bold", LucideBold);
 export const BracesIcon = createIcon("braces", LucideBraces);
 export const Heading2Icon = createIcon("heading-2", LucideHeading2);

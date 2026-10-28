@@ -322,7 +322,13 @@
     "correctionInProgress": "A completed inspection of this building is being corrected. Complete the correction, then start a new inspection.",
     "correctionNotCancellable": "A correction can't be cancelled: that would delete the original inspection too. Complete the correction.",
     "invalidCoordinates": "The coordinates aren't in the right form. Enter latitude and longitude, e.g. 50.0755, 14.4378.",
-    "invalidRadius": "The radius must be a whole number from 10 to 5000 metres."
+    "invalidRadius": "The radius must be a whole number from 10 to 5000 metres.",
+    "templateProblems": "The template can't be published while something in it needs fixing. The list is in the editor under the blocks.",
+    "templateDefault": "The default template can't be archived. Make another one the default first.",
+    "templateNotPublished": "The template isn't published yet.",
+    "templateArchived": "The template is archived. Restore it first.",
+    "templateFileInvalid": "The file isn't a SparxDeck protocol template.",
+    "noteRequired": "Write a short note on what changed in this version."
   },
   "email": {
     "invite": {
@@ -2335,7 +2341,8 @@
       "usage": "Used for",
       "state": "State",
       "version": "Version",
-      "changed": "Changed"
+      "changed": "Changed",
+      "actions": "Actions"
     },
     "usage": {
       "inspection": "Inspection protocol",
@@ -2354,7 +2361,21 @@
       "fromHint": "The template is created as a draft. Protocols follow it only once it is published.",
       "fromDefault": "SparxDeck default protocol",
       "copyOf": "Copy of {name}",
-      "submit": "Create and edit"
+      "submit": "Create and edit",
+      "import": "Import",
+      "samples": "Sample templates",
+      "copies": "Copy a template",
+      "sample": {
+        "brief": "Sample: brief protocol",
+        "detailed": "Sample: detailed protocol",
+        "overview": "Sample: overview protocol (landscape)"
+      },
+      "importTitle": "Import a template from a file",
+      "importExplain": "A JSON file exported from SparxDeck (from another company, say). The template is checked again before it is stored and arrives as a draft; its own logo is converted again.",
+      "importFile": "Template file",
+      "importName": "Name (optional)",
+      "importNameHint": "Without one, the name in the file is used.",
+      "importSubmit": "Import"
     },
     "preview": {
       "loading": "Drawing the preview…",
@@ -2740,6 +2761,92 @@
       "deviceType": "Device type",
       "noDeviceTypes": "The company has no device types yet.",
       "variable": "Detail"
+    },
+    "assignedTo": "Customers: {customers}, device types: {types}",
+    "row": {
+      "actions": "Actions for template {name}",
+      "edit": "Edit",
+      "copy": "Copy",
+      "copyName": "{name} (copy)",
+      "copyTitle": "Copy the template",
+      "copyLabel": "Name of the copy",
+      "copySubmit": "Copy and edit",
+      "makeDefault": "Make default",
+      "defaultDone": "{name} is now the default template.",
+      "export": "Export to a file",
+      "archive": "Archive",
+      "archiveTitle": "Archive {name}?",
+      "archiveDescription": "New protocols won't use it and its assignments to customers and device types are removed. Issued protocols don't change. It can be restored.",
+      "archiveDone": "{name} is archived.",
+      "unarchive": "Restore from the archive",
+      "unarchiveDone": "{name} is restored."
+    },
+    "publish": {
+      "button": "Publish",
+      "title": "Publish the template",
+      "blocked": "The template can't be published yet. Fix:",
+      "explain": "The draft is stored as a new version. New protocols use it at once; issued protocols keep the version they were made with.",
+      "note": "What changed",
+      "noteHint": "A short note for the version history (required).",
+      "confirm": "Publish version",
+      "done": "Published as version {version}."
+    },
+    "history": {
+      "button": "History",
+      "title": "Template history",
+      "versions": "Published versions",
+      "noVersions": "The template has no published version yet.",
+      "versionLabel": "Version {version}",
+      "draft": "Draft",
+      "export": "Export version {version} to a file",
+      "restore": "Restore version {version} as the draft",
+      "compare": "Compare",
+      "compareFrom": "Compare from",
+      "compareTo": "Compare with",
+      "same": "No changes.",
+      "added": "Block added: {block}",
+      "removed": "Block removed: {block}",
+      "changed": "Block changed: {block}",
+      "reordered": "The order of blocks changed",
+      "settings": {
+        "page": "The page changed (orientation, margins)",
+        "style": "The look changed (font, colour, tables)",
+        "language": "The protocol's language changed",
+        "format": "The date format changed",
+        "footer": "The footer changed"
+      },
+      "events": "Changes",
+      "kinds": {
+        "created": "Created",
+        "published": "Version {version} published",
+        "renamed": "Renamed",
+        "archived": "Archived",
+        "restored": "{version, plural, =0 {Restored from the archive} other {Version # restored as the draft}}",
+        "default": "Made the default",
+        "copied": "Created as a copy of",
+        "imported": "Imported from a file",
+        "assigned": "Assignment changed"
+      },
+      "restored": "Version {version} is now the draft.",
+      "restoreTitle": "Restore version {version} as the draft?",
+      "restoreDescription": "The version's content goes into the draft. Protocols change only once it is published again.",
+      "restoreReplaces": "The version's content replaces the draft in progress. Protocols change only once it is published again.",
+      "restoreConfirm": "Restore as the draft"
+    },
+    "assign": {
+      "button": "Assign",
+      "buttonCount": "Assigned ({count})",
+      "needsPublished": "Only a published template can be assigned.",
+      "title": "Who the template is for",
+      "explain": "A protocol uses its customer's template, else its device type's (when the inspection is all one type), else the company's default.",
+      "customers": "Customers",
+      "noCustomers": "The company has no customers yet.",
+      "search": "Find a customer",
+      "deviceTypes": "Device types",
+      "deviceTypesHint": "Applies to inspections with devices of this type only.",
+      "now": "now: {template}",
+      "save": "Save assignments",
+      "saved": "Assignments saved."
     }
   }
 }

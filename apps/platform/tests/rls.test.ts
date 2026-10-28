@@ -5477,6 +5477,90 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect(protocol!.locale).toBe("en");
     });
 
+    it("managing templates: default, archive, copy, import, restore, assignments; all in the history", async () => {
+      const { DEFAULT_PROTOCOL_TEMPLATE } = await import("@/lib/protocol-template/default-template");
+      const content = DEFAULT_PROTOCOL_TEMPLATE as unknown as Json;
+      const events = async (template: string) =>
+        ((await olga.client.from("protocol_template_events").select("kind, note, version").eq("template_id", template).order("created_at")).data ?? []).map(
+          (event) => event.kind,
+        );
+
+      // A draft can't be the default; once published it can, and only one is.
+      const { data: draft } = await olga.client.from("protocol_templates").insert({ organization_id: org, name: "Správa" }).select("id").single();
+      expect((await olga.client.rpc("set_default_protocol_template", { p_template: draft!.id })).error?.message).toMatch(/template_not_published/);
+      await olga.client.rpc("publish_protocol_template", { p_template: draft!.id, p_content: content, p_note: "První" });
+      expect((await tomas.client.rpc("set_default_protocol_template", { p_template: draft!.id })).error?.message).toMatch(/not_found/);
+      expect((await bob.client.rpc("set_default_protocol_template", { p_template: draft!.id })).error?.message).toMatch(/not_found/);
+      expect((await olga.client.rpc("set_default_protocol_template", { p_template: draft!.id })).error).toBeNull();
+      const { data: defaults } = await olga.client.from("protocol_templates").select("id").eq("organization_id", org).eq("is_default", true);
+      expect(defaults).toEqual([{ id: draft!.id }]);
+
+      // The default can't be archived; another one can, and loses its assignments.
+      expect((await olga.client.rpc("archive_protocol_template", { p_template: draft!.id })).error?.message).toMatch(/template_default/);
+      const { error: back } = await olga.client.rpc("set_default_protocol_template", { p_template: defaultTemplate });
+      expect(back).toBeNull();
+      const { error: assigned } = await olga.client.rpc("set_protocol_template_assignments", {
+        p_template: draft!.id,
+        p_customers: [customerX],
+        p_device_types: [typeB],
+      });
+      expect(assigned).toBeNull();
+      expect((await olga.client.rpc("archive_protocol_template", { p_template: draft!.id })).error).toBeNull();
+      const { data: left } = await olga.client.from("protocol_template_assignments").select("id").eq("template_id", draft!.id);
+      expect(left).toEqual([]);
+      expect((await olga.client.rpc("set_default_protocol_template", { p_template: draft!.id })).error?.message).toMatch(/template_not_published/);
+      expect((await olga.client.rpc("unarchive_protocol_template", { p_template: draft!.id })).error).toBeNull();
+      const { data: restored } = await olga.client.from("protocol_templates").select("status").eq("id", draft!.id).single();
+      expect(restored!.status).toBe("published");
+
+      // A copy is a new draft with the same content.
+      const { data: copy, error: copied } = await olga.client.rpc("copy_protocol_template", { p_template: draft!.id, p_name: "Kopie správy" });
+      expect(copied).toBeNull();
+      const { data: copyRow } = await olga.client.from("protocol_templates").select("status, draft").eq("id", copy!).single();
+      expect(copyRow).toEqual({ status: "draft", draft: DEFAULT_PROTOCOL_TEMPLATE });
+      expect((await bob.client.rpc("copy_protocol_template", { p_template: draft!.id, p_name: "Ukradeno" })).error?.message).toMatch(/not_found/);
+
+      // An import: owners and admins only, a template only.
+      expect((await tomas.client.rpc("import_protocol_template", { p_name: "Z/souboru", p_description: "", p_content: content })).error?.message).toMatch(/forbidden/);
+      expect((await olga.client.rpc("import_protocol_template", { p_name: "Špatný", p_description: "", p_content: { schema: 2 } })).error?.message).toMatch(/invalid_template/);
+      const { data: imported } = await olga.client.rpc("import_protocol_template", { p_name: "Ze souboru", p_description: "Od kolegů", p_content: content });
+      const { data: importedRow } = await olga.client.from("protocol_templates").select("organization_id, status, description").eq("id", imported!).single();
+      expect(importedRow).toEqual({ organization_id: org, status: "draft", description: "Od kolegů" });
+
+      // An older version back as the draft.
+      await olga.client.rpc("publish_protocol_template", {
+        p_template: draft!.id,
+        p_content: { ...DEFAULT_PROTOCOL_TEMPLATE, style: { font: "inter", size: 9 } } as unknown as Json,
+        p_note: "Druhá",
+      });
+      const { data: first } = await olga.client.from("protocol_template_versions").select("id").eq("template_id", draft!.id).eq("version", 1).single();
+      expect((await olga.client.rpc("restore_protocol_template_version", { p_version: first!.id })).error).toBeNull();
+      const { data: afterRestore } = await olga.client.from("protocol_templates").select("draft").eq("id", draft!.id).single();
+      expect(afterRestore!.draft).toEqual(DEFAULT_PROTOCOL_TEMPLATE);
+      expect((await bob.client.rpc("restore_protocol_template_version", { p_version: first!.id })).error?.message).toMatch(/not_found/);
+
+      // Assignments: a customer moves from another template; another company's ids are refused.
+      await olga.client.rpc("set_protocol_template_assignments", { p_template: defaultTemplate, p_customers: [customerY], p_device_types: [] });
+      await olga.client.rpc("set_protocol_template_assignments", { p_template: draft!.id, p_customers: [customerY], p_device_types: [] });
+      const { data: owner } = await olga.client.from("protocol_template_assignments").select("template_id").eq("customer_id", customerY);
+      expect(owner).toEqual([{ template_id: draft!.id }]);
+      const { data: bobType } = await bob.client.from("device_types").select("id").limit(1).single();
+      expect(
+        (await olga.client.rpc("set_protocol_template_assignments", { p_template: draft!.id, p_customers: [], p_device_types: [bobType!.id] })).error?.message,
+      ).toMatch(/not_found/);
+      expect(
+        (await tomas.client.rpc("set_protocol_template_assignments", { p_template: draft!.id, p_customers: [], p_device_types: [] })).error?.message,
+      ).toMatch(/not_found/);
+
+      // A rename is in the history too.
+      await olga.client.from("protocol_templates").update({ name: "Správa 2" }).eq("id", draft!.id);
+      const kinds = await events(draft!.id);
+      for (const kind of ["created", "published", "default", "assigned", "archived", "restored", "renamed"])
+        expect(kinds, kind).toContain(kind);
+      expect((await events(copy!)).sort()).toEqual(["copied", "created"]);
+      expect((await events(imported!)).sort()).toEqual(["created", "imported"]);
+    });
+
     it("protocols' template version and snapshot are not the client's to write", async () => {
       const { data: protocol } = await olga.client.from("protocols").select("id").limit(1).single();
       await olga.client

@@ -1081,6 +1081,19 @@ export type Database = {
         Args: { p_template: string; p_content: Json; p_note: string };
         Returns: number;
       };
+      set_default_protocol_template: { Args: { p_template: string }; Returns: undefined };
+      archive_protocol_template: { Args: { p_template: string }; Returns: undefined };
+      unarchive_protocol_template: { Args: { p_template: string }; Returns: undefined };
+      copy_protocol_template: { Args: { p_template: string; p_name: string }; Returns: string };
+      import_protocol_template: {
+        Args: { p_name: string; p_description: string; p_content: Json };
+        Returns: string;
+      };
+      restore_protocol_template_version: { Args: { p_version: string }; Returns: undefined };
+      set_protocol_template_assignments: {
+        Args: { p_template: string; p_customers: string[]; p_device_types: string[] };
+        Returns: undefined;
+      };
       has_role: { Args: { p_org: string; p_roles: MemberRole[] }; Returns: boolean };
       create_organization: {
         Args: { p_name: string; p_display_name: string; p_locale?: string };

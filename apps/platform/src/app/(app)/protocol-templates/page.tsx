@@ -19,6 +19,7 @@ import {
 import { isManager, requireMembership } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { NewTemplateButton } from "./new-template-button";
+import { TemplateRowMenu } from "./template-row-menu";
 
 // Protocol templates (part 22): what the company's protocols look like.
 // Owners and admins open one in the editor; technicians see which exist.
@@ -39,9 +40,10 @@ export default async function ProtocolTemplatesPage() {
     .select("id, name, description, usage, status, is_default, draft_updated_at, updated_at, current_version_id")
     .eq("organization_id", organization.id)
     .order("is_default", { ascending: false })
+    .order("status")
     .order("name");
   const versionIds = (templates ?? []).flatMap((row) => (row.current_version_id ? [row.current_version_id] : []));
-  const [{ data: versions }, { data: drafts }] = await Promise.all([
+  const [{ data: versions }, { data: drafts }, { data: assignments }] = await Promise.all([
     versionIds.length
       ? supabase.from("protocol_template_versions").select("id, version").in("id", versionIds)
       : { data: [] },
@@ -50,7 +52,18 @@ export default async function ProtocolTemplatesPage() {
       .select("id")
       .eq("organization_id", organization.id)
       .not("draft", "is", null),
+    supabase
+      .from("protocol_template_assignments")
+      .select("template_id, customer_id")
+      .eq("organization_id", organization.id),
   ]);
+  const assigned = new Map<string, { customers: number; types: number }>();
+  for (const row of assignments ?? []) {
+    const counts = assigned.get(row.template_id) ?? { customers: 0, types: 0 };
+    if (row.customer_id) counts.customers += 1;
+    else counts.types += 1;
+    assigned.set(row.template_id, counts);
+  }
   const versionOf = new Map((versions ?? []).map((row) => [row.id, row.version]));
   const withDraft = new Set((drafts ?? []).map((row) => row.id));
   const app = appIcon("protocolTemplates");
@@ -84,6 +97,11 @@ export default async function ProtocolTemplatesPage() {
                   <TableHeaderCell>{t("columns.state")}</TableHeaderCell>
                   <TableHeaderCell className="hidden sm:table-cell">{t("columns.version")}</TableHeaderCell>
                   <TableHeaderCell className="hidden lg:table-cell">{t("columns.changed")}</TableHeaderCell>
+                  {manager && (
+                    <TableHeaderCell className="w-12">
+                      <span className="sr-only">{t("columns.actions")}</span>
+                    </TableHeaderCell>
+                  )}
                 </tr>
               </TableHead>
               <TableBody>
@@ -103,7 +121,17 @@ export default async function ProtocolTemplatesPage() {
                           <span className="block truncate text-ui-sm text-muted-foreground">{row.description}</span>
                         )}
                       </TableCell>
-                      <TableCell className="hidden whitespace-nowrap md:table-cell">{t(`usage.${row.usage}`)}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {t(`usage.${row.usage}`)}
+                        {assigned.has(row.id) && (
+                          <span className="block text-ui-sm text-muted-foreground">
+                            {t("assignedTo", {
+                              customers: assigned.get(row.id)!.customers,
+                              types: assigned.get(row.id)!.types,
+                            })}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <span className="flex flex-wrap gap-1">
                           <Badge variant={row.status === "published" ? "success" : row.status === "draft" ? "warning" : "outline"}>
@@ -121,6 +149,14 @@ export default async function ProtocolTemplatesPage() {
                       <TableCell className="hidden whitespace-nowrap lg:table-cell">
                         {format.dateTime(new Date(row.draft_updated_at ?? row.updated_at), { dateStyle: "medium" })}
                       </TableCell>
+                      {manager && (
+                        <TableCell>
+                          {/* Above the row's link, which covers the row. */}
+                          <div className="relative z-10">
+                            <TemplateRowMenu id={row.id} name={row.name} status={row.status} isDefault={row.is_default} />
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}

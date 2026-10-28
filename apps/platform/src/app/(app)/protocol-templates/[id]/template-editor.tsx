@@ -39,7 +39,10 @@ import { discardProtocolTemplateDraft, renameProtocolTemplate, saveProtocolTempl
 import { BlockList, type BlockActions } from "./block-list";
 import { BlockProperties, TextBody, type Placeholders } from "./block-properties";
 import { PageProperties } from "./page-properties";
+import { AssignDialog, type AssignOption } from "./assign-dialog";
 import { EditorEnvironmentContext, type EditorEnvironment } from "./editor-context";
+import { HistoryDialog, type HistoryEvent, type HistoryVersion } from "./history-dialog";
+import { PublishDialog } from "./publish-dialog";
 import { PdfPreview } from "./pdf-preview";
 
 // The protocol template editor (part 22, stage B): blocks on the left, the
@@ -67,6 +70,11 @@ export function TemplateEditor({
   fileName,
   deviceTypes,
   logoUrls: initialLogoUrls,
+  versions,
+  events,
+  assignCustomers,
+  assignDeviceTypes,
+  archived,
 }: {
   templateId: string;
   name: string;
@@ -82,6 +90,13 @@ export function TemplateEditor({
   deviceTypes: string[];
   /** Links to show the template's own logos, by their path. */
   logoUrls: Record<string, string>;
+  /** Published versions, newest first, and the template's history (stage D). */
+  versions: HistoryVersion[];
+  events: HistoryEvent[];
+  /** Customers and device types it can be assigned to. */
+  assignCustomers: AssignOption[];
+  assignDeviceTypes: AssignOption[];
+  archived: boolean;
 }) {
   const t = useTranslations("protocolTemplates.editor");
   const tBlocks = useTranslations("protocolTemplates.blocks");
@@ -124,21 +139,23 @@ export function TemplateEditor({
   }, []);
 
   // ---- Saving the draft -----------------------------------------------------
+  /** Saves the draft now; true when what the editor shows is stored. */
   const saveNow = useCallback(async () => {
     const sent = historyRef.current.present;
     if (sent === savedRef.current) {
       setSave("saved");
-      return;
+      return true;
     }
     setSave("saving");
     const result = await saveProtocolTemplateDraft(templateId, sent);
     if (!result.ok) {
       setSave("failed");
-      return;
+      return false;
     }
     savedRef.current = sent;
     setDraftExists(true);
     setSave(historyRef.current.present === sent ? "saved" : "pending");
+    return true;
   }, [templateId]);
 
   useEffect(() => {
@@ -206,6 +223,13 @@ export function TemplateEditor({
     [issues],
   );
   const selectedBlock = template.blocks.find((block) => block.id === selected) ?? null;
+  const issueText = (issue: (typeof issues)[number]) => {
+    const block = issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter");
+    if (issue.kind === "invalid") return t("issue.invalid", { block });
+    if (issue.code === "unknownVariable")
+      return t("issue.unknownVariable", { variable: `{{${issue.variable}}}`, block });
+    return t(`issue.${issue.code}`);
+  };
 
   // ---- Keyboard -------------------------------------------------------------
   useEffect(() => {
@@ -313,6 +337,26 @@ export function TemplateEditor({
             {t("discard")}
           </Button>
         )}
+        <HistoryDialog
+          templateId={templateId}
+          versions={versions}
+          events={events}
+          draft={template}
+          hasDraft={draftExists}
+          archived={archived}
+        />
+        <AssignDialog
+          templateId={templateId}
+          customers={assignCustomers}
+          deviceTypes={assignDeviceTypes}
+          disabled={!published || archived}
+        />
+        <PublishDialog
+          templateId={templateId}
+          issues={issues.map(issueText)}
+          saveFirst={saveNow}
+          disabled={archived || (!draftExists && published)}
+        />
         <label htmlFor="preview-source" className="sr-only">
           {t("previewSource")}
         </label>
@@ -395,14 +439,7 @@ export function TemplateEditor({
                         className="text-start whitespace-normal"
                         onClick={() => setSelected(issue.blockId ?? null)}
                       >
-                        {issue.kind === "invalid"
-                          ? t("issue.invalid", { block: issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter") })
-                          : issue.code === "unknownVariable"
-                            ? t("issue.unknownVariable", {
-                                variable: `{{${issue.variable}}}`,
-                                block: issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter"),
-                              })
-                            : t(`issue.${issue.code}`)}
+                        {issueText(issue)}
                       </Button>
                     </li>
                   ))}

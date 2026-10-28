@@ -322,7 +322,13 @@
     "correctionInProgress": "Na této budově právě probíhá oprava dokončené revize. Dokončete ji, pak můžete začít novou revizi.",
     "correctionNotCancellable": "Opravu dokončené revize nejde zrušit, smazal by se i původní záznam. Opravu dokončete.",
     "invalidCoordinates": "Souřadnice nejsou ve správném tvaru. Zadejte zeměpisnou šířku a délku, např. 50.0755, 14.4378.",
-    "invalidRadius": "Poloměr musí být celé číslo od 10 do 5000 metrů."
+    "invalidRadius": "Poloměr musí být celé číslo od 10 do 5000 metrů.",
+    "templateProblems": "Šablonu nejde publikovat, dokud v ní něco zbývá opravit. Seznam je v editoru pod bloky.",
+    "templateDefault": "Výchozí šablonu nejde archivovat. Nejdřív nastavte jako výchozí jinou.",
+    "templateNotPublished": "Šablona ještě není publikovaná.",
+    "templateArchived": "Šablona je archivovaná. Nejdřív ji obnovte.",
+    "templateFileInvalid": "Soubor není šablona protokolu ze SparxDecku.",
+    "noteRequired": "Napište krátkou poznámku, co se ve verzi změnilo."
   },
   "email": {
     "invite": {
@@ -2335,7 +2341,8 @@
       "usage": "Použití",
       "state": "Stav",
       "version": "Verze",
-      "changed": "Změněno"
+      "changed": "Změněno",
+      "actions": "Akce"
     },
     "usage": {
       "inspection": "Protokol z revize",
@@ -2354,7 +2361,21 @@
       "fromHint": "Šablona se vytvoří jako koncept. Ostré protokoly se podle ní řídí až po publikování.",
       "fromDefault": "Výchozí protokol SparxDeck",
       "copyOf": "Kopie: {name}",
-      "submit": "Vytvořit a upravit"
+      "submit": "Vytvořit a upravit",
+      "import": "Importovat",
+      "samples": "Ukázkové šablony",
+      "copies": "Kopie šablony",
+      "sample": {
+        "brief": "Ukázka: stručný protokol",
+        "detailed": "Ukázka: podrobný protokol",
+        "overview": "Ukázka: přehledový protokol (na šířku)"
+      },
+      "importTitle": "Importovat šablonu ze souboru",
+      "importExplain": "Soubor JSON vyexportovaný ze SparxDecku (třeba z jiné firmy). Šablona se před uložením znovu zkontroluje a přijde jako koncept; vlastní logo se znovu převede.",
+      "importFile": "Soubor šablony",
+      "importName": "Název (nepovinný)",
+      "importNameHint": "Bez názvu se použije název ze souboru.",
+      "importSubmit": "Importovat"
     },
     "preview": {
       "loading": "Kreslím náhled…",
@@ -2740,6 +2761,92 @@
       "deviceType": "Typ zařízení",
       "noDeviceTypes": "Firma zatím nemá žádné typy zařízení.",
       "variable": "Údaj"
+    },
+    "assignedTo": "Zákazníci: {customers}, typy zařízení: {types}",
+    "row": {
+      "actions": "Akce pro šablonu {name}",
+      "edit": "Upravit",
+      "copy": "Kopírovat",
+      "copyName": "{name} (kopie)",
+      "copyTitle": "Kopírovat šablonu",
+      "copyLabel": "Název kopie",
+      "copySubmit": "Kopírovat a upravit",
+      "makeDefault": "Nastavit jako výchozí",
+      "defaultDone": "Šablona {name} je teď výchozí.",
+      "export": "Exportovat do souboru",
+      "archive": "Archivovat",
+      "archiveTitle": "Archivovat šablonu {name}?",
+      "archiveDescription": "Nové protokoly ji používat nebudou a její přiřazení k zákazníkům a typům zařízení se zruší. Vydané protokoly se nemění. Šablonu půjde obnovit.",
+      "archiveDone": "Šablona {name} je archivovaná.",
+      "unarchive": "Obnovit z archivu",
+      "unarchiveDone": "Šablona {name} je obnovená."
+    },
+    "publish": {
+      "button": "Publikovat",
+      "title": "Publikovat šablonu",
+      "blocked": "Šablonu zatím nejde publikovat. Opravte:",
+      "explain": "Koncept se uloží jako nová verze. Nové protokoly ji použijí hned; vydané protokoly zůstanou ve verzi, se kterou vznikly.",
+      "note": "Co se změnilo",
+      "noteHint": "Krátká poznámka do historie verzí (povinná).",
+      "confirm": "Publikovat verzi",
+      "done": "Publikováno jako verze {version}."
+    },
+    "history": {
+      "button": "Historie",
+      "title": "Historie šablony",
+      "versions": "Publikované verze",
+      "noVersions": "Šablona zatím nemá publikovanou verzi.",
+      "versionLabel": "Verze {version}",
+      "draft": "Koncept",
+      "export": "Exportovat verzi {version} do souboru",
+      "restore": "Obnovit verzi {version} jako koncept",
+      "compare": "Porovnat",
+      "compareFrom": "Porovnat od",
+      "compareTo": "Porovnat s",
+      "same": "Beze změn.",
+      "added": "Přidán blok {block}",
+      "removed": "Odebrán blok {block}",
+      "changed": "Změněn blok {block}",
+      "reordered": "Změněno pořadí bloků",
+      "settings": {
+        "page": "Změněna stránka (orientace, okraje)",
+        "style": "Změněn vzhled (písmo, barva, tabulky)",
+        "language": "Změněn jazyk protokolu",
+        "format": "Změněn formát data",
+        "footer": "Změněna patička"
+      },
+      "events": "Záznam změn",
+      "kinds": {
+        "created": "Vytvořena",
+        "published": "Publikována verze {version}",
+        "renamed": "Přejmenována",
+        "archived": "Archivována",
+        "restored": "{version, plural, =0 {Obnovena z archivu} other {Verze # obnovena jako koncept}}",
+        "default": "Nastavena jako výchozí",
+        "copied": "Vytvořena kopií šablony",
+        "imported": "Importována ze souboru",
+        "assigned": "Změna přiřazení"
+      },
+      "restored": "Verze {version} je teď koncept.",
+      "restoreTitle": "Obnovit verzi {version} jako koncept?",
+      "restoreDescription": "Obsah verze se načte do konceptu. Ostré protokoly se změní až po novém publikování.",
+      "restoreReplaces": "Obsah verze nahradí rozpracovaný koncept. Ostré protokoly se změní až po novém publikování.",
+      "restoreConfirm": "Obnovit jako koncept"
+    },
+    "assign": {
+      "button": "Přiřadit",
+      "buttonCount": "Přiřazeno ({count})",
+      "needsPublished": "Přiřadit jde publikovanou šablonu.",
+      "title": "Pro koho šablona platí",
+      "explain": "Protokol použije šablonu svého zákazníka, jinak šablonu typu zařízení (když jsou v revizi všechna zařízení jednoho typu), jinak výchozí šablonu firmy.",
+      "customers": "Zákazníci",
+      "noCustomers": "Firma zatím nemá žádné zákazníky.",
+      "search": "Hledat zákazníka",
+      "deviceTypes": "Typy zařízení",
+      "deviceTypesHint": "Platí pro revize, ve kterých jsou jen zařízení tohoto typu.",
+      "now": "teď: {template}",
+      "save": "Uložit přiřazení",
+      "saved": "Přiřazení uloženo."
     }
   }
 }

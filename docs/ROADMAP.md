@@ -39,7 +39,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapy A–C hotové (2026-10-28), nenasazeno; D čeká |
+| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
@@ -691,7 +691,18 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Bez signálu:** beze změny (editor a náhled potřebují spojení).
 - **Ověření:** výchozí šablona dál dává přesně dosavadní protokol (referenční testy); testy proměnných, podmínek, kontrol publikování, všech písem a kurzívy, barev a stylů tabulek, formátu data, převodu textu (i zahození kódu, citací, obrázků a nebezpečných odkazů), čističe SVG a převodu loga; RLS test jazyka; `e2e/part22-style.mjs` (7 kroků včetně „zlého“ SVG); audit přístupnosti i s editorem textu na telefonu.
 
-**Etapa D (publikování, historie a porovnání verzí, obnovení, kopie, archivace, import a export, ukázkové šablony, přiřazení):** čeká.
+**Etapa D, správa šablon. Stav (2026-10-28): hotovo** (lokálně, nenasazeno).
+
+- **Publikování** s povinnou poznámkou „Co se změnilo“; dialog nejdřív ukáže, co publikování brání (záhlaví, neznámá proměnná, kontrast barvy, chybějící logo), a server to ověří znovu. Neuložený koncept se před publikováním uloží.
+- **Historie** (tlačítko v editoru): publikované verze s autorem, časem a poznámkou; porovnání libovolných dvou verzí i konceptu (přidané, odebrané, změněné bloky, pořadí, stránka, vzhled, jazyk, formát data, patička; `diff.ts`); záznam změn (vytvoření, publikování, přejmenování, výchozí, přiřazení, archivace, obnovení, kopie, import).
+- **Obnovení verze** jako koncept (`restore_protocol_template_version`): ostré protokoly se změní až po novém publikování.
+- **Seznam:** menu u každé šablony (upravit, kopírovat s názvem, nastavit jako výchozí, exportovat, archivovat, obnovit z archivu), u šablony počet přiřazených zákazníků a typů. Výchozí šablonu nejde archivovat; archivace zruší přiřazení, vydané protokoly se nemění.
+- **Export a import** (JSON `sparxdeck-protocol-template`, `transfer.ts`): export publikované verze nebo `?version=N`, vlastní logo jde v souboru. Import projde stejným schématem a kontrolami, přijde jako koncept a logo se znovu převede a uloží do složky firmy (SVG znovu očištěné).
+- **Ukázkové šablony** (cs/en podle jazyka firmy, `samples.ts`): stručný protokol, podrobný protokol a přehledový protokol na šířku. **Odchylka od plánu:** „souhrnná“ ukázka je přehledový protokol jedné revize, ne šablona souhrnného protokolu za více budov; souhrnný protokol (`/inspections/summary`) má dál pevné rozvržení a šablony se ho netýkají.
+- **Přiřazení** (tlačítko „Přiřadit“ v editoru, jen publikovaná šablona): zákazníci s hledáním a typy zařízení; u každého je vidět, kterou šablonu má teď. Pořadí výběru zůstává zákazník → typ zařízení → výchozí.
+- **Technicky:** migrace `20261031090000_protocol_template_management.sql` (`set_default_protocol_template`, `archive_protocol_template`, `unarchive_protocol_template`, `copy_protocol_template`, `import_protocol_template`, `restore_protocol_template_version`, `set_protocol_template_assignments`; triggery zapisují přejmenování a přiřazení do historie) a `20261031100000_protocol_template_created.sql` (událost vytvoření); trasa `/protocol-templates/<id>/export`.
+- **Bez signálu:** beze změny.
+- **Ověření:** testy porovnání, souboru šablony (poškozený, cizí formát, nebezpečný obsah, logo) a ukázkových šablon (projdou kontrolami v obou jazycích); RLS a role všech nových funkcí (cizí firma, technik, výchozí nejde archivovat, přiřazení jen vlastní firmy); `e2e/part22-manage.mjs` (10 kroků: ukázka, publikování s poznámkou, historie a porovnání, obnovení, export a import, kopie, přiřazení a protokol, který ho použije, výchozí a archivace, technik, tmavý režim a angličtina); celá sada části 22, audit přístupnosti, hlavní tok.
 
 **K ověření s odborníkem** (aplikace nic z toho nevymýšlí; doplní se do `requirements.ts`): co musí revizní protokol obsahovat (číslo osvědčení technika, výrobce, rok výroby, hasivo a množství, příští termín, lhůty závad, razítko, podpisy, prohlášení o provozuschopnosti, odkaz na předpisy) a zda platí pevné pořadí či nadpisy.
 
