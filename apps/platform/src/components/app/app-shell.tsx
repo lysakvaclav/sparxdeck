@@ -121,7 +121,7 @@ export function AppShell({
               >
                 {expanded && (
                   <>
-                    <BrandMark label="SparxDeck" className="size-6" />
+                    <BrandMark label="SparxDeck" className="size-5" />
                     <span
                       className="min-w-0 flex-1 truncate text-ui font-semibold"
                       title={organizationName}
@@ -179,7 +179,7 @@ export function AppShell({
               {/* Mobile top bar */}
               <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background ps-[15px] pe-1 pt-[env(safe-area-inset-top)] lg:hidden">
                 <Link href="/" className="flex min-h-12 min-w-0 items-center gap-2">
-                  <BrandMark label="SparxDeck" className="size-6" />
+                  <BrandMark label="SparxDeck" className="size-5" />
                   <span className="truncate text-ui font-semibold">{organizationName}</span>
                 </Link>
                 <div className="flex shrink-0 items-center">

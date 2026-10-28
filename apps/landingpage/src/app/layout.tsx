@@ -73,11 +73,8 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
+  // Icons: favicon.ico, icon.png and apple-icon.png in src/app (Next.js file
+  // conventions), generated from the mark by apps/platform/scripts/generate-app-icons.mjs.
 };
 
 export default function RootLayout({
