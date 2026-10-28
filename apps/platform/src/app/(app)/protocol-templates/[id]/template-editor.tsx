@@ -39,6 +39,7 @@ import { discardProtocolTemplateDraft, renameProtocolTemplate, saveProtocolTempl
 import { BlockList, type BlockActions } from "./block-list";
 import { BlockProperties, TextBody, type Placeholders } from "./block-properties";
 import { PageProperties } from "./page-properties";
+import { EditorEnvironmentContext, type EditorEnvironment } from "./editor-context";
 import { PdfPreview } from "./pdf-preview";
 
 // The protocol template editor (part 22, stage B): blocks on the left, the
@@ -64,6 +65,8 @@ export function TemplateEditor({
   placeholders,
   inspections,
   fileName,
+  deviceTypes,
+  logoUrls: initialLogoUrls,
 }: {
   templateId: string;
   name: string;
@@ -75,6 +78,10 @@ export function TemplateEditor({
   placeholders: Placeholders;
   inspections: { id: string; label: string }[];
   fileName: string;
+  /** The company's device types (a block may show only for one). */
+  deviceTypes: string[];
+  /** Links to show the template's own logos, by their path. */
+  logoUrls: Record<string, string>;
 }) {
   const t = useTranslations("protocolTemplates.editor");
   const tBlocks = useTranslations("protocolTemplates.blocks");
@@ -100,6 +107,17 @@ export function TemplateEditor({
   const [description, setDescription] = useState(initialDescription);
   const [renaming, startRename] = useTransition();
   const [nameError, setNameError] = useState<string>();
+
+  const [logoUrls, setLogoUrls] = useState(initialLogoUrls);
+  const environment: EditorEnvironment = useMemo(
+    () => ({
+      templateId,
+      deviceTypes,
+      logoUrls,
+      addLogoUrl: (path, url) => setLogoUrls((current) => ({ ...current, [path]: url })),
+    }),
+    [templateId, deviceTypes, logoUrls],
+  );
 
   const change = useCallback((next: ProtocolTemplate, mergeKey: string | null = null) => {
     setHistory((current) => record(current, next, mergeKey));
@@ -237,7 +255,10 @@ export function TemplateEditor({
         return;
       }
       setDiscarding(false);
-      window.location.reload();
+      // The page comes back with the published version; the editor starts over
+      // from it (its key follows the draft).
+      savedRef.current = historyRef.current.present;
+      router.refresh();
     });
 
   const saveLabel = {
@@ -264,6 +285,7 @@ export function TemplateEditor({
   );
 
   return (
+    <EditorEnvironmentContext.Provider value={environment}>
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Toolbar */}
       <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-2 px-4 py-1.5 shadow-[inset_0_-1px_0_var(--border)]">
@@ -371,11 +393,16 @@ export function TemplateEditor({
                       <Button
                         variant="link"
                         className="text-start whitespace-normal"
-                        onClick={() => issue.blockId && setSelected(issue.blockId)}
+                        onClick={() => setSelected(issue.blockId ?? null)}
                       >
-                        {issue.kind === "problem"
-                          ? t(`issue.${issue.code}`)
-                          : t("issue.invalid", { block: issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter") })}
+                        {issue.kind === "invalid"
+                          ? t("issue.invalid", { block: issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter") })
+                          : issue.code === "unknownVariable"
+                            ? t("issue.unknownVariable", {
+                                variable: `{{${issue.variable}}}`,
+                                block: issue.blockId ? (names[issue.blockId] ?? "") : t("pageAndFooter"),
+                              })
+                            : t(`issue.${issue.code}`)}
                       </Button>
                     </li>
                   ))}
@@ -461,5 +488,6 @@ export function TemplateEditor({
         onConfirm={discard}
       />
     </div>
+    </EditorEnvironmentContext.Provider>
   );
 }

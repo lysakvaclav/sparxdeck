@@ -5439,6 +5439,44 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect(fresh.template_version_id).not.toBe(defaultVersion);
     });
 
+    it("a template's language becomes its protocols' language", async () => {
+      const { DEFAULT_PROTOCOL_TEMPLATE } = await import("@/lib/protocol-template/default-template");
+      const { data: created } = await olga.client
+        .from("protocol_templates")
+        .insert({ organization_id: org, name: "English protocol" })
+        .select("id")
+        .single();
+      const { error: published } = await olga.client.rpc("publish_protocol_template", {
+        p_template: created!.id,
+        p_content: { ...DEFAULT_PROTOCOL_TEMPLATE, language: "en" } as unknown as Json,
+        p_note: "In English",
+      });
+      expect(published).toBeNull();
+      await olga.client.from("protocol_template_assignments").delete().eq("customer_id", customerY);
+      const { error: assigned } = await olga.client.from("protocol_template_assignments").insert({
+        organization_id: org,
+        template_id: created!.id,
+        customer_id: customerY,
+      });
+      expect(assigned).toBeNull();
+      const device = await (async () => {
+        const { data } = await olga.client
+          .from("devices")
+          .insert({ organization_id: org, site_id: sites.Y1!, device_type_id: typeB })
+          .select("id")
+          .single();
+        return data!.id;
+      })();
+      const inspection = await inspect(sites.Y1!, [device]);
+      const { data: protocol } = await olga.client
+        .from("protocols")
+        .select("locale")
+        .eq("inspection_id", inspection)
+        .eq("active", true)
+        .single();
+      expect(protocol!.locale).toBe("en");
+    });
+
     it("protocols' template version and snapshot are not the client's to write", async () => {
       const { data: protocol } = await olga.client.from("protocols").select("id").limit(1).single();
       await olga.client

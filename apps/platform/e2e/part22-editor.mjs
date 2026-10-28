@@ -163,7 +163,8 @@ try {
     // Typed letter by letter, a space at the end of the line stays in the field.
     await page.send("Input.insertText", { text: " " });
     await page.send("Input.insertText", { text: "V" });
-    const typed = await page.evaluate(`document.querySelector("#text-content").value`);
+    // The formatted text editor (stage C) is an editable element, not a textarea.
+    const typed = await page.evaluate(`document.querySelector("#text-content").innerText.trim()`);
     if (!typed.endsWith("2027. V")) throw new Error(`typed text: ${JSON.stringify(typed)}`);
     await until("the text saved", async () =>
       JSON.stringify((await draftOf(templateId)).draft.blocks.find((block) => block.id === "text")?.content ?? "").includes("2027. V"),
@@ -236,7 +237,7 @@ try {
       `organization_id=eq.${org}&is_default=eq.true&select=id`,
     );
     await page.goto(`${APP}/protocol-templates/${template.id}`);
-    await page.waitForText("Stránka a patička");
+    await page.waitFor("#page-orientation");
     await page.selectValue("#page-orientation", "landscape");
     await page.waitForText("Koncept uložen", 20000);
     if (!(await draftOf(template.id)).draft) throw new Error("no draft");

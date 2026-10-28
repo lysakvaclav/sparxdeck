@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { AddIcon, ArrowDownIcon, ArrowUpIcon, LockIcon, TrashIcon } from "@/components/icons";
+import { AddIcon, ArrowDownIcon, ArrowUpIcon, LockIcon, TrashIcon, UploadIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { richToText, textToRich } from "@/lib/protocol-template/editor";
 import {
   COMPANY_FIELDS,
+  CONDITIONS,
   CUSTOMER_FIELDS,
   DEVICE_COLUMNS,
   FACTS,
@@ -16,11 +16,17 @@ import {
   LOGO_POSITIONS,
   SIGNATURE_ROLES,
   TEMPLATE_LIMITS,
+  type BlockCondition,
   type BlockOf,
   type DeviceColumnKey,
   type TemplateBlock,
 } from "@/lib/protocol-template/schema";
-import { CheckControl, ChoiceList, InlineNumber, NumberControl, SelectControl, TextControl } from "./controls";
+import { VARIABLES } from "@/lib/protocol-template/variables";
+import { uploadProtocolTemplateLogo } from "../actions";
+import { CheckControl, ChoiceList, InlineNumber, NumberControl, SelectControl } from "./controls";
+import { useEditorEnvironment } from "./editor-context";
+import { RichTextEditor } from "./rich-text-editor";
+import { VariableInput, useVariableNames } from "./variable-menu";
 
 // The properties of the selected block (part 22, stage B).
 
@@ -59,7 +65,7 @@ function TitleField({
 }) {
   const t = useTranslations("protocolTemplates.properties");
   return (
-    <TextControl
+    <VariableInput
       id={`${block.id}-title`}
       label={label ?? t("title")}
       hint={t("titleHint")}
@@ -189,6 +195,7 @@ function HeaderProperties({ block, onChange, placeholders }: { block: BlockOf<"h
       />
       {block.logo.show && (
         <>
+          <LogoSource block={block} onChange={onChange} />
           <SelectControl
             id={`${block.id}-logo-position`}
             label={t("logoPosition")}
@@ -221,6 +228,78 @@ function HeaderProperties({ block, onChange, placeholders }: { block: BlockOf<"h
         checked={block.date}
         onChange={(date) => onChange({ ...block, date }, "date")}
       />
+    </>
+  );
+}
+
+/** The company's logo, or one of the template's own (uploaded, converted to PNG). */
+function LogoSource({ block, onChange }: { block: BlockOf<"header">; onChange: Change }) {
+  const t = useTranslations("protocolTemplates.properties");
+  const tErr = useTranslations("errors");
+  const { templateId, logoUrls, addLogoUrl } = useEditorEnvironment();
+  const file = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string>();
+  const [pending, start] = useTransition();
+  const source = block.logo.source ?? "organization";
+  const url = block.logo.path ? logoUrls[block.logo.path] : undefined;
+  const upload = (chosen: File) =>
+    start(async () => {
+      setError(undefined);
+      const form = new FormData();
+      form.set("logo", chosen);
+      const result = await uploadProtocolTemplateLogo(templateId, form);
+      if (!result.ok) {
+        setError(tErr(result.error));
+        return;
+      }
+      if (result.data.url) addLogoUrl(result.data.path, result.data.url);
+      onChange({ ...block, logo: { ...block.logo, source: "template", path: result.data.path } }, "logo.path");
+    });
+  return (
+    <>
+      <SelectControl
+        id={`${block.id}-logo-source`}
+        label={t("logoSource")}
+        value={source}
+        options={(["organization", "template"] as const).map((value) => ({ value, label: t(`logoSources.${value}`) }))}
+        onChange={(value) =>
+          onChange(
+            { ...block, logo: { ...block.logo, source: value === "organization" ? undefined : value } },
+            "logo.source",
+          )
+        }
+      />
+      {source === "template" && (
+        <div className="space-y-2">
+          {url && (
+            // eslint-disable-next-line @next/next/no-img-element -- a signed link to the uploaded logo
+            <img src={url} alt={t("logoPreview")} className="max-h-16 max-w-full rounded-sm bg-white p-1 shadow-[inset_0_0_0_1px_var(--border)]" />
+          )}
+          <input
+            ref={file}
+            id={`${block.id}-logo-file`}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            className="sr-only"
+            tabIndex={-1}
+            onChange={(event) => {
+              const chosen = event.target.files?.[0];
+              event.target.value = "";
+              if (chosen) upload(chosen);
+            }}
+          />
+          <Button type="button" variant="outline" size="sm" disabled={pending} onClick={() => file.current?.click()}>
+            <UploadIcon />
+            {block.logo.path ? t("logoReplace") : t("logoUpload")}
+          </Button>
+          <p className="text-ui-sm text-muted-foreground">{t("logoHint")}</p>
+          {error && (
+            <p role="alert" className="text-ui-sm text-destructive-text">
+              {error}
+            </p>
+          )}
+        </div>
+      )}
     </>
   );
 }
@@ -407,7 +486,7 @@ function TextProperties({ block, onChange }: { block: BlockOf<"text">; onChange:
   const t = useTranslations("protocolTemplates.properties");
   return (
     <>
-      <TextControl
+      <VariableInput
         id={`${block.id}-title`}
         label={t("titleOptional")}
         value={block.title ?? ""}
@@ -426,11 +505,7 @@ function TextProperties({ block, onChange }: { block: BlockOf<"text">; onChange:
   );
 }
 
-/**
- * The text of a text block as typed: the field keeps what is written (a space
- * at the end of a line, empty lines), the block gets its paragraphs. A change
- * from elsewhere (undo) replaces the field.
- */
+/** The formatted text of a text block (with variables). */
 export function TextBody({
   block,
   onChange,
@@ -442,24 +517,13 @@ export function TextBody({
   idPrefix?: string;
 }) {
   const t = useTranslations("protocolTemplates.properties");
-  const [text, setText] = useState(() => richToText(block.content));
-  const [shown, setShown] = useState(block.content);
-  if (shown !== block.content) {
-    setShown(block.content);
-    if (JSON.stringify(textToRich(text)) !== JSON.stringify(block.content)) setText(richToText(block.content));
-  }
   return (
-    <TextControl
+    <RichTextEditor
       id={`${idPrefix}${block.id}-content`}
       label={t("text")}
       hint={t("textHint")}
-      multiline
-      value={text}
-      maxLength={TEMPLATE_LIMITS.text}
-      onChange={(value) => {
-        setText(value);
-        onChange({ ...block, content: textToRich(value) }, "content");
-      }}
+      content={block.content}
+      onChange={(content) => onChange({ ...block, content }, "content")}
     />
   );
 }
@@ -470,7 +534,7 @@ function TableProperties({ block, onChange }: { block: BlockOf<"table">; onChang
     onChange({ ...block, columns, rows }, field);
   return (
     <>
-      <TextControl
+      <VariableInput
         id={`${block.id}-title`}
         label={t("titleOptional")}
         value={block.title ?? ""}
@@ -667,7 +731,76 @@ function SignaturesProperties({ block, onChange, placeholders }: { block: BlockO
   );
 }
 
+/** When the block shows: always, or under one condition chosen from a list. */
+function ConditionField({ block, onChange }: { block: TemplateBlock; onChange: Change }) {
+  const t = useTranslations("protocolTemplates.conditions");
+  const names = useVariableNames();
+  const { deviceTypes } = useEditorEnvironment();
+  const condition = block.condition;
+  const set = (next: BlockCondition | undefined, field: string) =>
+    onChange({ ...block, condition: next } as TemplateBlock, field);
+  const choose = (when: string) => {
+    if (when === "always") set(undefined, "condition");
+    else if (when === "deviceType") set({ when, type: deviceTypes[0] ?? "" }, "condition");
+    else if (when === "notEmpty") set({ when, variable: "zakaznik.kontakt" }, "condition");
+    else set({ when } as BlockCondition, "condition");
+  };
+  return (
+    <fieldset className="space-y-3 border-t border-border pt-4">
+      <legend className="sr-only">{t("legend")}</legend>
+      <SelectControl
+        id={`${block.id}-condition`}
+        label={t("when")}
+        value={condition?.when ?? "always"}
+        options={(["always", ...CONDITIONS] as const).map((value) => ({ value, label: t(`options.${value}`) }))}
+        onChange={choose}
+      />
+      {condition?.when === "deviceType" &&
+        (deviceTypes.length > 0 ? (
+          <SelectControl
+            id={`${block.id}-condition-type`}
+            label={t("deviceType")}
+            value={condition.type}
+            options={[...new Set([condition.type, ...deviceTypes])].filter(Boolean).map((value) => ({ value, label: value }))}
+            onChange={(type) => set({ when: "deviceType", type }, "condition.type")}
+          />
+        ) : (
+          <p className="text-ui-sm text-muted-foreground">{t("noDeviceTypes")}</p>
+        ))}
+      {condition?.when === "notEmpty" && (
+        <SelectControl
+          id={`${block.id}-condition-variable`}
+          label={t("variable")}
+          value={condition.variable}
+          options={VARIABLES.map((value) => ({
+            value,
+            label: `${names.group(value.split(".")[0]!)}: ${names.variable(value)}`,
+          }))}
+          onChange={(variable) => set({ when: "notEmpty", variable }, "condition.variable")}
+        />
+      )}
+    </fieldset>
+  );
+}
+
 export function BlockProperties({
+  block,
+  onChange,
+  placeholders,
+}: {
+  block: TemplateBlock;
+  onChange: Change;
+  placeholders: Placeholders;
+}) {
+  return (
+    <>
+      <BlockFields block={block} onChange={onChange} placeholders={placeholders} />
+      {block.type !== "header" && <ConditionField block={block} onChange={onChange} />}
+    </>
+  );
+}
+
+function BlockFields({
   block,
   onChange,
   placeholders,

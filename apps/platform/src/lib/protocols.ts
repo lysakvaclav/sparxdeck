@@ -92,6 +92,18 @@ async function templateOf(versionId: string | null): Promise<ProtocolTemplate> {
   return template;
 }
 
+/** The logo a template draws: its own (stage C), else the company's from its settings. */
+function logoOf(template: ProtocolTemplate, organizationLogo: string | null): string | null {
+  const header = template.blocks.find((block) => block.type === "header");
+  if (header?.type === "header" && header.logo.source === "template") return header.logo.path ?? null;
+  return organizationLogo;
+}
+
+/** The language a template sets for its protocols; null = the company's. */
+export function templateLanguage(template: ProtocolTemplate): ProtocolLocale | null {
+  return template.language === "cs" || template.language === "en" ? template.language : null;
+}
+
 /** Draws a protocol's PDF from its snapshot and template (`extra` replaces some of its images). */
 async function drawProtocol(
   organizationId: string,
@@ -131,7 +143,11 @@ async function drawProtocol(
     locale: input.locale,
     namespace: "protocol.pdf",
   })) as unknown as Translate;
-  return renderProtocolPdf(buildProtocol(input, t), assets, template);
+  return renderProtocolPdf(
+    buildProtocol(input, t, { dateStyle: template.format?.date }),
+    assets,
+    template,
+  );
 }
 
 /**
@@ -359,7 +375,7 @@ async function collectSnapshot(
       scanLocation: organization.scan_location_enabled,
     },
     images: {
-      logo: organization.logo_path,
+      logo: logoOf(template, organization.logo_path),
       signature: signatureImage
         ? { format: signatureImage.format, base64: signatureImage.data.toString("base64") }
         : null,
@@ -455,7 +471,9 @@ export async function previewProtocol(
   if (inspectionId) {
     const protocol = await protocolOf(inspectionId);
     if (!protocol || protocol.organization_id !== organizationId) return null;
-    const snapshot = await collectSnapshot(protocol, template);
+    // In the template's language, as a protocol drawn by it would be.
+    const language = templateLanguage(template);
+    const snapshot = await collectSnapshot(language ? { ...protocol, locale: language } : protocol, template);
     return snapshot ? drawProtocol(organizationId, snapshot, template) : null;
   }
   const { data: organization } = await supabase
@@ -464,7 +482,8 @@ export async function previewProtocol(
     .eq("id", organizationId)
     .single();
   if (!organization) return null;
-  const locale: ProtocolLocale = organization.default_locale === "en" ? "en" : "cs";
+  const locale: ProtocolLocale =
+    templateLanguage(template) ?? (organization.default_locale === "en" ? "en" : "cs");
   const t = await getTranslations({ locale, namespace: "protocolTemplates" });
   const keys = [
     "customer", "contact", "billingAddress", "site", "siteAddress", "technician", "colleague",

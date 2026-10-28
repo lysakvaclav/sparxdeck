@@ -6,6 +6,15 @@ import * as lucide from "lucide-react";
 
 const icons = {
   add: "Plus",
+  bold: "Bold",
+  braces: "Braces",
+  "heading-2": "Heading2",
+  "heading-3": "Heading3",
+  italic: "Italic",
+  "list-bulleted": "List",
+  "list-numbered": "ListOrdered",
+  "text-link": "Link2",
+  "text-unlink": "Unlink2",
   application: "AppWindow",
   "arrow-down": "ArrowDown",
   "arrow-up": "ArrowUp",

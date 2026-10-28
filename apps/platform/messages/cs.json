@@ -2399,7 +2399,11 @@
         "headerMissing": "Protokol musí mít záhlaví s číslem protokolu a údaji o firmě.",
         "headerHidden": "Záhlaví s číslem protokolu a údaji o firmě nesmí být skryté.",
         "headerTwice": "Záhlaví může být v protokolu jen jednou.",
-        "invalid": "{block}: hodnota mimo povolený rozsah"
+        "invalid": "{block}: hodnota mimo povolený rozsah",
+        "headerCondition": "Záhlaví s číslem protokolu a údaji o firmě se zobrazuje vždy, nesmí mít podmínku.",
+        "unknownVariable": "Neznámá proměnná {variable} ({block}).",
+        "accentContrast": "Barva firmy je na bílém papíře špatně čitelná. Zvolte tmavší.",
+        "logoMissing": "Záhlaví má mít vlastní logo, ale žádné není nahrané."
       },
       "shortcuts": "Zkratky: Ctrl+Z zpět, Ctrl+Shift+Z znovu, Ctrl+S uložit, Alt+šipka posune vybraný blok, Esc zruší výběr. Blok přesunete také tažením za úchyt nebo klávesnicí: na úchytu mezerník, šipky, mezerník.",
       "previewLabel": "Náhled",
@@ -2520,7 +2524,7 @@
         "note": "Drobné písmo (upozornění, právní text)"
       },
       "text": "Text",
-      "textHint": "Odstavce oddělte prázdným řádkem. Formátování a proměnné přibudou v další etapě. Právní texty si firma zadává sama.",
+      "textHint": "Proměnné se doplní podle revize. Právní a poznámkové texty si firma zadává sama, aplikace je nevymýšlí.",
       "tableColumns": "Sloupce",
       "tableColumnTitle": "Název sloupce {index}",
       "tableColumnWidth": "Šířka sloupce {index}",
@@ -2556,7 +2560,16 @@
       "spacerHeight": "Výška mezery",
       "dividerHint": "Vodorovná čára přes celou šířku.",
       "pageBreakHint": "Další blok začne na nové stránce.",
-      "unreadable": "Uloženou šablonu nešlo načíst, editor začíná z výchozího protokolu."
+      "unreadable": "Uloženou šablonu nešlo načíst, editor začíná z výchozího protokolu.",
+      "logoSource": "Které logo",
+      "logoSources": {
+        "organization": "Logo firmy (z Nastavení)",
+        "template": "Vlastní logo této šablony"
+      },
+      "logoPreview": "Logo šablony",
+      "logoUpload": "Nahrát logo",
+      "logoReplace": "Nahradit logo",
+      "logoHint": "PNG, JPG, WebP nebo SVG do 2 MB. SVG se očistí od skriptů a uloží jako obrázek."
     },
     "page": {
       "orientation": "Orientace stránky",
@@ -2580,7 +2593,35 @@
       },
       "footerOrganizationHint": "Text patičky se mění v Nastavení → Protokoly.",
       "footerCustom": "Text patičky",
-      "pageNumbers": "Číslo protokolu a strany na každé stránce"
+      "pageNumbers": "Číslo protokolu a strany na každé stránce",
+      "language": "Jazyk protokolu",
+      "languages": {
+        "organization": "Podle firmy",
+        "cs": "Čeština",
+        "en": "Angličtina"
+      },
+      "languageHint": "Texty protokolu (nadpisy, výsledky, data) v tomto jazyce. Vlastní texty šablony se nepřekládají.",
+      "dateFormat": "Formát data",
+      "font": "Písmo",
+      "fonts": {
+        "noto-sans": "Noto Sans (bezpatkové)",
+        "noto-serif": "Noto Serif (patkové)",
+        "inter": "Inter (bezpatkové)"
+      },
+      "fontHint": "Písma s otevřenou licencí OFL, vložená do PDF.",
+      "accent": "Barva firmy",
+      "accentOn": "Nadpisy, linka záhlaví a záhlaví tabulek v barvě firmy",
+      "accentPicker": "Vybrat barvu",
+      "accentHex": "Barva v zápisu #rrggbb",
+      "accentLow": "Barva je na bílém papíře špatně čitelná (kontrast {ratio}:1, potřeba aspoň 4,5:1). Zvolte tmavší.",
+      "accentHint": "Výsledky jsou dál slovy, ne barvou: protokol se čte stejně i z černobílé tiskárny.",
+      "tableBorders": "Čáry v tabulkách",
+      "tableBorderOptions": {
+        "rows": "Pod řádky",
+        "grid": "Mřížka",
+        "none": "Bez čar"
+      },
+      "tableZebra": "Střídat podklad řádků"
     },
     "sample": {
       "customer": "Bytové družstvo Lipová",
@@ -2603,6 +2644,102 @@
       "defectSeal": "Plomba chybí, přístroj vyměnit",
       "defectGauge": "Tlakoměr mimo zelené pole",
       "notes": "Ukázková poznámka technika k revizi."
+    },
+    "variables": {
+      "insert": "Vložit proměnnou",
+      "insertShort": "Proměnná",
+      "insertInto": "Vložit proměnnou do pole {field}",
+      "groups": {
+        "firma": "Firma",
+        "zakaznik": "Zákazník",
+        "budova": "Budova",
+        "revize": "Revize",
+        "technik": "Technik",
+        "protokol": "Protokol",
+        "vysledek": "Výsledek",
+        "zavady": "Závady",
+        "podpis": "Podpis"
+      },
+      "names": {
+        "firma": {
+          "nazev": "Název",
+          "ico": "IČO",
+          "dic": "DIČ",
+          "adresa": "Adresa",
+          "email": "E-mail",
+          "telefon": "Telefon"
+        },
+        "zakaznik": {
+          "nazev": "Název",
+          "ico": "IČO",
+          "dic": "DIČ",
+          "adresa": "Fakturační adresa",
+          "kontakt": "Kontaktní osoba"
+        },
+        "budova": {
+          "nazev": "Název",
+          "adresa": "Adresa"
+        },
+        "revize": {
+          "datum": "Datum revize",
+          "zahajeni": "Datum zahájení",
+          "dokonceni": "Datum dokončení",
+          "poznamka": "Poznámka technika"
+        },
+        "technik": {
+          "jmeno": "Jméno (podepisující)",
+          "vsichni": "Všichni, kdo kontrolovali"
+        },
+        "protokol": {
+          "cislo": "Číslo protokolu",
+          "verze": "Verze",
+          "vystaveno": "Datum vystavení"
+        },
+        "vysledek": {
+          "text": "Celkový výsledek (věta)",
+          "celkem": "Zařízení celkem",
+          "vyhovuje": "Vyhovuje",
+          "nevyhovuje": "Nevyhovuje",
+          "nezkontrolovano": "Nezkontrolováno"
+        },
+        "zavady": {
+          "pocet": "Počet zjištěných závad"
+        },
+        "podpis": {
+          "zakaznik": "Jméno podepsaného za zákazníka"
+        }
+      }
+    },
+    "richText": {
+      "toolbar": "Formátování textu",
+      "bold": "Tučně (Ctrl+B)",
+      "italic": "Kurzíva (Ctrl+I)",
+      "heading2": "Nadpis",
+      "heading3": "Podnadpis",
+      "bulletList": "Odrážky",
+      "orderedList": "Číslovaný seznam",
+      "link": "Odkaz",
+      "unlink": "Zrušit odkaz",
+      "linkAddress": "Adresa odkazu",
+      "linkApply": "Použít",
+      "linkCancel": "Zrušit",
+      "linkInvalid": "Odkaz musí začínat https:// nebo mailto:.",
+      "variable": "Vložit proměnnou"
+    },
+    "conditions": {
+      "legend": "Kdy blok zobrazit",
+      "when": "Zobrazit blok",
+      "options": {
+        "always": "Vždy",
+        "hasDefects": "Jen když revize zjistila závady",
+        "noDefects": "Jen když revize nezjistila závady",
+        "failed": "Jen když některé zařízení nevyhovuje",
+        "deviceType": "Jen když revize obsahuje typ zařízení",
+        "notEmpty": "Jen když je údaj vyplněný"
+      },
+      "deviceType": "Typ zařízení",
+      "noDeviceTypes": "Firma zatím nemá žádné typy zařízení.",
+      "variable": "Údaj"
     }
   }
 }

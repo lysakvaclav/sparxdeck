@@ -496,3 +496,29 @@
 .dark .maplibregl-ctrl-attrib-button {
   filter: invert(1);
 }
+
+/* The formatted text of a protocol template in its editor (part 22). */
+.rich-text h2 {
+  margin: 0.4em 0 0.2em;
+  font-size: 1.15em;
+  font-weight: 600;
+}
+.rich-text h3 {
+  margin: 0.3em 0 0.2em;
+  font-weight: 600;
+}
+.rich-text p {
+  margin: 0.2em 0;
+}
+.rich-text ul {
+  list-style: disc;
+  padding-inline-start: 1.4em;
+}
+.rich-text ol {
+  list-style: decimal;
+  padding-inline-start: 1.4em;
+}
+.rich-text a {
+  color: var(--link);
+  text-decoration: underline;
+}

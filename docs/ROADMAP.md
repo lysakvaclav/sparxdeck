@@ -39,7 +39,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 19 | Plánování a závady 2 | K, I | Hotovo (2026-10-24), nasazeno 2026-10-25 (s novým vzhledem platformy) |
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapy A a B hotové (2026-10-28), nenasazeno; C–D čekají |
+| 22 | Editor protokolů (etapy A–D) | Fáze 3 | Etapy A–C hotové (2026-10-28), nenasazeno; D čeká |
 | 23 | Trasy pro techniky | Fáze 3 | Čeká na plán |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
@@ -680,7 +680,18 @@ Zadání majitele z 2026-10-27: čtyři funkce, po kterých je produkt připrave
 - **Bez signálu:** editor potřebuje spojení (náhled kreslí server); revize v terénu beze změny.
 - **Ověření:** testy funkcí editoru a ukázkových dat; `e2e/part22-editor.mjs` (11 kroků: seznam, nová šablona, náhled, textový blok, přesun klávesnicí i tlačítkem, skrytí, zpět a znovu, uložení a obnovení, skutečná data, zahození, technik, telefon, tmavý režim a angličtina); audit přístupnosti seznamu a editoru (i telefon a dotykové plochy).
 
-**Etapa C (proměnné, podmínky, styly, jazyky, písma, logo šablony) a D (publikování, historie a porovnání verzí, import a export, ukázkové šablony, přiřazení):** čekají.
+**Etapa C, proměnné, podmínky a vzhled. Stav (2026-10-28): hotovo** (lokálně, nenasazeno).
+
+- **Proměnné** `{{zakaznik.nazev}}` a dalších 28 (firma, zákazník, budova, revize, technik, protokol, výsledek, závady, podpis; `src/lib/protocol-template/variables.ts`): v nadpisech, textech, buňkách vlastní tabulky, popiscích podpisů a patičce. Vybírají se z nabídky, neznámá se v editoru hlásí a brání publikování; hodnota se vkládá vždy jako text (proměnná v hodnotě se znovu nedoplňuje).
+- **Podmínky bloků** výběrem: jen se závadami, jen bez závad, jen když něco nevyhovuje, jen pro typ zařízení (podle názvu), jen když je údaj vyplněný (`conditions.ts`). Záhlaví podmínku mít nesmí.
+- **Formátovaný text** v editoru TipTap 2.27 (MIT) s jen povolenými prvky (odstavce, nadpisy, odrážky, číslování, tučně, kurzíva, odkazy https/mailto, proměnné z nabídky); ukládá se převedený do kontrolovaného stromu (`rich-text.ts`), takže vložení odjinud nic dalšího nepřinese.
+- **Vzhled:** písma Noto Sans (doplněná kurzíva), Noto Serif a Inter (OFL, `src/assets/fonts`, licence vedle), barva firmy pro nadpisy, linku záhlaví a záhlaví tabulek (kontrast aspoň 4,5:1, jinak varování a zákaz publikování), čáry tabulek (pod řádky, mřížka, žádné) a střídání řádků, formát data (krátký, střední, dlouhý), jazyk protokolu (podle firmy, čeština, angličtina; migrace `20261030090000_protocol_template_language.sql` ho při očíslování přenese do protokolu).
+- **Logo šablony:** PNG, JPG, WebP nebo SVG do 2 MB, typ podle obsahu; SVG se očistí (`src/lib/svg-sanitize.ts`, `@xmldom/xmldom`: jen tvary, text a přechody; pryč skripty, obsluhy událostí, HTML, obrázky, styly, animace a odkazy ven; DOCTYPE a entity odmítnuty) a hned převede na PNG (`sharp`, nejvýš 1600 × 800, limit pixelů). Ukládá se do `<firma>/protocol-templates/`, do PDF jde jen obrázek; kreslí se jen z vlastní složky firmy.
+- **Opravy navíc:** po zahození konceptu se editor obnoví bez znovunačtení stránky; panel formátování a pole s proměnnými mají na dotyku 44 px.
+- **Bez signálu:** beze změny (editor a náhled potřebují spojení).
+- **Ověření:** výchozí šablona dál dává přesně dosavadní protokol (referenční testy); testy proměnných, podmínek, kontrol publikování, všech písem a kurzívy, barev a stylů tabulek, formátu data, převodu textu (i zahození kódu, citací, obrázků a nebezpečných odkazů), čističe SVG a převodu loga; RLS test jazyka; `e2e/part22-style.mjs` (7 kroků včetně „zlého“ SVG); audit přístupnosti i s editorem textu na telefonu.
+
+**Etapa D (publikování, historie a porovnání verzí, obnovení, kopie, archivace, import a export, ukázkové šablony, přiřazení):** čeká.
 
 **K ověření s odborníkem** (aplikace nic z toho nevymýšlí; doplní se do `requirements.ts`): co musí revizní protokol obsahovat (číslo osvědčení technika, výrobce, rok výroby, hasivo a množství, příští termín, lhůty závad, razítko, podpisy, prohlášení o provozuschopnosti, odkaz na předpisy) a zda platí pevné pořadí či nadpisy.
 

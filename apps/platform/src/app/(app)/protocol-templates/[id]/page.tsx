@@ -7,6 +7,7 @@ import { isManager, requireMembership } from "@/lib/auth";
 import { protocolFileNumber, protocolNumber } from "@/lib/protocol";
 import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-template";
 import { DEVICE_COLUMNS, templateSchema } from "@/lib/protocol-template/schema";
+import { signedUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
 import type { Placeholders } from "./block-properties";
@@ -38,7 +39,7 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
     .maybeSingle();
   if (!template || template.status === "archived") notFound();
 
-  const [{ data: version }, { data: protocols }] = await Promise.all([
+  const [{ data: version }, { data: protocols }, { data: deviceTypes }] = await Promise.all([
     template.draft || !template.current_version_id
       ? { data: null }
       : supabase
@@ -54,9 +55,18 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
       .eq("active", true)
       .order("created_at", { ascending: false })
       .limit(25),
+    supabase
+      .from("device_types")
+      .select("name")
+      .eq("organization_id", organization.id)
+      .order("name"),
   ]);
   const stored = templateSchema.safeParse(template.draft ?? version?.content);
   const initial = stored.success ? stored.data : DEFAULT_PROTOCOL_TEMPLATE;
+  // The template's own logo, shown in the header's properties.
+  const header = initial.blocks.find((block) => block.type === "header");
+  const logoPath = header?.type === "header" ? header.logo.path : null;
+  const logoUrl = logoPath ? await signedUrl(logoPath) : null;
 
   const locale = organization.default_locale === "en" ? "en" : "cs";
   const [t, tPdf, tProps, format] = await Promise.all([
@@ -124,6 +134,8 @@ export default async function ProtocolTemplateEditorPage({ params }: Props) {
         placeholders={placeholders}
         inspections={inspections}
         fileName={t("editor.previewFile", { number: protocolFileNumber(template.name).slice(0, 60) })}
+        deviceTypes={(deviceTypes ?? []).map((type) => type.name)}
+        logoUrls={logoPath && logoUrl ? { [logoPath]: logoUrl } : {}}
       />
     </>
   );

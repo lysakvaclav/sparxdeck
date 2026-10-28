@@ -1,6 +1,7 @@
 import { formatLabel } from "@/lib/devices";
 import { defectNumber } from "@/lib/defects";
 import { CALENDAR_FORMAT, calendarDate } from "@/lib/due";
+import type { VariableKey } from "@/lib/protocol-template/variables";
 import { scanLocationSummary } from "@/lib/scan-location";
 import type {
   CheckOutcome,
@@ -206,6 +207,13 @@ export type ProtocolModel = {
   footer: string | null;
   /** "Protocol 2026-0007 · page 1 of 2" with the numbers filled in at render time. */
   page: (page: number, pages: number) => string;
+  /** The values of the template's variables ({{zakaznik.nazev}}), empty where unknown. */
+  variables: Record<VariableKey, string>;
+};
+
+export type ProtocolOptions = {
+  /** How dates are written (the template's choice); "medium" is the protocol as before. */
+  dateStyle?: "medium" | "long" | "short";
 };
 
 const dash = "—";
@@ -216,13 +224,18 @@ const lines = (value: string | null | undefined) =>
     .filter(Boolean);
 const joined = (parts: (string | null | undefined)[]) => parts.filter(Boolean).join(" · ");
 
-export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel {
+export function buildProtocol(
+  input: ProtocolInput,
+  t: Translate,
+  { dateStyle = "medium" }: ProtocolOptions = {},
+): ProtocolModel {
   const number = protocolNumber(input.year, input.number, input.numberFormat);
-  const day = new Intl.DateTimeFormat(input.locale, {
-    dateStyle: "medium",
-    timeZone: input.timeZone,
-  });
-  const calendar = new Intl.DateTimeFormat(input.locale, CALENDAR_FORMAT);
+  const day = new Intl.DateTimeFormat(input.locale, { dateStyle, timeZone: input.timeZone });
+  // Calendar days (the next due date) in the same style; medium as everywhere in the app.
+  const calendar = new Intl.DateTimeFormat(
+    input.locale,
+    dateStyle === "medium" ? CALENDAR_FORMAT : { dateStyle, timeZone: "UTC" },
+  );
   const decimal = new Intl.NumberFormat(input.locale, { maximumFractionDigits: 3 });
   const ids = (companyId: string | null, vatId: string | null) =>
     joined([companyId && `${t("companyId")}: ${companyId}`, vatId && `${t("vatId")}: ${vatId}`]);
@@ -316,6 +329,45 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
         : String(input.version),
     });
 
+  const result =
+    counts.failed > 0
+      ? t("overall.failed", { count: counts.failed })
+      : counts.passed > 0
+        ? t("overall.passed")
+        : t("overall.none");
+  const organizationName = organization.legalName || organization.name;
+  const variables: Record<VariableKey, string> = {
+    "firma.nazev": organizationName,
+    "firma.ico": organization.companyId ?? "",
+    "firma.dic": organization.vatId ?? "",
+    "firma.adresa": lines(organization.address).join(", "),
+    "firma.email": organization.email ?? "",
+    "firma.telefon": organization.phone ?? "",
+    "zakaznik.nazev": customer?.name ?? "",
+    "zakaznik.ico": customer?.companyId ?? "",
+    "zakaznik.dic": customer?.vatId ?? "",
+    "zakaznik.adresa": lines(customer?.billingAddress).join(", "),
+    "zakaznik.kontakt": customer?.contactPerson ?? "",
+    "budova.nazev": site?.name ?? "",
+    "budova.adresa": lines(site?.address).join(", "),
+    "revize.datum": facts[0]!.value,
+    "revize.zahajeni": started,
+    "revize.dokonceni": completed,
+    "revize.poznamka": input.notes?.trim() ?? "",
+    "technik.jmeno": technicians[0] ?? "",
+    "technik.vsichni": technicians.join(", "),
+    "protokol.cislo": number,
+    "protokol.verze": String(input.version),
+    "protokol.vystaveno": day.format(new Date(input.generatedAt)),
+    "vysledek.text": result,
+    "vysledek.celkem": String(counts.total),
+    "vysledek.vyhovuje": String(counts.passed),
+    "vysledek.nevyhovuje": String(counts.failed),
+    "vysledek.nezkontrolovano": String(counts.notChecked),
+    "zavady.pocet": String(counts.defects),
+    "podpis.zakaznik": input.customerSignature?.name ?? "",
+  };
+
   return {
     locale: input.locale,
     fileName: t("fileName", { number: protocolFileNumber(number) }),
@@ -323,7 +375,7 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
     numberLabel: t("number"),
     number,
     organization: {
-      name: organization.legalName || organization.name,
+      name: organizationName,
       address: lines(organization.address),
       ids: ids(organization.companyId, organization.vatId),
       contact: joined([organization.email, organization.phone]),
@@ -344,12 +396,7 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
       failed: counts.failed,
       notChecked: counts.notChecked,
     }),
-    result:
-      counts.failed > 0
-        ? t("overall.failed", { count: counts.failed })
-        : counts.passed > 0
-          ? t("overall.passed")
-          : t("overall.none"),
+    result,
     countLabels: {
       total: t("counts.total"),
       passed: t("counts.passed"),
@@ -439,5 +486,6 @@ export function buildProtocol(input: ProtocolInput, t: Translate): ProtocolModel
     signatureHint: t("signHint"),
     footer: organization.footer?.trim() || null,
     page: (page, pages) => t("page", { number, page, pages }),
+    variables,
   };
 }

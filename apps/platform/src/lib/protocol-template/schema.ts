@@ -73,8 +73,40 @@ export const richTextSchema = z.array(richNodeSchema).max(TEMPLATE_LIMITS.richNo
 // Blocks
 // ---------------------------------------------------------------------------
 
-/** Everything a block has in common: its id (for the editor) and whether it is hidden. */
-const common = { id: blockId, hidden: z.boolean().optional() };
+/** A variable of the protocol's data, written {{zakaznik.nazev}} (variables.ts lists them). */
+export const variableKey = z.string().regex(/^[a-z]+\.[a-z]+$/, "variableKey");
+
+/**
+ * When a block shows (part 22, stage C), chosen from a list, not programmed:
+ * only with defects, only without, only when a device failed, only when the
+ * inspection has a device of a type (by its name), only when a variable has a
+ * value. No condition: always.
+ */
+export const conditionSchema = z.discriminatedUnion("when", [
+  z.strictObject({ when: z.literal("hasDefects") }),
+  z.strictObject({ when: z.literal("noDefects") }),
+  z.strictObject({ when: z.literal("failed") }),
+  z.strictObject({ when: z.literal("deviceType"), type: plain(TEMPLATE_LIMITS.title).min(1) }),
+  z.strictObject({ when: z.literal("notEmpty"), variable: variableKey }),
+]);
+export type BlockCondition = z.infer<typeof conditionSchema>;
+export const CONDITIONS = ["hasDefects", "noDefects", "failed", "deviceType", "notEmpty"] as const;
+
+/** Everything a block has in common: its id (for the editor), whether it is hidden, when it shows. */
+const common = {
+  id: blockId,
+  hidden: z.boolean().optional(),
+  condition: conditionSchema.optional(),
+};
+
+/**
+ * The template's own logo in the company's storage (uploaded, converted to
+ * PNG): "<organization>/protocol-templates/<file>.png". A path of another
+ * company is never drawn (the loader checks the folder).
+ */
+export const templateLogoPath = z
+  .string()
+  .regex(/^[0-9a-f-]{36}\/protocol-templates\/[0-9a-f-]{36}\.png$/, "logoPath");
 
 export const LOGO_POSITIONS = ["left", "center", "right"] as const;
 export const COMPANY_FIELDS = ["address", "ids", "contact"] as const;
@@ -116,6 +148,9 @@ export const headerBlockSchema = z.strictObject({
     show: z.boolean(),
     position: z.enum(LOGO_POSITIONS),
     heightMm: millimetres(6, 40),
+    /** The company's logo from its settings (default), or the template's own. */
+    source: z.enum(["organization", "template"]).optional(),
+    path: templateLogoPath.nullable().optional(),
   }),
   /** The company's name always shows (it identifies who issued the protocol). */
   company: fieldList(COMPANY_FIELDS),
@@ -264,7 +299,20 @@ export type Inline = z.infer<typeof inlineSchema>;
 // The whole template
 // ---------------------------------------------------------------------------
 
-export const FONTS = ["noto-sans"] as const;
+export const FONTS = ["noto-sans", "noto-serif", "inter"] as const;
+export const LANGUAGES = ["organization", "cs", "en"] as const;
+export const DATE_STYLES = ["medium", "long", "short"] as const;
+
+/** A colour as #rrggbb. */
+export const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "color");
+
+export const tableStyleSchema = z.strictObject({
+  /** Lines under the rows (as before), a full grid, or none. */
+  borders: z.enum(["rows", "grid", "none"]),
+  /** Every other row shaded. */
+  zebra: z.boolean(),
+});
+export type TableStyle = z.infer<typeof tableStyleSchema>;
 
 export const footerSchema = z.strictObject({
   /** The company's footer text from its settings, the template's own, or none. */
@@ -287,10 +335,17 @@ export const templateSchema = z
         left: millimetres(5, 40),
       }),
     }),
+    /** The protocol's language; "organization" (or none) = the company's. */
+    language: z.enum(LANGUAGES).optional(),
+    /** How dates are written ("13. 10. 2026", "13. října 2026", "13.10.26"). */
+    format: z.strictObject({ date: z.enum(DATE_STYLES) }).optional(),
     style: z.strictObject({
       font: z.enum(FONTS),
       /** The body text size in points. */
       size: z.number().min(7).max(12),
+      /** The company's colour for headings, the header's rule and table heads; none = black. */
+      accent: hexColor.nullable().optional(),
+      table: tableStyleSchema.optional(),
     }),
     blocks: z.array(blockSchema).min(1).max(TEMPLATE_LIMITS.blocks),
     footer: footerSchema,

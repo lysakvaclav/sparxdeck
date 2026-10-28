@@ -1,11 +1,14 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/auth";
 import { databaseErrorCode, zodFieldErrors, type ActionResult } from "@/lib/errors";
 import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-template";
 import { templateSchema } from "@/lib/protocol-template/schema";
 import type { Json } from "@/lib/supabase/database.types";
+import { templateLogoPng } from "@/lib/protocol-template-logo";
+import { ORG_ASSETS_BUCKET, signedUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema, protocolTemplateNameSchema } from "@/lib/validation";
 
@@ -129,4 +132,40 @@ export async function renameProtocolTemplate(id: unknown, input: unknown): Promi
   if (!data) return { ok: false, error: "notFound" };
   revalidatePath("/protocol-templates", "layout");
   return { ok: true };
+}
+
+/**
+ * A template's own logo (stage C): checked by its content, an SVG cleaned,
+ * stored as a PNG in the company's folder. Returns its path (the editor puts
+ * it into the header block) and a short-lived link to show it. Earlier logos
+ * stay: published versions may draw them.
+ */
+export async function uploadProtocolTemplateLogo(
+  id: unknown,
+  formData: FormData,
+): Promise<ActionResult<{ path: string; url: string | null }>> {
+  const active = await requireManager();
+  if (!active) return { ok: false, error: "forbidden" };
+  const templateId = idSchema.safeParse(id);
+  if (!templateId.success) return { ok: false, error: "notFound" };
+  const supabase = await createClient();
+  const { data: template } = await supabase
+    .from("protocol_templates")
+    .select("id")
+    .eq("id", templateId.data)
+    .eq("organization_id", active.organization.id)
+    .maybeSingle();
+  if (!template) return { ok: false, error: "notFound" };
+
+  const file = formData.get("logo");
+  if (!(file instanceof File)) return { ok: false, error: "fileTypeInvalid" };
+  const result = await templateLogoPng(new Uint8Array(await file.arrayBuffer()));
+  if ("error" in result) return { ok: false, error: result.error };
+
+  const path = `${active.organization.id}/protocol-templates/${randomUUID()}.png`;
+  const { error } = await supabase.storage
+    .from(ORG_ASSETS_BUCKET)
+    .upload(path, result.png, { contentType: "image/png", upsert: false });
+  if (error) return { ok: false, error: "unexpected" };
+  return { ok: true, data: { path, url: await signedUrl(path) } };
 }

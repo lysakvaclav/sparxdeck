@@ -14,7 +14,9 @@ import {
   ArrowUp as LucideArrowUp,
   Ban as LucideBan,
   Barcode as LucideBarcode,
+  Bold as LucideBold,
   Box as LucideBox,
+  Braces as LucideBraces,
   BriefcaseBusiness as LucideBriefcaseBusiness,
   Building2 as LucideBuilding2,
   CalendarDays as LucideCalendarDays,
@@ -56,18 +58,23 @@ import {
   Globe as LucideGlobe,
   GripVertical as LucideGripVertical,
   Hammer as LucideHammer,
+  Heading2 as LucideHeading2,
+  Heading3 as LucideHeading3,
   History as LucideHistory,
   House as LucideHouse,
   IdCard as LucideIdCard,
   Image as LucideImage,
   Info as LucideInfo,
+  Italic as LucideItalic,
   Key as LucideKey,
   Languages as LucideLanguages,
   Layers as LucideLayers,
   LayoutGrid as LucideLayoutGrid,
   Link as LucideLink,
+  Link2 as LucideLink2,
   List as LucideList,
   ListFilter as LucideListFilter,
+  ListOrdered as LucideListOrdered,
   LocateFixed as LucideLocateFixed,
   Lock as LucideLock,
   LogOut as LucideLogOut,
@@ -107,6 +114,7 @@ import {
   Trash2 as LucideTrash2,
   TriangleAlert as LucideTriangleAlert,
   Undo2 as LucideUndo2,
+  Unlink2 as LucideUnlink2,
   Upload as LucideUpload,
   User as LucideUser,
   UserPlus as LucideUserPlus,
@@ -152,6 +160,15 @@ function createIcon(name: string, Glyph: LucideIcon): IconComponent {
 }
 
 export const AddIcon = createIcon("add", LucidePlus);
+export const BoldIcon = createIcon("bold", LucideBold);
+export const BracesIcon = createIcon("braces", LucideBraces);
+export const Heading2Icon = createIcon("heading-2", LucideHeading2);
+export const Heading3Icon = createIcon("heading-3", LucideHeading3);
+export const ItalicIcon = createIcon("italic", LucideItalic);
+export const ListBulletedIcon = createIcon("list-bulleted", LucideList);
+export const ListNumberedIcon = createIcon("list-numbered", LucideListOrdered);
+export const TextLinkIcon = createIcon("text-link", LucideLink2);
+export const TextUnlinkIcon = createIcon("text-unlink", LucideUnlink2);
 export const ApplicationIcon = createIcon("application", LucideAppWindow);
 export const ArrowDownIcon = createIcon("arrow-down", LucideArrowDown);
 export const ArrowUpIcon = createIcon("arrow-up", LucideArrowUp);

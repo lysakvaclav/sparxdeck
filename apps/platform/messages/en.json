@@ -2399,7 +2399,11 @@
         "headerMissing": "A protocol needs the header with the protocol number and the company's details.",
         "headerHidden": "The header with the protocol number and the company's details can't be hidden.",
         "headerTwice": "A protocol can have the header only once.",
-        "invalid": "{block}: a value is out of range"
+        "invalid": "{block}: a value is out of range",
+        "headerCondition": "The header with the protocol number and the company's details always shows; it can't have a condition.",
+        "unknownVariable": "Unknown variable {variable} ({block}).",
+        "accentContrast": "The company colour is hard to read on white paper. Choose a darker one.",
+        "logoMissing": "The header should have its own logo, but none is uploaded."
       },
       "shortcuts": "Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z redo, Ctrl+S save, Alt+arrow moves the selected block, Esc clears the selection. Move a block also by dragging its handle, or with the keyboard: space on the handle, arrows, space.",
       "previewLabel": "Preview",
@@ -2520,7 +2524,7 @@
         "note": "Small print (notices, legal wording)"
       },
       "text": "Text",
-      "textHint": "Separate paragraphs with an empty line. Formatting and variables come in the next stage. The company writes its own legal wording.",
+      "textHint": "Variables are filled in from the inspection. The company writes its own legal wording and notices; the app doesn't make them up.",
       "tableColumns": "Columns",
       "tableColumnTitle": "Name of column {index}",
       "tableColumnWidth": "Width of column {index}",
@@ -2556,7 +2560,16 @@
       "spacerHeight": "Height of the space",
       "dividerHint": "A horizontal line across the full width.",
       "pageBreakHint": "The next block starts on a new page.",
-      "unreadable": "The stored template couldn't be read; the editor starts from the default protocol."
+      "unreadable": "The stored template couldn't be read; the editor starts from the default protocol.",
+      "logoSource": "Which logo",
+      "logoSources": {
+        "organization": "The company's logo (from Settings)",
+        "template": "This template's own logo"
+      },
+      "logoPreview": "The template's logo",
+      "logoUpload": "Upload a logo",
+      "logoReplace": "Replace the logo",
+      "logoHint": "PNG, JPG, WebP or SVG up to 2 MB. An SVG is cleaned of scripts and stored as a picture."
     },
     "page": {
       "orientation": "Page orientation",
@@ -2580,7 +2593,35 @@
       },
       "footerOrganizationHint": "The footer text is changed in Settings → Protocols.",
       "footerCustom": "Footer text",
-      "pageNumbers": "Protocol and page number on every page"
+      "pageNumbers": "Protocol and page number on every page",
+      "language": "Protocol language",
+      "languages": {
+        "organization": "The company's",
+        "cs": "Czech",
+        "en": "English"
+      },
+      "languageHint": "The protocol's own words (headings, results, dates) in this language. The template's own texts aren't translated.",
+      "dateFormat": "Date format",
+      "font": "Font",
+      "fonts": {
+        "noto-sans": "Noto Sans (sans serif)",
+        "noto-serif": "Noto Serif (serif)",
+        "inter": "Inter (sans serif)"
+      },
+      "fontHint": "Fonts under the open OFL licence, embedded in the PDF.",
+      "accent": "Company colour",
+      "accentOn": "Headings, the header's rule and table heads in the company colour",
+      "accentPicker": "Pick a colour",
+      "accentHex": "Colour as #rrggbb",
+      "accentLow": "The colour is hard to read on white paper (contrast {ratio}:1, at least 4.5:1 needed). Choose a darker one.",
+      "accentHint": "Results stay words, not colours: the protocol reads the same from a black-and-white printer.",
+      "tableBorders": "Lines in tables",
+      "tableBorderOptions": {
+        "rows": "Under the rows",
+        "grid": "Grid",
+        "none": "None"
+      },
+      "tableZebra": "Alternate row shading"
     },
     "sample": {
       "customer": "Linden Street Housing Cooperative",
@@ -2603,6 +2644,102 @@
       "defectSeal": "Seal missing, replace the extinguisher",
       "defectGauge": "Gauge outside the green zone",
       "notes": "A sample note of the technician on the inspection."
+    },
+    "variables": {
+      "insert": "Insert a variable",
+      "insertShort": "Variable",
+      "insertInto": "Insert a variable into {field}",
+      "groups": {
+        "firma": "Company",
+        "zakaznik": "Customer",
+        "budova": "Building",
+        "revize": "Inspection",
+        "technik": "Technician",
+        "protokol": "Protocol",
+        "vysledek": "Result",
+        "zavady": "Defects",
+        "podpis": "Signature"
+      },
+      "names": {
+        "firma": {
+          "nazev": "Name",
+          "ico": "Company ID",
+          "dic": "VAT ID",
+          "adresa": "Address",
+          "email": "E-mail",
+          "telefon": "Phone"
+        },
+        "zakaznik": {
+          "nazev": "Name",
+          "ico": "Company ID",
+          "dic": "VAT ID",
+          "adresa": "Billing address",
+          "kontakt": "Contact person"
+        },
+        "budova": {
+          "nazev": "Name",
+          "adresa": "Address"
+        },
+        "revize": {
+          "datum": "Inspection date",
+          "zahajeni": "Start date",
+          "dokonceni": "Completion date",
+          "poznamka": "Technician's note"
+        },
+        "technik": {
+          "jmeno": "Name (who signs)",
+          "vsichni": "Everyone who checked"
+        },
+        "protokol": {
+          "cislo": "Protocol number",
+          "verze": "Version",
+          "vystaveno": "Issue date"
+        },
+        "vysledek": {
+          "text": "Overall result (sentence)",
+          "celkem": "Devices in total",
+          "vyhovuje": "Passed",
+          "nevyhovuje": "Failed",
+          "nezkontrolovano": "Not inspected"
+        },
+        "zavady": {
+          "pocet": "Number of defects found"
+        },
+        "podpis": {
+          "zakaznik": "Name signed for the customer"
+        }
+      }
+    },
+    "richText": {
+      "toolbar": "Text formatting",
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "heading2": "Heading",
+      "heading3": "Subheading",
+      "bulletList": "Bullets",
+      "orderedList": "Numbered list",
+      "link": "Link",
+      "unlink": "Remove link",
+      "linkAddress": "Link address",
+      "linkApply": "Apply",
+      "linkCancel": "Cancel",
+      "linkInvalid": "A link must start with https:// or mailto:.",
+      "variable": "Insert a variable"
+    },
+    "conditions": {
+      "legend": "When the block shows",
+      "when": "Show the block",
+      "options": {
+        "always": "Always",
+        "hasDefects": "Only when the inspection found defects",
+        "noDefects": "Only when the inspection found no defects",
+        "failed": "Only when a device failed",
+        "deviceType": "Only when the inspection has a device type",
+        "notEmpty": "Only when a detail is filled in"
+      },
+      "deviceType": "Device type",
+      "noDeviceTypes": "The company has no device types yet.",
+      "variable": "Detail"
     }
   }
 }

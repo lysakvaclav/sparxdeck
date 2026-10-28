@@ -149,6 +149,27 @@ try {
     "protocol_templates",
     `organization_id=eq.${org}&select=id&limit=1`,
   );
+  // A draft with a formatted text (stage C), so its editor is audited too.
+  const [defaultVersion] = await selectRows(
+    "protocol_template_versions",
+    `template_id=eq.${protocolTemplate.id}&select=content`,
+  );
+  await updateRows("protocol_templates", `id=eq.${protocolTemplate.id}`, {
+    draft: {
+      ...defaultVersion.content,
+      blocks: [
+        ...defaultVersion.content.blocks,
+        {
+          id: "text",
+          type: "text",
+          title: "Upozornění",
+          variant: "note",
+          condition: { when: "hasDefects" },
+          content: [{ type: "paragraph", content: [{ type: "text", text: "Závady odstraňte do {{revize.datum}}.", bold: true }] }],
+        },
+      ],
+    },
+  });
 
   const pages = [
     ["dashboard", "/"],

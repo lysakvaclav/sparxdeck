@@ -1,6 +1,7 @@
 import "server-only";
 import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
 import type { ProtocolDeviceRow, ProtocolModel } from "@/lib/protocol";
+import { conditionHolds } from "@/lib/protocol-template/conditions";
 import { DEFAULT_PROTOCOL_TEMPLATE } from "@/lib/protocol-template/default-template";
 import type {
   BlockOf,
@@ -8,9 +9,11 @@ import type {
   Inline,
   ProtocolTemplate,
   RichText,
+  TableStyle,
   TemplateBlock,
 } from "@/lib/protocol-template/schema";
-import { FONT, renderPdf } from "./fonts";
+import { fillVariables } from "@/lib/protocol-template/variables";
+import { FONT_FAMILIES, renderPdf } from "./fonts";
 
 // The inspection protocol, laid out block by block as its template says
 // (part 22). Black on white with grey rules only, so it reads the same from a
@@ -44,6 +47,25 @@ function footerLines(footer: string | null) {
 
 export const label = { fontSize: 7, fontWeight: 700, color: MUTED, letterSpacing: 0.3 } as const;
 
+/**
+ * A template's look (part 22, stage C) for the shared pieces below: the
+ * accent colour, the table style, and the variables put into its texts. The
+ * summary report and the default template use the defaults: as before.
+ * Passed along, not through React context: this renders on the server.
+ */
+export type Look = { accent: string | null; table: TableStyle; fill: (text: string) => string };
+const DEFAULT_LOOK: Look = { accent: null, table: { borders: "rows", zebra: false }, fill: (text) => text };
+const ZEBRA = "#f4f4f4";
+
+/** The accent mixed with white, light enough for black text on it (table heads). */
+function tint(hex: string, amount = 0.16) {
+  const mix = (offset: number) =>
+    Math.round(255 - (255 - parseInt(hex.slice(offset, offset + 2), 16)) * amount)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${mix(1)}${mix(3)}${mix(5)}`;
+}
+
 export function Box({ title, name, lines }: { title: string; name: string; lines: string[] }) {
   return (
     <View style={{ flex: 1, paddingRight: 4 * MM }}>
@@ -66,14 +88,24 @@ export function Table<Row>({
   cell,
   below,
   emphasis,
+  look = DEFAULT_LOOK,
 }: {
   columns: Column[];
   rows: Row[];
   cell: (row: Row, key: string) => string;
   below?: (row: Row) => string[];
   emphasis?: (row: Row, key: string) => boolean;
+  look?: Look;
 }) {
   const first = columns[0]?.width ?? "0%";
+  const { accent, table } = look;
+  const grid = table.borders === "grid";
+  // Grid: a line between columns; the table's own left and right edges.
+  const divider = (index: number) =>
+    grid && index < columns.length - 1 ? { borderRightWidth: 0.5, borderRightColor: RULE } : {};
+  const edges = grid
+    ? { borderLeftWidth: 0.5, borderLeftColor: RULE, borderRightWidth: 0.5, borderRightColor: RULE }
+    : {};
   return (
     <View>
       {/* Repeated at the top of every page the table continues on. */}
@@ -81,12 +113,13 @@ export function Table<Row>({
         fixed
         style={{
           flexDirection: "row",
-          backgroundColor: SHADE,
+          backgroundColor: accent ? tint(accent) : SHADE,
           borderBottomWidth: 1,
-          borderBottomColor: INK,
+          borderBottomColor: accent ?? INK,
+          ...edges,
         }}
       >
-        {columns.map((column) => (
+        {columns.map((column, index) => (
           <Text
             key={column.key}
             style={{
@@ -95,6 +128,7 @@ export function Table<Row>({
               paddingHorizontal: 1.2 * MM,
               fontSize: 7.5,
               fontWeight: 700,
+              ...divider(index),
             }}
           >
             {column.title}
@@ -107,16 +141,22 @@ export function Table<Row>({
           <View
             key={index}
             wrap={false}
-            style={{ borderBottomWidth: 0.5, borderBottomColor: RULE, paddingVertical: 1.1 * MM }}
+            style={{
+              ...(table.borders === "none" ? {} : { borderBottomWidth: 0.5, borderBottomColor: RULE }),
+              paddingVertical: 1.1 * MM,
+              ...(table.zebra && index % 2 === 1 ? { backgroundColor: ZEBRA } : {}),
+              ...edges,
+            }}
           >
             <View style={{ flexDirection: "row" }}>
-              {columns.map((column) => (
+              {columns.map((column, cellIndex) => (
                 <Text
                   key={column.key}
                   style={{
                     width: column.width,
                     paddingHorizontal: 1.2 * MM,
                     fontWeight: emphasis?.(row, column.key) ? 700 : 400,
+                    ...divider(cellIndex),
                   }}
                 >
                   {cell(row, column.key)}
@@ -144,10 +184,22 @@ export function Table<Row>({
   );
 }
 
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({
+  title,
+  children,
+  look = DEFAULT_LOOK,
+}: {
+  title: string;
+  children: React.ReactNode;
+  look?: Look;
+}) {
+  const { accent } = look;
   return (
     <View style={{ marginTop: 6 * MM }}>
-      <Text style={{ fontSize: 10.5, fontWeight: 700, marginBottom: 2 * MM }} minPresenceAhead={40}>
+      <Text
+        style={{ fontSize: 10.5, fontWeight: 700, marginBottom: 2 * MM, ...(accent ? { color: accent } : {}) }}
+        minPresenceAhead={40}
+      >
         {title}
       </Text>
       {children}
@@ -185,6 +237,7 @@ export type ProtocolAssets = {
 
 type Context = {
   model: ProtocolModel;
+  look: Look;
   assets: Required<ProtocolAssets>;
   template: ProtocolTemplate;
   /** The width the content may take, in points. */
@@ -195,23 +248,38 @@ type Context = {
 // Formatted text
 // ---------------------------------------------------------------------------
 
-function Inlines({ content }: { content: Inline[] }) {
+function Inlines({ content, fill }: { content: Inline[]; fill: (text: string) => string }) {
   return content.map((inline, index) => {
-    // Italic waits for the italic font (part 22, stage C); until then upright.
-    const style = { fontWeight: inline.bold ? 700 : 400 } as const;
+    const style = {
+      fontWeight: inline.bold ? 700 : 400,
+      ...(inline.italic ? { fontStyle: "italic" as const } : {}),
+    };
     return inline.link ? (
       <Link key={index} src={inline.link} style={{ ...style, color: INK }}>
-        {inline.text}
+        {fill(inline.text)}
       </Link>
     ) : (
       <Text key={index} style={style}>
-        {inline.text}
+        {fill(inline.text)}
       </Text>
     );
   });
 }
 
-function RichTextView({ content, size }: { content: RichText; size: number }) {
+/** A heading of the template's own (with its variables), else the protocol's. */
+function heading(own: string | null, fallback: string, context: Context) {
+  return own ? fillVariables(own, context.model.variables) : fallback;
+}
+
+function RichTextView({
+  content,
+  size,
+  fill,
+}: {
+  content: RichText;
+  size: number;
+  fill: (text: string) => string;
+}) {
   return content.map((node, index) => {
     const top = index === 0 ? 0 : 1.5 * MM;
     if (node.type === "heading")
@@ -221,7 +289,7 @@ function RichTextView({ content, size }: { content: RichText; size: number }) {
           minPresenceAhead={20}
           style={{ fontWeight: 700, fontSize: size + [3, 2, 1][node.level - 1]!, marginTop: top }}
         >
-          <Inlines content={node.content} />
+          <Inlines content={node.content} fill={fill} />
         </Text>
       );
     if (node.type === "list")
@@ -231,7 +299,7 @@ function RichTextView({ content, size }: { content: RichText; size: number }) {
             <View key={line} style={{ flexDirection: "row" }} wrap={false}>
               <Text style={{ width: 5 * MM }}>{node.ordered ? `${line + 1}.` : "•"}</Text>
               <Text style={{ flex: 1 }}>
-                <Inlines content={item} />
+                <Inlines content={item} fill={fill} />
               </Text>
             </View>
           ))}
@@ -239,7 +307,7 @@ function RichTextView({ content, size }: { content: RichText; size: number }) {
       );
     return (
       <Text key={index} style={{ marginTop: top }}>
-        <Inlines content={node.content} />
+        <Inlines content={node.content} fill={fill} />
       </Text>
     );
   });
@@ -277,7 +345,7 @@ function HeaderBlock({ block, context }: { block: BlockOf<"header">; context: Co
           alignItems: "flex-start",
           paddingBottom: 4 * MM,
           borderBottomWidth: 1.2,
-          borderBottomColor: INK,
+          borderBottomColor: context.template.style.accent ?? INK,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "flex-start", flex: 1 }}>
@@ -292,7 +360,7 @@ function HeaderBlock({ block, context }: { block: BlockOf<"header">; context: Co
           </View>
         </View>
         <View style={{ alignItems: "flex-end", marginLeft: 6 * MM }}>
-          <Text style={{ fontSize: 15, fontWeight: 700 }}>{block.title || model.title}</Text>
+          <Text style={{ fontSize: 15, fontWeight: 700 }}>{heading(block.title, model.title, context)}</Text>
           <Text style={{ ...label, marginTop: 3 * MM }}>{model.numberLabel.toUpperCase()}</Text>
           <Text style={{ fontSize: 13, fontWeight: 700 }}>{model.number}</Text>
           {block.date && date && (
@@ -347,7 +415,7 @@ function SummaryBlock({ block, context }: { block: BlockOf<"summary">; context: 
   const { counts, countLabels } = model;
   if (block.style === "sentence")
     return (
-      <Section title={block.title || model.titles.summary}>
+      <Section title={heading(block.title, model.titles.summary, context)} look={context.look}>
         <Text style={{ fontWeight: 700 }}>{model.result}</Text>
         <Text>{model.summary}</Text>
       </Section>
@@ -361,7 +429,7 @@ function SummaryBlock({ block, context }: { block: BlockOf<"summary">; context: 
     { name: countLabels.defects, value: String(counts.defects) },
   ];
   return (
-    <Section title={block.title || model.titles.summary}>
+    <Section title={heading(block.title, model.titles.summary, context)} look={context.look}>
       {rows.map((row, index) => (
         <View
           key={row.name}
@@ -391,13 +459,14 @@ function DevicesBlock({ block, context }: { block: BlockOf<"devices">; context: 
     width: column.share,
   }));
   return (
-    <Section title={block.title || model.titles.devices}>
+    <Section title={heading(block.title, model.titles.devices, context)} look={context.look}>
       {block.summary && <Text style={{ marginBottom: 2 * MM }}>{model.summary}</Text>}
       {block.summary && model.scan && (
         <Text style={{ marginBottom: 2 * MM }}>{model.scan.summary}</Text>
       )}
       {model.devices.length > 0 && (
         <Table
+          look={context.look}
           columns={columns}
           rows={model.devices}
           cell={(row, key) => row[key as keyof ProtocolDeviceRow] as string}
@@ -416,12 +485,12 @@ function DevicesBlock({ block, context }: { block: BlockOf<"devices">; context: 
 
 function ChecklistBlock({ block, context }: { block: BlockOf<"checklist">; context: Context }) {
   const { model } = context;
-  const heading = (device: ProtocolDeviceRow) =>
+  const deviceHeading = (device: ProtocolDeviceRow) =>
     [device.label, device.type, device.location !== "—" ? device.location : null]
       .filter(Boolean)
       .join(" · ");
   return (
-    <Section title={block.title || model.titles.checklist}>
+    <Section title={heading(block.title, model.titles.checklist, context)} look={context.look}>
       {model.devices.map((device, index) =>
         block.style === "compact" ? (
           <View
@@ -430,7 +499,7 @@ function ChecklistBlock({ block, context }: { block: BlockOf<"checklist">; conte
             style={{ flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: RULE, paddingVertical: 1.1 * MM }}
           >
             <Text style={{ width: "30%", paddingHorizontal: 1.2 * MM, fontWeight: 700 }}>
-              {heading(device)}
+              {deviceHeading(device)}
             </Text>
             <Text style={{ flex: 1, paddingHorizontal: 1.2 * MM }}>
               {device.answers.length > 0
@@ -441,7 +510,7 @@ function ChecklistBlock({ block, context }: { block: BlockOf<"checklist">; conte
         ) : (
           <View key={index} style={{ marginBottom: 3 * MM }}>
             <Text style={{ fontWeight: 700, marginBottom: 1 * MM }} minPresenceAhead={30}>
-              {heading(device)} · {device.result}
+              {deviceHeading(device)} · {device.result}
             </Text>
             {device.answers.length === 0 && <Text style={{ color: MUTED }}>{model.noAnswers}</Text>}
             {device.answers.map((answer, line) => (
@@ -509,9 +578,10 @@ function DefectsBlock({ block, context }: { block: BlockOf<"defects">; context: 
   if (model.defects.length === 0 && block.whenEmpty === "hide") return null;
   const photos = block.photos.perDefect > 0 ? defectPhotoList(context, block.photos.perDefect) : [];
   return (
-    <Section title={block.title || model.titles.defects}>
+    <Section title={heading(block.title, model.titles.defects, context)} look={context.look}>
       {model.defects.length > 0 ? (
         <Table
+          look={context.look}
           columns={[
             { key: "number", title: model.defectColumns.number, width: "12%" },
             { key: "device", title: model.defectColumns.device, width: "10%" },
@@ -544,7 +614,7 @@ function GalleryBlock({ block, context }: { block: BlockOf<"gallery">; context: 
   // The last photo of a row keeps its margin; one point of slack keeps rows whole.
   const width = (context.contentWidth - gap * block.perRow - 1) / block.perRow;
   return (
-    <Section title={block.title || context.model.titles.gallery}>
+    <Section title={heading(block.title, context.model.titles.gallery, context)} look={context.look}>
       <PhotoGrid photos={photos} width={width} gap={gap} captions={block.captions} />
     </Section>
   );
@@ -553,7 +623,7 @@ function GalleryBlock({ block, context }: { block: BlockOf<"gallery">; context: 
 function NotesBlock({ block, context }: { block: BlockOf<"notes">; context: Context }) {
   if (!context.model.notes) return null;
   return (
-    <Section title={block.title || context.model.titles.notes}>
+    <Section title={heading(block.title, context.model.titles.notes, context)} look={context.look}>
       <Text>{context.model.notes}</Text>
     </Section>
   );
@@ -564,23 +634,29 @@ function TextBlock({ block, context }: { block: BlockOf<"text">; context: Contex
   const size = note ? 7 : context.template.style.size;
   const body = (
     <View style={note ? { fontSize: size, color: MUTED } : undefined}>
-      <RichTextView content={block.content} size={size} />
+      <RichTextView content={block.content} size={size} fill={context.look.fill} />
     </View>
   );
-  if (block.title) return <Section title={block.title}>{body}</Section>;
+  if (block.title) return <Section title={heading(block.title, "", context)} look={context.look}>{body}</Section>;
   return <View style={{ marginTop: 4 * MM }}>{body}</View>;
 }
 
-function TableBlock({ block }: { block: BlockOf<"table"> }) {
+function TableBlock({ block, context }: { block: BlockOf<"table">; context: Context }) {
+  const fill = (text: string) => fillVariables(text, context.model.variables);
   const columns = columnWidths(block.columns).map((column, index) => ({
     key: String(index),
-    title: column.title,
+    title: fill(column.title),
     width: column.share,
   }));
   const content = (
-    <Table columns={columns} rows={block.rows} cell={(row, key) => row[Number(key)] ?? ""} />
+    <Table
+      look={context.look}
+      columns={columns}
+      rows={block.rows}
+      cell={(row, key) => fill(row[Number(key)] ?? "")}
+    />
   );
-  if (block.title) return <Section title={block.title}>{content}</Section>;
+  if (block.title) return <Section title={heading(block.title, "", context)} look={context.look}>{content}</Section>;
   return <View style={{ marginTop: 4 * MM }}>{content}</View>;
 }
 
@@ -590,7 +666,7 @@ function SignaturesBlock({ block, context }: { block: BlockOf<"signatures">; con
     <View wrap={false} style={{ flexDirection: "row", marginTop: 10 * MM }}>
       {block.fields.map((field, index) => {
         const signer = field.role === "other" ? null : model.signatures[field.role];
-        const fieldLabel = field.label || signer?.label || model.signatures.otherLabel;
+        const fieldLabel = heading(field.label, signer?.label || model.signatures.otherLabel, context);
         return (
           <View
             key={index}
@@ -648,7 +724,7 @@ function Block({ block, context }: { block: TemplateBlock; context: Context }) {
     case "text":
       return <TextBlock block={block} context={context} />;
     case "table":
-      return <TableBlock block={block} />;
+      return <TableBlock block={block} context={context} />;
     case "signatures":
       return <SignaturesBlock block={block} context={context} />;
     case "divider":
@@ -676,11 +752,17 @@ export function ProtocolDocument({
     template.footer.text === "organization"
       ? model.footer
       : template.footer.text === "custom"
-        ? template.footer.custom.trim() || null
+        ? fillVariables(template.footer.custom, model.variables).trim() || null
         : null;
+  const look: Look = {
+    accent: template.style.accent ?? null,
+    table: template.style.table ?? DEFAULT_LOOK.table,
+    fill: (text) => fillVariables(text, model.variables),
+  };
   const footer = footerText !== null || template.footer.pageNumbers;
   const context: Context = {
     model,
+    look,
     template,
     assets: {
       logo: assets.logo ?? null,
@@ -702,7 +784,7 @@ export function ProtocolDocument({
         size="A4"
         orientation={orientation}
         style={{
-          fontFamily: FONT,
+          fontFamily: FONT_FAMILIES[template.style.font],
           fontSize: template.style.size,
           color: INK,
           paddingTop: margins.top * MM,
@@ -712,7 +794,7 @@ export function ProtocolDocument({
         }}
       >
         {template.blocks
-          .filter((block) => !block.hidden)
+          .filter((block) => !block.hidden && conditionHolds(block.condition, model))
           .map((block) => (
             <Block key={block.id} block={block} context={context} />
           ))}
