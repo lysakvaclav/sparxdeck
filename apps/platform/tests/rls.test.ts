@@ -5850,6 +5850,21 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
       expect((await stops(id))[0]!.visited_at).toBeNull();
       expect((await petr.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true })).error?.message).toMatch(/not_found/);
 
+      // A phone without a signal sends its own time later: kept between the start of the day and now.
+      const visitedAt = async () => (await stops(id))[0]!.visited_at!;
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true, p_at: "2000-01-01T00:00:00Z" });
+      const dayStart = new Date(`${today()}T00:00:00+01:00`).getTime();
+      expect(Math.abs(new Date(await visitedAt()).getTime() - dayStart)).toBeLessThanOrEqual(3600_000);
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: false });
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true, p_at: "2100-01-01T00:00:00Z" });
+      expect(new Date(await visitedAt()).getTime()).toBeLessThanOrEqual(Date.now() + 5000);
+      const marked = new Date(Date.now() - 60_000).toISOString();
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: false });
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: true, p_at: marked });
+      // Unless the day started less than a minute ago.
+      expect(new Date(await visitedAt()).getTime()).toBeGreaterThanOrEqual(Math.min(new Date(marked).getTime(), Date.now()) - 1000);
+      await tom.client.rpc("set_route_stop_visited", { p_stop: first!.id, p_visited: false });
+
       const { data: device } = await rita.client
         .from("devices")
         .insert({ organization_id: org, site_id: sites[6]!, device_type_id: deviceType })

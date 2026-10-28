@@ -8,7 +8,8 @@
 //   src/lib/client/offline-store.ts): network first, the last copy without a
 //   signal or when a weak one doesn't answer within a few seconds; any
 //   /inspections/<id>/check/<device> address is served by its inspection's
-//   page, which shows the device itself.
+//   page, which shows the device itself. The technician's plan for today
+//   (/routes/today, part 23) is kept the same way.
 // * Any other page without a signal: /offline, the list of downloaded inspections.
 //
 // Registered as /sw.js?dev in development: Next.js files change there with every
@@ -25,6 +26,14 @@ const STATIC_LIMIT = 500;
 const PAGE_WAIT_MS = 4000;
 const DEV = new URL(self.location.href).searchParams.has("dev");
 const FIELD_PAGE = /^\/inspections\/([0-9a-f-]{36})(?:\/check\/[0-9a-f-]{36})?\/?$/i;
+const TODAY_PAGE = "/routes/today";
+
+/** The key a kept page is saved under, null for pages that aren't kept. */
+function savedKey(pathname) {
+  const match = FIELD_PAGE.exec(pathname);
+  if (match) return `/inspections/${match[1]}`;
+  return pathname.replace(/\/$/, "") === TODAY_PAGE ? TODAY_PAGE : null;
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -111,12 +120,11 @@ async function trimStatic() {
 }
 
 async function page(event, url) {
-  const match = FIELD_PAGE.exec(url.pathname);
-  const key = match ? `/inspections/${match[1]}` : null;
+  const key = savedKey(url.pathname);
   const cache = await caches.open(PAGES_CACHE);
   const saved = key ? await cache.match(key) : undefined;
   const network = fetch(event.request).then((response) => {
-    // A downloaded inspection's page: keep the copy fresh (without delaying the page).
+    // A kept page (an inspection, today's plan): keep the copy fresh (without delaying the page).
     if (saved && response.ok && !response.redirected && isHtml(response)) {
       const copy = response.clone();
       event.waitUntil(

@@ -36,6 +36,7 @@ import {
   updateRouteStop,
 } from "../actions";
 import { AddStopsDialog } from "./add-stops-dialog";
+import { NearbyStops } from "./nearby-stops";
 import { RouteMap, type RouteMapHandle } from "./route-map";
 import { RouteStops } from "./route-stops";
 
@@ -76,7 +77,7 @@ export function RouteEditor({ route, today, soonDays }: { route: RouteView; toda
     lockFirst: route.lockFirst,
     lockLast: route.lockLast,
   };
-  const points = stops.map((stop) => stop.point);
+  const points = useMemo(() => stops.map((stop) => stop.point), [stops]);
   const distanceText = (metres: number) => {
     const { value, unit } = distanceParts(metres);
     return t(`distance.${unit}`, { value: format.number(value) });
@@ -385,6 +386,16 @@ export function RouteEditor({ route, today, soonDays }: { route: RouteView; toda
               />
             )}
           </section>
+
+          <NearbyStops
+            stops={points}
+            sites={route.sites}
+            inRoute={inRoute}
+            today={today}
+            full={stops.length >= ROUTE_MAX_STOPS}
+            disabled={pending}
+            onAdd={(siteId) => void add([siteId])}
+          />
         </div>
       </div>
 

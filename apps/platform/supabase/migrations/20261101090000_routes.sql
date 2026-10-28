@@ -25,7 +25,7 @@
 --   drop function public.route_editable(uuid), public.create_route_plan(uuid, date, uuid, text),
 --     public.update_route_plan(uuid, date, uuid), public.add_route_stops(uuid, uuid[]),
 --     public.remove_route_stop(uuid), public.reorder_route_stops(uuid, uuid[]),
---     public.set_route_stop_visited(uuid, boolean), public.route_plan_guard(),
+--     public.set_route_stop_visited(uuid, boolean, timestamptz), public.route_plan_guard(),
 --     public.route_stop_release_plan(), public.route_stops_visited();
 --   drop type public.route_start_kind;
 --   alter table public.organizations drop column base_latitude, drop column base_longitude;
@@ -525,8 +525,13 @@ begin
 end;
 $$;
 
--- Visited, or not after all.
-create or replace function public.set_route_stop_visited(p_stop uuid, p_visited boolean)
+-- Visited, or not after all. A phone without a signal sends the time it was
+-- marked (p_at) later; it is kept between the start of the route's day and now.
+create or replace function public.set_route_stop_visited(
+  p_stop uuid,
+  p_visited boolean,
+  p_at timestamptz default null
+)
 returns void
 language plpgsql
 security definer
@@ -534,14 +539,20 @@ set search_path = ''
 as $$
 declare
   v_stop public.route_plan_stops%rowtype;
+  v_route public.route_plans%rowtype;
+  v_from timestamptz;
 begin
   select * into v_stop from public.route_plan_stops where id = p_stop;
   if not found then
     raise exception 'not_found' using errcode = 'P0001';
   end if;
-  perform public.route_editable(v_stop.route_id);
+  v_route := public.route_editable(v_stop.route_id);
+  select (v_route.planned_on::timestamp at time zone o.timezone) into v_from
+  from public.organizations o where o.id = v_route.organization_id;
   if p_visited and v_stop.visited_at is null then
-    update public.route_plan_stops set visited_at = now(), visited_by = (select auth.uid())
+    update public.route_plan_stops
+    set visited_at = least(now(), greatest(coalesce(p_at, now()), coalesce(v_from, now()))),
+        visited_by = (select auth.uid())
     where id = p_stop;
   elsif not p_visited then
     update public.route_plan_stops set visited_at = null, visited_by = null where id = p_stop;
@@ -555,13 +566,13 @@ revoke all on function public.update_route_plan(uuid, date, uuid) from public, a
 revoke all on function public.add_route_stops(uuid, uuid[]) from public, anon;
 revoke all on function public.remove_route_stop(uuid) from public, anon;
 revoke all on function public.reorder_route_stops(uuid, uuid[]) from public, anon;
-revoke all on function public.set_route_stop_visited(uuid, boolean) from public, anon;
+revoke all on function public.set_route_stop_visited(uuid, boolean, timestamptz) from public, anon;
 grant execute on function public.create_route_plan(uuid, date, uuid, text) to authenticated;
 grant execute on function public.update_route_plan(uuid, date, uuid) to authenticated;
 grant execute on function public.add_route_stops(uuid, uuid[]) to authenticated;
 grant execute on function public.remove_route_stop(uuid) to authenticated;
 grant execute on function public.reorder_route_stops(uuid, uuid[]) to authenticated;
-grant execute on function public.set_route_stop_visited(uuid, boolean) to authenticated;
+grant execute on function public.set_route_stop_visited(uuid, boolean, timestamptz) to authenticated;
 revoke all on function public.route_editable(uuid) from authenticated;
 revoke all on function public.route_plan_guard() from public, anon, authenticated;
 revoke all on function public.route_stop_release_plan() from public, anon, authenticated;

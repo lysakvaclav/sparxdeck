@@ -375,8 +375,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P2 Řazení vzdušnou čarou (nejbližší soused a 2-opt), návrat, zamčení první a poslední, ruční pořadí tažením i klávesnicí, celková vzdálenost (část 23 A, `tests/route-plans.test.ts`)
 - [x] P2 Mapa trasy s očíslovanými zastávkami a spojnicí; zahájení kontroly a odkaz do mapové aplikace (část 23 A)
 - [x] P2 Zastávky jsou návštěvy v kalendáři; navštíveno ručně i po dokončení revize; RLS (část 23 A, `tests/rls.test.ts`)
-- [ ] P2 Tip „poblíž končí revize“ (okruh 3 km, termín do 30 dní nebo po termínu) (část 23 B)
-- [ ] P2 Dnešní plán na telefonu, dostupný bez signálu (část 23 B)
+- [x] P2 Tip „poblíž končí revize“ (okruh 3 km, termín do 30 dní nebo po termínu) (část 23 B, `e2e/part23-today.mjs`)
+- [x] P2 Dnešní plán na telefonu, dostupný bez signálu (část 23 B: označení čeká v telefonu a odešle se s časem označení, `tests/route-visits.test.ts`)
 
 ---
 

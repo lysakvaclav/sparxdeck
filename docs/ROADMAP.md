@@ -40,7 +40,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 20 | Poloha při skenu QR a souřadnice budov | Fáze 3 (zadání majitele) | Hotovo (2026-10-27), nenasazeno |
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 22 | Editor protokolů (etapy A–D) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 23 | Trasy pro techniky (etapy A–B) | Fáze 3 | Etapa A hotová (2026-10-28), nenasazeno; B čeká |
+| 23 | Trasy pro techniky (etapy A–B) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -720,7 +720,14 @@ Dvě etapy, po každé zpráva majiteli. Rozhodnutí majitele (2026-10-28, dopor
 - **Bez signálu:** zatím ne (etapa B).
 - **Ověření:** testy řazení (přímka, bez výchozího bodu, zámky, bez polohy, 30 zastávek do 0,5 s, porovnání s nejlepším pořadím hrubou silou, koule), vzdáleností, tipu „poblíž“ (okruh, hranice 30 dní, vyloučení), odkazů; RLS (6 testů: domov, viditelnost, sloupce, kalendář a limit, pořadí, navštíveno po revizi); `e2e/part23.mjs` (10 kroků); audit přístupnosti seznamu a trasy i na telefonu; části 19, 21, telefon a hlavní tok.
 
-**Etapa B (tip „poblíž končí revize“, Dnešní plán na telefonu a bez signálu, trasa v kalendáři a v Moje práce):** čeká.
+**Etapa B, poblíž, Dnešní plán a bez signálu. Stav (2026-10-28): hotovo** (lokálně, nenasazeno).
+
+- **Poblíž končí revize** (v editoru trasy): budovy do zvoleného okruhu od zastávek (1, 3, 5, 10 km, výchozí 3 km; telefon si volbu pamatuje), které v trase nejsou a mají termín do 30 dní nebo po termínu; nejdřív nejbližší termín, u každé vzdálenost od nejbližší zastávky, přidání jedním klepnutím.
+- **Dnešní plán** `/routes/today`: zastávky dnešních tras přihlášeného technika s poznámkou a časem na místě, „Navštíveno“, otevření v mapové aplikaci a zahájení kontroly (jen s připojením a jen u budovy se zařízením). Vede k němu „Moje práce“ na přehledu (dnešní trasa s počtem navštívených) a tlačítko v seznamu tras.
+- **Bez signálu:** stránka se ukládá do telefonu (`keepPage`, service worker ji podává stejně jako uložené revize: nejdřív síť, po 4 s uložená kopie); označení „navštíveno“ se hned ukáže, čeká v telefonu (i po znovunačtení) a odešle se, jakmile je signál, s časem označení (`set_route_stop_visited(…, p_at)`, server ho drží mezi začátkem dne trasy a teď). Stránka bez signálu nabízí odkaz na Dnešní plán; plán z dřívějšího dne upozorní. Odhlášení a přihlášení jiného účtu frontu smaže, varování před odhlášením ji započítá.
+- **Kalendář:** návštěva ze zastávky má ikonu trasy a v dialogu dne odkaz „Otevřít trasu“ (místo úpravy, kterou databáze u návštěv z trasy nepustí).
+- **Opravy navíc:** procházka části 16 nepočítala s vysvětlením polohy před prvním skenem (část 20) a padala; ukládání stránek do telefonu je sdílené (`src/lib/client/keep-page.ts`).
+- **Ověření:** testy fronty označení; RLS test času z telefonu; `e2e/part23-today.mjs` (8 kroků: tip, kalendář, Moje práce, uložení do telefonu, označení bez signálu i po znovunačtení, stránka bez signálu, odeslání s původním časem, tmavý režim a angličtina); audit přístupnosti Dnešního plánu (i dotykové plochy); části 16, 19, 23 a hlavní tok.
 
 ---
 

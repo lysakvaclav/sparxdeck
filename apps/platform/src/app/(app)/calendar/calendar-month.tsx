@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { AddIcon, CalendarIcon } from "@/components/icons";
+import { AddIcon, CalendarIcon, RouteIcon } from "@/components/icons";
 import { OBJECT_TYPES } from "@/components/app/object-types";
 import {
   PlanDialog,
@@ -93,6 +93,7 @@ export function CalendarMonth({
     <span className="flex min-w-0 items-center gap-1.5">
       <span aria-hidden className={cn("size-2 shrink-0 rounded-full", STATE_DOT[item.state])} />
       <span className="truncate">{item.siteName}</span>
+      {item.routeId && <RouteIcon size={12} className="text-muted-foreground" title={t("day.inRoute")} />}
       <span className="sr-only">· {t(`state.${item.state}`)}</span>
     </span>
   );
@@ -288,7 +289,15 @@ export function CalendarMonth({
                         ) : (
                           <StartInspectionButton siteId={item.siteId} size="sm" />
                         )}
-                        {manager && !item.inspectionId && (
+                        {item.routeId && (
+                          <Button asChild size="sm" variant="outline">
+                            <Link href={`/routes/${item.routeId}`}>
+                              <RouteIcon />
+                              {t("day.openRoute")}
+                            </Link>
+                          </Button>
+                        )}
+                        {manager && !item.inspectionId && !item.routeId && (
                           <Button
                             size="sm"
                             variant="outline"

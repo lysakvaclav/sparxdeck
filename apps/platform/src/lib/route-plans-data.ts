@@ -183,3 +183,96 @@ export async function loadRoute(
     home: home ? { latitude: home.latitude, longitude: home.longitude } : null,
   };
 }
+
+export type TodayStop = {
+  id: string;
+  siteId: string;
+  name: string;
+  address: string | null;
+  customerName: string | null;
+  point: Coordinates | null;
+  minutes: number | null;
+  note: string | null;
+  visitedAt: string | null;
+  /** Active devices: a check can be started only where there are some. */
+  devices: number;
+};
+
+export type TodayRoute = {
+  id: string;
+  name: string;
+  plannedOn: string;
+  start: Coordinates | null;
+  returnToStart: boolean;
+  stops: TodayStop[];
+};
+
+type TodayRow = {
+  id: string;
+  name: string;
+  planned_on: string;
+  start_latitude: number | null;
+  start_longitude: number | null;
+  return_to_start: boolean;
+  route_plan_stops: {
+    id: string;
+    position: number;
+    minutes: number | null;
+    note: string | null;
+    visited_at: string | null;
+    site: {
+      id: string;
+      name: string;
+      address: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      customer: { name: string } | null;
+    } | null;
+  }[];
+};
+
+/** The signed-in member's routes for the day (the phone's plan for today). */
+export async function loadTodayRoutes(
+  organizationId: string,
+  userId: string,
+  day: string,
+): Promise<TodayRoute[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("route_plans")
+    .select(
+      "id, name, planned_on, start_latitude, start_longitude, return_to_start, route_plan_stops(id, position, minutes, note, visited_at, site:sites(id, name, address, latitude, longitude, customer:customers(name)))",
+    )
+    .eq("organization_id", organizationId)
+    .eq("technician_id", userId)
+    .eq("planned_on", day)
+    .order("created_at");
+  const rows = (data ?? []) as unknown as TodayRow[];
+  const siteIds = [...new Set(rows.flatMap((row) => row.route_plan_stops.flatMap((stop) => (stop.site ? [stop.site.id] : []))))];
+  const { data: devices } = siteIds.length
+    ? await supabase.from("devices").select("site_id").in("site_id", siteIds).eq("status", "active").is("deleted_at", null)
+    : { data: [] };
+  const deviceCount = new Map<string, number>();
+  for (const device of devices ?? []) deviceCount.set(device.site_id, (deviceCount.get(device.site_id) ?? 0) + 1);
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    plannedOn: row.planned_on,
+    start: pointOf(row.start_latitude, row.start_longitude),
+    returnToStart: row.return_to_start,
+    stops: [...row.route_plan_stops]
+      .sort((a, b) => a.position - b.position)
+      .map((stop) => ({
+        id: stop.id,
+        siteId: stop.site?.id ?? "",
+        name: stop.site?.name ?? "—",
+        address: stop.site?.address ?? null,
+        customerName: stop.site?.customer?.name ?? null,
+        point: pointOf(stop.site?.latitude ?? null, stop.site?.longitude ?? null),
+        minutes: stop.minutes,
+        note: stop.note,
+        visitedAt: stop.visited_at,
+        devices: stop.site ? (deviceCount.get(stop.site.id) ?? 0) : 0,
+      })),
+  }));
+}

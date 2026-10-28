@@ -32,8 +32,8 @@ import {
   updateDraft,
 } from "@/lib/client/check-drafts";
 import { devicesWithWork, requestTimeout, syncInspection } from "@/lib/client/field-sync";
+import { keepPage, keepStaticFiles } from "@/lib/client/keep-page";
 import {
-  PAGES_CACHE,
   forgetInspection,
   loadPack,
   planImage,
@@ -88,33 +88,6 @@ function subscribeOnline(notify: () => void) {
     window.removeEventListener("online", notify);
     window.removeEventListener("offline", notify);
   };
-}
-
-/** Next.js files this page loaded, for the service worker to keep (see public/sw.js). */
-async function keepStaticFiles() {
-  const registration = await navigator.serviceWorker?.getRegistration();
-  const worker = registration?.active;
-  if (!worker) return;
-  const urls = new Set<string>();
-  for (const entry of performance.getEntriesByType("resource"))
-    if (entry.name.includes("/_next/static/")) urls.add(entry.name);
-  document
-    .querySelectorAll<HTMLScriptElement | HTMLLinkElement>("script[src], link[href]")
-    .forEach((element) => {
-      const url = "src" in element ? element.src : element.href;
-      if (url.includes("/_next/static/")) urls.add(url);
-    });
-  worker.postMessage({ type: "cache-static", urls: [...urls] });
-}
-
-/** Keeps this inspection's page in the phone (the service worker serves it without a signal). */
-async function keepPage(inspectionId: string) {
-  const cache = await caches.open(PAGES_CACHE);
-  const key = `/inspections/${inspectionId}`;
-  if (await cache.match(key)) return;
-  const response = await fetch(key, { credentials: "same-origin" });
-  if (response.ok && !response.redirected && response.headers.get("content-type")?.includes("html"))
-    await cache.put(key, response);
 }
 
 type Closed = "completed" | "missing" | null;
@@ -311,7 +284,7 @@ export function FieldApp({
           if (response?.ok) await savePlanImage(plan.imagePath, await response.blob());
         }
         if (!prepared.current) {
-          await keepPage(inspectionId).catch(() => undefined);
+          await keepPage(`/inspections/${inspectionId}`).catch(() => undefined);
           // Load what the field needs later (the label decoder) while there's a signal.
           await import("jsqr").catch(() => undefined);
           await keepStaticFiles().catch(() => undefined);

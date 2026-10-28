@@ -202,7 +202,9 @@
       "title": "Moje práce",
       "today": "Dnes",
       "defects": "{count, plural, one {# závada přiřazená mně} few {# závady přiřazené mně} other {# závad přiřazených mně}}",
-      "overdue": "{count, plural, one {# po termínu odstranění} few {# po termínu odstranění} other {# po termínu odstranění}}"
+      "overdue": "{count, plural, one {# po termínu odstranění} few {# po termínu odstranění} other {# po termínu odstranění}}",
+      "route": "Dnešní trasa {name}: navštíveno {visited} z {count}",
+      "routeUntitled": "bez názvu"
     }
   },
   "team": {
@@ -2182,7 +2184,8 @@
     "savedAt": "data z {time}",
     "waiting": "{count, plural, one {# změna čeká} few {# změny čekají} other {# změn čeká}} na odeslání",
     "retry": "Zkusit znovu",
-    "home": "Přejít na přehled"
+    "home": "Přejít na přehled",
+    "todayPlan": "Dnešní plán"
   },
   "calendar": {
     "title": "Kalendář",
@@ -2217,7 +2220,9 @@
       "noDue": "Žádné zařízení nemá v tento den termín revize.",
       "planThis": "Naplánovat",
       "openInspection": "Otevřít revizi",
-      "edit": "Upravit"
+      "edit": "Upravit",
+      "inRoute": "Zastávka trasy",
+      "openRoute": "Otevřít trasu"
     },
     "plan": {
       "title": "Naplánovat revizi",
@@ -3020,6 +3025,31 @@
       "viewList": "Zastávky ({count})",
       "viewMap": "Mapa",
       "close": "Zavřít"
+    },
+    "nearby": {
+      "title": "Poblíž končí revize",
+      "radius": "Okruh",
+      "hint": "Budovy do zvolené vzdálenosti od zastávek (vzdušnou čarou), které v trase nejsou a mají termín do 30 dní nebo po termínu.",
+      "noPoints": "Tip se ukáže, až bude mít některá zastávka polohu.",
+      "none": "Do {distance} od zastávek nic nepropadá.",
+      "near": "{distance} od zastávky {number}",
+      "add": "Přidat",
+      "addName": "Přidat {name} do trasy",
+      "more": "a {count} dalších"
+    },
+    "today": {
+      "title": "Dnešní plán",
+      "empty": "Na dnešek nemáte žádnou trasu.",
+      "allRoutes": "Všechny trasy",
+      "stale": "Uložený plán je ze dne {day}. Dnešní se načte, až bude signál.",
+      "offline": "Bez signálu, plán je uložený v telefonu.",
+      "waiting": "{count, plural, one {# označení čeká} few {# označení čekají} other {# označení čeká}} na odeslání.",
+      "sending": "Odesílám {count, plural, one {# označení} few {# označení} other {# označení}}…",
+      "stopWaiting": "Čeká na odeslání",
+      "visited": "Navštíveno",
+      "markVisited": "Navštíveno?",
+      "edit": "Upravit trasu",
+      "dropped": "{count, plural, one {# označení se neuložilo} few {# označení se neuložila} other {# označení se neuložilo}}: zastávka už v trase není."
     }
   }
 }

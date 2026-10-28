@@ -1175,7 +1175,10 @@ export type Database = {
       add_route_stops: { Args: { p_route: string; p_sites: string[] }; Returns: number };
       remove_route_stop: { Args: { p_stop: string }; Returns: undefined };
       reorder_route_stops: { Args: { p_route: string; p_stops: string[] }; Returns: undefined };
-      set_route_stop_visited: { Args: { p_stop: string; p_visited: boolean }; Returns: undefined };
+      set_route_stop_visited: {
+        Args: { p_stop: string; p_visited: boolean; p_at?: string | null };
+        Returns: undefined;
+      };
       publish_protocol_template: {
         Args: { p_template: string; p_content: Json; p_note: string };
         Returns: number;

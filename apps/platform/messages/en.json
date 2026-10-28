@@ -202,7 +202,9 @@
       "title": "My work",
       "today": "Today",
       "defects": "{count, plural, one {# defect assigned to me} other {# defects assigned to me}}",
-      "overdue": "{count, plural, one {# past its fix-by date} other {# past their fix-by date}}"
+      "overdue": "{count, plural, one {# past its fix-by date} other {# past their fix-by date}}",
+      "route": "Today's route {name}: {visited} of {count} visited",
+      "routeUntitled": "untitled"
     }
   },
   "team": {
@@ -2182,7 +2184,8 @@
     "savedAt": "data from {time}",
     "waiting": "{count, plural, one {# change waits} other {# changes wait}} to be sent",
     "retry": "Try again",
-    "home": "Go to the overview"
+    "home": "Go to the overview",
+    "todayPlan": "Today's plan"
   },
   "calendar": {
     "title": "Calendar",
@@ -2217,7 +2220,9 @@
       "noDue": "No device is due for inspection on this day.",
       "planThis": "Plan",
       "openInspection": "Open inspection",
-      "edit": "Edit"
+      "edit": "Edit",
+      "inRoute": "A stop of a route",
+      "openRoute": "Open the route"
     },
     "plan": {
       "title": "Plan an inspection",
@@ -3020,6 +3025,31 @@
       "viewList": "Stops ({count})",
       "viewMap": "Map",
       "close": "Close"
+    },
+    "nearby": {
+      "title": "Due soon nearby",
+      "radius": "Radius",
+      "hint": "Buildings within the chosen distance of the stops (straight line) that aren't in the route and are due within 30 days or overdue.",
+      "noPoints": "The tip shows once a stop has a location.",
+      "none": "Nothing is due within {distance} of the stops.",
+      "near": "{distance} from stop {number}",
+      "add": "Add",
+      "addName": "Add {name} to the route",
+      "more": "and {count} more"
+    },
+    "today": {
+      "title": "Today's plan",
+      "empty": "You have no route for today.",
+      "allRoutes": "All routes",
+      "stale": "The saved plan is from {day}. Today's loads once there is a signal.",
+      "offline": "No signal, the plan is saved in the phone.",
+      "waiting": "{count, plural, one {# mark waits} other {# marks wait}} to be sent.",
+      "sending": "Sending {count, plural, one {# mark} other {# marks}}…",
+      "stopWaiting": "Waiting to be sent",
+      "visited": "Visited",
+      "markVisited": "Visited?",
+      "edit": "Edit the route",
+      "dropped": "{count, plural, one {# mark wasn't saved} other {# marks weren't saved}}: the stop is no longer in the route."
     }
   }
 }

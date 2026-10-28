@@ -7,7 +7,7 @@ import { ChevronRightIcon, RefreshIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { devicesWithDrafts, readOps } from "@/lib/client/check-drafts";
-import { listPacks } from "@/lib/client/offline-store";
+import { PAGES_CACHE, listPacks } from "@/lib/client/offline-store";
 import { queuedPhotoInspections } from "@/lib/client/photo-queue";
 
 type Entry = {
@@ -23,12 +23,22 @@ export function OfflineList() {
   const t = useTranslations("offline");
   const format = useFormatter();
   const [entries, setEntries] = useState<Entry[] | null>(null);
+  // Today's plan kept in the phone (part 23).
+  const [today, setToday] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [packs, photos] = await Promise.all([listPacks(), queuedPhotoInspections()]);
+      const [packs, photos, kept] = await Promise.all([
+        listPacks(),
+        queuedPhotoInspections(),
+        caches
+          .open(PAGES_CACHE)
+          .then((cache) => cache.match("/routes/today"))
+          .catch(() => undefined),
+      ]);
       if (cancelled) return;
+      setToday(Boolean(kept));
       setEntries(
         packs.map(({ pack }) => ({
           id: pack.inspection.id,
@@ -49,6 +59,19 @@ export function OfflineList() {
 
   return (
     <>
+      {today && (
+        <Card>
+          {/* A full page load: the service worker serves the saved page. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- see above */}
+          <a
+            href="/routes/today"
+            className="flex min-h-14 items-center gap-3 px-[15px] py-2 hover:bg-accent"
+          >
+            <span className="min-w-0 flex-1 font-semibold">{t("todayPlan")}</span>
+            <ChevronRightIcon className="shrink-0 text-subtle rtl:rotate-180" />
+          </a>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>{t("list")}</CardTitle>

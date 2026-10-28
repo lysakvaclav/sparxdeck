@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { RouteIcon } from "@/components/icons";
+import { RouteIcon, TickIcon } from "@/components/icons";
 import { EmptyState } from "@/components/app/empty-state";
 import { appIcon } from "@/components/app/nav-items";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   RowLink,
@@ -79,11 +80,19 @@ export default async function RoutesPage({ searchParams }: { searchParams: Searc
         title={t("title")}
         breadcrumbs={[{ label: organization.name, href: "/" }]}
         actions={
-          <RouteDialog
-            initial={{ plannedOn: today, technicianId: manager ? "" : membership.user_id, name: "" }}
-            members={members}
-            canChooseTechnician={manager}
-          />
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link href="/routes/today">
+                <TickIcon />
+                {t("today.title")}
+              </Link>
+            </Button>
+            <RouteDialog
+              initial={{ plannedOn: today, technicianId: manager ? "" : membership.user_id, name: "" }}
+              members={members}
+              canChooseTechnician={manager}
+            />
+          </div>
         }
       />
       <PageBody>

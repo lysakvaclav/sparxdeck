@@ -174,7 +174,13 @@ try {
   // Part 23: a route with the sample buildings, one of them visited and one opened.
   const sampleSites = await selectRows("sites", `organization_id=eq.${org}&select=id&order=name`);
   const [route] = await insertRows("route_plans", [
-    { organization_id: org, technician_id: owner.id, planned_on: soon.toISOString().slice(0, 10), name: "Přístupná" },
+    {
+      organization_id: org,
+      technician_id: owner.id,
+      // Today (the company's day), so the phone's plan for today has it too.
+      planned_on: new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Prague" }).format(new Date()),
+      name: "Přístupná",
+    },
   ]);
   await insertRows(
     "route_plan_stops",
@@ -222,6 +228,7 @@ try {
     ["protocol-templates", "/protocol-templates"],
     ["protocol-template", `/protocol-templates/${protocolTemplate.id}`],
     ["routes", "/routes"],
+    ["routes-today", "/routes/today"],
     ["route", `/routes/${route.id}`],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
@@ -241,6 +248,11 @@ try {
   await sleep(800);
   await audit(page, "phone route");
   await touchTargets(page, "phone route");
+  await page.goto(`${APP}/routes/today`);
+  await page.waitFor("li[data-stop] button[aria-pressed]");
+  await sleep(800);
+  await audit(page, "phone today");
+  await touchTargets(page, "phone today");
   await page.goto(`${APP}/sites/${site.id}`);
   await page.clickText("Zahájit revizi");
   await page.waitForText("Zkontrolováno 0 z");

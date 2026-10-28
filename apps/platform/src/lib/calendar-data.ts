@@ -14,6 +14,8 @@ export type CalendarPlan = {
   note: string | null;
   inspectionId: string | null;
   state: PlanState;
+  /** The route the visit is a stop of (part 23), when the viewer may see it. */
+  routeId: string | null;
 };
 
 export type DueSite = { siteId: string; siteName: string; customerName: string; devices: number };
@@ -21,7 +23,7 @@ export type DueSite = { siteId: string; siteName: string; customerName: string; 
 export type CalendarFilters = { customer?: string; technician?: string };
 
 const PLAN_SELECT =
-  "id, site_id, planned_on, technician_id, note, inspection_id, inspection:inspections(status), site:sites!inner(name, customer_id, customer:customers(name))";
+  "id, site_id, planned_on, technician_id, note, inspection_id, inspection:inspections(status), site:sites!inner(name, customer_id, customer:customers(name)), stop:route_plan_stops(route_id)";
 
 type PlanRow = {
   id: string;
@@ -32,6 +34,8 @@ type PlanRow = {
   inspection_id: string | null;
   inspection: { status: "in_progress" | "completed" } | null;
   site: { name: string; customer_id: string; customer: { name: string } | null };
+  // One stop at most (a unique key); PostgREST may still give it as a list.
+  stop: { route_id: string } | { route_id: string }[] | null;
 };
 
 function toPlan(row: PlanRow, today: IsoDate): CalendarPlan {
@@ -45,6 +49,7 @@ function toPlan(row: PlanRow, today: IsoDate): CalendarPlan {
     note: row.note,
     inspectionId: row.inspection_id,
     state: planState(row.planned_on, row.inspection?.status ?? null, today),
+    routeId: (Array.isArray(row.stop) ? row.stop[0] : row.stop)?.route_id ?? null,
   };
 }
 

@@ -234,6 +234,10 @@ try {
 
     // A label scanned: the decoder was loaded while there was a signal.
     await phone.clickText("Skenovat štítek");
+    // The first scan explains the location of scans first (part 20).
+    await sleep(500);
+    if ((await phone.evaluate(`document.body.innerText`)).includes("Rozumím, skenovat"))
+      await phone.clickText("Rozumím, skenovat", "button");
     await phone.waitForText("Vyfotit štítek");
     await phone.setFile(
       '[data-testid="scanner-photo"]',

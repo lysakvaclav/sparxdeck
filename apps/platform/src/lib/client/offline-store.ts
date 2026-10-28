@@ -12,10 +12,12 @@ import {
 import { STORES, clearStores, idb } from "./idb";
 import { queuedPhotoInspections } from "./photo-queue";
 import { draftPending } from "@/lib/field";
+import { ROUTE_VISITS_KEY, parseQueue } from "@/lib/route-visits";
 
 // Inspections downloaded for work without a signal: the pack (IndexedDB), its
-// floor plan images, and the page itself (the service worker's cache). Wiped on
-// signing out, and when another account signs in on the phone.
+// floor plan images, and the page itself (the service worker's cache); and the
+// plan for today with its stops marked visited (part 23). Wiped on signing out,
+// and when another account signs in on the phone.
 
 /** Cache of pages the service worker keeps for offline use (see public/sw.js). */
 export const PAGES_CACHE = "sparxdeck-pages-v1";
@@ -27,8 +29,13 @@ type StoredImage = { path: string; blob: Blob };
 export async function savePack(pack: FieldPack): Promise<void> {
   const entry: StoredPack = { inspectionId: pack.inspection.id, pack, savedAt: Date.now() };
   await idb(STORES.packs, "readwrite", (store) => store.put(entry));
+  rememberOwner(pack.userId);
+}
+
+/** Whose data the phone keeps, so another account signing in wipes it (checkOwner). */
+export function rememberOwner(userId: string) {
   try {
-    localStorage.setItem(OWNER_KEY, pack.userId);
+    localStorage.setItem(OWNER_KEY, userId);
   } catch {
     // The owner check then wipes nothing; signing out still does.
   }
@@ -99,6 +106,12 @@ export async function pendingInPhone(): Promise<number> {
     count += readOps(inspectionId).length;
   }
   const photos = await queuedPhotoInspections();
+  try {
+    // Stops of today's route marked visited without a signal (part 23).
+    count += Object.keys(parseQueue(localStorage.getItem(ROUTE_VISITS_KEY))).length;
+  } catch {
+    // No storage: nothing waits there.
+  }
   return count + Object.values(photos).reduce((sum, n) => sum + n, 0);
 }
 
@@ -117,6 +130,7 @@ export async function wipeOfflineData(): Promise<void> {
   }
   try {
     localStorage.removeItem(OWNER_KEY);
+    localStorage.removeItem(ROUTE_VISITS_KEY);
   } catch {
     // No storage.
   }
