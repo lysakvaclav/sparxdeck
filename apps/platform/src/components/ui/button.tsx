@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
  * Buttons: 32px tall with 8px corners and medium-weight labels: solid blue for
  * the main action, white with a light grey border for the others, plain text for
  * quiet ones; a small line icon before the label in the text colour. 44px on
- * touch screens; the landing page shape on the sign-in screens (.brand).
+ * touch screens; the landing page's pills on the sign-in screens (.brand).
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-lg leading-none font-medium whitespace-nowrap transition-[background-color,box-shadow] duration-100 select-none disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [.brand_&]:font-medium",
+  "inline-flex shrink-0 items-center justify-center rounded-lg leading-none font-medium whitespace-nowrap transition-[background-color,box-shadow] duration-100 select-none disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [.brand_&]:rounded-full [.brand_&]:font-medium",
   {
     variants: {
       variant: {

@@ -46,8 +46,11 @@ export function LoginForm({ next, initialError }: { next?: string; initialError?
         {mode === "password" ? t("login.magicLinkToggle") : t("login.passwordToggle")}
       </Button>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground">
+      <div className="flex flex-col items-center gap-1 pt-1 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="flex min-h-11 items-center text-muted-foreground hover:text-foreground sm:min-h-8"
+        >
           {t("login.forgot")}
         </Link>
         <p className="text-muted-foreground">

@@ -54,7 +54,7 @@ export function Theme({
   }
 
   const buttonClasses = cn(
-    "inline-flex min-h-9 items-center gap-2 rounded-lg border max-md:min-h-11 border-line-strong px-3 text-xs text-muted hover:text-strong",
+    "inline-flex min-h-9 items-center gap-2 rounded-full border max-md:min-h-11 border-line-strong px-3 text-xs text-muted hover:text-strong",
     "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text-main)] hover:bg-[var(--color-primary-soft)]",
     size === "sm" ? "h-8" : "h-9 text-xs",
     className,

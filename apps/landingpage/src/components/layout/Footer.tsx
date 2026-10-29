@@ -46,7 +46,7 @@ export function Footer({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-line-strong text-muted transition-colors hover:text-strong max-md:size-11"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-line-strong text-muted transition-colors hover:text-strong max-md:size-11"
               >
                 <RiLinkedinBoxFill className="size-5" aria-hidden />
               </a>

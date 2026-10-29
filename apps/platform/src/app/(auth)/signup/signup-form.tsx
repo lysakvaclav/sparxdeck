@@ -74,7 +74,7 @@ export function SignupForm({ next, defaultEmail }: { next?: string; defaultEmail
       <Button type="submit" className="w-full" disabled={pending}>
         {t("signup.submit")}
       </Button>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-center text-sm text-muted-foreground">
         {t("signup.hasAccount")}{" "}
         <Link
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}

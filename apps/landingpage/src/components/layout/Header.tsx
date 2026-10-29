@@ -105,7 +105,7 @@ export function Header({ locale, dict }: HeaderProps) {
                     hoveredAt.current = event.timeStamp;
                     setCompanyOpen(true);
                   }}
-                  className={`flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors ${
+                  className={`flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                     companyOpen ? "text-strong" : "text-muted hover:text-strong"
                   }`}
                 >
@@ -136,7 +136,7 @@ export function Header({ locale, dict }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setMobileOpen((open) => !open)}
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-strong"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-strong"
                 aria-label={dict.company}
                 aria-expanded={mobileOpen}
                 aria-controls="header-mobile"

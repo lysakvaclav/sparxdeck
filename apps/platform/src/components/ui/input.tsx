@@ -15,7 +15,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       className={cn(
         controlClass,
-        "flex h-8 px-2.5 pointer-coarse:h-11 pointer-coarse:px-3 [.brand_&]:h-11 [.brand_&]:px-3",
+        "flex h-8 px-2.5 pointer-coarse:h-11 pointer-coarse:px-3 [.brand_&]:h-11 [.brand_&]:rounded-xl [.brand_&]:px-3.5",
         className,
       )}
       {...props}

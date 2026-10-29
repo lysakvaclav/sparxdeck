@@ -42,7 +42,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       <>
         <AuthHeading title={t("title")} subtitle={intro} />
         <div className="space-y-5">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground">
             {t("forEmail", { email: invitation.email })} {t("signInToAccept")}
           </p>
           <div className="grid gap-3">
