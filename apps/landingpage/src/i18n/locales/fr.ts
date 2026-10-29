@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/fr";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const fr: Dictionary = {
     backToHome: "Retour à l’accueil",
   },
   header: {
+    product: "Produit",
     signIn: "Connexion",
     getStarted: "Commencer",
     bookDemo: "Demander une démo",
@@ -18,191 +20,7 @@ const fr: Dictionary = {
     careers: "Carrières",
     megaContactLabel: "Contact",
   },
-  hero: {
-    heading: "Vérifications incendie.\nSans paperasse.",
-    body:
-      "SparxDeck est l’application des entreprises de maintenance qui vérifient les équipements de sécurité incendie. Le technicien scanne un QR code, coche la checklist et le rapport part automatiquement chez le client. Les prochaines échéances sont suivies par le système, pas par un tableur.",
-    primaryCta: "Commencer",
-    secondaryCta: "Comment ça marche",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Parc d’équipements et étiquettes QR",
-        description:
-          "Clients, bâtiments et tous les équipements au même endroit : extincteurs, poteaux et robinets d’incendie, éclairage de sécurité, clapets et portes coupe-feu. SparxDeck imprime les étiquettes QR et chaque appareil a sa propre fiche avec l’historique complet des vérifications.",
-      },
-      {
-        title: "Vérification sur le terrain au smartphone",
-        description:
-          "Le technicien scanne le QR code et coche une courte checklist : pression, scellé, dommages, date de validité. Les anomalies sont photographiées sur place. L’application fonctionne même sans réseau, au sous-sol ou en local technique.",
-      },
-      {
-        title: "Rapport prêt avant de repartir",
-        description:
-          "Le client signe directement sur l’écran et le rapport PDF à votre logo lui est envoyé immédiatement par e-mail. Fini les soirées à recopier des notes papier.",
-      },
-      {
-        title: "Suivi des échéances",
-        description:
-          "Voyez ce qui arrive à échéance le mois prochain et recevez des rappels pour les vérifications à venir. Aucune date n’est oubliée, et chaque vérification amène la suivante.",
-      },
-      {
-        title: "Anomalies sous contrôle",
-        description:
-          "Chaque anomalie détectée devient une tâche suivie jusqu’à sa résolution. Les gestionnaires de bâtiments voient l’état de leurs équipements dans le portail client.",
-      },
-    ],
-    headingLine1: "Pas de logiciel d’entreprise surchargé.",
-    headingLine2: "Juste ce dont les techniciens ont besoin.",
-    paragraph:
-      "SparxDeck est volontairement simple. La prise en main prend quelques minutes, vos techniciens l’utilisent sur leur propre téléphone et vous avez enfin une vue claire sur toutes les interventions, tous les équipements et toutes les échéances.",
-    cardCta: "En savoir plus",
-  },
-  comparison: {
-    title: "Papier et Excel vs. SparxDeck",
-    subtitle:
-      "Découvrez comment chaque étape de la vérification change lorsque carnets, classeurs et tableurs sont remplacés par une seule application.",
-    oldLabel: "Papier et Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Notes de vérification",
-        old: "À la main sur papier, souvent illisibles et sources d’erreurs",
-        new: "Scan du QR code et courte checklist directement sur le téléphone",
-      },
-      {
-        topic: "Rapport",
-        old: "Des heures de saisie dans Word ou Excel le soir",
-        new: "Un PDF à votre logo avec la signature du client, prêt sur place",
-      },
-      {
-        topic: "Échéances",
-        old: "Un tableur, un agenda ou la mémoire",
-        new: "Une vue d’ensemble automatique et des rappels anticipés",
-      },
-      {
-        topic: "Anomalies",
-        old: "Une note en marge qui se perd facilement",
-        new: "Une tâche avec photo, suivie jusqu’à sa résolution",
-      },
-      {
-        topic: "Historique des équipements",
-        old: "Des classeurs au bureau et des recherches dans les dossiers",
-        new: "L’historique complet de chaque appareil en un geste",
-      },
-      {
-        topic: "Client",
-        old: "Attend le rapport et ne connaît pas l’état de ses équipements",
-        new: "Reçoit le rapport immédiatement par e-mail et suit l’état dans le portail client",
-      },
-    ],
-  },
-  radar: {
-    title: "Tout le cycle de vérification dans un seul outil",
-    subtitle:
-      "Du parc d’équipements à la vérification sur site, jusqu’au rapport signé et à la prochaine échéance. SparxDeck couvre l’ensemble du cycle que les entreprises de maintenance assemblent sinon à partir de papier, de tableurs et d’e-mails.",
-    labels: ["Parc", "Étiquettes QR", "Vérification", "Rapports", "Échéances", "Anomalies"],
-    keyAreasHeading: "Ce que couvre SparxDeck",
-    keyAreas: [
-      {
-        title: "Parc",
-        description:
-          "Clients, bâtiments et équipements de tous types avec l’historique complet des vérifications, au même endroit.",
-      },
-      {
-        title: "Étiquettes QR",
-        description:
-          "Impression des étiquettes depuis l’application. Un scan et le technicien sait devant quel appareil il se trouve.",
-      },
-      {
-        title: "Vérification",
-        description:
-          "Une checklist par type d’équipement, photo d’anomalie en un geste et fonctionnement complet sans réseau.",
-      },
-      {
-        title: "Rapports",
-        description:
-          "Un rapport PDF à votre logo avec la signature du client, envoyé juste après la vérification.",
-      },
-      {
-        title: "Échéances",
-        description:
-          "La liste des vérifications à faire le mois prochain, avec des rappels en temps utile.",
-      },
-      {
-        title: "Anomalies",
-        description: "Chaque anomalie est une tâche avec un statut, suivie jusqu’à sa résolution.",
-      },
-    ],
-    howItWorksHeading: "Une vérification avec SparxDeck",
-    howItWorks: [
-      "Au bureau, vous créez le client, le bâtiment et les équipements, ou vous les importez depuis votre tableur actuel.",
-      "Vous imprimez les étiquettes QR ; le technicien les colle sur les équipements lors de la première visite.",
-      "À chaque vérification suivante, le technicien scanne l’étiquette et coche la checklist sur son téléphone.",
-      "S’il trouve une anomalie, il la photographie et une tâche est créée automatiquement.",
-      "Le client signe sur l’écran, le rapport lui est envoyé par e-mail et la date de la prochaine vérification est fixée.",
-    ],
-    resultHeading: "Ce que vous y gagnez",
-    result: [
-      "Des soirées libérées de la saisie des notes papier.",
-      "Aucune vérification oubliée, donc aucun contrat perdu pour cette raison.",
-      "Des interventions récurrentes suivies par le système à votre place.",
-      "Des rapports professionnels et un historique traçable en cas de contrôle ou de sinistre.",
-    ],
-  },
-  faq: {
-    headingLine1: "Questions fréquentes",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "À qui s’adresse SparxDeck ?",
-        answer:
-          "Aux entreprises de maintenance qui se déplacent de bâtiment en bâtiment pour vérifier les équipements de sécurité incendie, généralement de 3 à 30 personnes. Les techniciens travaillent sur leur téléphone, le bureau sur ordinateur et les gestionnaires de bâtiments dans leur propre portail client.",
-      },
-      {
-        id: "equipment",
-        question: "Quels équipements SparxDeck prend-il en charge ?",
-        answer:
-          "Extincteurs, poteaux et robinets d’incendie, éclairage de sécurité, clapets coupe-feu et portes coupe-feu. Chaque type d’équipement a sa propre checklist : le technicien vérifie exactement ce qu’il faut.",
-      },
-      {
-        id: "offline",
-        question: "L’application fonctionne-t-elle sans réseau ?",
-        answer:
-          "Oui. Les techniciens peuvent travailler au sous-sol ou en local technique sans connexion. Dès que le téléphone est de nouveau en ligne, les données se synchronisent automatiquement.",
-      },
-      {
-        id: "pricing",
-        question: "Combien coûte SparxDeck ?",
-        answer:
-          "Vous payez un abonnement mensuel selon le nombre de techniciens ou d’équipements : le prix évolue avec votre entreprise. Demandez une courte démo et nous vous préparerons une offre sur mesure.",
-      },
-      {
-        id: "protocols",
-        question: "Les rapports respectent-ils la réglementation ?",
-        answer:
-          "Oui. Les modèles de rapport reposent sur les exigences réglementaires locales de chaque pays où SparxDeck est présent. Chaque rapport porte le logo et les coordonnées de votre entreprise ainsi que la signature du client.",
-      },
-      {
-        id: "portal",
-        question: "Les gestionnaires de bâtiments voient-ils l’état de leurs équipements ?",
-        answer:
-          "Oui. Gestionnaires et propriétaires disposent de leur propre portail client, où ils voient l’état de leurs équipements, les anomalies ouvertes et les échéances, et téléchargent tous les rapports.",
-      },
-      {
-        id: "onboarding",
-        question: "Combien de temps faut-il pour démarrer ?",
-        answer:
-          "Quelques minutes. SparxDeck ne contient que l’essentiel : un technicien peut faire sa première vérification sans formation. Vos données existantes s’importent depuis Excel en quelques clics.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Commencer avec SparxDeck",
-    secondaryCta: "Demander une démo",
-  },
+  home,
   footer: {
     allRightsReserved: "Tous droits réservés.",
     cookiesSettings: "Cookies",
@@ -231,7 +49,7 @@ const fr: Dictionary = {
       subheading: "Un logiciel pour les entreprises de maintenance en sécurité incendie.",
       body: [
         "SparxDeck est une application web et mobile pour les entreprises qui effectuent les vérifications périodiques des équipements de sécurité incendie : extincteurs, poteaux et robinets d’incendie, éclairage de sécurité, clapets et portes coupe-feu. Elle remplace les notes papier et les tableurs par un seul outil clair.",
-        `SparxDeck est né en République tchèque et a été conçu pour fonctionner dans plusieurs pays. Le cœur de l’application est le même partout ; seuls la langue et les modèles de rapport changent selon la réglementation locale. L’application est disponible en ${locales.length} langues.`,
+        `SparxDeck est né en Tchéquie et est conçu pour travailler dans plusieurs pays. Le cœur de l'application est partout le même ; la langue et les modèles de rapport changent. L'application existe pour l'instant en tchèque et en anglais, ce site en ${locales.length} langues.`,
         "Nous développons le produit en étroite collaboration avec des entreprises de maintenance et des techniciens de terrain. Si vous avez une idée qui vous faciliterait encore le travail, écrivez-nous.",
       ],
     },
@@ -269,7 +87,7 @@ const fr: Dictionary = {
       subheading: "Signature sur écran et PDF automatique à votre logo",
       body: [
         "À la fin de la vérification, SparxDeck génère automatiquement un rapport PDF à partir de tout ce que le technicien a saisi sur le terrain. Le client le signe directement sur l’écran du téléphone. Le rapport porte le logo et les coordonnées de votre entreprise et liste les équipements vérifiés, les résultats et les anomalies relevées.",
-        "Le rapport est envoyé immédiatement au client par e-mail, conservé dans le système et accessible à tout moment au gestionnaire du bâtiment dans son portail. Les modèles de rapport respectent la réglementation locale. Vous retrouvez à tout moment ce qui a été vérifié, chez quel client et quand, par exemple lors d’un contrôle administratif ou d’un sinistre.",
+        "Envoyez le rapport au client par e-mail d'un geste ; il reste enregistré dans le système. Vous réglez son apparence dans l'éditeur de modèles et un rapport émis ne change plus jamais. Vous retrouvez à tout moment ce qui a été vérifié, chez quel client et quand, par exemple lors d'un contrôle administratif ou d'un sinistre.",
       ],
     },
     deadlineTracking: {
@@ -285,7 +103,7 @@ const fr: Dictionary = {
       subheading: "Chaque anomalie détectée devient une tâche suivie jusqu’à sa résolution",
       body: [
         "Lorsqu’un technicien détecte une anomalie pendant une vérification, SparxDeck la transforme automatiquement en tâche avec photo et description. L’anomalie ne se perd pas dans les notes, et la personne responsable est clairement identifiée.",
-        "Chaque anomalie a un statut : nouvelle, en cours, résolue. Les gestionnaires de bâtiments voient les anomalies ouvertes dans leur portail client et savent que les problèmes sont réellement corrigés, et vous disposez d’une base pour votre prochaine intervention.",
+        "Pour chaque défaut, vous voyez son statut (ouvert, en cours, résolu), qui s'en occupe et pour quand. La résolution exige une note et tout l'historique des modifications reste consultable. Vous savez que les problèmes trouvés sont vraiment traités, et vous avez la base de la prochaine intervention.",
       ],
     },
   },

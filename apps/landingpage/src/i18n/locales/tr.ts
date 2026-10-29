@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/tr";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const tr: Dictionary = {
     backToHome: "Ana sayfaya dön",
   },
   header: {
+    product: "Ürün",
     signIn: "Giriş yap",
     getStarted: "Hemen başla",
     bookDemo: "Demo talep et",
@@ -18,190 +20,7 @@ const tr: Dictionary = {
     careers: "Kariyer",
     megaContactLabel: "İletişim",
   },
-  hero: {
-    heading: "Yangın güvenliği kontrolleri.\nKâğıt işi olmadan.",
-    body:
-      "SparxDeck, yangın güvenliği ekipmanlarını kontrol eden servis firmaları için geliştirilmiş bir uygulamadır. Teknisyen QR kodu tarar, kontrol listesini işaretler ve tutanak müşteriye otomatik olarak gönderilir. Sonraki kontrollerin tarihlerini Excel tablosu değil, sistem takip eder.",
-    primaryCta: "Hemen başla",
-    secondaryCta: "Nasıl çalışır",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Ekipman kaydı ve QR etiketler",
-        description:
-          "Müşteriler, binalar ve tüm ekipmanlar tek bir yerde: yangın söndürücüler, hidrantlar, acil aydınlatma, yangın damperleri ve yangın kapıları. SparxDeck QR etiketleri yazdırır ve her cihazın tüm kontrol geçmişini içeren kendi kartı olur.",
-      },
-      {
-        title: "Telefonla sahada kontrol",
-        description:
-          "Teknisyen QR kodu tarar ve kısa bir kontrol listesini işaretler: basınç, mühür, hasar, geçerlilik süresi. Arızayı anında fotoğraflar. Uygulama sinyal olmadan da çalışır; bodrumda ya da teknik odada.",
-      },
-      {
-        title: "Tutanak daha sahadayken hazır",
-        description:
-          "Müşteri doğrudan ekranda imzalar ve şirketinizin logosunu taşıyan PDF tutanak hemen e-postayla kendisine gönderilir. Akşamları notları yeniden yazmakla geçen saatler sona erer.",
-      },
-      {
-        title: "Kontrol tarihlerinin takibi",
-        description:
-          "Gelecek ay nelerin süresinin dolacağını görün ve yaklaşan kontroller için hatırlatmalar alın. Hiçbir tarih kaçmaz ve her kontrol bir sonraki işi getirir.",
-      },
-      {
-        title: "Arızalar kontrol altında",
-        description:
-          "Tespit edilen her arıza, giderilene kadar takip ettiğiniz bir göreve dönüşür. Bina yöneticisi ekipmanlarının durumunu müşteri portalında görür.",
-      },
-    ],
-    headingLine1: "Karmaşık kurumsal sistemler yok.",
-    headingLine2: "Sadece teknisyenin gerçekten ihtiyaç duyduğu şeyler.",
-    paragraph:
-      "SparxDeck bilerek basit tasarlandı. Birkaç dakikada öğrenilir, teknisyenler kendi telefonlarında kullanır ve siz nihayet tüm işlerin, ekipmanların ve tarihlerin net bir görünümüne sahip olursunuz.",
-    cardCta: "Daha fazla bilgi",
-  },
-  comparison: {
-    title: "Kâğıt ve Excel karşısında SparxDeck",
-    subtitle:
-      "Defter, klasör ve tabloların yerini tek bir uygulama aldığında kontrolün her adımının nasıl değiştiğini görün.",
-    oldLabel: "Kâğıt ve Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Kontrol notları",
-        old: "Kâğıda elle yazılır, çoğu zaman okunaksız ve hatalıdır",
-        new: "QR kod taraması ve kısa kontrol listesi doğrudan telefonda",
-      },
-      {
-        topic: "Tutanak",
-        old: "Akşamları saatlerce Word veya Excel'e aktarma",
-        new: "Logonuzu ve müşteri imzasını taşıyan PDF, daha sahadayken hazır",
-      },
-      {
-        topic: "Kontrol tarihleri",
-        old: "Tablo, takvim ya da hafıza",
-        new: "Otomatik genel bakış ve önceden hatırlatmalar",
-      },
-      {
-        topic: "Arızalar",
-        old: "Kolayca kaybolan bir kenar notu",
-        new: "Çözülene kadar takip edilen, fotoğraflı bir görev",
-      },
-      {
-        topic: "Ekipman geçmişi",
-        old: "Ofiste klasörler ve dosyalarda arama",
-        new: "Her cihazın tüm geçmişi tek dokunuşla",
-      },
-      {
-        topic: "Müşteri",
-        old: "Tutanağı bekler ve ekipmanının durumunu bilmez",
-        new: "Tutanağı hemen e-postayla alır ve durumu müşteri portalında görür",
-      },
-    ],
-  },
-  radar: {
-    title: "Tüm kontrol döngüsü tek bir sistemde",
-    subtitle:
-      "Ekipman kaydından sahadaki kontrole, imzalı tutanaktan bir sonraki tarihe kadar. SparxDeck, servis firmalarının normalde kâğıt, Excel ve e-postalarla bir araya getirdiği tüm döngüyü kapsar.",
-    labels: ["Kayıt", "QR etiketler", "Kontrol", "Tutanaklar", "Tarihler", "Arızalar"],
-    keyAreasHeading: "SparxDeck neleri kapsar",
-    keyAreas: [
-      {
-        title: "Kayıt",
-        description:
-          "Her türden müşteri, bina ve ekipman, eksiksiz kontrol geçmişiyle tek bir yerde.",
-      },
-      {
-        title: "QR etiketler",
-        description:
-          "Etiketleri doğrudan uygulamadan yazdırın. Tek bir tarama ve teknisyen hangi cihazın önünde durduğunu bilir.",
-      },
-      {
-        title: "Kontrol",
-        description:
-          "Her ekipman türü için kontrol listesi, tek dokunuşla arıza fotoğrafı ve sinyal olmadan tam işlevsellik.",
-      },
-      {
-        title: "Tutanaklar",
-        description:
-          "Logonuzu ve müşteri imzasını taşıyan, kontrolün hemen ardından gönderilen PDF tutanak.",
-      },
-      {
-        title: "Tarihler",
-        description: "Gelecek ay yapılması gereken kontrollere genel bakış ve zamanında hatırlatmalar.",
-      },
-      {
-        title: "Arızalar",
-        description: "Her arıza, çözülene kadar takip edilen, durumu olan bir görevdir.",
-      },
-    ],
-    howItWorksHeading: "SparxDeck ile kontrol nasıl yapılır",
-    howItWorks: [
-      "Ofiste müşteriyi, binayı ve ekipmanları oluşturur ya da mevcut tablonuzdan içe aktarırsınız.",
-      "QR etiketleri yazdırırsınız; teknisyen ilk ziyarette bunları ekipmanlara yapıştırır.",
-      "Sonraki her kontrolde teknisyen etiketi tarar ve kontrol listesini telefonunda işaretler.",
-      "Bir arıza bulursa fotoğrafını çeker ve sistemde otomatik olarak bir görev oluşturulur.",
-      "Müşteri ekranda imzalar, tutanak e-postayla kendisine gönderilir ve sistem bir sonraki kontrol tarihini belirler.",
-    ],
-    resultHeading: "Neler kazanırsınız",
-    result: [
-      "Kâğıt notları tutanaklara aktarmadan geçen akşamlar.",
-      "Unutulan hiçbir kontrol, dolayısıyla kaybedilen hiçbir iş yok.",
-      "Sistemin sizin yerinize takip ettiği tekrarlayan işler.",
-      "Denetim veya olay durumunda profesyonel tutanaklar ve izlenebilir geçmiş.",
-    ],
-  },
-  faq: {
-    headingLine1: "Sıkça sorulan sorular",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "SparxDeck kimler için?",
-        answer:
-          "Binaları dolaşarak yangın güvenliği ekipmanlarını kontrol eden, genellikle 3 ila 30 çalışanı olan servis firmaları için. Teknisyenler sahada telefonla, ofis bilgisayarla, bina yöneticileri ise kendi müşteri portallarında çalışır.",
-      },
-      {
-        id: "equipment",
-        question: "SparxDeck hangi ekipmanları destekliyor?",
-        answer:
-          "Yangın söndürücüler, hidrantlar, acil aydınlatma, yangın damperleri ve yangın kapıları. Her ekipman türünün kendi kontrol listesi vardır; böylece teknisyen tam olarak gerekeni kontrol eder.",
-      },
-      {
-        id: "offline",
-        question: "Uygulama sinyal olmadan çalışır mı?",
-        answer:
-          "Evet. Teknisyen bodrumda veya teknik odada bağlantı olmadan çalışabilir. Telefon yeniden çevrimiçi olur olmaz veriler otomatik olarak senkronize edilir.",
-      },
-      {
-        id: "pricing",
-        question: "SparxDeck'in fiyatı nedir?",
-        answer:
-          "Teknisyen veya cihaz sayısına göre aylık abonelik ödersiniz; böylece fiyat şirketinizle birlikte büyür. Kısa bir demo talep edin, size özel bir teklif hazırlayalım.",
-      },
-      {
-        id: "protocols",
-        question: "Tutanaklar mevzuata uygun mu?",
-        answer:
-          "Evet. Tutanak şablonları, SparxDeck'in faaliyet gösterdiği her ülkedeki yerel kontrol gerekliliklerine dayanır. Her tutanakta şirketinizin logosu ve bilgileri ile müşterinin imzası bulunur.",
-      },
-      {
-        id: "portal",
-        question: "Bina yöneticisi ekipmanlarının durumunu görebilir mi?",
-        answer:
-          "Evet. Bina yöneticileri ve sahiplerinin kendi müşteri portalı vardır; burada ekipmanların durumunu, açık arızaları ve tarihleri görür, tüm tutanakları indirebilirler.",
-      },
-      {
-        id: "onboarding",
-        question: "Kullanmayı öğrenmek ne kadar sürer?",
-        answer:
-          "Birkaç dakika. SparxDeck yalnızca en önemli şeyleri içerir; bu yüzden teknisyen ilk kontrolü eğitim almadan yapar. Excel'deki mevcut kayıtlarınızı birkaç tıklamayla içe aktarırsınız.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "SparxDeck ile başlayın",
-    secondaryCta: "Demo talep edin",
-  },
+  home,
   footer: {
     allRightsReserved: "Tüm hakları saklıdır.",
     cookiesSettings: "Çerezler",
@@ -229,7 +48,7 @@ const tr: Dictionary = {
       subheading: "Yangın güvenliği alanındaki servis firmaları için yazılım.",
       body: [
         "SparxDeck, yangın güvenliği ekipmanlarını düzenli olarak kontrol eden firmalar için bir web ve mobil uygulamadır: yangın söndürücüler, hidrantlar, acil aydınlatma, yangın damperleri ve kapıları. Kâğıt notları ve Excel'i tek, anlaşılır bir sistemle değiştirir.",
-        `SparxDeck Çekya'da doğdu ve farklı ülkelerde çalışacak şekilde tasarlandı. Uygulamanın çekirdeği her yerde aynıdır; yalnızca dil ve tutanak şablonları yerel mevzuata göre değişir. Uygulama ${locales.length} dilde kullanılabilir.`,
+        `SparxDeck Çekya'da doğdu ve farklı ülkelerde çalışmak için tasarlandı. Uygulamanın çekirdeği her yerde aynıdır; dil ve rapor şablonları değişir. Uygulama şimdilik Çekçe ve İngilizce, bu web sitesi ${locales.length} dilde.`,
         "Ürünü servis firmaları ve sahadaki teknisyenlerle yakın iş birliği içinde geliştiriyoruz. İşinizi daha da kolaylaştıracak bir fikriniz varsa bize yazın.",
       ],
     },
@@ -267,7 +86,7 @@ const tr: Dictionary = {
       subheading: "Ekranda imza ve logonuzu taşıyan otomatik PDF",
       body: [
         "Kontrol tamamlandığında SparxDeck, teknisyenin sahada kaydettiği her şeyden otomatik olarak bir PDF tutanak oluşturur. Müşteri bunu doğrudan telefon ekranında imzalar. Tutanakta şirketinizin logosu ve bilgileri, kontrol edilen ekipmanların listesi, sonuçlar ve tespit edilen arızalar yer alır.",
-        "Tutanak hemen e-postayla müşteriye gönderilir, sistemde saklanır ve bina yöneticisi tarafından istenildiği zaman kendi portalından indirilebilir. Tutanak şablonları yerel mevzuata uygundur. Neyin, ne zaman ve hangi müşteride kontrol edildiğini her zaman öğrenebilirsiniz; örneğin resmi bir denetimde ya da sigorta hasarında.",
+        "Raporu müşteriye tek dokunuşla e-postayla gönderirsiniz ve sistemde kayıtlı kalır. Görünümünü şablon düzenleyicisinde ayarlarsınız ve düzenlenen bir rapor bir daha asla değişmez. Hangi müşteride neyin ne zaman denetlendiğini, örneğin bir resmi denetimde veya sigorta hasarında, her zaman bulursunuz.",
       ],
     },
     deadlineTracking: {
@@ -283,7 +102,7 @@ const tr: Dictionary = {
       subheading: "Tespit edilen her arıza, çözülene kadar takip edilen bir göreve dönüşür",
       body: [
         "Teknisyen kontrol sırasında bir arıza bulduğunda SparxDeck bunu otomatik olarak fotoğraf ve açıklama içeren bir göreve dönüştürür. Arıza notlar arasında kaybolmaz ve kimin sorumlu olduğu bellidir.",
-        "Her arızanın bir durumu vardır: yeni, işlemde, çözüldü. Bina yöneticisi açık arızaları kendi müşteri portalında görür ve sorunların gerçekten giderildiğinden emin olur; siz ise bir sonraki iş için sağlam bir zemine sahip olursunuz.",
+        "Her arızada durumu (açık, işlemde, giderildi), kimin ilgilendiğini ve ne zamana kadar olduğunu görürsünüz. Giderme bir not gerektirir ve tüm değişiklik geçmişi kayıtlı kalır. Bulunan sorunların gerçekten çözüldüğünü bilir, bir sonraki iş için de dayanağınız olur.",
       ],
     },
   },

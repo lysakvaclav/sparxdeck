@@ -1,4 +1,6 @@
 export type HeaderDictionary = {
+  /** Label of the Product menu (the feature pages). */
+  product: string;
   signIn: string;
   /** Primary header CTA leading to signup */
   getStarted: string;
@@ -17,52 +19,45 @@ export type HeaderDictionary = {
   megaContactLabel: string;
 };
 
-export type HeroDictionary = {
-  heading: string;
-  body: string;
-  primaryCta: string;
-  secondaryCta: string;
-};
-
-export type CompaniesDictionary = {
-  cards: { title: string; description: string }[];
-  headingLine1: string;
-  headingLine2: string;
-  paragraph: string;
-  cardCta: string;
-};
-
-export type ComparisonDictionary = {
-  title: string;
-  subtitle: string;
-  /** Column header for the current way of working (paper, Excel) */
-  oldLabel: string;
-  /** Column header for SparxDeck */
-  newLabel: string;
-  rows: { topic: string; old: string; new: string }[];
-};
-
-export type RadarDictionary = {
-  title: string;
-  subtitle: string;
-  labels: string[];
-  keyAreasHeading: string;
-  keyAreas: { title: string; description: string }[];
-  howItWorksHeading: string;
-  howItWorks: string[];
-  resultHeading: string;
-  result: string[];
-};
-
-export type FaqDictionary = {
-  headingLine1: string;
-  headingLine2: string;
-  items: { id: string; question: string; answer: string }[];
-};
-
-export type GetStartedDictionary = {
-  primaryCta: string;
-  secondaryCta: string;
+/** The home page (src/app/[locale]/page.tsx), section by section. */
+export type HomeDictionary = {
+  hero: {
+    eyebrow: string;
+    title: string;
+    /** The second line of the heading, in the muted colour. */
+    titleMuted: string;
+    body: string;
+    primary: string;
+    secondary: string;
+    note: string;
+  };
+  /** Short product facts under the hero (no invented numbers). */
+  facts: { value: string; label: string }[];
+  platform: { eyebrow: string; title: string; body: string; learnMore: string };
+  /** In the order of FEATURES in src/components/home/features.ts. */
+  features: { label: string; title: string; body: string }[];
+  principles: { eyebrow: string; title: string; items: { title: string; body: string }[] };
+  steps: { eyebrow: string; title: string; items: string[] };
+  comparison: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    oldLabel: string;
+    newLabel: string;
+    rows: { topic: string; old: string; new: string }[];
+  };
+  faq: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    items: { question: string; answer: string }[];
+  };
+  cta: { title: string; body: string; primary: string; secondary: string };
+  /** Alternative texts of the platform's screenshots. */
+  shots: Record<
+    "dashboard" | "devices" | "check" | "protocol" | "calendar" | "defects" | "map" | "route" | "today",
+    string
+  >;
 };
 
 type PageWithBody = {
@@ -120,12 +115,7 @@ export type CommonDictionary = {
 export type Dictionary = {
   common: CommonDictionary;
   header: HeaderDictionary;
-  hero: HeroDictionary;
-  companies: CompaniesDictionary;
-  comparison: ComparisonDictionary;
-  radar: RadarDictionary;
-  faq: FaqDictionary;
-  getStarted: GetStartedDictionary;
+  home: HomeDictionary;
   footer: FooterDictionary;
   pages: PagesDictionary;
   legal: LegalDictionary;

@@ -1,155 +1,132 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { locales, shortLabel, type FooterDictionary, type Locale } from "@/i18n/dictionary";
 import { FooterThemeToggle } from "@/components/layout/FooterThemeToggle";
 import { LocaleFlag } from "@/components/layout/LocaleFlag";
+import type { ProductLink } from "@/components/layout/Header";
+import { TextLogo } from "@/components/ui/text-logo";
 import { SITE } from "@/config/site";
+import { languageOptions, type Dictionary, type Locale } from "@/i18n/dictionary";
 
-const footerLocales = locales;
-
-export function Footer({ locale, dict }: { locale: Locale; dict: FooterDictionary }) {
+/**
+ * The site's footer: the product and company pages, contact, every language
+ * (each link keeps the page), the theme, and the legal pages.
+ */
+export function Footer({
+  locale,
+  dict,
+  products,
+  path,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  products: ProductLink[];
+  /** The page without the language ("" for the home page), so a language link stays on it. */
+  path: string;
+}) {
   const year = new Date().getFullYear();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const handleLocaleClick = (code: Locale) => {
-    if (!pathname) {
-      router.push(`/${code}`);
-      return;
-    }
-
-    const segments = pathname.split("/").filter(Boolean);
-    const rest = segments.slice(1).join("/");
-    const target = `/${code}` + (rest ? `/${rest}` : "");
-
-    if (target !== pathname) {
-      router.push(target);
-    }
-  };
+  const f = dict.footer;
+  const company = [
+    { href: `/${locale}/mission`, label: f.mission },
+    { href: `/${locale}/about`, label: SITE.name },
+    { href: `/${locale}/team`, label: f.team },
+    { href: `/${locale}/news`, label: f.newsroom },
+    { href: `/${locale}/careers`, label: f.careers },
+  ];
+  const link = "text-sm text-main transition-colors hover:text-strong";
 
   return (
-    <footer className="border-t border-[var(--color-border)] bg-[var(--background)]">
-      <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 lg:px-12">
-        <div className="grid gap-10 md:grid-cols-3">
-          {/* Brand block */}
-          <div className="space-y-4 text-xs text-[var(--color-text-muted)]">
-            <p>
-              © {year} {SITE.name}. {dict.allRightsReserved}
-            </p>
-            <div className="mt-1 flex flex-wrap gap-3 text-xs">
-              <Link
-                href={`/${locale}/terms-of-use`}
-                className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-              >
-                {dict.termsOfService}
-              </Link>
-              <Link
-                href={`/${locale}/privacy-policy`}
-                className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-              >
-                {dict.privacyPolicy}
-              </Link>
-              <Link
-                href={`/${locale}/cookies`}
-                className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-              >
-                {dict.cookiesSettings}
-              </Link>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-x-2.5 gap-y-1 text-xs">
-              {footerLocales.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => handleLocaleClick(code)}
-                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.1em] text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-                >
-                  <LocaleFlag code={code} />
-                  {shortLabel(code)}
-                </button>
-              ))}
-            </div>
-            <FooterThemeToggle />
-            <div className="mt-4 space-y-2">
-              {SITE.social.linkedin && (
-                <a
-                  href={SITE.social.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="button-font flex w-full items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                >
-                  LinkedIn
-                </a>
-              )}
-              {SITE.social.x && (
-                <a
-                  href={SITE.social.x}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="button-font flex w-full items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                >
-                  X
-                </a>
-              )}
-              <a
-                href={`mailto:${SITE.email}`}
-                className="button-font inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
-              >
+    <footer className="border-t border-line bg-background">
+      <div className="container-site grid gap-12 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-16">
+        <div className="space-y-4">
+          <Link href={`/${locale}`} aria-label={SITE.name} className="inline-block text-strong">
+            <TextLogo className="h-6" />
+          </Link>
+          <p className="max-w-xs text-sm text-muted">{dict.home.hero.eyebrow}</p>
+          <FooterThemeToggle />
+        </div>
+        <nav aria-label={dict.header.product}>
+          <p className="eyebrow">{dict.header.product}</p>
+          <ul className="mt-4 space-y-2.5">
+            {products.map((product) => (
+              <li key={product.href}>
+                <Link href={product.href} className={link}>
+                  {product.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <nav aria-label={f.companyHeading}>
+          <p className="eyebrow">{f.companyHeading}</p>
+          <ul className="mt-4 space-y-2.5">
+            {company.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className={link}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div>
+          <p className="eyebrow">{dict.header.megaContactLabel}</p>
+          <ul className="mt-4 space-y-2.5">
+            <li>
+              <a href={`mailto:${SITE.email}`} className={link}>
                 {SITE.email}
               </a>
-            </div>
-          </div>
+            </li>
+            <li>
+              <a href={SITE.loginUrl} className={link}>
+                {dict.header.signIn}
+              </a>
+            </li>
+            <li>
+              <a href={SITE.bookingUrl} className={link}>
+                {dict.header.bookDemo}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-          {/* Company */}
-          <div className="space-y-3 text-sm">
-            <h3 className="font-sans text-sm font-semibold uppercase tracking-wide text-[var(--color-text-strong)]">
-              {dict.companyHeading}
-            </h3>
-            <ul className="space-y-1">
-              <li>
+      <div className="border-t border-line">
+        <div className="container-site py-6">
+          <ul className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Language">
+            {languageOptions.map((option) => (
+              <li key={option.code}>
                 <Link
-                  href={`/${locale}/mission`}
-                  className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-strong)]"
+                  href={`/${option.code}${path ? `/${path}` : ""}`}
+                  hrefLang={option.code}
+                  lang={option.code}
+                  aria-current={option.code === locale ? "true" : undefined}
+                  className={`inline-flex min-h-6 items-center gap-1.5 text-xs transition-colors ${
+                    option.code === locale ? "text-strong" : "text-muted hover:text-strong"
+                  }`}
                 >
-                  {dict.mission}
+                  <LocaleFlag code={option.code} />
+                  {option.nativeName}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href={`/${locale}/team`}
-                  className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-strong)]"
-                >
-                  {dict.team}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/${locale}/news`}
-                  className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-strong)]"
-                >
-                  {dict.newsroom}
-                </Link>
-              </li>
-            </ul>
-          </div>
+            ))}
+          </ul>
+        </div>
+      </div>
 
-          {/* Work with us */}
-          <div className="space-y-3 text-sm">
-            <h3 className="font-sans text-sm font-semibold uppercase tracking-wide text-[var(--color-text-strong)]">
-              {dict.workWithUs}
-            </h3>
-            <ul className="space-y-1">
-              <li>
-                <Link
-                  href={`/${locale}/careers`}
-                  className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-strong)]"
-                >
-                  {dict.careers}
-                </Link>
-              </li>
-            </ul>
+      <div className="border-t border-line">
+        <div className="container-site flex flex-col gap-3 py-6 text-xs text-muted md:flex-row md:items-center md:justify-between">
+          <p>
+            © {year} {SITE.name}. {f.allRightsReserved}
+          </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link href={`/${locale}/terms-of-use`} className="hover:text-strong">
+              {f.termsOfService}
+            </Link>
+            <Link href={`/${locale}/privacy-policy`} className="hover:text-strong">
+              {f.privacyPolicy}
+            </Link>
+            <Link href={`/${locale}/cookies`} className="hover:text-strong">
+              {f.cookiesSettings}
+            </Link>
           </div>
         </div>
       </div>

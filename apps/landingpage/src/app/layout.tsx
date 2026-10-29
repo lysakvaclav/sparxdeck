@@ -34,6 +34,11 @@ const helveticaNowDisplay = localFont({
       weight: "400",
       style: "normal",
     },
+    {
+      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
   ],
   variable: "--font-display",
   display: "swap",
@@ -63,7 +68,7 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     title: "SparxDeck – revize požární techniky bez papíru",
     description:
-      "Naskenujte QR kód, odklikněte kontrolu a protokol odejde zákazníkovi sám. Aplikace pro servisní firmy v požární ochraně.",
+      "Naskenujte QR štítek, odklikněte kontrolu a protokol s podpisem zákazníka je hotový ještě na místě. Aplikace pro servisní firmy v požární ochraně.",
   },
   twitter: {
     card: "summary_large_image",

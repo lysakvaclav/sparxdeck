@@ -68,7 +68,7 @@ export function Theme({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button type="button" className={buttonClasses}>
-          {themeIcons[current] as any}
+          {themeIcons[current]}
           {showLabel && <span>{themeLabels[current]}</span>}
         </button>
       </DropdownMenuTrigger>
@@ -84,7 +84,7 @@ export function Theme({
                 : "text-[var(--color-text-main)]",
             )}
           >
-            {themeIcons[name] as any}
+            {themeIcons[name]}
             <span className="uppercase tracking-[0.16em]">{themeLabels[name]}</span>
           </DropdownMenuItem>
         ))}

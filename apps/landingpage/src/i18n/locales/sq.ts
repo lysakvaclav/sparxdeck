@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/sq";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const sq: Dictionary = {
     backToHome: "Kthehu në faqen kryesore",
   },
   header: {
+    product: "Produkti",
     signIn: "Hyr",
     getStarted: "Fillo tani",
     bookDemo: "Rezervo një demo",
@@ -18,190 +20,7 @@ const sq: Dictionary = {
     careers: "Karriera",
     megaContactLabel: "Kontakt",
   },
-  hero: {
-    heading: "Kontrollet kundër zjarrit.\nPa letra.",
-    body:
-      "SparxDeck është aplikacioni për kompanitë e shërbimit që kontrollojnë pajisjet e sigurisë nga zjarri. Tekniku skanon një kod QR, plotëson listën e kontrollit dhe raporti i dërgohet klientit automatikisht. Afatet e kontrolleve të ardhshme i ndjek sistemi, jo një tabelë Excel.",
-    primaryCta: "Fillo tani",
-    secondaryCta: "Si funksionon",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Regjistri i pajisjeve dhe etiketat QR",
-        description:
-          "Klientët, ndërtesat dhe të gjitha pajisjet në një vend: fikëset, hidrantët, ndriçimi emergjent, valvulat dhe dyert kundër zjarrit. SparxDeck printon etiketat QR dhe çdo pajisje ka kartelën e vet me historikun e plotë të kontrolleve.",
-      },
-      {
-        title: "Kontrolli në terren me telefon",
-        description:
-          "Tekniku skanon kodin QR dhe plotëson një listë të shkurtër: presioni, plumbçja, dëmtimet, afati i vlefshmërisë. Defektin e fotografon menjëherë. Aplikacioni punon edhe pa sinjal, në bodrum apo në dhomën teknike.",
-      },
-      {
-        title: "Raporti gati para se të largoheni",
-        description:
-          "Klienti nënshkruan drejtpërdrejt në ekran dhe raporti PDF me logon e kompanisë suaj i dërgohet menjëherë me email. Mbaruan mbrëmjet e rishkrimit të shënimeve.",
-      },
-      {
-        title: "Ndjekja e afateve të kontrolleve",
-        description:
-          "Shikoni çfarë skadon muajin e ardhshëm dhe merrni kujtesa për kontrollet që po afrohen. Asnjë afat nuk humbet dhe çdo kontroll sjell punën e radhës.",
-      },
-      {
-        title: "Defektet nën kontroll",
-        description:
-          "Çdo defekt i gjetur bëhet detyrë që e ndiqni deri në zgjidhje. Administratori i ndërtesës e sheh gjendjen e pajisjeve në portalin e klientit.",
-      },
-    ],
-    headingLine1: "Pa sisteme të ndërlikuara korporative.",
-    headingLine2: "Vetëm ajo që i duhet vërtet teknikut.",
-    paragraph:
-      "SparxDeck është qëllimisht i thjeshtë. Mësohet për pak minuta, teknikët e përdorin në telefonin e tyre dhe ju më në fund keni pasqyrë të plotë të të gjitha punëve, pajisjeve dhe afateve.",
-    cardCta: "Mëso më shumë",
-  },
-  comparison: {
-    title: "Letra dhe Excel kundrejt SparxDeck",
-    subtitle:
-      "Shikoni si ndryshon çdo hap i kontrollit kur blloku i shënimeve, dosjet dhe tabelat zëvendësohen nga një aplikacion i vetëm.",
-    oldLabel: "Letra dhe Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Shënimet e kontrollit",
-        old: "Me dorë në letër, shpesh të palexueshme dhe me gabime",
-        new: "Skanim i kodit QR dhe listë e shkurtër kontrolli direkt në telefon",
-      },
-      {
-        topic: "Raporti",
-        old: "Orë të tëra rishkrimi në Word ose Excel në mbrëmje",
-        new: "PDF me logon tuaj dhe nënshkrimin e klientit, gati që në vend",
-      },
-      {
-        topic: "Afatet e kontrolleve",
-        old: "Tabelë, kalendar ose kujtesë",
-        new: "Pasqyrë automatike dhe kujtesa paraprake",
-      },
-      {
-        topic: "Defektet",
-        old: "Një shënim anash që humbet lehtë",
-        new: "Detyrë me foto, e ndjekur deri në zgjidhje",
-      },
-      {
-        topic: "Historiku i pajisjeve",
-        old: "Dosje në zyrë dhe kërkime nëpër arkiva",
-        new: "Historiku i plotë i çdo pajisjeje me një prekje",
-      },
-      {
-        topic: "Klienti",
-        old: "Pret raportin dhe nuk di gjendjen e pajisjeve",
-        new: "Merr raportin menjëherë me email dhe sheh gjendjen në portalin e klientit",
-      },
-    ],
-  },
-  radar: {
-    title: "I gjithë cikli i kontrollit në një sistem",
-    subtitle:
-      "Nga regjistri i pajisjeve te kontrolli në terren, raporti i nënshkruar dhe afati i radhës. SparxDeck mbulon gjithë ciklin që kompanitë e shërbimit përndryshe e ndërtojnë me letra, Excel dhe email.",
-    labels: ["Regjistri", "Etiketat QR", "Kontrolli", "Raportet", "Afatet", "Defektet"],
-    keyAreasHeading: "Çfarë mbulon SparxDeck",
-    keyAreas: [
-      {
-        title: "Regjistri",
-        description:
-          "Klientët, ndërtesat dhe pajisjet e të gjitha llojeve me historikun e plotë të kontrolleve në një vend.",
-      },
-      {
-        title: "Etiketat QR",
-        description:
-          "Printimi i etiketave direkt nga aplikacioni. Një skanim dhe tekniku e di para cilës pajisje ndodhet.",
-      },
-      {
-        title: "Kontrolli",
-        description:
-          "Listë kontrolli për çdo lloj pajisjeje, foto e defektit me një prekje dhe funksionim i plotë pa sinjal.",
-      },
-      {
-        title: "Raportet",
-        description:
-          "Raport PDF me logon tuaj dhe nënshkrimin e klientit, i dërguar menjëherë pas kontrollit.",
-      },
-      {
-        title: "Afatet",
-        description: "Pasqyrë e kontrolleve që skadojnë muajin e ardhshëm dhe kujtesa në kohë.",
-      },
-      {
-        title: "Defektet",
-        description: "Çdo defekt është detyrë me status, e ndjekur deri në zgjidhje.",
-      },
-    ],
-    howItWorksHeading: "Si zhvillohet një kontroll me SparxDeck",
-    howItWorks: [
-      "Në zyrë krijoni klientin, ndërtesën dhe pajisjet, ose i importoni nga tabela juaj ekzistuese.",
-      "Printoni etiketat QR dhe tekniku i ngjit në pajisje gjatë vizitës së parë.",
-      "Në çdo kontroll të mëpasshëm tekniku skanon etiketën dhe plotëson listën në telefon.",
-      "Nëse gjen defekt, e fotografon dhe në sistem krijohet automatikisht një detyrë.",
-      "Klienti nënshkruan në ekran, raporti i dërgohet me email dhe sistemi cakton afatin e kontrollit të radhës.",
-    ],
-    resultHeading: "Çfarë fitoni",
-    result: [
-      "Mbrëmje pa rishkrimin e shënimeve në raporte.",
-      "Asnjë kontroll të harruar, pra asnjë punë të humbur.",
-      "Punë të përsëritura që sistemi i ndjek për ju.",
-      "Raporte profesionale dhe historik të gjurmueshëm në rast inspektimi ose incidenti.",
-    ],
-  },
-  faq: {
-    headingLine1: "Pyetje të shpeshta",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "Për kë është SparxDeck?",
-        answer:
-          "Për kompanitë e shërbimit që lëvizin nëpër ndërtesa dhe kontrollojnë pajisjet e sigurisë nga zjarri, zakonisht me 3 deri në 30 punonjës. Teknikët punojnë në terren me telefon, zyra në kompjuter dhe administratorët e ndërtesave në portalin e tyre të klientit.",
-      },
-      {
-        id: "equipment",
-        question: "Cilat pajisje mbështet SparxDeck?",
-        answer:
-          "Fikëset, hidrantët, ndriçimin emergjent, valvulat kundër zjarrit dhe dyert kundër zjarrit. Çdo lloj pajisjeje ka listën e vet të kontrollit, kështu që tekniku kontrollon saktësisht atë që duhet.",
-      },
-      {
-        id: "offline",
-        question: "A funksionon aplikacioni pa sinjal?",
-        answer:
-          "Po. Tekniku mund të punojë në bodrum ose në dhomën teknike pa lidhje. Sapo telefoni të jetë sërish online, të dhënat sinkronizohen automatikisht.",
-      },
-      {
-        id: "pricing",
-        question: "Sa kushton SparxDeck?",
-        answer:
-          "Paguani një abonim mujor sipas numrit të teknikëve ose pajisjeve, kështu që çmimi rritet bashkë me kompaninë tuaj. Rezervoni një demo të shkurtër dhe do t’ju përgatisim një ofertë të personalizuar.",
-      },
-      {
-        id: "protocols",
-        question: "A përputhen raportet me rregulloret?",
-        answer:
-          "Po. Shabllonet e raporteve bazohen në kërkesat vendore për kontrollet në çdo vend ku vepron SparxDeck. Çdo raport mban logon dhe të dhënat e kompanisë suaj si dhe nënshkrimin e klientit.",
-      },
-      {
-        id: "portal",
-        question: "A e sheh administratori i ndërtesës gjendjen e pajisjeve?",
-        answer:
-          "Po. Administratorët dhe pronarët e ndërtesave kanë portalin e tyre të klientit, ku shohin gjendjen e pajisjeve, defektet e hapura dhe afatet, dhe shkarkojnë të gjitha raportet.",
-      },
-      {
-        id: "onboarding",
-        question: "Sa zgjat mësimi i përdorimit?",
-        answer:
-          "Disa minuta. SparxDeck përmban vetëm thelbësoren, kështu që tekniku e bën kontrollin e parë pa trajnim. Regjistrin ekzistues nga Excel e importoni me disa klikime.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Fillo me SparxDeck",
-    secondaryCta: "Rezervo një demo",
-  },
+  home,
   footer: {
     allRightsReserved: "Të gjitha të drejtat e rezervuara.",
     cookiesSettings: "Cookies",
@@ -229,7 +48,7 @@ const sq: Dictionary = {
       subheading: "Softuer për kompanitë e shërbimit në mbrojtjen nga zjarri.",
       body: [
         "SparxDeck është aplikacion web dhe celular për kompanitë që kryejnë kontrolle periodike të pajisjeve të sigurisë nga zjarri: fikëseve, hidrantëve, ndriçimit emergjent, valvulave dhe dyerve kundër zjarrit. Ai zëvendëson shënimet në letër dhe Excel me një sistem të qartë.",
-        `SparxDeck lindi në Republikën Çeke dhe është projektuar për të punuar në shumë vende. Thelbi i aplikacionit është i njëjtë kudo; ndryshojnë vetëm gjuha dhe shabllonet e raporteve sipas rregulloreve vendore. Aplikacioni është i disponueshëm në ${locales.length} gjuhë.`,
+        `SparxDeck lindi në Çeki dhe është krijuar për punë në shumë vende. Thelbi i aplikacionit është kudo i njëjtë; ndryshojnë gjuha dhe shabllonet e procesverbaleve. Aplikacioni për momentin është në çekisht dhe anglisht, kjo faqe në ${locales.length} gjuhë.`,
         "E zhvillojmë produktin në bashkëpunim të ngushtë me kompani shërbimi dhe teknikë me përvojë. Nëse keni një ide që do t’jua lehtësonte edhe më shumë punën, na shkruani.",
       ],
     },
@@ -267,7 +86,7 @@ const sq: Dictionary = {
       subheading: "Nënshkrim në ekran dhe PDF automatik me logon tuaj",
       body: [
         "Pas përfundimit të kontrollit, SparxDeck krijon automatikisht një raport PDF nga gjithçka që tekniku regjistroi në terren. Klienti e nënshkruan direkt në ekranin e telefonit. Raporti mban logon dhe të dhënat e kompanisë suaj dhe përmban pajisjet e kontrolluara, rezultatet dhe defektet e gjetura.",
-        "Raporti i dërgohet menjëherë klientit me email, ruhet në sistem dhe administratori i ndërtesës mund ta shkarkojë kurdo nga portali i tij. Shabllonet e raporteve përputhen me rregulloret vendore. Ju gjithmonë mund të verifikoni çfarë u kontrollua, kur dhe te cili klient, p.sh. gjatë një inspektimi zyrtar ose dëmi të siguruar.",
+        "Procesverbalin ia dërgoni klientit me email me një prekje dhe ai mbetet i ruajtur në sistem. Pamjen e caktoni në redaktorin e shablloneve dhe një procesverbal i lëshuar nuk ndryshon më kurrë. Në çdo kohë gjeni çfarë është kontrolluar, te cili klient dhe kur, për shembull gjatë një inspektimi ose një dëmi të siguruar.",
       ],
     },
     deadlineTracking: {
@@ -283,7 +102,7 @@ const sq: Dictionary = {
       subheading: "Çdo defekt i gjetur bëhet detyrë e ndjekur deri në zgjidhje",
       body: [
         "Kur tekniku gjen një defekt gjatë kontrollit, SparxDeck e kthen automatikisht në detyrë me foto dhe përshkrim. Defekti nuk humbet mes shënimeve dhe është e qartë kush është përgjegjës.",
-        "Çdo defekt ka status: i ri, në proces, i zgjidhur. Administratori i ndërtesës i sheh defektet e hapura në portalin e tij dhe është i sigurt që problemet po zgjidhen vërtet, ndërsa ju keni bazën për punën e radhës.",
+        "Për çdo defekt shihni gjendjen (i hapur, në punë, i zgjidhur), kush merret me të dhe deri kur. Zgjidhja kërkon një shënim dhe gjithë historiku i ndryshimeve mbetet i disponueshëm. E dini që problemet e gjetura po zgjidhen vërtet dhe keni bazën për punën e radhës.",
       ],
     },
   },

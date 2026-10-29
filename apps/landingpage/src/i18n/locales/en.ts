@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/en";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const en: Dictionary = {
     backToHome: "Back to homepage",
   },
   header: {
+    product: "Product",
     signIn: "Sign in",
     getStarted: "Get started",
     bookDemo: "Book a demo",
@@ -18,190 +20,7 @@ const en: Dictionary = {
     careers: "Careers",
     megaContactLabel: "Contact",
   },
-  hero: {
-    heading: "Fire safety inspections.\nWithout the paperwork.",
-    body:
-      "SparxDeck is the app for service companies that inspect fire safety equipment. Technicians scan a QR code, tick through the checklist, and the report goes to the customer automatically. Upcoming inspections are tracked by the system, not a spreadsheet.",
-    primaryCta: "Get started",
-    secondaryCta: "How it works",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Equipment register and QR labels",
-        description:
-          "Customers, buildings and every device in one place: fire extinguishers, hydrants, emergency lighting, fire dampers and fire doors. SparxDeck prints QR labels, and every device gets its own record with a full inspection history.",
-      },
-      {
-        title: "Field inspections on your phone",
-        description:
-          "The technician scans the QR code and ticks through a short checklist: pressure, seal, damage, expiry. Defects are photographed on the spot. The app works even without signal, in basements and plant rooms.",
-      },
-      {
-        title: "Report done before you leave",
-        description:
-          "The customer signs right on the screen, and a PDF report with your company logo is emailed to them instantly. No more evenings retyping paper notes.",
-      },
-      {
-        title: "Inspection deadline tracking",
-        description:
-          "See what's due next month and get reminders for upcoming inspections. No deadline slips through, and every inspection leads to the next job.",
-      },
-      {
-        title: "Defects under control",
-        description:
-          "Every defect found becomes a task you track until it's fixed. Building managers see the status of their equipment in the client portal.",
-      },
-    ],
-    headingLine1: "No bloated enterprise software.",
-    headingLine2: "Just what technicians actually need.",
-    paragraph:
-      "SparxDeck is simple on purpose. You're up and running in minutes, your technicians use it on their own phones, and you finally have a clear view of every job, device and deadline.",
-    cardCta: "Learn more",
-  },
-  comparison: {
-    title: "Paper and Excel vs. SparxDeck",
-    subtitle:
-      "See how every step of an inspection changes when notebooks, binders and spreadsheets are replaced by a single app.",
-    oldLabel: "Paper and Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Inspection notes",
-        old: "Handwritten on paper, often illegible and error-prone",
-        new: "Scan a QR code and tick a short checklist on your phone",
-      },
-      {
-        topic: "Report",
-        old: "Hours of retyping into Word or Excel in the evening",
-        new: "A PDF with your logo and the customer's signature, done on site",
-      },
-      {
-        topic: "Inspection dates",
-        old: "A spreadsheet, a calendar or memory",
-        new: "An automatic overview with reminders well in advance",
-      },
-      {
-        topic: "Defects",
-        old: "A note in the margin that easily gets lost",
-        new: "A task with a photo, tracked until it's resolved",
-      },
-      {
-        topic: "Equipment history",
-        old: "Binders in the office and digging through folders",
-        new: "The full history of every device, one tap away",
-      },
-      {
-        topic: "Customer",
-        old: "Waits for the report and knows nothing about their equipment",
-        new: "Gets the report by email right away and sees status in the client portal",
-      },
-    ],
-  },
-  radar: {
-    title: "The whole inspection cycle in one system",
-    subtitle:
-      "From the equipment register to the field check, the signed report and the next due date. SparxDeck covers the full cycle that service companies otherwise piece together from paper, spreadsheets and email.",
-    labels: ["Register", "QR labels", "Inspection", "Reports", "Deadlines", "Defects"],
-    keyAreasHeading: "What SparxDeck covers",
-    keyAreas: [
-      {
-        title: "Register",
-        description:
-          "Customers, buildings and devices of every type, with their complete inspection history in one place.",
-      },
-      {
-        title: "QR labels",
-        description:
-          "Print labels straight from the app. One scan and the technician knows exactly which device they're at.",
-      },
-      {
-        title: "Inspection",
-        description:
-          "A checklist for each device type, one-tap defect photos, and full functionality without signal.",
-      },
-      {
-        title: "Reports",
-        description:
-          "A PDF report with your logo and the customer's signature, sent right after the inspection.",
-      },
-      {
-        title: "Deadlines",
-        description: "An overview of inspections due next month, with timely reminders.",
-      },
-      {
-        title: "Defects",
-        description: "Every defect is a task with a status, tracked until it's resolved.",
-      },
-    ],
-    howItWorksHeading: "How an inspection works with SparxDeck",
-    howItWorks: [
-      "In the office, add the customer, building and devices, or import them from your existing spreadsheet.",
-      "Print the QR labels; the technician sticks them onto the devices on the first visit.",
-      "On every following inspection, the technician scans the label and ticks through the checklist on their phone.",
-      "If they find a defect, they take a photo and a task is created automatically.",
-      "The customer signs on the screen, the report is emailed to them, and the next inspection date is set.",
-    ],
-    resultHeading: "What you get",
-    result: [
-      "Evenings free from retyping paper notes into reports.",
-      "No forgotten inspections, and no lost jobs because of them.",
-      "Recurring work that the system keeps track of for you.",
-      "Professional reports and a traceable history in case of an audit or incident.",
-    ],
-  },
-  faq: {
-    headingLine1: "Frequently asked questions",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "Who is SparxDeck for?",
-        answer:
-          "For service companies that travel between buildings inspecting fire safety equipment, typically with 3 to 30 people. Technicians work on their phones in the field, the office works on a computer, and building managers use their own client portal.",
-      },
-      {
-        id: "equipment",
-        question: "Which equipment does SparxDeck support?",
-        answer:
-          "Fire extinguishers, hydrants, emergency lighting, fire dampers and fire doors. Each device type has its own checklist, so technicians check exactly what they need to.",
-      },
-      {
-        id: "offline",
-        question: "Does the app work without signal?",
-        answer:
-          "Yes. Technicians can inspect in basements and plant rooms with no connection. As soon as the phone is back online, everything syncs automatically.",
-      },
-      {
-        id: "pricing",
-        question: "How much does SparxDeck cost?",
-        answer:
-          "You pay a monthly subscription based on the number of technicians or devices, so the price grows with your company. Book a short demo and we'll prepare a tailored offer.",
-      },
-      {
-        id: "protocols",
-        question: "Do the reports meet local regulations?",
-        answer:
-          "Yes. Report templates are built around the local inspection requirements in every country where SparxDeck operates. Each report carries your company's logo and details and the customer's signature.",
-      },
-      {
-        id: "portal",
-        question: "Can building managers see the status of their equipment?",
-        answer:
-          "Yes. Building managers and owners have their own client portal where they see the status of their equipment, open defects and upcoming dates, and can download every report.",
-      },
-      {
-        id: "onboarding",
-        question: "How long does it take to get started?",
-        answer:
-          "A few minutes. SparxDeck contains only what matters, so a technician can do their first inspection without any training. Your existing records from Excel can be imported in a few clicks.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Get started with SparxDeck",
-    secondaryCta: "Book a demo",
-  },
+  home,
   footer: {
     allRightsReserved: "All rights reserved.",
     cookiesSettings: "Cookies",
@@ -230,7 +49,7 @@ const en: Dictionary = {
       subheading: "Software for fire protection service companies.",
       body: [
         "SparxDeck is a web and mobile app for companies that carry out regular inspections of fire safety equipment: fire extinguishers, hydrants, emergency lighting, fire dampers and fire doors. It replaces paper notes and spreadsheets with one clear system.",
-        `SparxDeck was founded in the Czech Republic and is designed to work across countries. The core of the app is the same everywhere; only the language and report templates change to match local regulations. The app is available in ${locales.length} languages.`,
+        `SparxDeck was created in Czechia and is designed for work across countries. The core of the app is the same everywhere; the language and report templates change. The app is available in Czech and English so far, this website in ${locales.length} languages.`,
         "We build the product in close collaboration with service companies and working technicians. If you have an idea that would make your work even easier, let us know.",
       ],
     },
@@ -268,7 +87,7 @@ const en: Dictionary = {
       subheading: "On-screen signature and an automatic PDF with your logo",
       body: [
         "When the inspection is finished, SparxDeck automatically generates a PDF report from everything the technician recorded in the field. The customer signs it right on the phone screen. The report carries your company's logo and details and lists the inspected devices, results and any defects found.",
-        "The report is emailed to the customer instantly, stored in the system, and available to the building manager in their portal at any time. Report templates follow local regulations. You can always look up what was inspected for which customer and when, for example during an authority audit or an insurance claim.",
+        "Send the report to the customer by email in one tap; it stays stored in the system. You set its look in the template editor, and an issued report never changes. You can always find out what was inspected at which customer and when, for example during an authority check or an insurance claim.",
       ],
     },
     deadlineTracking: {
@@ -284,7 +103,7 @@ const en: Dictionary = {
       subheading: "Every defect found becomes a task tracked until it's resolved",
       body: [
         "When a technician finds a defect during an inspection, SparxDeck automatically turns it into a task with a photo and description. The defect doesn't get lost in notes, and it's clear who is responsible for it.",
-        "Each defect has a status: new, in progress, resolved. Building managers see open defects in their client portal, so they know problems are actually being fixed, and you have the basis for your next job.",
+        "For each defect you see its status (open, in progress, resolved), who is handling it and by when. Resolving it requires a note and the whole history of changes stays on record. You know the problems found are really being fixed, and you have the basis for the next job.",
       ],
     },
   },

@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/cs";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const cs: Dictionary = {
     backToHome: "Zpět na úvodní stránku",
   },
   header: {
+    product: "Produkt",
     signIn: "Přihlášení",
     getStarted: "Začít se SparxDeck",
     bookDemo: "Domluvit ukázku",
@@ -18,192 +20,7 @@ const cs: Dictionary = {
     careers: "Kariéra",
     megaContactLabel: "Kontakt",
   },
-  hero: {
-    heading: "Revize požární techniky.\nBez papíru a přepisování.",
-    body:
-      "SparxDeck je aplikace pro servisní firmy, které dělají revize a kontroly požárně bezpečnostních zařízení. Technik naskenuje QR kód, odklikne kontrolu a protokol odejde zákazníkovi sám. Termíny dalších revizí hlídá systém místo Excelu.",
-    primaryCta: "Začít se SparxDeck",
-    secondaryCta: "Jak to funguje",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Evidence zařízení a QR štítky",
-        description:
-          "Zákazníci, budovy a všechna zařízení přehledně na jednom místě: hasicí přístroje, hydranty, nouzové osvětlení, požární klapky i dveře. SparxDeck vytiskne QR štítky a každé zařízení má vlastní kartu s historií všech kontrol.",
-      },
-      {
-        title: "Kontrola v terénu přes telefon",
-        description:
-          "Technik naskenuje QR kód a odklikne krátký checklist: tlak, plomba, poškození, platnost. Závadu rovnou vyfotí. Aplikace funguje i bez signálu, třeba ve sklepě nebo v technické místnosti.",
-      },
-      {
-        title: "Protokol hotový ještě na místě",
-        description:
-          "Zákazník kontrolu podepíše přímo na displeji a PDF protokol s logem vaší firmy mu okamžitě odejde e-mailem. Večerní přepisování z papíru do počítače odpadá.",
-      },
-      {
-        title: "Hlídání termínů revizí",
-        description:
-          "Přehled toho, co propadá příští měsíc, a upozornění na blížící se revize. Žádný termín neuteče a z každé revize je další zakázka.",
-      },
-      {
-        title: "Závady pod kontrolou",
-        description:
-          "Nalezená závada se automaticky stane úkolem, který sledujete až do vyřešení. Správce budovy vidí stav svých zařízení v klientském portálu.",
-      },
-    ],
-    headingLine1: "Žádný složitý podnikový systém.",
-    headingLine2: "Jen to, co technik opravdu potřebuje.",
-    paragraph:
-      "SparxDeck je záměrně jednoduchý. Zaučíte se za pár minut, technici ho používají na svém telefonu a vy máte konečně přehled o všech zakázkách, zařízeních a termínech.",
-    cardCta: "Zjistit více",
-  },
-  comparison: {
-    title: "Papír a Excel vs. SparxDeck",
-    subtitle:
-      "Podívejte se, jak se změní každý krok revize, když zápisník, šanony a tabulky nahradí jedna aplikace.",
-    oldLabel: "Papír a Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Zápis z kontroly",
-        old: "Ručně na papír, často nečitelně a s chybami",
-        new: "Sken QR kódu a krátký checklist přímo v telefonu",
-      },
-      {
-        topic: "Protokol",
-        old: "Večer hodiny přepisování do Wordu nebo Excelu",
-        new: "PDF s logem a podpisem zákazníka hotové ještě na místě",
-      },
-      {
-        topic: "Termíny revizí",
-        old: "Tabulka, kalendář nebo paměť",
-        new: "Automatický přehled a upozornění s předstihem",
-      },
-      {
-        topic: "Závady",
-        old: "Poznámka na okraji, která se snadno ztratí",
-        new: "Úkol s fotkou, sledovaný až do vyřešení",
-      },
-      {
-        topic: "Historie zařízení",
-        old: "Šanony v kanceláři a hledání po složkách",
-        new: "Kompletní historie každého zařízení na jedno klepnutí",
-      },
-      {
-        topic: "Zákazník",
-        old: "Čeká na protokol a o stavu zařízení nic neví",
-        new: "Protokol hned v e-mailu a stav zařízení v klientském portálu",
-      },
-    ],
-  },
-  radar: {
-    title: "Celá revize v jednom systému",
-    subtitle:
-      "Od evidence zařízení přes kontrolu v terénu až po podepsaný protokol a další termín. SparxDeck pokrývá celý cyklus, který servisní firmy jinak skládají z papírů, Excelu a e-mailů.",
-    labels: ["Evidence", "QR štítky", "Kontrola", "Protokoly", "Termíny", "Závady"],
-    keyAreasHeading: "Co SparxDeck pokrývá",
-    keyAreas: [
-      {
-        title: "Evidence",
-        description:
-          "Zákazníci, budovy a zařízení všech typů s kompletní historií kontrol na jednom místě.",
-      },
-      {
-        title: "QR štítky",
-        description:
-          "Tisk štítků přímo z aplikace. Jeden sken a technik ví, u jakého zařízení stojí.",
-      },
-      {
-        title: "Kontrola",
-        description:
-          "Checklist podle typu zařízení, fotka závady jedním klepnutím a plná funkčnost i bez signálu.",
-      },
-      {
-        title: "Protokoly",
-        description:
-          "PDF protokol s logem vaší firmy a podpisem zákazníka, odeslaný hned po kontrole.",
-      },
-      {
-        title: "Termíny",
-        description:
-          "Přehled revizí, které propadají příští měsíc, a včasná upozornění.",
-      },
-      {
-        title: "Závady",
-        description:
-          "Každá závada je úkol se stavem, který se sleduje až do vyřešení.",
-      },
-    ],
-    howItWorksHeading: "Jak probíhá revize se SparxDeck",
-    howItWorks: [
-      "V kanceláři založíte zákazníka, budovu a zařízení, nebo je naimportujete z dosavadní tabulky.",
-      "Vytisknete QR štítky a při první návštěvě je technik nalepí na zařízení.",
-      "Při každé další kontrole technik štítek naskenuje a odklikne checklist přímo na telefonu.",
-      "Pokud najde závadu, vyfotí ji a v systému automaticky vznikne úkol.",
-      "Zákazník podepíše na displeji, protokol mu odejde e-mailem a systém nastaví termín další revize.",
-    ],
-    resultHeading: "Co tím získáte",
-    result: [
-      "Večery bez přepisování papírových zápisů do protokolů.",
-      "Žádnou zapomenutou revizi, a tím ani ztracenou zakázku.",
-      "Opakované zakázky, které si systém hlídá za vás.",
-      "Profesionální protokoly a dohledatelnou historii pro případ kontroly nebo události.",
-    ],
-  },
-  faq: {
-    headingLine1: "Často kladené otázky",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "Pro koho je SparxDeck určený?",
-        answer:
-          "Pro servisní firmy, které jezdí po budovách a dělají revize a kontroly požárně bezpečnostních zařízení, typicky se 3 až 30 lidmi. Technici pracují v terénu na telefonu, kancelář na počítači a správci budov ve svém klientském portálu.",
-      },
-      {
-        id: "equipment",
-        question: "Jaká zařízení SparxDeck podporuje?",
-        answer:
-          "Hasicí přístroje, hydranty, nouzové osvětlení, požární klapky a požární dveře. Každý typ zařízení má vlastní checklist, takže technik kontroluje přesně to, co má.",
-      },
-      {
-        id: "offline",
-        question: "Funguje aplikace bez signálu?",
-        answer:
-          "Ano. Technik může kontrolovat i ve sklepě nebo v technické místnosti bez připojení. Jakmile je telefon znovu online, data se automaticky synchronizují.",
-      },
-      {
-        id: "pricing",
-        question: "Kolik SparxDeck stojí?",
-        answer:
-          "Platíte měsíční předplatné podle počtu techniků nebo zařízení, takže cena roste spolu s vaší firmou. Domluvte si krátkou ukázku a připravíme vám nabídku na míru.",
-      },
-      {
-        id: "protocols",
-        question: "Odpovídají protokoly předpisům?",
-        answer:
-          "Ano. Šablony protokolů vycházejí z požadavků místních předpisů pro kontroly provozuschopnosti v každé zemi, kde SparxDeck působí. Protokol nese logo a údaje vaší firmy a podpis zákazníka.",
-      },
-      {
-        id: "portal",
-        question: "Vidí stav zařízení i správce budovy?",
-        answer:
-          "Ano. Správci a majitelé budov mají vlastní klientský portál, kde vidí stav svých zařízení, otevřené závady a termíny a kde si stáhnou všechny protokoly.",
-      },
-      {
-        id: "onboarding",
-        question: "Jak dlouho trvá zaučení?",
-        answer:
-          "Pár minut. SparxDeck obsahuje jen to nejdůležitější, takže technik zvládne první kontrolu bez školení. Stávající evidenci z Excelu jednoduše naimportujete.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Začít se SparxDeck",
-    secondaryCta: "Domluvit ukázku",
-  },
+  home,
   footer: {
     allRightsReserved: "Všechna práva vyhrazena.",
     cookiesSettings: "Cookies",
@@ -231,7 +48,7 @@ const cs: Dictionary = {
       subheading: "Software pro servisní firmy v oblasti požární ochrany.",
       body: [
         "SparxDeck je webová a mobilní aplikace pro firmy, které dělají pravidelné revize a kontroly požárně bezpečnostních zařízení: hasicích přístrojů, hydrantů, nouzového osvětlení, požárních klapek a dveří. Nahrazuje papírové zápisy a Excel jedním přehledným systémem.",
-        `SparxDeck vznikl v Česku a je navržený pro práci napříč zeměmi. Jádro aplikace je všude stejné, mění se jazyk a šablony protokolů podle místních předpisů. Aplikace je dostupná v ${locales.length} jazycích.`,
+        `SparxDeck vznikl v Česku a je navržený pro práci napříč zeměmi. Jádro aplikace je všude stejné, mění se jazyk a šablony protokolů. Aplikace je zatím v češtině a angličtině, tento web v ${locales.length} jazycích.`,
         "Produkt vyvíjíme v úzké spolupráci se servisními firmami a techniky z praxe. Pokud máte nápad, co by vám práci ještě usnadnilo, napište nám.",
       ],
     },
@@ -269,7 +86,7 @@ const cs: Dictionary = {
       subheading: "Podpis na displeji a automatické PDF s logem vaší firmy",
       body: [
         "Po skončení kontroly SparxDeck automaticky vytvoří PDF protokol ze všeho, co technik v terénu zaznamenal. Zákazník ho podepíše přímo na displeji telefonu. Protokol nese logo a údaje vaší firmy a obsahuje seznam zkontrolovaných zařízení, výsledky i nalezené závady.",
-        "Protokol okamžitě odejde zákazníkovi e-mailem, uloží se v systému a správce budovy si ho kdykoli stáhne ze svého portálu. Šablony protokolů odpovídají místním předpisům. Vy máte kdykoli dohledatelné, co se kdy u kterého zákazníka kontrolovalo, například při kontrole úřadů nebo při pojistné události.",
+        "Protokol jedním klepnutím odešlete zákazníkovi e-mailem a zůstane uložený v systému. Vzhled si nastavíte v editoru šablon a vydaný protokol se už nikdy nezmění. Kdykoli dohledáte, co se kdy u kterého zákazníka kontrolovalo, například při kontrole úřadů nebo při pojistné události.",
       ],
     },
     deadlineTracking: {
@@ -285,7 +102,7 @@ const cs: Dictionary = {
       subheading: "Každá nalezená závada je úkol, který se sleduje do vyřešení",
       body: [
         "Když technik při kontrole najde závadu, SparxDeck z ní automaticky vytvoří úkol včetně fotky a popisu. Závada se tak neztratí v poznámkách a je jasné, kdo ji má na starosti.",
-        "U každé závady vidíte stav: nová, v řešení, vyřešená. Správce budovy vidí otevřené závady ve svém klientském portálu, takže má jistotu, že se nalezené problémy opravdu řeší, a vy máte podklad pro další zakázku.",
+        "U každé závady vidíte stav (otevřená, v řešení, vyřešená), kdo ji řeší a do kdy. Vyřešení vyžaduje poznámku a celá historie změn zůstává dohledatelná. Máte tak jistotu, že se nalezené problémy opravdu řeší, a podklad pro další zakázku.",
       ],
     },
   },

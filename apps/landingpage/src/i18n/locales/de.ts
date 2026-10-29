@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/de";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const de: Dictionary = {
     backToHome: "Zurück zur Startseite",
   },
   header: {
+    product: "Produkt",
     signIn: "Anmelden",
     getStarted: "Jetzt starten",
     bookDemo: "Demo vereinbaren",
@@ -18,191 +20,7 @@ const de: Dictionary = {
     careers: "Karriere",
     megaContactLabel: "Kontakt",
   },
-  hero: {
-    heading: "Brandschutzprüfungen.\nOhne Papierkram.",
-    body:
-      "SparxDeck ist die App für Servicebetriebe, die Brandschutzeinrichtungen prüfen. Der Techniker scannt einen QR-Code, hakt die Checkliste ab und das Prüfprotokoll geht automatisch an den Kunden. Anstehende Prüftermine überwacht das System statt einer Excel-Tabelle.",
-    primaryCta: "Jetzt starten",
-    secondaryCta: "So funktioniert's",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Geräteverwaltung und QR-Etiketten",
-        description:
-          "Kunden, Gebäude und alle Geräte übersichtlich an einem Ort: Feuerlöscher, Hydranten, Notbeleuchtung, Brandschutzklappen und Brandschutztüren. SparxDeck druckt QR-Etiketten, und jedes Gerät hat eine eigene Akte mit allen bisherigen Prüfungen.",
-      },
-      {
-        title: "Prüfung vor Ort per Smartphone",
-        description:
-          "Der Techniker scannt den QR-Code und hakt eine kurze Checkliste ab: Druck, Plombe, Beschädigung, Prüffrist. Mängel werden direkt fotografiert. Die App funktioniert auch ohne Empfang, etwa im Keller oder im Technikraum.",
-      },
-      {
-        title: "Protokoll fertig, bevor Sie gehen",
-        description:
-          "Der Kunde unterschreibt direkt auf dem Display, und das PDF-Protokoll mit Ihrem Firmenlogo geht sofort per E-Mail an ihn. Das abendliche Abtippen von Papiernotizen entfällt.",
-      },
-      {
-        title: "Prüftermine im Blick",
-        description:
-          "Sehen Sie, was nächsten Monat fällig wird, und erhalten Sie Erinnerungen an anstehende Prüfungen. Kein Termin geht verloren, und aus jeder Prüfung wird der nächste Auftrag.",
-      },
-      {
-        title: "Mängel unter Kontrolle",
-        description:
-          "Jeder gefundene Mangel wird zu einer Aufgabe, die Sie bis zur Behebung verfolgen. Gebäudeverwalter sehen den Zustand ihrer Geräte im Kundenportal.",
-      },
-    ],
-    headingLine1: "Keine überladene Unternehmenssoftware.",
-    headingLine2: "Nur das, was Techniker wirklich brauchen.",
-    paragraph:
-      "SparxDeck ist bewusst einfach gehalten. Die Einarbeitung dauert nur wenige Minuten, Ihre Techniker nutzen die App auf dem eigenen Smartphone und Sie haben endlich den Überblick über alle Aufträge, Geräte und Termine.",
-    cardCta: "Mehr erfahren",
-  },
-  comparison: {
-    title: "Papier und Excel vs. SparxDeck",
-    subtitle:
-      "So verändert sich jeder Schritt der Prüfung, wenn Notizblock, Ordner und Tabellen durch eine einzige App ersetzt werden.",
-    oldLabel: "Papier und Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Prüfnotizen",
-        old: "Handschriftlich auf Papier, oft unleserlich und fehlerhaft",
-        new: "QR-Code scannen und kurze Checkliste auf dem Smartphone abhaken",
-      },
-      {
-        topic: "Prüfprotokoll",
-        old: "Abends stundenlanges Abtippen in Word oder Excel",
-        new: "PDF mit Ihrem Logo und der Unterschrift des Kunden, noch vor Ort fertig",
-      },
-      {
-        topic: "Prüftermine",
-        old: "Tabelle, Kalender oder Gedächtnis",
-        new: "Automatische Übersicht und Erinnerungen mit Vorlauf",
-      },
-      {
-        topic: "Mängel",
-        old: "Eine Randnotiz, die leicht verloren geht",
-        new: "Eine Aufgabe mit Foto, verfolgt bis zur Behebung",
-      },
-      {
-        topic: "Gerätehistorie",
-        old: "Ordner im Büro und Suchen in Akten",
-        new: "Die vollständige Historie jedes Geräts mit einem Tippen",
-      },
-      {
-        topic: "Kunde",
-        old: "Wartet auf das Protokoll und kennt den Zustand seiner Geräte nicht",
-        new: "Erhält das Protokoll sofort per E-Mail und sieht den Status im Kundenportal",
-      },
-    ],
-  },
-  radar: {
-    title: "Der gesamte Prüfzyklus in einem System",
-    subtitle:
-      "Von der Geräteverwaltung über die Prüfung vor Ort bis zum unterschriebenen Protokoll und zum nächsten Termin. SparxDeck deckt den ganzen Ablauf ab, den Servicebetriebe sonst aus Papier, Excel und E-Mails zusammensetzen.",
-    labels: ["Verwaltung", "QR-Etiketten", "Prüfung", "Protokolle", "Termine", "Mängel"],
-    keyAreasHeading: "Was SparxDeck abdeckt",
-    keyAreas: [
-      {
-        title: "Verwaltung",
-        description:
-          "Kunden, Gebäude und Geräte aller Art mit vollständiger Prüfhistorie an einem Ort.",
-      },
-      {
-        title: "QR-Etiketten",
-        description:
-          "Etiketten direkt aus der App drucken. Ein Scan, und der Techniker weiß, vor welchem Gerät er steht.",
-      },
-      {
-        title: "Prüfung",
-        description:
-          "Checkliste je Gerätetyp, Mängelfoto mit einem Tippen und volle Funktion auch ohne Empfang.",
-      },
-      {
-        title: "Protokolle",
-        description:
-          "PDF-Protokoll mit Ihrem Logo und der Unterschrift des Kunden, direkt nach der Prüfung versendet.",
-      },
-      {
-        title: "Termine",
-        description:
-          "Übersicht der Prüfungen, die nächsten Monat fällig werden, mit rechtzeitigen Erinnerungen.",
-      },
-      {
-        title: "Mängel",
-        description: "Jeder Mangel ist eine Aufgabe mit Status, die bis zur Behebung verfolgt wird.",
-      },
-    ],
-    howItWorksHeading: "So läuft eine Prüfung mit SparxDeck ab",
-    howItWorks: [
-      "Im Büro legen Sie Kunde, Gebäude und Geräte an oder importieren sie aus Ihrer bisherigen Tabelle.",
-      "Sie drucken die QR-Etiketten, und der Techniker klebt sie beim ersten Besuch auf die Geräte.",
-      "Bei jeder weiteren Prüfung scannt der Techniker das Etikett und hakt die Checkliste auf dem Smartphone ab.",
-      "Findet er einen Mangel, fotografiert er ihn und im System entsteht automatisch eine Aufgabe.",
-      "Der Kunde unterschreibt auf dem Display, das Protokoll geht per E-Mail an ihn und der nächste Prüftermin wird festgelegt.",
-    ],
-    resultHeading: "Ihr Nutzen",
-    result: [
-      "Feierabend ohne Abtippen von Papiernotizen.",
-      "Keine vergessene Prüfung und damit kein verlorener Auftrag.",
-      "Wiederkehrende Aufträge, die das System für Sie im Blick behält.",
-      "Professionelle Protokolle und nachvollziehbare Historie für Behördenprüfungen oder Schadensfälle.",
-    ],
-  },
-  faq: {
-    headingLine1: "Häufig gestellte Fragen",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "Für wen ist SparxDeck gedacht?",
-        answer:
-          "Für Servicebetriebe, die von Gebäude zu Gebäude fahren und Brandschutzeinrichtungen prüfen, typischerweise mit 3 bis 30 Mitarbeitenden. Techniker arbeiten unterwegs auf dem Smartphone, das Büro am Computer und Gebäudeverwalter in ihrem eigenen Kundenportal.",
-      },
-      {
-        id: "equipment",
-        question: "Welche Geräte unterstützt SparxDeck?",
-        answer:
-          "Feuerlöscher, Hydranten, Notbeleuchtung, Brandschutzklappen und Brandschutztüren. Jeder Gerätetyp hat eine eigene Checkliste, sodass der Techniker genau das prüft, was nötig ist.",
-      },
-      {
-        id: "offline",
-        question: "Funktioniert die App ohne Empfang?",
-        answer:
-          "Ja. Techniker können auch im Keller oder im Technikraum ohne Verbindung prüfen. Sobald das Smartphone wieder online ist, werden die Daten automatisch synchronisiert.",
-      },
-      {
-        id: "pricing",
-        question: "Was kostet SparxDeck?",
-        answer:
-          "Sie zahlen ein monatliches Abonnement abhängig von der Anzahl der Techniker oder Geräte, sodass der Preis mit Ihrem Betrieb wächst. Vereinbaren Sie eine kurze Demo, und wir erstellen Ihnen ein individuelles Angebot.",
-      },
-      {
-        id: "protocols",
-        question: "Entsprechen die Protokolle den Vorschriften?",
-        answer:
-          "Ja. Die Protokollvorlagen basieren auf den lokalen Prüfvorschriften in jedem Land, in dem SparxDeck tätig ist. Jedes Protokoll trägt das Logo und die Angaben Ihres Unternehmens sowie die Unterschrift des Kunden.",
-      },
-      {
-        id: "portal",
-        question: "Sehen auch Gebäudeverwalter den Zustand ihrer Geräte?",
-        answer:
-          "Ja. Gebäudeverwalter und Eigentümer haben ein eigenes Kundenportal, in dem sie den Zustand ihrer Geräte, offene Mängel und anstehende Termine sehen und alle Protokolle herunterladen können.",
-      },
-      {
-        id: "onboarding",
-        question: "Wie lange dauert die Einarbeitung?",
-        answer:
-          "Wenige Minuten. SparxDeck enthält nur das Wesentliche, sodass ein Techniker die erste Prüfung ohne Schulung durchführen kann. Ihre bisherigen Daten aus Excel importieren Sie mit wenigen Klicks.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Mit SparxDeck starten",
-    secondaryCta: "Demo vereinbaren",
-  },
+  home,
   footer: {
     allRightsReserved: "Alle Rechte vorbehalten.",
     cookiesSettings: "Cookies",
@@ -230,7 +48,7 @@ const de: Dictionary = {
       subheading: "Software für Servicebetriebe im Brandschutz.",
       body: [
         "SparxDeck ist eine Web- und Mobile-App für Betriebe, die regelmäßig Brandschutzeinrichtungen prüfen: Feuerlöscher, Hydranten, Notbeleuchtung, Brandschutzklappen und Brandschutztüren. Sie ersetzt Papiernotizen und Excel durch ein übersichtliches System.",
-        `SparxDeck wurde in Tschechien gegründet und ist für den Einsatz in mehreren Ländern ausgelegt. Der Kern der App ist überall gleich; nur Sprache und Protokollvorlagen werden an die lokalen Vorschriften angepasst. Die App ist in ${locales.length} Sprachen verfügbar.`,
+        `SparxDeck ist in Tschechien entstanden und für die Arbeit über Ländergrenzen hinweg gedacht. Der Kern der App ist überall gleich, es ändern sich Sprache und Protokollvorlagen. Die App gibt es bisher auf Tschechisch und Englisch, diese Website in ${locales.length} Sprachen.`,
         "Wir entwickeln das Produkt in enger Zusammenarbeit mit Servicebetrieben und Technikern aus der Praxis. Wenn Sie eine Idee haben, die Ihnen die Arbeit noch leichter machen würde, schreiben Sie uns.",
       ],
     },
@@ -268,7 +86,7 @@ const de: Dictionary = {
       subheading: "Unterschrift auf dem Display und automatisches PDF mit Ihrem Logo",
       body: [
         "Nach Abschluss der Prüfung erstellt SparxDeck automatisch ein PDF-Protokoll aus allem, was der Techniker vor Ort erfasst hat. Der Kunde unterschreibt direkt auf dem Smartphone-Display. Das Protokoll trägt das Logo und die Angaben Ihres Unternehmens und enthält die geprüften Geräte, die Ergebnisse und gefundene Mängel.",
-        "Das Protokoll geht sofort per E-Mail an den Kunden, wird im System gespeichert und steht dem Gebäudeverwalter jederzeit in seinem Portal zur Verfügung. Die Protokollvorlagen entsprechen den lokalen Vorschriften. Sie können jederzeit nachsehen, was wann bei welchem Kunden geprüft wurde, etwa bei einer Behördenprüfung oder einem Versicherungsfall.",
+        "Das Protokoll senden Sie mit einem Tippen per E-Mail an den Kunden, es bleibt im System gespeichert. Das Aussehen legen Sie im Vorlageneditor fest, ein ausgestelltes Protokoll ändert sich nie mehr. Sie können jederzeit nachweisen, was wann bei welchem Kunden geprüft wurde, etwa bei einer Behördenkontrolle oder einem Versicherungsfall.",
       ],
     },
     deadlineTracking: {
@@ -284,7 +102,7 @@ const de: Dictionary = {
       subheading: "Jeder gefundene Mangel wird zur Aufgabe, die bis zur Behebung verfolgt wird",
       body: [
         "Findet ein Techniker bei der Prüfung einen Mangel, macht SparxDeck daraus automatisch eine Aufgabe mit Foto und Beschreibung. Der Mangel geht nicht in Notizen verloren, und es ist klar, wer zuständig ist.",
-        "Jeder Mangel hat einen Status: neu, in Bearbeitung, behoben. Gebäudeverwalter sehen offene Mängel in ihrem Kundenportal und wissen, dass Probleme tatsächlich behoben werden, und Sie haben die Grundlage für den nächsten Auftrag.",
+        "Bei jedem Mangel sehen Sie den Status (offen, in Bearbeitung, behoben), wer sich darum kümmert und bis wann. Die Behebung erfordert eine Notiz, und der gesamte Änderungsverlauf bleibt nachvollziehbar. So wissen Sie, dass gefundene Probleme wirklich behoben werden, und haben die Grundlage für den nächsten Auftrag.",
       ],
     },
   },

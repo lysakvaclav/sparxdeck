@@ -25,6 +25,8 @@ Webová a mobilní aplikace (SaaS, měsíční předplatné) pro servisní firmy
 | Landing page | `apps/landingpage` | sparxdeck.com (16 jazyků, hotová) |
 | Platforma | `apps/platform` | portal.sparxdeck.com |
 
+Landing page (přepracovaná 2026-10-29): oficiální vzhled ve stylu Linear/Kpler, hranatá tlačítka, tokeny barev a třídy (`.button`, `.eyebrow`, `.shot`, `.phone`) v `src/app/globals.css` (ve vrstvách `base` a `components`, jinak by přebíjely utility Tailwindu; `dark:` řídí třída z next-themes). Úvodní stránka = sekce v `src/components/home`, texty ve slovníku `home` (`src/i18n/home/<jazyk>.ts`, 16 jazyků, stejná struktura); funkce a jejich stránky a snímky v `src/components/home/features.ts`. Všechny stránky přes `SiteShell` (hlavička s menu Produkt a Společnost, patička) a `src/components/site/Pages.tsx`. Snímky platformy v `public/screens/<cs|en>/<light|dark>/` vyrábí `apps/platform/e2e/landing-screens.mjs` (smyšlená firma ve vývojové databázi, po skončení smazaná). Web nesmí tvrdit nic, co aplikace neumí (portál správců, soulad s předpisy, předplatné).
+
 Každá aplikace má vlastní `node_modules` a `package-lock.json` (instalace uvnitř složky aplikace). Pracovní větev: `sparxdeck`.
 
 Spuštění obou aplikací: `npm run dev` v kořeni (landing :3000, platforma :3001). Skript nejdřív ukončí zbylé dev servery tohoto repa i s podřízenými procesy (`scripts/stop-dev.mjs`, na Windows po Ctrl+C v turbu často zůstávají běžet) a ověří, že porty 3000 a 3001 jsou volné; port obsazený cizím programem jen ohlásí (PID a příkaz) a turbo nespustí. Ručně `npm run dev:stop`. Obě aplikace mají pevný port (landing by jinak při obsazeném 3000 tiše přešel na 3001 platformy).

@@ -1,4 +1,5 @@
 import type { Dictionary } from "../types";
+import home from "../home/pl";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -7,6 +8,7 @@ const pl: Dictionary = {
     backToHome: "Powrót do strony głównej",
   },
   header: {
+    product: "Produkt",
     signIn: "Zaloguj się",
     getStarted: "Zacznij teraz",
     bookDemo: "Umów prezentację",
@@ -18,190 +20,7 @@ const pl: Dictionary = {
     careers: "Kariera",
     megaContactLabel: "Kontakt",
   },
-  hero: {
-    heading: "Przeglądy sprzętu ppoż.\nBez papierologii.",
-    body:
-      "SparxDeck to aplikacja dla firm serwisowych, które wykonują przeglądy urządzeń przeciwpożarowych. Technik skanuje kod QR, odhacza listę kontrolną, a protokół trafia do klienta automatycznie. Terminy kolejnych przeglądów pilnuje system, a nie arkusz Excela.",
-    primaryCta: "Zacznij teraz",
-    secondaryCta: "Jak to działa",
-  },
-  companies: {
-    cards: [
-      {
-        title: "Ewidencja urządzeń i etykiety QR",
-        description:
-          "Klienci, budynki i wszystkie urządzenia w jednym miejscu: gaśnice, hydranty, oświetlenie awaryjne, klapy i drzwi przeciwpożarowe. SparxDeck drukuje etykiety QR, a każde urządzenie ma własną kartę z pełną historią przeglądów.",
-      },
-      {
-        title: "Przegląd w terenie na telefonie",
-        description:
-          "Technik skanuje kod QR i odhacza krótką listę kontrolną: ciśnienie, plomba, uszkodzenia, ważność. Usterkę od razu fotografuje. Aplikacja działa nawet bez zasięgu, np. w piwnicy czy pomieszczeniu technicznym.",
-      },
-      {
-        title: "Protokół gotowy jeszcze na miejscu",
-        description:
-          "Klient podpisuje bezpośrednio na ekranie, a protokół PDF z logo Twojej firmy od razu trafia do niego e-mailem. Koniec z wieczornym przepisywaniem notatek.",
-      },
-      {
-        title: "Pilnowanie terminów przeglądów",
-        description:
-          "Zobacz, co wygasa w przyszłym miesiącu, i otrzymuj przypomnienia o zbliżających się przeglądach. Żaden termin nie umknie, a każdy przegląd to kolejne zlecenie.",
-      },
-      {
-        title: "Usterki pod kontrolą",
-        description:
-          "Każda wykryta usterka staje się zadaniem, które śledzisz aż do usunięcia. Zarządca budynku widzi stan swoich urządzeń w portalu klienta.",
-      },
-    ],
-    headingLine1: "Żadnego skomplikowanego systemu korporacyjnego.",
-    headingLine2: "Tylko to, czego technik naprawdę potrzebuje.",
-    paragraph:
-      "SparxDeck jest celowo prosty. Wdrożenie zajmuje kilka minut, technicy korzystają z niego na własnych telefonach, a Ty masz wreszcie pełny obraz wszystkich zleceń, urządzeń i terminów.",
-    cardCta: "Dowiedz się więcej",
-  },
-  comparison: {
-    title: "Papier i Excel vs. SparxDeck",
-    subtitle:
-      "Zobacz, jak zmienia się każdy etap przeglądu, gdy notes, segregatory i arkusze zastępuje jedna aplikacja.",
-    oldLabel: "Papier i Excel",
-    newLabel: "SparxDeck",
-    rows: [
-      {
-        topic: "Notatki z przeglądu",
-        old: "Ręcznie na papierze, często nieczytelnie i z błędami",
-        new: "Skan kodu QR i krótka lista kontrolna prosto w telefonie",
-      },
-      {
-        topic: "Protokół",
-        old: "Wieczorem godziny przepisywania do Worda lub Excela",
-        new: "PDF z logo i podpisem klienta gotowy jeszcze na miejscu",
-      },
-      {
-        topic: "Terminy przeglądów",
-        old: "Arkusz, kalendarz albo pamięć",
-        new: "Automatyczny przegląd i przypomnienia z wyprzedzeniem",
-      },
-      {
-        topic: "Usterki",
-        old: "Notatka na marginesie, która łatwo ginie",
-        new: "Zadanie ze zdjęciem, śledzone aż do usunięcia",
-      },
-      {
-        topic: "Historia urządzeń",
-        old: "Segregatory w biurze i szukanie po teczkach",
-        new: "Pełna historia każdego urządzenia jednym dotknięciem",
-      },
-      {
-        topic: "Klient",
-        old: "Czeka na protokół i nie wie, w jakim stanie są urządzenia",
-        new: "Dostaje protokół od razu e-mailem i widzi stan w portalu klienta",
-      },
-    ],
-  },
-  radar: {
-    title: "Cały cykl przeglądu w jednym systemie",
-    subtitle:
-      "Od ewidencji urządzeń, przez przegląd w terenie, po podpisany protokół i kolejny termin. SparxDeck obejmuje cały cykl, który firmy serwisowe zwykle składają z papieru, Excela i e-maili.",
-    labels: ["Ewidencja", "Etykiety QR", "Przegląd", "Protokoły", "Terminy", "Usterki"],
-    keyAreasHeading: "Co obejmuje SparxDeck",
-    keyAreas: [
-      {
-        title: "Ewidencja",
-        description:
-          "Klienci, budynki i urządzenia wszystkich typów z pełną historią przeglądów w jednym miejscu.",
-      },
-      {
-        title: "Etykiety QR",
-        description:
-          "Druk etykiet prosto z aplikacji. Jedno skanowanie i technik wie, przy którym urządzeniu stoi.",
-      },
-      {
-        title: "Przegląd",
-        description:
-          "Lista kontrolna dla każdego typu urządzenia, zdjęcie usterki jednym dotknięciem i pełne działanie bez zasięgu.",
-      },
-      {
-        title: "Protokoły",
-        description:
-          "Protokół PDF z Twoim logo i podpisem klienta, wysłany zaraz po przeglądzie.",
-      },
-      {
-        title: "Terminy",
-        description: "Lista przeglądów przypadających w przyszłym miesiącu i przypomnienia na czas.",
-      },
-      {
-        title: "Usterki",
-        description: "Każda usterka to zadanie ze statusem, śledzone aż do rozwiązania.",
-      },
-    ],
-    howItWorksHeading: "Jak wygląda przegląd ze SparxDeck",
-    howItWorks: [
-      "W biurze dodajesz klienta, budynek i urządzenia albo importujesz je z dotychczasowego arkusza.",
-      "Drukujesz etykiety QR, a technik nakleja je na urządzenia podczas pierwszej wizyty.",
-      "Przy każdym kolejnym przeglądzie technik skanuje etykietę i odhacza listę kontrolną na telefonie.",
-      "Jeśli znajdzie usterkę, robi zdjęcie, a w systemie automatycznie powstaje zadanie.",
-      "Klient podpisuje na ekranie, protokół trafia do niego e-mailem, a system ustala termin następnego przeglądu.",
-    ],
-    resultHeading: "Co zyskujesz",
-    result: [
-      "Wieczory bez przepisywania papierowych notatek do protokołów.",
-      "Żadnego zapomnianego przeglądu, a więc żadnego utraconego zlecenia.",
-      "Powtarzalne zlecenia, których system pilnuje za Ciebie.",
-      "Profesjonalne protokoły i pełną historię na wypadek kontroli lub zdarzenia.",
-    ],
-  },
-  faq: {
-    headingLine1: "Najczęściej zadawane pytania",
-    headingLine2: "",
-    items: [
-      {
-        id: "who",
-        question: "Dla kogo jest SparxDeck?",
-        answer:
-          "Dla firm serwisowych, które jeżdżą po budynkach i wykonują przeglądy urządzeń przeciwpożarowych, zwykle zatrudniających od 3 do 30 osób. Technicy pracują w terenie na telefonie, biuro na komputerze, a zarządcy budynków we własnym portalu klienta.",
-      },
-      {
-        id: "equipment",
-        question: "Jakie urządzenia obsługuje SparxDeck?",
-        answer:
-          "Gaśnice, hydranty, oświetlenie awaryjne, klapy przeciwpożarowe i drzwi przeciwpożarowe. Każdy typ urządzenia ma własną listę kontrolną, więc technik sprawdza dokładnie to, co trzeba.",
-      },
-      {
-        id: "offline",
-        question: "Czy aplikacja działa bez zasięgu?",
-        answer:
-          "Tak. Technik może pracować w piwnicy lub pomieszczeniu technicznym bez połączenia. Gdy telefon znów będzie online, dane zsynchronizują się automatycznie.",
-      },
-      {
-        id: "pricing",
-        question: "Ile kosztuje SparxDeck?",
-        answer:
-          "Płacisz miesięczny abonament zależny od liczby techników lub urządzeń, więc cena rośnie razem z Twoją firmą. Umów krótką prezentację, a przygotujemy ofertę dopasowaną do Ciebie.",
-      },
-      {
-        id: "protocols",
-        question: "Czy protokoły są zgodne z przepisami?",
-        answer:
-          "Tak. Szablony protokołów opierają się na lokalnych wymaganiach dotyczących przeglądów w każdym kraju, w którym działa SparxDeck. Każdy protokół zawiera logo i dane Twojej firmy oraz podpis klienta.",
-      },
-      {
-        id: "portal",
-        question: "Czy zarządca budynku widzi stan swoich urządzeń?",
-        answer:
-          "Tak. Zarządcy i właściciele budynków mają własny portal klienta, w którym widzą stan urządzeń, otwarte usterki i terminy oraz pobierają wszystkie protokoły.",
-      },
-      {
-        id: "onboarding",
-        question: "Ile trwa wdrożenie?",
-        answer:
-          "Kilka minut. SparxDeck zawiera tylko to, co najważniejsze, więc technik wykona pierwszy przegląd bez szkolenia. Dotychczasową ewidencję z Excela zaimportujesz w kilku kliknięciach.",
-      },
-    ],
-  },
-  getStarted: {
-    primaryCta: "Zacznij ze SparxDeck",
-    secondaryCta: "Umów prezentację",
-  },
+  home,
   footer: {
     allRightsReserved: "Wszelkie prawa zastrzeżone.",
     cookiesSettings: "Cookies",
@@ -229,7 +48,7 @@ const pl: Dictionary = {
       subheading: "Oprogramowanie dla firm serwisowych z branży ochrony przeciwpożarowej.",
       body: [
         "SparxDeck to aplikacja webowa i mobilna dla firm, które regularnie wykonują przeglądy urządzeń przeciwpożarowych: gaśnic, hydrantów, oświetlenia awaryjnego, klap i drzwi przeciwpożarowych. Zastępuje papierowe notatki i Excela jednym przejrzystym systemem.",
-        `SparxDeck powstał w Czechach i został zaprojektowany do pracy w wielu krajach. Rdzeń aplikacji jest wszędzie taki sam, zmienia się jedynie język i szablony protokołów zgodnie z lokalnymi przepisami. Aplikacja jest dostępna w ${locales.length} językach.`,
+        `SparxDeck powstał w Czechach i jest zaprojektowany do pracy w wielu krajach. Rdzeń aplikacji jest wszędzie taki sam, zmienia się język i szablony protokołów. Aplikacja jest na razie po czesku i angielsku, ta strona w ${locales.length} językach.`,
         "Rozwijamy produkt w ścisłej współpracy z firmami serwisowymi i technikami z praktyki. Jeśli masz pomysł, co jeszcze ułatwiłoby Ci pracę, napisz do nas.",
       ],
     },
@@ -267,7 +86,7 @@ const pl: Dictionary = {
       subheading: "Podpis na ekranie i automatyczny PDF z logo Twojej firmy",
       body: [
         "Po zakończeniu przeglądu SparxDeck automatycznie tworzy protokół PDF ze wszystkiego, co technik zapisał w terenie. Klient podpisuje go bezpośrednio na ekranie telefonu. Protokół zawiera logo i dane Twojej firmy, listę sprawdzonych urządzeń, wyniki i wykryte usterki.",
-        "Protokół natychmiast trafia do klienta e-mailem, zapisuje się w systemie, a zarządca budynku może go w każdej chwili pobrać ze swojego portalu. Szablony protokołów są zgodne z lokalnymi przepisami. Zawsze sprawdzisz, co, kiedy i u którego klienta zostało skontrolowane, np. podczas kontroli urzędowej lub szkody ubezpieczeniowej.",
+        "Protokół jednym dotknięciem wyślesz klientowi e-mailem, a pozostanie zapisany w systemie. Wygląd ustawisz w edytorze szablonów, a wydany protokół nigdy się już nie zmienia. W każdej chwili sprawdzisz, co i kiedy kontrolowano u danego klienta, na przykład podczas kontroli urzędu lub przy szkodzie ubezpieczeniowej.",
       ],
     },
     deadlineTracking: {
@@ -283,7 +102,7 @@ const pl: Dictionary = {
       subheading: "Każda wykryta usterka to zadanie śledzone aż do rozwiązania",
       body: [
         "Gdy technik podczas przeglądu znajdzie usterkę, SparxDeck automatycznie tworzy z niej zadanie ze zdjęciem i opisem. Usterka nie ginie w notatkach i wiadomo, kto za nią odpowiada.",
-        "Każda usterka ma status: nowa, w realizacji, rozwiązana. Zarządca budynku widzi otwarte usterki w swoim portalu klienta i ma pewność, że problemy są naprawdę usuwane, a Ty masz podstawę do kolejnego zlecenia.",
+        "Przy każdej usterce widzisz jej status (otwarta, w toku, usunięta), kto się nią zajmuje i do kiedy. Usunięcie wymaga notatki, a cała historia zmian pozostaje dostępna. Masz pewność, że wykryte problemy są naprawdę rozwiązywane, i podstawę do kolejnego zlecenia.",
       ],
     },
   },

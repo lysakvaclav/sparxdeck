@@ -1,260 +1,222 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { TextLogo } from "@/components/ui/text-logo";
-import { TextScramble } from "@/components/ui/text-scramble";
 import type { HeaderDictionary, Locale } from "@/i18n/dictionary";
 import { SITE } from "@/config/site";
+
+export type ProductLink = { href: string; label: string; title: string };
 
 interface HeaderProps {
   locale: Locale;
   dict: HeaderDictionary;
+  /** The feature pages, for the Product menu. */
+  products: ProductLink[];
 }
 
-export function Header({ locale, dict }: HeaderProps) {
-  const [isCompanyOpen, setIsCompanyOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+type Panel = "product" | "company" | null;
+
+/**
+ * The site's header: a floating, see-through bar with the logo, the Product
+ * and Company menus, the sign-in and sign-up buttons and the language.
+ */
+export function Header({ locale, dict, products }: HeaderProps) {
+  const [panel, setPanel] = useState<Panel>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 8);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  useEffect(() => {
+    if (!panel && !mobileOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPanel(null);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [panel, mobileOpen]);
+
+  // A click right after the pointer opened a menu is the same intent: it stays open.
+  const hoveredAt = useRef(0);
+  const hover = (name: Exclude<Panel, null>, at: number) => {
+    hoveredAt.current = at;
+    setPanel(name);
+  };
+  const toggle = (name: Exclude<Panel, null>, at: number) => {
+    const justHovered = at - hoveredAt.current < 400;
+    setPanel((open) => (open === name && !justHovered ? null : name));
+  };
+  const company = [
+    { href: `/${locale}/mission`, label: dict.mission },
+    { href: `/${locale}/about`, label: SITE.name },
+    { href: `/${locale}/team`, label: dict.team },
+    { href: `/${locale}/news`, label: dict.newsroom },
+    { href: `/${locale}/careers`, label: dict.careers },
+  ];
+
+  const menuButton = (name: Exclude<Panel, null>, label: string) => (
+    <button
+      type="button"
+      aria-expanded={panel === name}
+      aria-controls={`header-${name}`}
+      onClick={(event) => toggle(name, event.timeStamp)}
+      onMouseEnter={(event) => panel !== name && hover(name, event.timeStamp)}
+      className={`flex h-9 items-center gap-1.5 px-2 text-sm font-medium transition-colors ${
+        panel === name ? "text-strong" : "text-muted hover:text-strong"
+      }`}
+    >
+      {label}
+      <span aria-hidden className="w-2.5 text-center text-base leading-none">
+        {panel === name ? "−" : "+"}
+      </span>
+    </button>
+  );
 
   return (
-    <header className="sticky top-0 z-40 bg-transparent">
-      <div className="mx-auto max-w-[96rem] px-4 pt-2 md:px-6 md:pt-3 lg:px-8 lg:pt-4">
+    <header className="sticky top-0 z-40">
+      <div className="mx-auto max-w-[96rem] px-2 pt-2 md:px-4 md:pt-3 lg:px-6">
         <div
-          className="rounded-lg bg-background/60 shadow-sm backdrop-blur-2xl backdrop-saturate-150"
-          onMouseLeave={() => setIsCompanyOpen(false)}
+          onMouseLeave={() => setPanel(null)}
+          className={`border bg-background/40 backdrop-blur-xl backdrop-saturate-150 transition-[border-color,background-color] duration-200 ${
+            scrolled || panel || mobileOpen ? "border-line bg-background/70" : "border-transparent"
+          }`}
         >
-          <div className="flex h-14 items-center justify-between gap-2 px-5 md:h-16 md:px-8 lg:px-10">
-            <a
-              href={`/${locale}#hero`}
-              className="flex items-center text-[var(--color-text-strong)]"
-              aria-label={`${SITE.name} home`}
-            >
-              {/* The narrowest phones get only the mark, so the menu still fits beside it. */}
-              <TextLogo className="h-[17px] max-[374px]:aspect-square sm:h-6 md:h-7" />
-            </a>
+          <div className="flex h-14 items-center justify-between gap-3 px-4 md:h-16 md:px-6">
+            <div className="flex items-center gap-6">
+              <a href={`/${locale}`} className="flex items-center text-strong" aria-label={`${SITE.name}`}>
+                {/* The narrowest phones get only the mark, so the menu still fits beside it. */}
+                <TextLogo className="h-[18px] max-[374px]:aspect-square sm:h-6" />
+              </a>
+              <nav className="hidden items-center gap-1 lg:flex" aria-label={SITE.name}>
+                {menuButton("product", dict.product)}
+                {menuButton("company", dict.company)}
+              </nav>
+            </div>
 
-            <nav className="hidden items-center gap-4 md:flex">
-              <button
-                type="button"
-                onMouseEnter={() => setIsCompanyOpen(true)}
-                onClick={() => setIsCompanyOpen((open) => !open)}
-                onFocus={() => setIsCompanyOpen(true)}
-                className={`nav-link flex items-center gap-1 text-sm font-medium ${
-                  isCompanyOpen
-                    ? "text-[var(--color-text-strong)]"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-strong)]"
-                }`}
-              >
-                <span>{dict.company}</span>
-                <span className="text-lg leading-none transition-transform duration-200">
-                  {isCompanyOpen ? "−" : "+"}
-                </span>
-              </button>
-
-              <div className="ml-2 flex items-center gap-3">
-                <a
-                  href={SITE.loginUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case"
-                >
-                  <span>{dict.signIn}</span>
-                </a>
-                <a
-                  href={SITE.signupUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case"
-                >
-                  <span>{dict.getStarted}</span>
-                </a>
-                <a
-                  href={SITE.bookingUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case"
-                >
-                  <span>{dict.bookDemo}</span>
-                  <ExternalLink className="h-4 w-4" aria-hidden />
-                </a>
-              </div>
+            <div className="hidden items-center gap-2 lg:flex">
+              <a href={SITE.loginUrl} className="btn btn-compact btn-square btn-header button-font">
+                {dict.signIn}
+              </a>
+              <a href={SITE.bookingUrl} className="btn btn-compact btn-square btn-header button-font">
+                {dict.bookDemo}
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </a>
+              <a href={SITE.signupUrl} className="button button-primary button-sm">
+                {dict.getStarted}
+              </a>
               <LanguageSwitcher locale={locale} />
-            </nav>
+            </div>
 
-            {/* Mobile header: company button + language switcher + hamburger */}
-            <div className="flex items-center gap-2 md:hidden">
-              <button
-                type="button"
-                onClick={() => setIsCompanyOpen((open) => !open)}
-                className={`nav-link flex items-center gap-1 text-sm font-medium ${
-                  isCompanyOpen
-                    ? "text-[var(--color-text-strong)]"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-strong)]"
-                }`}
-              >
-                <span>{dict.company}</span>
-                <span className="text-lg leading-none transition-transform duration-200">
-                  {isCompanyOpen ? "−" : "+"}
-                </span>
-              </button>
-
+            <div className="flex items-center gap-1.5 lg:hidden">
               <LanguageSwitcher locale={locale} />
-
               <button
                 type="button"
-                onClick={() => setIsMobileMenuOpen((open) => !open)}
-                className="button-font flex h-8 w-8 items-center justify-center text-[var(--color-text-strong)]"
-                aria-label="Toggle navigation menu"
-                aria-expanded={isMobileMenuOpen}
+                onClick={() => setMobileOpen((open) => !open)}
+                className="flex h-11 w-11 items-center justify-center text-strong"
+                aria-label={`${dict.product}, ${dict.company}`}
+                aria-expanded={mobileOpen}
+                aria-controls="header-mobile"
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-4 w-4" aria-hidden />
-                ) : (
-                  <Menu className="h-4 w-4" aria-hidden />
-                )}
+                {mobileOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
               </button>
             </div>
           </div>
 
-          {/* Mobile navigation drawer */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-[var(--color-border)] px-5 pb-4 pt-3">
-              <div className="flex flex-col gap-2">
-                <a
-                  href={SITE.loginUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case justify-between"
-                >
-                  <span>{dict.signIn}</span>
+          {/* Desktop menus */}
+          <div
+            id="header-product"
+            hidden={panel !== "product"}
+            className="hidden border-t border-line px-6 pb-6 pt-5 lg:block"
+          >
+            {panel === "product" && (
+              <div className="grid grid-cols-5 gap-px bg-line">
+                {products.map((product) => (
+                  <Link
+                    key={product.href}
+                    href={product.href}
+                    className="group flex flex-col gap-2 bg-background p-4 transition-colors hover:bg-surface"
+                  >
+                    <span className="eyebrow">{product.label}</span>
+                    <span className="text-sm font-medium leading-snug text-strong">{product.title}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <div
+            id="header-company"
+            hidden={panel !== "company"}
+            className="hidden border-t border-line px-6 pb-6 pt-5 lg:block"
+          >
+            {panel === "company" && (
+              <div className="grid grid-cols-[1fr_2fr] gap-8">
+                <div className="space-y-2">
+                  <p className="eyebrow">{dict.megaContactLabel}</p>
+                  <a href={`mailto:${SITE.email}`} className="block text-sm text-strong hover:underline">
+                    {SITE.email}
+                  </a>
+                </div>
+                <ul className="grid grid-cols-3 gap-x-8 gap-y-1">
+                  {company.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className="block py-1.5 text-sm text-main hover:text-strong">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Phones and tablets */}
+          {mobileOpen && (
+            <div id="header-mobile" className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-line px-4 pb-5 pt-4 lg:hidden">
+              <p className="eyebrow">{dict.product}</p>
+              <ul className="mt-2 mb-5">
+                {products.map((product) => (
+                  <li key={product.href}>
+                    <Link href={product.href} className="flex min-h-11 items-center text-base text-strong">
+                      {product.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="eyebrow">{dict.company}</p>
+              <ul className="mt-2 mb-5">
+                {company.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="flex min-h-11 items-center text-base text-strong">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="grid gap-2">
+                <a href={SITE.signupUrl} className="button button-primary">
+                  {dict.getStarted}
                 </a>
-                <a
-                  href={SITE.signupUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case justify-between"
-                >
-                  <span>{dict.getStarted}</span>
+                <a href={SITE.loginUrl} className="button button-secondary">
+                  {dict.signIn}
                 </a>
-                <a
-                  href={SITE.bookingUrl}
-                  className="button-font btn btn-compact btn-square btn-header normal-case justify-between"
-                >
-                  <span>{dict.bookDemo}</span>
-                  <ExternalLink className="h-4 w-4" aria-hidden />
+                <a href={SITE.bookingUrl} className="button button-secondary">
+                  {dict.bookDemo}
+                  <ArrowUpRight aria-hidden />
                 </a>
               </div>
             </div>
           )}
-
-          <div
-            className={
-              "overflow-hidden transition-all duration-300 ease-in-out " +
-              (isCompanyOpen
-                ? "max-h-[480px] opacity-100"
-                : "max-h-0 opacity-0 pointer-events-none")
-            }
-            aria-hidden={!isCompanyOpen}
-          >
-            <div className="px-5 pb-5 pt-4 md:px-8 md:pb-6 md:pt-5 lg:px-10">
-              <div className="grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                <div className="space-y-4 text-sm text-[var(--color-text-main)]">
-                  <div>
-                    <TextScramble
-                      as="p"
-                      duration={0.4}
-                      className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
-                      trigger={isCompanyOpen}
-                    >
-                      {dict.megaContactLabel}
-                    </TextScramble>
-                    <a
-                      href={`mailto:${SITE.email}`}
-                      className="mt-1 inline-block text-sm text-[var(--color-text-strong)] hover:underline"
-                    >
-                      {SITE.email}
-                    </a>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {SITE.social.linkedin && (
-                      <a
-                        href={SITE.social.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="button-font flex items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                      >
-                        LinkedIn
-                      </a>
-                    )}
-                    {SITE.social.x && (
-                      <a
-                        href={SITE.social.x}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="button-font flex items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                      >
-                        X
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  <TextScramble
-                    as="p"
-                    duration={0.4}
-                    className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
-                    trigger={isCompanyOpen}
-                  >
-                    {dict.company}
-                  </TextScramble>
-                  <ul className="space-y-1">
-                    <li>
-                      <a
-                        href={`/${locale}/mission`}
-                        className="flex items-center gap-1 text-[var(--color-text-strong)] hover:translate-x-0.5 transition-transform"
-                      >
-                        <span className="text-base leading-none">+</span>
-                        <span>{dict.mission}</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href={`/${locale}/team`}
-                        className="flex items-center gap-1 text-[var(--color-text-strong)] hover:translate-x-0.5 transition-transform"
-                      >
-                        <span className="text-base leading-none">+</span>
-                        <span>{dict.team}</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href={`/${locale}/news`}
-                        className="flex items-center gap-1 text-[var(--color-text-strong)] hover:translate-x-0.5 transition-transform"
-                      >
-                        <span className="text-base leading-none">+</span>
-                        <span>{dict.newsroom}</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  <TextScramble
-                    as="p"
-                    duration={0.4}
-                    className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
-                    trigger={isCompanyOpen}
-                  >
-                    {dict.workWithUs}
-                  </TextScramble>
-                  <ul className="space-y-1">
-                    <li>
-                      <Link
-                        href={`/${locale}/careers`}
-                        className="flex items-center gap-1 text-[var(--color-text-strong)] hover:translate-x-0.5 transition-transform"
-                      >
-                        <span className="text-base leading-none">+</span>
-                        <span>{dict.careers}</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </header>

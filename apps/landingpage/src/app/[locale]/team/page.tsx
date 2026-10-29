@@ -1,129 +1,51 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { TeamSection } from "@/components/sections/TeamSection";
-import { getDictionary, locales, shortLabel, type Locale } from "@/i18n/dictionary";
-import { FooterThemeToggle } from "@/components/layout/FooterThemeToggle";
-import { LocaleFlag } from "@/components/layout/LocaleFlag";
-import { SITE } from "@/config/site";
+import type { Metadata } from "next";
+import { TextPage, pageLocale, pageMetadata, type PageParams } from "@/components/site/Pages";
 
-const footerLocales = locales;
-
-interface TeamPageProps {
-  params: Promise<{
-    locale: string;
-  }>;
+export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
+  const { dict } = await pageLocale(params);
+  return pageMetadata(dict.pages.team.heading, dict.pages.team.subheading);
 }
 
-export default async function TeamPage({ params }: TeamPageProps) {
-  const { locale: rawLocale } = await params;
-  const locale = (rawLocale || "cs") as Locale;
-  const dict = getDictionary(locale);
-  const content = dict.pages.team;
+const TEAM = [
+  {
+    name: "Václav Lysák",
+    role: "Co-Founder & CEO",
+    linkedin: "https://www.linkedin.com/in/v%C3%A1clav-lys%C3%A1k-327835385/",
+  },
+];
 
+export default async function TeamPage({ params }: { params: PageParams }) {
+  const { locale, dict } = await pageLocale(params);
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-48 bg-gradient-to-b from-[var(--background)] via-[var(--background)] to-transparent md:h-64" />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-6 pb-16 pt-10 md:px-8 lg:px-12 md:pt-12 lg:pt-12">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href={`/${locale}`}
-            aria-label={dict.common.backToHome}
-            className="button-font btn btn-compact btn-square btn-header normal-case"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-          </Link>
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs">
-            {footerLocales.map((code) => (
-              <Link
-                key={code}
-                href={`/${code}/team`}
-                className="button-font inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
-              >
-                <LocaleFlag code={code} />
-                {shortLabel(code)}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <section className="mx-auto w-full max-w-3xl space-y-6">
-          <header className="space-y-4">
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text-strong)] md:text-4xl">
-              {content.heading}
-            </h1>
-            <p className="max-w-2xl text-base text-[var(--color-text-main)] md:text-lg">
-              {content.subheading}
-            </p>
-          </header>
-        </section>
-
-        <section className="mx-auto w-full max-w-3xl">
-          <TeamSection />
-        </section>
-      </main>
-      <footer className="mt-auto border-t border-[var(--color-border)] bg-[var(--background)]">
-        <div className="mx-auto max-w-6xl px-6 py-8 md:px-8 lg:px-12">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2 text-xs text-[var(--color-text-muted)]">
-              <p>
-                © {new Date().getFullYear()} {SITE.name}. {dict.footer.allRightsReserved}
-              </p>
-              <div className="mt-1 flex flex-wrap gap-3 text-xs">
-                <Link
-                  href={`/${locale}/terms-of-use`}
-                  className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-                >
-                  {dict.footer.termsOfService}
-                </Link>
-                <Link
-                  href={`/${locale}/privacy-policy`}
-                  className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-                >
-                  {dict.footer.privacyPolicy}
-                </Link>
-                <Link
-                  href={`/${locale}/cookies`}
-                  className="text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-strong)] hover:underline"
-                >
-                  {dict.footer.cookiesSettings}
-                </Link>
-              </div>
+    <TextPage
+      locale={locale}
+      dict={dict}
+      path="team"
+      eyebrow={dict.footer.companyHeading}
+      title={dict.pages.team.heading}
+      subtitle={dict.pages.team.subheading}
+    >
+      <ul className="max-w-3xl border-t border-line">
+        {TEAM.map((person) => (
+          <li key={person.name} className="flex items-center justify-between gap-6 border-b border-line py-6">
+            <div>
+              <p className="text-lg font-medium text-strong">{person.name}</p>
+              <p className="text-sm text-muted">{person.role}</p>
             </div>
-
-            <div className="space-y-2 text-xs">
-              <FooterThemeToggle />
-              <div className="mt-2 flex flex-wrap gap-2">
-                {SITE.social.linkedin && (
-                  <a
-                    href={SITE.social.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="button-font flex items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                  >
-                    LinkedIn
-                  </a>
-                )}
-                {SITE.social.x && (
-                  <a
-                    href={SITE.social.x}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="button-font flex items-center justify-center rounded-full border border-[var(--color-border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] transition-colors hover:bg-[var(--color-primary-soft)]"
-                  >
-                    X
-                  </a>
-                )}
-                <a
-                  href={`mailto:${SITE.email}`}
-                  className="button-font inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-strong)] underline-offset-2 hover:underline"
-                >
-                  {SITE.email}
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+            <a
+              href={person.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${person.name} LinkedIn`}
+              className="flex h-11 w-11 items-center justify-center border border-line-strong text-strong transition-colors hover:bg-surface"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+              </svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </TextPage>
   );
 }

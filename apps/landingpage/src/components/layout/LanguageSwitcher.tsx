@@ -59,7 +59,8 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="button-font btn btn-compact btn-square btn-header normal-case flex items-center gap-2 px-3"
+        className="button-font btn btn-compact btn-square btn-header normal-case flex items-center gap-2 px-3 max-lg:min-h-11 max-lg:min-w-11"
+        aria-label={current.nativeName}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -69,7 +70,7 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
         <span className="hidden sm:inline">{current.nativeName}</span>
       </button>
       {open && (
-        <div className="absolute end-0 z-50 mt-2 max-h-[min(22rem,calc(100dvh-6rem))] w-48 overflow-y-auto overscroll-contain rounded-md border border-[var(--color-border)] bg-[var(--color-card)] p-2 shadow-lg">
+        <div className="absolute end-0 z-50 mt-2 max-h-[min(22rem,calc(100dvh-6rem))] w-48 overflow-y-auto overscroll-contain border border-[var(--color-border)] bg-[var(--color-card)] p-2 shadow-lg">
           <ul className="space-y-1" role="listbox">
             {languageOptions.map((lang) => (
               <li key={lang.code}>
