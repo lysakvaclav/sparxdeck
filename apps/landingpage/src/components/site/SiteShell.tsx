@@ -37,8 +37,8 @@ export function SiteShell({
   return (
     <div className="relative flex min-h-screen flex-col">
       <Header locale={locale} dict={dict.header} />
-      {/* The header floats over the top of the page (its height at each width). */}
-      <main className="-mt-16 flex-1 md:-mt-[4.75rem] lg:-mt-20">{children}</main>
+      {/* The header is fixed over the top of the page; each page's top padding leaves it room. */}
+      <main className="flex-1">{children}</main>
       <Footer locale={locale} dict={dict} products={products} path={path} />
     </div>
   );

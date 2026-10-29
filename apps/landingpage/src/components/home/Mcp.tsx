@@ -1,11 +1,44 @@
 import { ArrowRight } from "lucide-react";
-import { Orbits } from "@/components/home/HeroVisual";
 import { TextLogo } from "@/components/ui/text-logo";
 import { SITE } from "@/config/site";
 import type { HomeDictionary } from "@/i18n/dictionary";
 
 /** AI assistants the coming MCP connection is meant for (names only, no logos). */
 const ASSISTANTS = ["ChatGPT", "Claude", "Gemini"];
+
+/** An arrowhead on a ring of radius r at an angle, pointing along the ring. */
+function Arrow({ r, angle, tone }: { r: number; angle: number; tone: "signal" | "muted" }) {
+  return (
+    <path
+      d="M-5 -7 L7 0 L-5 7 L-2 0 Z"
+      transform={`rotate(${angle} 300 300) translate(${300 + r} 300) rotate(90)`}
+      fill={tone === "signal" ? "var(--signal)" : "currentColor"}
+      opacity={tone === "signal" ? 1 : 0.45}
+    />
+  );
+}
+
+/** Rings with arrows that turn slowly (still for reduced motion, globals.css). */
+function Orbits() {
+  return (
+    <g className="text-muted">
+      <g className="orbit">
+        <circle cx="300" cy="300" r="270" fill="none" stroke="currentColor" strokeOpacity="0.35" strokeDasharray="2 7" />
+        <Arrow r={270} angle={-62} tone="signal" />
+        <Arrow r={270} angle={18} tone="signal" />
+        <Arrow r={270} angle={104} tone="muted" />
+        <Arrow r={270} angle={196} tone="signal" />
+      </g>
+      <circle cx="300" cy="300" r="218" fill="none" stroke="currentColor" strokeOpacity="0.22" />
+      <g className="orbit orbit-reverse">
+        <circle cx="300" cy="300" r="166" fill="none" stroke="currentColor" strokeOpacity="0.3" strokeDasharray="5 8" />
+        <Arrow r={166} angle={-140} tone="muted" />
+        <Arrow r={166} angle={-20} tone="signal" />
+        <Arrow r={166} angle={150} tone="muted" />
+      </g>
+    </g>
+  );
+}
 
 /** The coming MCP connection: SparxDeck's data in AI assistants. */
 export function Mcp({ dict }: { dict: HomeDictionary }) {

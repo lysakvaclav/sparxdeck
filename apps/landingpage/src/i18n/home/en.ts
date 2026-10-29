@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "How it works",
-    "title": "An inspection in five steps",
-    "items": [
-      "Add your customers, buildings and equipment, or import them from your current spreadsheet.",
-      "Print the QR labels; the technician sticks them on the equipment on the first visit.",
-      "At each check the technician scans the label and ticks off the checklist on a phone.",
-      "A failed item is recorded as a defect with a photo and a deadline.",
-      "The customer signs on the screen, the report goes out by email and the next date is set."
-    ]
-  },
   "comparison": {
     "eyebrow": "Comparison",
     "title": "Paper and Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Map of buildings by the state of their due dates",
     "route": "A technician's route on the map, ordered by distance",
     "today": "A technician's plan for today on a phone"
-  },
-  "showcase": {
-    "title": "See inside the app",
-    "body": "Real screens of SparxDeck. Switch between the parts of the app."
   },
   "mcp": {
     "badge": "Coming soon",

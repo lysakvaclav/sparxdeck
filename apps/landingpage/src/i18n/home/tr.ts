@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Nasıl çalışır",
-    "title": "Beş adımda bir denetim",
-    "items": [
-      "Müşterileri, binaları ve ekipmanı eklersiniz ya da mevcut tablonuzdan içe aktarırsınız.",
-      "QR etiketlerini yazdırırsınız; teknisyen ilk ziyarette ekipmana yapıştırır.",
-      "Her kontrolde teknisyen etiketi tarar ve listeyi telefonda işaretler.",
-      "Uygun olmayan bir madde, fotoğraf ve süreyle arıza olarak kaydedilir.",
-      "Müşteri ekranda imzalar, rapor e-postayla gider ve sistem bir sonraki tarihi belirler."
-    ]
-  },
   "comparison": {
     "eyebrow": "Karşılaştırma",
     "title": "Kâğıt ve Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Tarih durumuna göre bina haritası",
     "route": "Haritada, mesafeye göre sıralanmış teknisyen rotası",
     "today": "Teknisyenin bugünkü planı telefonda"
-  },
-  "showcase": {
-    "title": "Uygulamanın içine bakın",
-    "body": "SparxDeck'in gerçek ekranları. Uygulamanın bölümleri arasında geçiş yapın."
   },
   "mcp": {
     "badge": "Yakında",

@@ -37,7 +37,6 @@ export type HomeDictionary = {
   /** In the order of FEATURES in src/components/home/features.ts. */
   features: { label: string; title: string; body: string }[];
   principles: { eyebrow: string; title: string; items: { title: string; body: string }[] };
-  steps: { eyebrow: string; title: string; items: string[] };
   comparison: {
     eyebrow: string;
     title: string;
@@ -53,8 +52,6 @@ export type HomeDictionary = {
     items: { question: string; answer: string }[];
   };
   cta: { title: string; body: string; primary: string; secondary: string };
-  /** The tabbed showcase of the platform's screens. */
-  showcase: { title: string; body: string };
   /** The coming MCP connection to AI assistants. */
   mcp: { badge: string; title: string; titleRest: string; body: string; cta: string };
   /** Alternative texts of the platform's screenshots. */

@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Jak to funguje",
-    "title": "Revize v pěti krocích",
-    "items": [
-      "Založíte zákazníky, budovy a zařízení, nebo je naimportujete z dosavadní tabulky.",
-      "Vytisknete QR štítky a technik je při první návštěvě nalepí na zařízení.",
-      "Při kontrole technik štítek naskenuje a odklikne checklist na telefonu.",
-      "Nevyhovující položka se zapíše jako závada s fotkou a termínem odstranění.",
-      "Zákazník podepíše na displeji, protokol odejde e-mailem a systém nastaví další termín."
-    ]
-  },
   "comparison": {
     "eyebrow": "Srovnání",
     "title": "Papír a Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Mapa budov podle stavu termínů",
     "route": "Trasa technika na mapě, seřazená podle vzdálenosti",
     "today": "Dnešní plán technika na telefonu"
-  },
-  "showcase": {
-    "title": "Podívejte se do aplikace",
-    "body": "Skutečné obrazovky SparxDecku. Přepínejte mezi částmi aplikace."
   },
   "mcp": {
     "badge": "Připravujeme",

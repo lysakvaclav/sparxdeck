@@ -95,24 +95,3 @@ export function Principles({ dict }: { dict: HomeDictionary }) {
     </section>
   );
 }
-
-export function Steps({ dict }: { dict: HomeDictionary }) {
-  const s = dict.steps;
-  return (
-    <section aria-labelledby="steps-title" id="how" className="border-t border-line">
-      <div className="container-site py-24 md:py-32">
-        <h2 id="steps-title" className="max-w-3xl text-4xl leading-[1.05] md:text-5xl lg:text-[3.5rem]">
-          {s.title}
-        </h2>
-        <ol className="mt-16 grid gap-x-8 md:grid-cols-5">
-          {s.items.map((item, index) => (
-            <li key={item} className="border-t border-line-strong pt-6 pb-10 md:pb-0">
-              <span className="fig">{index + 1}.0</span>
-              <p className="mt-4 text-base leading-relaxed text-main">{item}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}

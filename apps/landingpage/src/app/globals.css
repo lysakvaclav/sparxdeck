@@ -6,7 +6,7 @@
 
 /*
  * SparxDeck's website: an official, quiet look. Near-black and white, one
- * signal colour for small accents, hairline rules, square buttons. Every
+ * signal colour only in drawings, hairline rules, rounded buttons. Every
  * text colour keeps at least 4.5:1 against its background.
  */
 :root {
@@ -19,11 +19,8 @@
   --text-main: #3c3f44;
   --text-muted: #62666d;
   --accent: #08090a;
-  /* Only in drawings (the hero's extinguisher, the orbits' arrows). */
+  /* Only in drawings (the arrows on the MCP section's orbits). */
   --signal: #e5544a;
-  --signal-deep: #a8322b;
-  --metal-light: #c9cdd3;
-  --metal-dark: #6b7178;
   --shot-shadow: 0 0 0 1px rgba(8, 9, 10, 0.04), 0 30px 60px -30px rgba(8, 9, 10, 0.25);
 
   /* Older names, still used by the language switcher and the theme menu. */
@@ -51,9 +48,6 @@
   --text-muted: #8a8f98;
   --accent: #f7f8f8;
   --signal: #ff6a5c;
-  --signal-deep: #b93a30;
-  --metal-light: #8f959d;
-  --metal-dark: #4a4f56;
   --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
@@ -216,7 +210,7 @@ h4 {
   font-size: 0.82rem;
 }
 
-/* Header buttons (also the language switcher): compact, square, outlined. */
+/* Header buttons (also the language switcher): compact, rounded, outlined. */
 .button-font {
   font-weight: 500;
 }
@@ -266,45 +260,7 @@ h4 {
   box-shadow: var(--shot-shadow);
 }
 
-/* Tabs as one rounded bar, the chosen one filled (the showcase of screens). */
-.tabs {
-  display: inline-flex;
-  max-width: 100%;
-  gap: 2px;
-  padding: 4px;
-  overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
-  scrollbar-width: none;
-}
-
-.tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.tab {
-  min-height: 2.5rem;
-  padding: 0 1.1rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  color: var(--text-muted);
-  transition:
-    background-color 200ms ease-out,
-    color 200ms ease-out;
-}
-
-.tab:hover {
-  color: var(--text-strong);
-}
-
-.tab[aria-selected="true"] {
-  background: var(--text-strong);
-  color: var(--background);
-}
-
-/* Slow orbits around the hero's drawing (still for reduced motion). */
+/* Slow orbits in the MCP section (still for reduced motion). */
 @keyframes orbit {
   to {
     transform: rotate(360deg);

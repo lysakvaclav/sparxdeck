@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Si funksionon",
-    "title": "Një kontroll në pesë hapa",
-    "items": [
-      "Shtoni klientët, ndërtesat dhe pajisjet, ose i importoni nga tabela ekzistuese.",
-      "Printoni etiketat QR dhe tekniku i ngjit në pajisje gjatë vizitës së parë.",
-      "Në çdo kontroll tekniku skanon etiketën dhe shënon listën në telefon.",
-      "Një pikë e pakënaqshme regjistrohet si defekt me foto dhe afat zgjidhjeje.",
-      "Klienti nënshkruan në ekran, procesverbali dërgohet me email dhe sistemi cakton afatin e radhës."
-    ]
-  },
   "comparison": {
     "eyebrow": "Krahasimi",
     "title": "Letër dhe Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Harta e ndërtesave sipas gjendjes së afateve",
     "route": "Itinerari i teknikut në hartë, i renditur sipas distancës",
     "today": "Plani i sotëm i teknikut në telefon"
-  },
-  "showcase": {
-    "title": "Shihni brenda aplikacionit",
-    "body": "Ekrane të vërteta të SparxDeck. Kaloni nga një pjesë e aplikacionit te tjetra."
   },
   "mcp": {
     "badge": "Së shpejti",

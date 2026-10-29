@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Fonctionnement",
-    "title": "Une vérification en cinq étapes",
-    "items": [
-      "Vous créez vos clients, bâtiments et équipements, ou vous les importez depuis votre tableau actuel.",
-      "Vous imprimez les étiquettes QR ; le technicien les colle sur les équipements lors de la première visite.",
-      "À chaque contrôle, le technicien scanne l'étiquette et valide la liste sur son téléphone.",
-      "Un point non conforme est enregistré comme défaut avec photo et délai.",
-      "Le client signe sur l'écran, le rapport part par e-mail et la prochaine échéance est fixée."
-    ]
-  },
   "comparison": {
     "eyebrow": "Comparaison",
     "title": "Papier et Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Carte des bâtiments selon l'état des échéances",
     "route": "Tournée d'un technicien sur la carte, triée par distance",
     "today": "Plan du jour d'un technicien sur téléphone"
-  },
-  "showcase": {
-    "title": "Découvrez l'application",
-    "body": "De vrais écrans de SparxDeck. Passez d'une partie de l'application à l'autre."
   },
   "mcp": {
     "badge": "Bientôt disponible",

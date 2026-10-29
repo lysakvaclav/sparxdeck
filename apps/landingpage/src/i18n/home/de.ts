@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "So funktioniert es",
-    "title": "Eine Prüfung in fünf Schritten",
-    "items": [
-      "Sie legen Kunden, Gebäude und Geräte an oder importieren sie aus Ihrer bisherigen Tabelle.",
-      "Sie drucken die QR-Etiketten, der Techniker klebt sie beim ersten Besuch auf die Geräte.",
-      "Bei jeder Prüfung scannt der Techniker das Etikett und hakt die Checkliste auf dem Handy ab.",
-      "Ein nicht bestandener Punkt wird als Mangel mit Foto und Frist erfasst.",
-      "Der Kunde unterschreibt auf dem Display, das Protokoll geht per E-Mail hinaus und der nächste Termin wird gesetzt."
-    ]
-  },
   "comparison": {
     "eyebrow": "Vergleich",
     "title": "Papier und Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Gebäudekarte nach Stand der Termine",
     "route": "Route eines Technikers auf der Karte, nach Entfernung sortiert",
     "today": "Tagesplan eines Technikers auf dem Handy"
-  },
-  "showcase": {
-    "title": "Ein Blick in die App",
-    "body": "Echte Bildschirme von SparxDeck. Wechseln Sie zwischen den Bereichen der App."
   },
   "mcp": {
     "badge": "In Vorbereitung",

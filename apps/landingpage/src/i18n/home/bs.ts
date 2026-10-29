@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Kako funkcioniše",
-    "title": "Pregled u pet koraka",
-    "items": [
-      "Unesete klijente, zgrade i opremu ili ih uvezete iz postojeće tabele.",
-      "Odštampate QR naljepnice, a tehničar ih pri prvoj posjeti zalijepi na opremu.",
-      "Pri svakom pregledu tehničar skenira naljepnicu i označi kontrolnu listu na telefonu.",
-      "Neispravna stavka se bilježi kao kvar s fotografijom i rokom otklanjanja.",
-      "Klijent potpiše na ekranu, zapisnik ode e-mailom, a sistem postavi naredni rok."
-    ]
-  },
   "comparison": {
     "eyebrow": "Poređenje",
     "title": "Papir i Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Mapa zgrada prema stanju rokova",
     "route": "Ruta tehničara na mapi, poredana po udaljenosti",
     "today": "Dnevni plan tehničara na telefonu"
-  },
-  "showcase": {
-    "title": "Pogledajte aplikaciju iznutra",
-    "body": "Pravi ekrani SparxDecka. Prelazite između dijelova aplikacije."
   },
   "mcp": {
     "badge": "Uskoro",

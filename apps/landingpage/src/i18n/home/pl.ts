@@ -85,17 +85,6 @@ const home: HomeDictionary = {
       }
     ]
   },
-  "steps": {
-    "eyebrow": "Jak to działa",
-    "title": "Przegląd w pięciu krokach",
-    "items": [
-      "Dodajesz klientów, budynki i urządzenia albo importujesz je z dotychczasowej tabeli.",
-      "Drukujesz etykiety QR, a technik przykleja je na urządzenia podczas pierwszej wizyty.",
-      "Przy każdej kontroli technik skanuje etykietę i zaznacza listę w telefonie.",
-      "Niezgodny punkt zapisuje się jako usterka ze zdjęciem i terminem usunięcia.",
-      "Klient podpisuje na ekranie, protokół trafia e-mailem, a system ustawia kolejny termin."
-    ]
-  },
   "comparison": {
     "eyebrow": "Porównanie",
     "title": "Papier i Excel vs. SparxDeck",
@@ -186,10 +175,6 @@ const home: HomeDictionary = {
     "map": "Mapa budynków według stanu terminów",
     "route": "Trasa technika na mapie, ułożona według odległości",
     "today": "Plan dnia technika w telefonie"
-  },
-  "showcase": {
-    "title": "Zajrzyj do aplikacji",
-    "body": "Prawdziwe ekrany SparxDeck. Przełączaj się między częściami aplikacji."
   },
   "mcp": {
     "badge": "W przygotowaniu",
