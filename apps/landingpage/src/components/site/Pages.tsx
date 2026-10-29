@@ -5,6 +5,7 @@ import { FEATURES } from "@/components/home/features";
 import { DesktopShot, PhoneShot } from "@/components/site/Screenshot";
 import { SiteShell } from "@/components/site/SiteShell";
 import { getDictionary, isLocale, type Dictionary, type Locale } from "@/i18n/dictionary";
+import { seoMetadata } from "@/lib/seo";
 
 // The site's inner pages: the product's features, the company and the legal
 // texts. All of them share the header, a heading under it and the footer.
@@ -147,6 +148,6 @@ export function FeaturePage({ locale, dict, index }: { locale: Locale; dict: Dic
 }
 
 /** The page's title in the browser tab and in search results. */
-export function pageMetadata(title: string, description?: string) {
-  return { title, ...(description ? { description } : {}) };
+export function pageMetadata(locale: Locale, path: string, title: string, description?: string) {
+  return seoMetadata({ locale, path: `/${path}`, title, description });
 }

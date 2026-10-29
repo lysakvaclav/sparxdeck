@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { TextPage, pageLocale, pageMetadata, type PageParams } from "@/components/site/Pages";
 
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const { dict } = await pageLocale(params);
-  return pageMetadata(dict.pages.team.heading, dict.pages.team.subheading);
+  const { locale, dict } = await pageLocale(params);
+  return pageMetadata(locale, "team", dict.pages.team.heading, dict.pages.team.subheading);
 }
 
 const TEAM = [

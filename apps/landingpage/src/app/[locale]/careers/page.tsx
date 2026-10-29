@@ -4,8 +4,8 @@ import { TextPage, pageLocale, pageMetadata, type PageParams } from "@/component
 import { SITE } from "@/config/site";
 
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const { dict } = await pageLocale(params);
-  return pageMetadata(dict.pages.careers.heading, dict.pages.careers.subheading);
+  const { locale, dict } = await pageLocale(params);
+  return pageMetadata(locale, "careers", dict.pages.careers.heading, dict.pages.careers.subheading);
 }
 
 export default async function CareersPage({ params }: { params: PageParams }) {

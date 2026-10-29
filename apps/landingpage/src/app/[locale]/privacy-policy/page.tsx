@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { TextPage, pageLocale, pageMetadata, type PageParams } from "@/components/site/Pages";
 
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const { dict } = await pageLocale(params);
-  return pageMetadata(dict.footer.privacyPolicy, dict.legal.privacy.subheading);
+  const { locale, dict } = await pageLocale(params);
+  return pageMetadata(locale, "privacy-policy", dict.footer.privacyPolicy, dict.legal.privacy.subheading);
 }
 
 export default async function PrivacyPage({ params }: { params: PageParams }) {

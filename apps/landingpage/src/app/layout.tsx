@@ -64,7 +64,6 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    url: SITE.url,
     siteName: SITE.name,
     title: "SparxDeck – revize požární techniky bez papíru",
     description:
@@ -77,7 +76,8 @@ export const metadata: Metadata = {
       "QR štítky, kontrola na telefonu, automatický PDF protokol a hlídání termínů revizí.",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
+  // No canonical here: every page sets its own (src/lib/seo.ts). One inherited
+  // canonical would tell search engines that all pages are copies of one.
   // Icons: favicon.ico, icon.png and apple-icon.png in src/app (Next.js file
   // conventions), generated from the mark by apps/platform/scripts/generate-app-icons.mjs.
 };
@@ -98,7 +98,9 @@ export default function RootLayout({
               "@type": "Organization",
               name: SITE.name,
               url: SITE.url,
+              logo: `${SITE.url}/icon.png`,
               email: SITE.email,
+              ...(SITE.social.linkedin ? { sameAs: [SITE.social.linkedin] } : {}),
             })}
           </Script>
           {/* JSON-LD: Website */}

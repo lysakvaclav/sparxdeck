@@ -4,12 +4,27 @@ import { Mcp } from "@/components/home/Mcp";
 import { Platform } from "@/components/home/Platform";
 import { Principles } from "@/components/home/Principles";
 import { SiteShell } from "@/components/site/SiteShell";
-import { getDictionary, type Locale } from "@/i18n/dictionary";
+import type { Metadata } from "next";
+import { getDictionary, isLocale, type Locale } from "@/i18n/dictionary";
+import { seoMetadata } from "@/lib/seo";
 
 interface LocalePageProps {
   params: Promise<{
     locale: string;
   }>;
+}
+
+export async function generateMetadata({ params }: LocalePageProps): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = isLocale(raw) ? raw : "cs";
+  const hero = getDictionary(locale).home.hero;
+  return seoMetadata({
+    locale,
+    path: "",
+    title: `SparxDeck – ${hero.title.replace(/[.。։]$/u, "")}`,
+    description: hero.body,
+    absoluteTitle: true,
+  });
 }
 
 export default async function LocaleHome({ params }: LocalePageProps) {
