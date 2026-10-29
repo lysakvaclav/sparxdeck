@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Software pro revize požárně bezpečnostních zařízení",
-    "title": "Revize požární techniky.",
-    "titleMuted": "Bez papíru a přepisování.",
-    "body": "SparxDeck je aplikace pro servisní firmy, které dělají revize hasicích přístrojů, hydrantů, nouzového osvětlení, požárních klapek a dveří. Technik naskenuje QR štítek, odklikne kontrolu na telefonu a protokol je hotový ještě na místě. Termíny dalších revizí hlídá systém místo Excelu.",
-    "primary": "Začít se SparxDeck",
-    "secondary": "Domluvit ukázku",
-    "note": "Běží v prohlížeči na počítači i telefonu. Bez instalace."
+    "title": "Kompletní systém pro revize požární techniky.",
+    "body": "Software vytvořený pro servisní firmy. Evidence zařízení, QR štítky, plánování a trasy techniků, kontroly na telefonu, protokoly, závady a hlídání termínů na jednom místě.",
+    "cta": "Domluvit ukázku"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Dnešní plán technika na telefonu"
   },
   "mcp": {
-    "badge": "Připravujeme",
     "title": "SparxDeck MCP.",
     "titleRest": "Vaše revize v AI asistentovi.",
-    "body": "MCP propojí vaše data ve SparxDecku s AI asistenty jako ChatGPT, Claude nebo Gemini. Zeptáte se běžnou řečí, třeba co propadá příští měsíc nebo které závady jsou po termínu, a odpověď přijde přímo z vaší evidence.",
-    "cta": "Chci vědět jako první"
+    "body": "Připojte SparxDeck k ChatGPT, Claude nebo Gemini a ptejte se běžnou řečí: co propadá příští měsíc, které závady jsou po termínu nebo kam má technik zítra jet. Odpověď přijde přímo z vaší evidence.",
+    "question": "Co nám propadá příští měsíc?",
+    "answer": "V listopadu propadá revize 16 zařízení ve 4 budovách. Jako první Bytový dům Lipová 12, 3. listopadu.",
+    "cta": "Domluvit ukázku"
   }
 };
 

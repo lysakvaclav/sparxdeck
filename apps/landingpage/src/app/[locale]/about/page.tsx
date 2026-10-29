@@ -12,7 +12,6 @@ export default async function AboutPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="about"
       title={dict.pages.about.heading}
       subtitle={dict.pages.about.subheading}
       paragraphs={dict.pages.about.body}

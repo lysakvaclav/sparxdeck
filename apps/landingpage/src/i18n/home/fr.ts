@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Logiciel pour la vérification des équipements de sécurité incendie",
-    "title": "Vérifications incendie.",
-    "titleMuted": "Sans papier ni ressaisie.",
-    "body": "SparxDeck est une application pour les entreprises de maintenance qui vérifient extincteurs, bouches d'incendie, éclairage de sécurité, clapets et portes coupe-feu. Le technicien scanne une étiquette QR, valide le contrôle sur son téléphone et le rapport est prêt sur place. Les prochaines échéances sont suivies par le système, plus par un tableur.",
-    "primary": "Commencer avec SparxDeck",
-    "secondary": "Demander une démo",
-    "note": "Fonctionne dans le navigateur, sur ordinateur et téléphone. Rien à installer."
+    "title": "Le système complet pour les vérifications incendie.",
+    "body": "Un logiciel conçu pour les entreprises de maintenance. Registre des équipements, étiquettes QR, planning et tournées des techniciens, contrôles sur téléphone, rapports, anomalies et échéances au même endroit.",
+    "cta": "Demander une démo"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Plan du jour d'un technicien sur téléphone"
   },
   "mcp": {
-    "badge": "Bientôt disponible",
     "title": "SparxDeck MCP.",
     "titleRest": "Vos vérifications dans votre assistant IA.",
-    "body": "MCP reliera vos données SparxDeck à des assistants IA comme ChatGPT, Claude ou Gemini. Posez vos questions en langage courant, par exemple ce qui arrive à échéance le mois prochain ou quels défauts sont en retard, et la réponse vient directement de vos données.",
-    "cta": "Être informé en premier"
+    "body": "Connectez SparxDeck à ChatGPT, Claude ou Gemini et posez vos questions simplement : ce qui arrive à échéance le mois prochain, quelles anomalies sont en retard ou où un technicien se rend demain. La réponse vient directement de vos données.",
+    "question": "Qu’est-ce qui arrive à échéance le mois prochain ?",
+    "answer": "En novembre, 16 équipements dans 4 bâtiments arrivent à échéance. D’abord l’immeuble Lipová 12, le 3 novembre.",
+    "cta": "Demander une démo"
   }
 };
 

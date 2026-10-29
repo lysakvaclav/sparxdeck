@@ -14,7 +14,6 @@ export default async function CareersPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="careers"
       title={dict.pages.careers.heading}
       subtitle={dict.pages.careers.subheading}
     >

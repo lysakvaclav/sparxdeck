@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Softuer për kontrollin e pajisjeve kundër zjarrit",
-    "title": "Kontrolli i pajisjeve kundër zjarrit.",
-    "titleMuted": "Pa letra dhe pa rishkrime.",
-    "body": "SparxDeck është aplikacion për firmat e shërbimit që kontrollojnë fikëset, hidrantët, ndriçimin emergjent, klapat dhe dyert kundër zjarrit. Tekniku skanon etiketën QR, shënon kontrollin në telefon dhe procesverbali është gati që në vend. Afatet e kontrolleve të ardhshme i ndjek sistemi në vend të Excel-it.",
-    "primary": "Filloni me SparxDeck",
-    "secondary": "Rezervoni një demo",
-    "note": "Punon në shfletues, në kompjuter dhe telefon. Pa instalim."
+    "title": "Sistemi i plotë për kontrollet e pajisjeve kundër zjarrit.",
+    "body": "Softuer i krijuar për kompanitë e shërbimit. Regjistri i pajisjeve, etiketat QR, planifikimi dhe itineraret e teknikëve, kontrollet në telefon, raportet, defektet dhe afatet në një vend.",
+    "cta": "Rezervoni një demo"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Plani i sotëm i teknikut në telefon"
   },
   "mcp": {
-    "badge": "Së shpejti",
     "title": "SparxDeck MCP.",
     "titleRest": "Kontrollet tuaja në asistentin tuaj AI.",
-    "body": "MCP do t'i lidhë të dhënat tuaja në SparxDeck me asistentë AI si ChatGPT, Claude ose Gemini. Pyetni me fjalë të thjeshta, për shembull çfarë skadon muajin e ardhshëm ose cilat defekte janë me vonesë, dhe përgjigjja vjen drejt nga regjistri juaj.",
-    "cta": "Dua ta mësoj i pari"
+    "body": "Lidheni SparxDeck me ChatGPT, Claude ose Gemini dhe pyesni me fjalë të thjeshta: çfarë skadon muajin e ardhshëm, cilat defekte janë me vonesë ose ku shkon nesër tekniku. Përgjigjja vjen drejtpërdrejt nga të dhënat tuaja.",
+    "question": "Çfarë na skadon muajin e ardhshëm?",
+    "answer": "Në nëntor skadon kontrolli për 16 pajisje në 4 ndërtesa. E para është ndërtesa e banimit Lipová 12, më 3 nëntor.",
+    "cta": "Rezervoni një demo"
   }
 };
 

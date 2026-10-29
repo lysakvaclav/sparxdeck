@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Software for fire safety equipment inspections",
-    "title": "Fire safety inspections.",
-    "titleMuted": "No paper, no retyping.",
-    "body": "SparxDeck is an app for service companies that inspect fire extinguishers, hydrants, emergency lighting, fire dampers and fire doors. The technician scans a QR label, ticks off the check on a phone and the report is ready on site. The system keeps track of the next inspection dates instead of a spreadsheet.",
-    "primary": "Get started with SparxDeck",
-    "secondary": "Book a demo",
-    "note": "Runs in the browser on a computer and a phone. Nothing to install."
+    "title": "The complete system for fire safety inspections.",
+    "body": "Software built for service companies. Equipment records, QR labels, scheduling and technician routes, checks on the phone, reports, defects and due dates in one place.",
+    "cta": "Book a demo"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "A technician's plan for today on a phone"
   },
   "mcp": {
-    "badge": "Coming soon",
     "title": "SparxDeck MCP.",
     "titleRest": "Your inspections in your AI assistant.",
-    "body": "MCP will connect your SparxDeck data to AI assistants such as ChatGPT, Claude or Gemini. Ask in plain words, say what falls due next month or which defects are overdue, and the answer comes straight from your records.",
-    "cta": "Tell me first"
+    "body": "Connect SparxDeck to ChatGPT, Claude or Gemini and ask in plain language: what falls due next month, which defects are overdue or where a technician is going tomorrow. The answer comes straight from your records.",
+    "question": "What falls due next month?",
+    "answer": "In November, 16 devices in 4 buildings are due for inspection. First up: the Lipová 12 apartment building on 3 November.",
+    "cta": "Book a demo"
   }
 };
 

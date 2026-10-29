@@ -87,7 +87,7 @@ export function Header({ locale, dict }: HeaderProps) {
         >
           <div className="flex h-14 items-center justify-between gap-3 px-4 md:h-16 md:px-6">
             <div className="flex items-center gap-6">
-              <a href={`/${locale}`} className="flex items-center text-strong" aria-label={SITE.name}>
+              <a href={`/${locale}`} className="flex min-h-11 items-center text-strong" aria-label={SITE.name}>
                 {/* The narrowest phones get only the mark, so the menu still fits beside it. */}
                 <TextLogo className="h-[18px] max-[374px]:aspect-square sm:h-6" />
               </a>
@@ -105,7 +105,7 @@ export function Header({ locale, dict }: HeaderProps) {
                     hoveredAt.current = event.timeStamp;
                     setCompanyOpen(true);
                   }}
-                  className={`flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                  className={`flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors ${
                     companyOpen ? "text-strong" : "text-muted hover:text-strong"
                   }`}
                 >
@@ -136,7 +136,7 @@ export function Header({ locale, dict }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setMobileOpen((open) => !open)}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-strong"
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-strong"
                 aria-label={dict.company}
                 aria-expanded={mobileOpen}
                 aria-controls="header-mobile"

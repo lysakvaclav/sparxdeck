@@ -12,7 +12,6 @@ export default async function TermsPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="terms-of-use"
       title={dict.footer.termsOfService}
       subtitle={dict.legal.terms.subheading}
       paragraphs={dict.legal.terms.body}

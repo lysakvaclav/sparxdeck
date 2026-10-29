@@ -12,7 +12,6 @@ export default async function MissionPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="mission"
       title={dict.pages.mission.heading}
       subtitle={dict.pages.mission.subheading}
       paragraphs={dict.pages.mission.body}

@@ -50,7 +50,6 @@ export function Prose({ paragraphs }: { paragraphs: string[] }) {
 export function TextPage({
   locale,
   dict,
-  path,
   title,
   subtitle,
   paragraphs,
@@ -58,14 +57,13 @@ export function TextPage({
 }: {
   locale: Locale;
   dict: Dictionary;
-  path: string;
   title: string;
   subtitle?: string;
   paragraphs?: string[];
   children?: React.ReactNode;
 }) {
   return (
-    <SiteShell locale={locale} dict={dict} path={path}>
+    <SiteShell locale={locale} dict={dict}>
       <PageHero title={title} subtitle={subtitle} />
       {(paragraphs?.length || children) && (
         <section className="border-t border-line">
@@ -88,7 +86,7 @@ export function FeaturePage({ locale, dict, index }: { locale: Locale; dict: Dic
   const others = FEATURES.map((item, i) => ({ item, i })).filter(({ item, i }) => item.path && i !== index);
 
   return (
-    <SiteShell locale={locale} dict={dict} path={feature.path!}>
+    <SiteShell locale={locale} dict={dict}>
       <PageHero title={page.heading} subtitle={page.subheading} />
       <section>
         <div className="container-site pb-20 md:pb-28">

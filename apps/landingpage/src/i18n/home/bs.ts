@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Softver za preglede protivpožarne opreme",
-    "title": "Pregledi protivpožarne opreme.",
-    "titleMuted": "Bez papira i prepisivanja.",
-    "body": "SparxDeck je aplikacija za servisne firme koje pregledaju vatrogasne aparate, hidrante, panik rasvjetu, protivpožarne klapne i vrata. Tehničar skenira QR naljepnicu, označi pregled na telefonu i zapisnik je gotov još na licu mjesta. Rokove narednih pregleda prati sistem umjesto Excel tabele.",
-    "primary": "Počnite sa SparxDeck",
-    "secondary": "Zakažite demo",
-    "note": "Radi u pregledniku na računaru i telefonu. Bez instalacije."
+    "title": "Kompletan sistem za preglede protivpožarne opreme.",
+    "body": "Softver napravljen za servisne firme. Evidencija uređaja, QR naljepnice, planiranje i rute tehničara, kontrole na telefonu, zapisnici, nedostaci i rokovi na jednom mjestu.",
+    "cta": "Zakažite demo"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Dnevni plan tehničara na telefonu"
   },
   "mcp": {
-    "badge": "Uskoro",
     "title": "SparxDeck MCP.",
     "titleRest": "Vaši pregledi u AI asistentu.",
-    "body": "MCP će povezati vaše podatke u SparxDecku s AI asistentima kao što su ChatGPT, Claude ili Gemini. Pitajte običnim riječima, na primjer šta ističe sljedećeg mjeseca ili koji kvarovi kasne, i odgovor stiže direktno iz vaše evidencije.",
-    "cta": "Želim saznati prvi"
+    "body": "Povežite SparxDeck sa ChatGPT, Claude ili Gemini i pitajte običnim jezikom: šta ističe idući mjesec, koji nedostaci kasne ili kuda tehničar ide sutra. Odgovor stiže direktno iz vaše evidencije.",
+    "question": "Šta nam ističe idući mjesec?",
+    "answer": "U novembru ističe pregled za 16 uređaja u 4 zgrade. Prva je stambena zgrada Lipová 12, 3. novembra.",
+    "cta": "Zakažite demo"
   }
 };
 

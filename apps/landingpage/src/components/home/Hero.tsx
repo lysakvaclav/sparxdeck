@@ -3,33 +3,20 @@ import { DesktopShot } from "@/components/site/Screenshot";
 import { SITE } from "@/config/site";
 import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
-/** The top of the home page: the promise, the two ways in, the product itself. */
+/** The top of the home page: the promise, one way in, the product itself. */
 export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale }) {
   const hero = dict.hero;
   return (
     <section id="hero" className="relative">
       <div className="container-site pt-40 md:pt-52">
-        <h1 className="rise max-w-5xl text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[5rem]">
-          {hero.title}
-          <span className="block text-muted">{hero.titleMuted}</span>
-        </h1>
-        <div className="rise rise-delay-1 mt-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <p className="max-w-xl text-base leading-relaxed text-main md:text-lg">{hero.body}</p>
-          <div>
-            <div className="flex flex-wrap gap-3">
-              <a href={SITE.signupUrl} className="button button-primary">
-                {hero.primary}
-                <ArrowRight className="arrow" aria-hidden />
-              </a>
-              <a href={SITE.bookingUrl} className="button button-secondary">
-                {hero.secondary}
-              </a>
-            </div>
-            <p className="mt-4 text-sm text-muted">{hero.note}</p>
-          </div>
-        </div>
+        <h1 className="rise max-w-5xl text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[5rem]">{hero.title}</h1>
+        <p className="rise rise-delay-1 mt-8 max-w-2xl text-lg leading-relaxed text-muted md:text-xl">{hero.body}</p>
+        <a href={SITE.bookingUrl} className="rise rise-delay-2 button button-primary button-lg mt-10">
+          {hero.cta}
+          <ArrowRight className="arrow" aria-hidden />
+        </a>
       </div>
-      <div className="container-site rise rise-delay-2 relative mt-16 md:mt-24">
+      <div className="container-site rise rise-delay-3 relative mt-16 md:mt-24">
         <DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />
         {/* The picture fades into the page. */}
         <div

@@ -20,7 +20,6 @@ export default async function TeamPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="team"
       title={dict.pages.team.heading}
       subtitle={dict.pages.team.subheading}
     >

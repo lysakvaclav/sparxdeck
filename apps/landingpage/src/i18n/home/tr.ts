@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Yangın güvenliği ekipmanı denetimleri için yazılım",
-    "title": "Yangın ekipmanı denetimleri.",
-    "titleMuted": "Kâğıt ve yeniden yazma olmadan.",
-    "body": "SparxDeck, yangın söndürücüleri, hidrantları, acil aydınlatmayı, yangın damperlerini ve yangın kapılarını denetleyen servis firmaları için bir uygulamadır. Teknisyen QR etiketini tarar, kontrolü telefonda işaretler ve rapor daha sahadayken hazır olur. Sonraki denetim tarihlerini Excel yerine sistem takip eder.",
-    "primary": "SparxDeck ile başlayın",
-    "secondary": "Demo ayarlayın",
-    "note": "Bilgisayarda ve telefonda tarayıcıda çalışır. Kurulum gerekmez."
+    "title": "Yangın ekipmanı denetimleri için eksiksiz sistem.",
+    "body": "Servis firmaları için geliştirilmiş yazılım. Ekipman kaydı, QR etiketler, teknisyen planlaması ve rotaları, telefonda kontroller, raporlar, arızalar ve son tarihler tek yerde.",
+    "cta": "Demo ayarlayın"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Teknisyenin bugünkü planı telefonda"
   },
   "mcp": {
-    "badge": "Yakında",
     "title": "SparxDeck MCP.",
     "titleRest": "Denetimleriniz yapay zekâ asistanınızda.",
-    "body": "MCP, SparxDeck'teki verilerinizi ChatGPT, Claude veya Gemini gibi yapay zekâ asistanlarına bağlayacak. Gündelik dille sorun; örneğin gelecek ay neyin dolacağını veya hangi arızaların geciktiğini, yanıt doğrudan kayıtlarınızdan gelsin.",
-    "cta": "İlk ben öğreneyim"
+    "body": "SparxDeck’i ChatGPT, Claude veya Gemini’ye bağlayın ve günlük dille sorun: gelecek ay neyin süresi doluyor, hangi arızaların süresi geçti ya da teknisyen yarın nereye gidiyor. Yanıt doğrudan kayıtlarınızdan gelir.",
+    "question": "Gelecek ay neyin süresi doluyor?",
+    "answer": "Kasım ayında 4 binadaki 16 cihazın denetim süresi doluyor. İlki 3 Kasım’da Lipová 12 apartmanı.",
+    "cta": "Demo ayarlayın"
   }
 };
 

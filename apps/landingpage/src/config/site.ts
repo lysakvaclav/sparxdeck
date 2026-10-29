@@ -16,7 +16,7 @@ export const SITE = {
   bookingUrl: "mailto:info@sparxdeck.com?subject=SparxDeck%20demo",
   /** Social profiles; leave null to hide the button. */
   social: {
-    linkedin: null as string | null,
+    linkedin: "https://www.linkedin.com/company/sparxdeck/home" as string | null,
     x: null as string | null,
   },
 } as const;

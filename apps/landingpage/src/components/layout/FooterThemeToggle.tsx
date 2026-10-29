@@ -4,7 +4,7 @@ import { Theme } from "@/components/ui/theme";
 
 export function FooterThemeToggle() {
   return (
-    <div className="pt-2">
+    <div>
       <Theme
         size="sm"
         variant="dropdown"

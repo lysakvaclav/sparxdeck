@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Oprogramowanie do przeglądów urządzeń przeciwpożarowych",
-    "title": "Przeglądy sprzętu ppoż.",
-    "titleMuted": "Bez papieru i przepisywania.",
-    "body": "SparxDeck to aplikacja dla firm serwisowych, które wykonują przeglądy gaśnic, hydrantów, oświetlenia awaryjnego, klap i drzwi przeciwpożarowych. Technik skanuje etykietę QR, zaznacza kontrolę w telefonie, a protokół jest gotowy jeszcze na miejscu. Terminy kolejnych przeglądów pilnuje system zamiast Excela.",
-    "primary": "Zacznij ze SparxDeck",
-    "secondary": "Umów prezentację",
-    "note": "Działa w przeglądarce na komputerze i telefonie. Bez instalacji."
+    "title": "Kompletny system do przeglądów sprzętu przeciwpożarowego.",
+    "body": "Oprogramowanie stworzone dla firm serwisowych. Ewidencja urządzeń, etykiety QR, planowanie i trasy techników, kontrole w telefonie, protokoły, usterki i terminy w jednym miejscu.",
+    "cta": "Umów prezentację"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Plan dnia technika w telefonie"
   },
   "mcp": {
-    "badge": "W przygotowaniu",
     "title": "SparxDeck MCP.",
     "titleRest": "Twoje przeglądy w asystencie AI.",
-    "body": "MCP połączy Twoje dane w SparxDeck z asystentami AI, takimi jak ChatGPT, Claude czy Gemini. Zapytasz zwykłym językiem, na przykład co wygasa w przyszłym miesiącu lub które usterki są po terminie, a odpowiedź przyjdzie prosto z Twojej ewidencji.",
-    "cta": "Chcę wiedzieć pierwszy"
+    "body": "Połącz SparxDeck z ChatGPT, Claude lub Gemini i pytaj zwykłym językiem: co wypada w przyszłym miesiącu, które usterki są po terminie albo dokąd technik jedzie jutro. Odpowiedź przychodzi prosto z Twojej ewidencji.",
+    "question": "Co wypada nam w przyszłym miesiącu?",
+    "answer": "W listopadzie przegląd wypada dla 16 urządzeń w 4 budynkach. Najpierw budynek mieszkalny Lipová 12, 3 listopada.",
+    "cta": "Umów prezentację"
   }
 };
 

@@ -24,12 +24,9 @@ export type HomeDictionary = {
   hero: {
     eyebrow: string;
     title: string;
-    /** The second line of the heading, in the muted colour. */
-    titleMuted: string;
     body: string;
-    primary: string;
-    secondary: string;
-    note: string;
+    /** The one button: book a demo. */
+    cta: string;
   };
   /** Short product facts under the hero (no invented numbers). */
   facts: { value: string; label: string }[];
@@ -53,7 +50,16 @@ export type HomeDictionary = {
   };
   cta: { title: string; body: string; primary: string; secondary: string };
   /** The coming MCP connection to AI assistants. */
-  mcp: { badge: string; title: string; titleRest: string; body: string; cta: string };
+  mcp: {
+    title: string;
+    /** The rest of the heading, in the muted colour. */
+    titleRest: string;
+    body: string;
+    /** An example question to the assistant and its answer. */
+    question: string;
+    answer: string;
+    cta: string;
+  };
   /** Alternative texts of the platform's screenshots. */
   shots: Record<
     "dashboard" | "devices" | "check" | "protocol" | "calendar" | "defects" | "map" | "route" | "today",

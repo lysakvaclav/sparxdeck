@@ -12,7 +12,6 @@ export default async function NewsPage({ params }: { params: PageParams }) {
     <TextPage
       locale={locale}
       dict={dict}
-      path="news"
       title={dict.pages.news.heading}
       subtitle={dict.pages.news.subheading}
     />

@@ -19,7 +19,7 @@ export default async function LocaleHome({ params }: LocalePageProps) {
   const home = dict.home;
 
   return (
-    <SiteShell locale={locale} dict={dict} path="">
+    <SiteShell locale={locale} dict={dict}>
       <Hero dict={home} locale={locale} />
       <Facts dict={home} />
       <Statement dict={home} />

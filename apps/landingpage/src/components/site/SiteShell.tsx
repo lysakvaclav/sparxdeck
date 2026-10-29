@@ -24,13 +24,10 @@ export function productLinks(locale: Locale, dict: Dictionary): ProductLink[] {
 export function SiteShell({
   locale,
   dict,
-  path,
   children,
 }: {
   locale: Locale;
   dict: Dictionary;
-  /** The page without the language ("" for the home page). */
-  path: string;
   children: React.ReactNode;
 }) {
   const products = productLinks(locale, dict);
@@ -39,7 +36,7 @@ export function SiteShell({
       <Header locale={locale} dict={dict.header} />
       {/* The header is fixed over the top of the page; each page's top padding leaves it room. */}
       <main className="flex-1">{children}</main>
-      <Footer locale={locale} dict={dict} products={products} path={path} />
+      <Footer locale={locale} dict={dict} products={products} />
     </div>
   );
 }

@@ -4,12 +4,9 @@ import type { HomeDictionary } from "../types";
 const home: HomeDictionary = {
   "hero": {
     "eyebrow": "Software für die Prüfung von Brandschutzeinrichtungen",
-    "title": "Brandschutzprüfungen.",
-    "titleMuted": "Ohne Papier und Abtippen.",
-    "body": "SparxDeck ist eine App für Servicefirmen, die Feuerlöscher, Hydranten, Notbeleuchtung, Brandschutzklappen und Brandschutztüren prüfen. Der Techniker scannt ein QR-Etikett, hakt die Prüfung auf dem Handy ab und das Protokoll ist noch vor Ort fertig. Die nächsten Prüftermine überwacht das System statt einer Excel-Tabelle.",
-    "primary": "Mit SparxDeck starten",
-    "secondary": "Demo vereinbaren",
-    "note": "Läuft im Browser auf Computer und Handy. Ohne Installation."
+    "title": "Das Komplettsystem für Brandschutzprüfungen.",
+    "body": "Software für Servicefirmen. Anlagenverzeichnis, QR-Etiketten, Planung und Routen der Techniker, Prüfungen auf dem Handy, Protokolle, Mängel und Fristen an einem Ort.",
+    "cta": "Demo vereinbaren"
   },
   "facts": [
     {
@@ -177,11 +174,12 @@ const home: HomeDictionary = {
     "today": "Tagesplan eines Technikers auf dem Handy"
   },
   "mcp": {
-    "badge": "In Vorbereitung",
     "title": "SparxDeck MCP.",
     "titleRest": "Ihre Prüfungen im KI-Assistenten.",
-    "body": "MCP verbindet Ihre Daten in SparxDeck mit KI-Assistenten wie ChatGPT, Claude oder Gemini. Fragen Sie in normaler Sprache, etwa was nächsten Monat fällig wird oder welche Mängel überfällig sind, und die Antwort kommt direkt aus Ihren Daten.",
-    "cta": "Als Erste erfahren"
+    "body": "Verbinden Sie SparxDeck mit ChatGPT, Claude oder Gemini und fragen Sie in normaler Sprache: was nächsten Monat fällig wird, welche Mängel überfällig sind oder wohin ein Techniker morgen fährt. Die Antwort kommt direkt aus Ihren Daten.",
+    "question": "Was wird nächsten Monat fällig?",
+    "answer": "Im November sind 16 Geräte in 4 Gebäuden zur Prüfung fällig. Als Erstes das Wohnhaus Lipová 12 am 3. November.",
+    "cta": "Demo vereinbaren"
   }
 };
 
