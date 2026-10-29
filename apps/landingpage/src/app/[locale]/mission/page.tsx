@@ -13,7 +13,6 @@ export default async function MissionPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="mission"
-      eyebrow={dict.footer.companyHeading}
       title={dict.pages.mission.heading}
       subtitle={dict.pages.mission.subheading}
       paragraphs={dict.pages.mission.body}

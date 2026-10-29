@@ -15,7 +15,6 @@ export default async function CareersPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="careers"
-      eyebrow={dict.footer.workWithUs}
       title={dict.pages.careers.heading}
       subtitle={dict.pages.careers.subheading}
     >

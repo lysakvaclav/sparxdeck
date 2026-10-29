@@ -13,7 +13,6 @@ export default async function NewsPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="news"
-      eyebrow={dict.footer.companyHeading}
       title={dict.pages.news.heading}
       subtitle={dict.pages.news.subheading}
     />

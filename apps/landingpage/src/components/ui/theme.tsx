@@ -54,7 +54,7 @@ export function Theme({
   }
 
   const buttonClasses = cn(
-    "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em]",
+    "inline-flex min-h-9 items-center gap-2 border border-line-strong px-3 text-xs text-muted hover:text-strong",
     "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text-main)] hover:bg-[var(--color-primary-soft)]",
     size === "sm" ? "h-8" : "h-9 text-xs",
     className,
@@ -85,7 +85,7 @@ export function Theme({
             )}
           >
             {themeIcons[name]}
-            <span className="uppercase tracking-[0.16em]">{themeLabels[name]}</span>
+            <span>{themeLabels[name]}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

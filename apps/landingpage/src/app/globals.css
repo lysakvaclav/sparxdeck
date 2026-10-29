@@ -11,17 +11,15 @@
  */
 :root {
   --background: #ffffff;
-  --surface: #f6f7f9;
-  --surface-2: #eceef1;
-  --border: #e3e6ea;
-  --border-strong: #c9ced5;
-  --text-strong: #0b0d10;
-  --text-main: #2b3038;
-  --text-muted: #5d6671;
-  --accent: #c8332f;
-  --accent-soft: rgba(200, 51, 47, 0.08);
-  --grid-line: rgba(11, 13, 16, 0.06);
-  --shot-shadow: 0 1px 2px rgba(11, 13, 16, 0.06), 0 24px 48px -24px rgba(11, 13, 16, 0.22);
+  --surface: #f7f7f8;
+  --surface-2: #efeff1;
+  --border: #e6e6e9;
+  --border-strong: #cfd0d4;
+  --text-strong: #08090a;
+  --text-main: #3c3f44;
+  --text-muted: #62666d;
+  --accent: #08090a;
+  --shot-shadow: 0 0 0 1px rgba(8, 9, 10, 0.04), 0 30px 60px -30px rgba(8, 9, 10, 0.25);
 
   /* Older names, still used by the language switcher and the theme menu. */
   --foreground: var(--text-strong);
@@ -38,18 +36,16 @@
 }
 
 :root.dark {
-  --background: #08090b;
-  --surface: #0f1114;
-  --surface-2: #16191d;
-  --border: #1f2329;
-  --border-strong: #30353d;
-  --text-strong: #f4f5f6;
-  --text-main: #c7ccd2;
-  --text-muted: #8f97a1;
-  --accent: #ff6b5e;
-  --accent-soft: rgba(255, 107, 94, 0.1);
-  --grid-line: rgba(255, 255, 255, 0.05);
-  --shot-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 32px 64px -24px rgba(0, 0, 0, 0.7);
+  --background: #08090a;
+  --surface: #0f1011;
+  --surface-2: #161719;
+  --border: #23252a;
+  --border-strong: #34363c;
+  --text-strong: #f7f8f8;
+  --text-main: #b4b7bd;
+  --text-muted: #8a8f98;
+  --accent: #f7f8f8;
+  --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
 
@@ -118,36 +114,18 @@ h4 {
   }
 }
 
-/* A small label above headings: mono, upper case, a square marker. */
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
+/* A figure's caption ("FIG 0.1"): mono, quiet. */
+.fig {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
 }
 
-.eyebrow::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-}
-
 /* Arabic letters join: no spacing between them; Georgian has no customary capitals. */
-[lang="ar"] .eyebrow,
 [lang="ar"] .mono {
   font-family: inherit;
   letter-spacing: 0;
-}
-
-[lang="ar"] .eyebrow,
-[lang="ka"] .eyebrow {
-  text-transform: none;
 }
 
 .mono {
@@ -263,46 +241,20 @@ h4 {
   border-color: var(--text-muted);
 }
 
-/* A faint grid of lines, fading out towards the edges. */
-.grid-backdrop {
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
-}
-
-/* A screenshot of the platform in a thin window frame. */
+/* A screenshot of the platform in a thin frame. */
 .shot {
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shot-shadow);
-}
-
-.shot-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding-inline: 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.shot-bar span {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: var(--border-strong);
 }
 
 /* A phone around a phone screenshot. */
 .phone {
   overflow: hidden;
   border: 7px solid #15181c;
-  border-radius: 34px;
+  border-radius: 30px;
   background: #15181c;
   box-shadow: var(--shot-shadow);
 }
@@ -313,7 +265,7 @@ h4 {
 }
 
 .phone img {
-  border-radius: 27px;
+  border-radius: 23px;
 }
 
 /* FAQ: the plus turns into a cross when open. */

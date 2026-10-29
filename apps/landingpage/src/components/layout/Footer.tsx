@@ -31,11 +31,11 @@ export function Footer({
     { href: `/${locale}/news`, label: f.newsroom },
     { href: `/${locale}/careers`, label: f.careers },
   ];
-  const link = "text-sm text-main transition-colors hover:text-strong";
+  const link = "text-sm text-muted transition-colors hover:text-strong";
 
   return (
     <footer className="border-t border-line bg-background">
-      <div className="container-site grid gap-12 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-16">
+      <div className="container-site grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-20">
         <div className="space-y-4">
           <Link href={`/${locale}`} aria-label={SITE.name} className="inline-block text-strong">
             <TextLogo className="h-6" />
@@ -44,7 +44,7 @@ export function Footer({
           <FooterThemeToggle />
         </div>
         <nav aria-label={dict.header.product}>
-          <p className="eyebrow">{dict.header.product}</p>
+          <p className="text-sm font-medium text-strong">{dict.header.product}</p>
           <ul className="mt-4 space-y-2.5">
             {products.map((product) => (
               <li key={product.href}>
@@ -56,7 +56,7 @@ export function Footer({
           </ul>
         </nav>
         <nav aria-label={f.companyHeading}>
-          <p className="eyebrow">{f.companyHeading}</p>
+          <p className="text-sm font-medium text-strong">{f.companyHeading}</p>
           <ul className="mt-4 space-y-2.5">
             {company.map((item) => (
               <li key={item.href}>
@@ -68,7 +68,7 @@ export function Footer({
           </ul>
         </nav>
         <div>
-          <p className="eyebrow">{dict.header.megaContactLabel}</p>
+          <p className="text-sm font-medium text-strong">{dict.header.megaContactLabel}</p>
           <ul className="mt-4 space-y-2.5">
             <li>
               <a href={`mailto:${SITE.email}`} className={link}>

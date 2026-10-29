@@ -72,7 +72,7 @@ export function Header({ locale, dict, products }: HeaderProps) {
       aria-controls={`header-${name}`}
       onClick={(event) => toggle(name, event.timeStamp)}
       onMouseEnter={(event) => panel !== name && hover(name, event.timeStamp)}
-      className={`flex h-9 items-center gap-1.5 px-2 text-sm font-medium transition-colors ${
+      className={`flex h-9 items-center gap-1.5 px-2 text-sm transition-colors ${
         panel === name ? "text-strong" : "text-muted hover:text-strong"
       }`}
     >
@@ -85,15 +85,15 @@ export function Header({ locale, dict, products }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40">
-      <div className="mx-auto max-w-[96rem] px-2 pt-2 md:px-4 md:pt-3 lg:px-6">
-        <div
-          onMouseLeave={() => setPanel(null)}
-          className={`border bg-background/40 backdrop-blur-xl backdrop-saturate-150 transition-[border-color,background-color] duration-200 ${
-            scrolled || panel || mobileOpen ? "border-line bg-background/70" : "border-transparent"
-          }`}
-        >
-          <div className="flex h-14 items-center justify-between gap-3 px-4 md:h-16 md:px-6">
-            <div className="flex items-center gap-6">
+      <div
+        onMouseLeave={() => setPanel(null)}
+        className={`border-b bg-background/60 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-200 ${
+          scrolled || panel || mobileOpen ? "border-line bg-background/85" : "border-transparent"
+        }`}
+      >
+        <div className="container-site">
+          <div className="flex h-16 items-center justify-between gap-3">
+            <div className="flex items-center gap-8">
               <a href={`/${locale}`} className="flex items-center text-strong" aria-label={`${SITE.name}`}>
                 {/* The narrowest phones get only the mark, so the menu still fits beside it. */}
                 <TextLogo className="h-[18px] max-[374px]:aspect-square sm:h-6" />
@@ -105,14 +105,14 @@ export function Header({ locale, dict, products }: HeaderProps) {
             </div>
 
             <div className="hidden items-center gap-2 lg:flex">
-              <a href={SITE.loginUrl} className="btn btn-compact btn-square btn-header button-font">
+              <a href={SITE.bookingUrl} className="px-2 text-sm text-muted transition-colors hover:text-strong">
+                {dict.bookDemo}
+              </a>
+              <span aria-hidden className="mx-2 h-4 w-px bg-line-strong" />
+              <a href={SITE.loginUrl} className="px-2 text-sm text-muted transition-colors hover:text-strong">
                 {dict.signIn}
               </a>
-              <a href={SITE.bookingUrl} className="btn btn-compact btn-square btn-header button-font">
-                {dict.bookDemo}
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-              </a>
-              <a href={SITE.signupUrl} className="button button-primary button-sm">
+              <a href={SITE.signupUrl} className="button button-primary button-sm ms-2">
                 {dict.getStarted}
               </a>
               <LanguageSwitcher locale={locale} />
@@ -137,7 +137,7 @@ export function Header({ locale, dict, products }: HeaderProps) {
           <div
             id="header-product"
             hidden={panel !== "product"}
-            className="hidden border-t border-line px-6 pb-6 pt-5 lg:block"
+            className="hidden border-t border-line pb-8 pt-6 lg:block"
           >
             {panel === "product" && (
               <div className="grid grid-cols-5 gap-px bg-line">
@@ -147,8 +147,8 @@ export function Header({ locale, dict, products }: HeaderProps) {
                     href={product.href}
                     className="group flex flex-col gap-2 bg-background p-4 transition-colors hover:bg-surface"
                   >
-                    <span className="eyebrow">{product.label}</span>
-                    <span className="text-sm font-medium leading-snug text-strong">{product.title}</span>
+                    <span className="text-sm font-medium text-strong">{product.label}</span>
+                    <span className="text-sm leading-snug text-muted">{product.title}</span>
                   </Link>
                 ))}
               </div>
@@ -157,12 +157,12 @@ export function Header({ locale, dict, products }: HeaderProps) {
           <div
             id="header-company"
             hidden={panel !== "company"}
-            className="hidden border-t border-line px-6 pb-6 pt-5 lg:block"
+            className="hidden border-t border-line pb-8 pt-6 lg:block"
           >
             {panel === "company" && (
               <div className="grid grid-cols-[1fr_2fr] gap-8">
                 <div className="space-y-2">
-                  <p className="eyebrow">{dict.megaContactLabel}</p>
+                  <p className="text-sm text-muted">{dict.megaContactLabel}</p>
                   <a href={`mailto:${SITE.email}`} className="block text-sm text-strong hover:underline">
                     {SITE.email}
                   </a>
@@ -182,8 +182,8 @@ export function Header({ locale, dict, products }: HeaderProps) {
 
           {/* Phones and tablets */}
           {mobileOpen && (
-            <div id="header-mobile" className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-line px-4 pb-5 pt-4 lg:hidden">
-              <p className="eyebrow">{dict.product}</p>
+            <div id="header-mobile" className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-line pb-5 pt-4 lg:hidden">
+              <p className="text-sm text-muted">{dict.product}</p>
               <ul className="mt-2 mb-5">
                 {products.map((product) => (
                   <li key={product.href}>
@@ -193,7 +193,7 @@ export function Header({ locale, dict, products }: HeaderProps) {
                   </li>
                 ))}
               </ul>
-              <p className="eyebrow">{dict.company}</p>
+              <p className="text-sm text-muted">{dict.company}</p>
               <ul className="mt-2 mb-5">
                 {company.map((item) => (
                   <li key={item.href}>

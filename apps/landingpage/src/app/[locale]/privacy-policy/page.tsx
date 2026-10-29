@@ -13,7 +13,6 @@ export default async function PrivacyPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="privacy-policy"
-      eyebrow={dict.footer.companyHeading}
       title={dict.footer.privacyPolicy}
       subtitle={dict.legal.privacy.subheading}
       paragraphs={dict.legal.privacy.body}

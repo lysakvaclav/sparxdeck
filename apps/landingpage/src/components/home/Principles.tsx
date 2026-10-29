@@ -73,28 +73,25 @@ const FIGURES = [FigureSimple, FigureOffline, FigureData];
 export function Principles({ dict }: { dict: HomeDictionary }) {
   const p = dict.principles;
   return (
-    <section aria-labelledby="principles-title" className="border-b border-line">
-      <div className="container-site py-20 md:py-28">
-        <p className="eyebrow">{p.eyebrow}</p>
-        <h2 id="principles-title" className="mt-5 max-w-3xl text-3xl leading-[1.08] md:text-5xl">
-          {p.title}
-        </h2>
-        <ul className="mt-14 grid gap-px bg-line md:grid-cols-3">
-          {p.items.map((item, index) => {
-            const Figure = FIGURES[index] ?? FigureSimple;
-            return (
-              <li key={item.title} className="flex flex-col bg-background py-8 md:px-8 md:first:ps-0 md:last:pe-0">
-                <p className="mono text-[11px] text-muted">FIG 0.{index + 1}</p>
-                <div className="mx-auto my-8 h-44 w-full max-w-[260px] text-muted">
-                  <Figure />
-                </div>
-                <h3 className="text-lg font-medium">{item.title}</h3>
-                <p className="mt-2 text-base leading-relaxed text-main">{item.body}</p>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+    <section aria-label={p.title} className="border-t border-line">
+      <ul className="container-site grid md:grid-cols-3">
+        {p.items.map((item, index) => {
+          const Figure = FIGURES[index] ?? FigureSimple;
+          return (
+            <li
+              key={item.title}
+              className="flex flex-col border-line py-14 md:py-20 md:ps-10 md:first:ps-0 md:[&:not(:first-child)]:border-s max-md:[&:not(:first-child)]:border-t"
+            >
+              <p className="fig">FIG 0.{index + 1}</p>
+              <div className="mx-auto my-12 h-56 w-full max-w-[300px] text-muted">
+                <Figure />
+              </div>
+              <h3 className="text-lg font-medium tracking-tight">{item.title}</h3>
+              <p className="mt-3 max-w-sm text-base leading-relaxed text-muted">{item.body}</p>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
@@ -102,19 +99,16 @@ export function Principles({ dict }: { dict: HomeDictionary }) {
 export function Steps({ dict }: { dict: HomeDictionary }) {
   const s = dict.steps;
   return (
-    <section aria-labelledby="steps-title" id="how" className="border-b border-line bg-surface">
-      <div className="container-site py-20 md:py-28">
-        <p className="eyebrow">{s.eyebrow}</p>
-        <h2 id="steps-title" className="mt-5 max-w-3xl text-3xl leading-[1.08] md:text-5xl">
+    <section aria-labelledby="steps-title" id="how" className="border-t border-line">
+      <div className="container-site py-24 md:py-32">
+        <h2 id="steps-title" className="max-w-3xl text-4xl leading-[1.05] md:text-5xl lg:text-[3.5rem]">
           {s.title}
         </h2>
-        <ol className="mt-14 grid gap-px bg-line md:grid-cols-5">
+        <ol className="mt-16 grid gap-x-8 md:grid-cols-5">
           {s.items.map((item, index) => (
-            <li key={item} className="flex gap-4 bg-surface py-6 md:flex-col md:gap-8 md:px-5 md:py-8 md:first:ps-0">
-              <span className="mono flex h-9 w-9 shrink-0 items-center justify-center border border-line-strong text-xs text-strong">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <p className="text-base leading-relaxed text-main">{item}</p>
+            <li key={item} className="border-t border-line-strong pt-6 pb-10 md:pb-0">
+              <span className="fig">{index + 1}.0</span>
+              <p className="mt-4 text-base leading-relaxed text-main">{item}</p>
             </li>
           ))}
         </ol>

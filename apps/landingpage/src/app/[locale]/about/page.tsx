@@ -13,7 +13,6 @@ export default async function AboutPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="about"
-      eyebrow={dict.footer.companyHeading}
       title={dict.pages.about.heading}
       subtitle={dict.pages.about.subheading}
       paragraphs={dict.pages.about.body}

@@ -7,10 +7,11 @@ import { SectionHeading } from "./Platform";
 export function Comparison({ dict }: { dict: HomeDictionary }) {
   const c = dict.comparison;
   return (
-    <section aria-labelledby="comparison-title" className="border-b border-line">
-      <div className="container-site py-20 md:py-28">
-        <SectionHeading eyebrow={c.eyebrow} title={c.title} body={c.body} id="comparison-title" />
-        <div className="mt-14 overflow-hidden border border-line">
+    <section aria-labelledby="comparison-title" className="border-t border-line">
+      <div className="container-site py-24 md:py-32">
+        <SectionHeading title={c.title} body={c.body} id="comparison-title" />
+        {/* Scrolls sideways on narrow phones: reachable by keyboard too. */}
+        <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-16 overflow-x-auto border border-line">
           <table className="w-full border-collapse text-start text-sm md:text-base">
             <thead>
               <tr className="bg-surface">
@@ -39,7 +40,7 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
                   </td>
                   <td className="border-s border-line p-4 text-strong md:p-5">
                     <span className="flex gap-2.5">
-                      <Check className="mt-1 h-4 w-4 shrink-0 text-accent" aria-hidden />
+                      <Check className="mt-1 h-4 w-4 shrink-0" aria-hidden />
                       {row.new}
                     </span>
                   </td>
@@ -57,14 +58,13 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
 export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string }) {
   const f = dict.faq;
   return (
-    <section aria-labelledby="faq-title" id="faq" className="border-b border-line">
-      <div className="container-site grid gap-12 py-20 md:py-28 lg:grid-cols-12">
+    <section aria-labelledby="faq-title" id="faq" className="border-t border-line">
+      <div className="container-site grid gap-12 py-24 md:py-32 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <p className="eyebrow">{f.eyebrow}</p>
-          <h2 id="faq-title" className="mt-5 text-3xl leading-[1.08] md:text-5xl">
+          <h2 id="faq-title" className="text-4xl leading-[1.05] md:text-5xl">
             {f.title}
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-main">{f.body}</p>
+          <p className="mt-5 text-base leading-relaxed text-muted">{f.body}</p>
           <a href={SITE.bookingUrl} className="button button-primary mt-8">
             {bookDemo}
             <ArrowRight className="arrow" aria-hidden />
@@ -75,9 +75,9 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
             <details key={item.question} className="group border-b border-line">
               <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-5 text-base font-medium text-strong md:text-lg">
                 {item.question}
-                <Plus className="faq-icon h-5 w-5 shrink-0 text-accent transition-transform duration-200" aria-hidden />
+                <Plus className="faq-icon h-5 w-5 shrink-0 text-muted transition-transform duration-200" aria-hidden />
               </summary>
-              <p className="max-w-3xl pb-6 text-base leading-relaxed text-main">{item.answer}</p>
+              <p className="max-w-3xl pb-6 text-base leading-relaxed text-muted">{item.answer}</p>
             </details>
           ))}
         </div>
@@ -86,25 +86,22 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
   );
 }
 
-/** The closing band: dark in both themes, the buttons in reverse. */
+/** The closing statement, centred, as at the end of the reference. */
 export function Cta({ dict }: { dict: HomeDictionary }) {
   const c = dict.cta;
   return (
-    <section aria-labelledby="cta-title" className="relative overflow-hidden bg-[#0b0d10] text-[#c7ccd2] [--grid-line:rgba(255,255,255,0.06)] dark:border-b dark:border-line dark:bg-[#111317]">
-      <div aria-hidden className="grid-backdrop pointer-events-none absolute inset-0 opacity-80" />
-      <div className="container-site relative grid gap-10 py-20 md:py-28 lg:grid-cols-12 lg:items-end">
-        <div className="lg:col-span-7">
-          <h2 id="cta-title" className="text-3xl leading-[1.08] text-white md:text-5xl">
-            {c.title}
-          </h2>
-          <p className="mt-5 max-w-xl text-base leading-relaxed md:text-lg">{c.body}</p>
-        </div>
-        <div className="flex flex-wrap gap-3 lg:col-span-5 lg:justify-end">
-          <a href={SITE.signupUrl} className="button bg-white text-[#0b0d10] hover:bg-[#e6e8eb]">
+    <section aria-labelledby="cta-title" className="border-t border-line">
+      <div className="container-site flex flex-col items-center py-28 text-center md:py-40">
+        <h2 id="cta-title" className="max-w-4xl text-4xl leading-[1.05] md:text-6xl">
+          {c.title}
+        </h2>
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-muted md:text-lg">{c.body}</p>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <a href={SITE.signupUrl} className="button button-primary">
             {c.primary}
             <ArrowRight className="arrow" aria-hidden />
           </a>
-          <a href={SITE.bookingUrl} className="button border-[#3a4049] text-white hover:bg-white/10">
+          <a href={SITE.bookingUrl} className="button button-secondary">
             {c.secondary}
           </a>
         </div>

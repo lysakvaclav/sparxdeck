@@ -36,7 +36,7 @@ export function SiteShell({
     <div className="relative flex min-h-screen flex-col">
       <Header locale={locale} dict={dict.header} products={products} />
       {/* The header floats over the top of the page. */}
-      <main className="-mt-16 flex-1 md:-mt-[4.75rem]">{children}</main>
+      <main className="-mt-16 flex-1">{children}</main>
       <Footer locale={locale} dict={dict} products={products} path={path} />
     </div>
   );

@@ -13,7 +13,6 @@ export default async function CookiesPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="cookies"
-      eyebrow={dict.footer.companyHeading}
       title={dict.footer.cookiesSettings}
       subtitle={dict.legal.cookies.subheading}
       paragraphs={dict.legal.cookies.body}

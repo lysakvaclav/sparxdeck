@@ -21,7 +21,6 @@ export default async function TeamPage({ params }: { params: PageParams }) {
       locale={locale}
       dict={dict}
       path="team"
-      eyebrow={dict.footer.companyHeading}
       title={dict.pages.team.heading}
       subtitle={dict.pages.team.subheading}
     >
