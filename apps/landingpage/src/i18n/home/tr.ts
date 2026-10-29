@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Tarih durumuna göre bina haritası",
     "route": "Haritada, mesafeye göre sıralanmış teknisyen rotası",
     "today": "Teknisyenin bugünkü planı telefonda"
+  },
+  "showcase": {
+    "title": "Uygulamanın içine bakın",
+    "body": "SparxDeck'in gerçek ekranları. Uygulamanın bölümleri arasında geçiş yapın."
+  },
+  "mcp": {
+    "badge": "Yakında",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Denetimleriniz yapay zekâ asistanınızda.",
+    "body": "MCP, SparxDeck'teki verilerinizi ChatGPT, Claude veya Gemini gibi yapay zekâ asistanlarına bağlayacak. Gündelik dille sorun; örneğin gelecek ay neyin dolacağını veya hangi arızaların geciktiğini, yanıt doğrudan kayıtlarınızdan gelsin.",
+    "cta": "İlk ben öğreneyim"
   }
 };
 

@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Gebäudekarte nach Stand der Termine",
     "route": "Route eines Technikers auf der Karte, nach Entfernung sortiert",
     "today": "Tagesplan eines Technikers auf dem Handy"
+  },
+  "showcase": {
+    "title": "Ein Blick in die App",
+    "body": "Echte Bildschirme von SparxDeck. Wechseln Sie zwischen den Bereichen der App."
+  },
+  "mcp": {
+    "badge": "In Vorbereitung",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Ihre Prüfungen im KI-Assistenten.",
+    "body": "MCP verbindet Ihre Daten in SparxDeck mit KI-Assistenten wie ChatGPT, Claude oder Gemini. Fragen Sie in normaler Sprache, etwa was nächsten Monat fällig wird oder welche Mängel überfällig sind, und die Antwort kommt direkt aus Ihren Daten.",
+    "cta": "Als Erste erfahren"
   }
 };
 

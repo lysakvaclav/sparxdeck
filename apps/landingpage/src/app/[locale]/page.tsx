@@ -1,6 +1,7 @@
 import { Comparison, Cta, Faq } from "@/components/home/Closing";
 import { Facts, Hero, Statement } from "@/components/home/Hero";
-import { Platform } from "@/components/home/Platform";
+import { Mcp } from "@/components/home/Mcp";
+import { Showcase } from "@/components/home/Showcase";
 import { Principles, Steps } from "@/components/home/Principles";
 import { SiteShell } from "@/components/site/SiteShell";
 import { getDictionary, type Locale } from "@/i18n/dictionary";
@@ -23,7 +24,8 @@ export default async function LocaleHome({ params }: LocalePageProps) {
       <Facts dict={home} />
       <Statement dict={home} />
       <Principles dict={home} />
-      <Platform dict={home} locale={locale} />
+      <Showcase dict={home} locale={locale} />
+      <Mcp dict={home} />
       <Steps dict={home} />
       <Comparison dict={home} />
       <Faq dict={home} bookDemo={dict.header.bookDemo} />

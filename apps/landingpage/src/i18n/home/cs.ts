@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Mapa budov podle stavu termínů",
     "route": "Trasa technika na mapě, seřazená podle vzdálenosti",
     "today": "Dnešní plán technika na telefonu"
+  },
+  "showcase": {
+    "title": "Podívejte se do aplikace",
+    "body": "Skutečné obrazovky SparxDecku. Přepínejte mezi částmi aplikace."
+  },
+  "mcp": {
+    "badge": "Připravujeme",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Vaše revize v AI asistentovi.",
+    "body": "MCP propojí vaše data ve SparxDecku s AI asistenty jako ChatGPT, Claude nebo Gemini. Zeptáte se běžnou řečí, třeba co propadá příští měsíc nebo které závady jsou po termínu, a odpověď přijde přímo z vaší evidence.",
+    "cta": "Chci vědět jako první"
   }
 };
 

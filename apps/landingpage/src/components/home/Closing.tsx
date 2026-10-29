@@ -11,7 +11,7 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
       <div className="container-site py-24 md:py-32">
         <SectionHeading title={c.title} body={c.body} id="comparison-title" />
         {/* Scrolls sideways on narrow phones: reachable by keyboard too. */}
-        <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-16 overflow-x-auto border border-line">
+        <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-16 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full border-collapse text-start text-sm md:text-base">
             <thead>
               <tr className="bg-surface">

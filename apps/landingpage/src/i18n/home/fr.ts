@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Carte des bâtiments selon l'état des échéances",
     "route": "Tournée d'un technicien sur la carte, triée par distance",
     "today": "Plan du jour d'un technicien sur téléphone"
+  },
+  "showcase": {
+    "title": "Découvrez l'application",
+    "body": "De vrais écrans de SparxDeck. Passez d'une partie de l'application à l'autre."
+  },
+  "mcp": {
+    "badge": "Bientôt disponible",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Vos vérifications dans votre assistant IA.",
+    "body": "MCP reliera vos données SparxDeck à des assistants IA comme ChatGPT, Claude ou Gemini. Posez vos questions en langage courant, par exemple ce qui arrive à échéance le mois prochain ou quels défauts sont en retard, et la réponse vient directement de vos données.",
+    "cta": "Être informé en premier"
   }
 };
 

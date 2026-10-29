@@ -70,7 +70,7 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
         <span className="hidden sm:inline">{current.nativeName}</span>
       </button>
       {open && (
-        <div className="absolute end-0 z-50 mt-2 max-h-[min(22rem,calc(100dvh-6rem))] w-48 overflow-y-auto overscroll-contain border border-[var(--color-border)] bg-[var(--color-card)] p-2 shadow-lg">
+        <div className="absolute end-0 z-50 mt-2 max-h-[min(22rem,calc(100dvh-6rem))] w-48 overflow-y-auto overscroll-contain rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-2 shadow-lg">
           <ul className="space-y-1" role="listbox">
             {languageOptions.map((lang) => (
               <li key={lang.code}>

@@ -1,21 +1,22 @@
 import { ArrowRight } from "lucide-react";
+import { HeroVisual } from "@/components/home/HeroVisual";
 import { DesktopShot } from "@/components/site/Screenshot";
 import { SITE } from "@/config/site";
 import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
-/** The top of the home page: the promise, the two ways in, the product itself. */
+/** The top of the home page: the promise and the two ways in beside the drawing, then the product. */
 export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale }) {
   const hero = dict.hero;
   return (
-    <section id="hero" className="relative">
-      <div className="container-site pt-40 md:pt-52">
-        <h1 className="rise max-w-5xl text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[5rem]">
-          {hero.title}
-          <span className="block text-muted">{hero.titleMuted}</span>
-        </h1>
-        <div className="rise rise-delay-1 mt-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <p className="max-w-xl text-base leading-relaxed text-main md:text-lg">{hero.body}</p>
-          <div className="flex flex-wrap gap-3">
+    <section id="hero" className="relative overflow-hidden">
+      <div className="container-site grid items-center gap-12 pt-32 md:pt-40 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pt-36">
+        <div>
+          <h1 className="rise text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[3.75rem] xl:text-[4rem]">
+            {hero.title}
+            <span className="block text-muted">{hero.titleMuted}</span>
+          </h1>
+          <p className="rise rise-delay-1 mt-8 max-w-xl text-base leading-relaxed text-main md:text-lg">{hero.body}</p>
+          <div className="rise rise-delay-2 mt-10 flex flex-wrap gap-3">
             <a href={SITE.signupUrl} className="button button-primary">
               {hero.primary}
               <ArrowRight className="arrow" aria-hidden />
@@ -24,14 +25,18 @@ export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale })
               {hero.secondary}
             </a>
           </div>
+          <p className="rise rise-delay-2 mt-5 text-sm text-muted">{hero.note}</p>
+        </div>
+        <div className="rise rise-delay-1 mx-auto aspect-square w-full max-w-[34rem] lg:-me-8">
+          <HeroVisual />
         </div>
       </div>
-      <div className="container-site rise rise-delay-2 relative mt-16 md:mt-24">
+      <div className="container-site rise rise-delay-3 relative mt-12 md:mt-16">
         <DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />
-        {/* The picture fades into the page, as on the reference. */}
+        {/* The picture fades into the page. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background via-background/70 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/70 to-transparent"
         />
       </div>
     </section>

@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Map of buildings by the state of their due dates",
     "route": "A technician's route on the map, ordered by distance",
     "today": "A technician's plan for today on a phone"
+  },
+  "showcase": {
+    "title": "See inside the app",
+    "body": "Real screens of SparxDeck. Switch between the parts of the app."
+  },
+  "mcp": {
+    "badge": "Coming soon",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Your inspections in your AI assistant.",
+    "body": "MCP will connect your SparxDeck data to AI assistants such as ChatGPT, Claude or Gemini. Ask in plain words, say what falls due next month or which defects are overdue, and the answer comes straight from your records.",
+    "cta": "Tell me first"
   }
 };
 

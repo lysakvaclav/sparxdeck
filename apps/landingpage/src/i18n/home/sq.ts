@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Harta e ndërtesave sipas gjendjes së afateve",
     "route": "Itinerari i teknikut në hartë, i renditur sipas distancës",
     "today": "Plani i sotëm i teknikut në telefon"
+  },
+  "showcase": {
+    "title": "Shihni brenda aplikacionit",
+    "body": "Ekrane të vërteta të SparxDeck. Kaloni nga një pjesë e aplikacionit te tjetra."
+  },
+  "mcp": {
+    "badge": "Së shpejti",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Kontrollet tuaja në asistentin tuaj AI.",
+    "body": "MCP do t'i lidhë të dhënat tuaja në SparxDeck me asistentë AI si ChatGPT, Claude ose Gemini. Pyetni me fjalë të thjeshta, për shembull çfarë skadon muajin e ardhshëm ose cilat defekte janë me vonesë, dhe përgjigjja vjen drejt nga regjistri juaj.",
+    "cta": "Dua ta mësoj i pari"
   }
 };
 

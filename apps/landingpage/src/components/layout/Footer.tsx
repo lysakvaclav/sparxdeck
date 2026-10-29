@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FooterThemeToggle } from "@/components/layout/FooterThemeToggle";
 import { LocaleFlag } from "@/components/layout/LocaleFlag";
-import type { ProductLink } from "@/components/layout/Header";
+import type { ProductLink } from "@/components/site/SiteShell";
 import { TextLogo } from "@/components/ui/text-logo";
 import { SITE } from "@/config/site";
 import { languageOptions, type Dictionary, type Locale } from "@/i18n/dictionary";

@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Mapa zgrada prema stanju rokova",
     "route": "Ruta tehničara na mapi, poređana po udaljenosti",
     "today": "Dnevni plan tehničara na telefonu"
+  },
+  "showcase": {
+    "title": "Pogledajte aplikaciju iznutra",
+    "body": "Pravi ekrani SparxDecka. Prelazite između djelova aplikacije."
+  },
+  "mcp": {
+    "badge": "Uskoro",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Vaši pregledi u AI asistentu.",
+    "body": "MCP će povezati vaše podatke u SparxDecku s AI asistentima kao što su ChatGPT, Claude ili Gemini. Pitajte običnim riječima, na primjer šta ističe sljedećeg mjeseca ili koji kvarovi kasne, i odgovor stiže direktno iz vaše evidencije.",
+    "cta": "Želim da saznam prvi"
   }
 };
 

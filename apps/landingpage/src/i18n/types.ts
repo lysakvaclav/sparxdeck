@@ -53,6 +53,10 @@ export type HomeDictionary = {
     items: { question: string; answer: string }[];
   };
   cta: { title: string; body: string; primary: string; secondary: string };
+  /** The tabbed showcase of the platform's screens. */
+  showcase: { title: string; body: string };
+  /** The coming MCP connection to AI assistants. */
+  mcp: { badge: string; title: string; titleRest: string; body: string; cta: string };
   /** Alternative texts of the platform's screenshots. */
   shots: Record<
     "dashboard" | "devices" | "check" | "protocol" | "calendar" | "defects" | "map" | "route" | "today",

@@ -186,6 +186,17 @@ const home: HomeDictionary = {
     "map": "Mapa budynków według stanu terminów",
     "route": "Trasa technika na mapie, ułożona według odległości",
     "today": "Plan dnia technika w telefonie"
+  },
+  "showcase": {
+    "title": "Zajrzyj do aplikacji",
+    "body": "Prawdziwe ekrany SparxDeck. Przełączaj się między częściami aplikacji."
+  },
+  "mcp": {
+    "badge": "W przygotowaniu",
+    "title": "SparxDeck MCP.",
+    "titleRest": "Twoje przeglądy w asystencie AI.",
+    "body": "MCP połączy Twoje dane w SparxDeck z asystentami AI, takimi jak ChatGPT, Claude czy Gemini. Zapytasz zwykłym językiem, na przykład co wygasa w przyszłym miesiącu lub które usterki są po terminie, a odpowiedź przyjdzie prosto z Twojej ewidencji.",
+    "cta": "Chcę wiedzieć pierwszy"
   }
 };
 

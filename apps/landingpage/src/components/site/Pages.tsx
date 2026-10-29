@@ -95,7 +95,7 @@ export function FeaturePage({ locale, dict, index }: { locale: Locale; dict: Dic
           {"desktop" in feature.shot ? (
             <DesktopShot name={feature.shot.desktop} locale={locale} alt={dict.home.shots[feature.shot.desktop]} priority />
           ) : (
-            <div className="flex items-start justify-center gap-6 border border-line bg-surface px-6 py-12 sm:gap-12 md:py-16">
+            <div className="flex items-start justify-center gap-6 rounded-3xl border border-line bg-surface px-6 py-12 sm:gap-12 md:py-16">
               {feature.shot.phones.map((name, i) => (
                 <PhoneShot
                   key={name}

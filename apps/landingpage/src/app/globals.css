@@ -19,6 +19,11 @@
   --text-main: #3c3f44;
   --text-muted: #62666d;
   --accent: #08090a;
+  /* Only in drawings (the hero's extinguisher, the orbits' arrows). */
+  --signal: #e5544a;
+  --signal-deep: #a8322b;
+  --metal-light: #c9cdd3;
+  --metal-dark: #6b7178;
   --shot-shadow: 0 0 0 1px rgba(8, 9, 10, 0.04), 0 30px 60px -30px rgba(8, 9, 10, 0.25);
 
   /* Older names, still used by the language switcher and the theme menu. */
@@ -45,6 +50,10 @@
   --text-main: #b4b7bd;
   --text-muted: #8a8f98;
   --accent: #f7f8f8;
+  --signal: #ff6a5c;
+  --signal-deep: #b93a30;
+  --metal-light: #8f959d;
+  --metal-dark: #4a4f56;
   --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
@@ -142,7 +151,7 @@ h4 {
   min-height: 2.75rem;
   padding: 0 1.25rem;
   border: 1px solid transparent;
-  border-radius: 0;
+  border-radius: 999px;
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1;
@@ -218,7 +227,7 @@ h4 {
   justify-content: center;
   gap: 0.5rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0;
+  border-radius: 999px;
   background: transparent;
   color: var(--text-strong);
   transition:
@@ -232,8 +241,15 @@ h4 {
   font-size: 0.82rem;
 }
 
-.btn-square {
-  border-radius: 0;
+.btn-filled {
+  border-color: var(--text-strong);
+  background: var(--text-strong);
+  color: var(--background);
+}
+
+.btn-filled.btn-header:hover {
+  border-color: var(--text-strong);
+  background: color-mix(in srgb, var(--text-strong) 86%, var(--background));
 }
 
 .btn-header:hover {
@@ -245,9 +261,65 @@ h4 {
 .shot {
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   background: var(--surface);
   box-shadow: var(--shot-shadow);
+}
+
+/* Tabs as one rounded bar, the chosen one filled (the showcase of screens). */
+.tabs {
+  display: inline-flex;
+  max-width: 100%;
+  gap: 2px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  min-height: 2.5rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  color: var(--text-muted);
+  transition:
+    background-color 200ms ease-out,
+    color 200ms ease-out;
+}
+
+.tab:hover {
+  color: var(--text-strong);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--text-strong);
+  color: var(--background);
+}
+
+/* Slow orbits around the hero's drawing (still for reduced motion). */
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orbit {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: orbit 90s linear infinite;
+}
+
+.orbit-reverse {
+  animation-direction: reverse;
+  animation-duration: 140s;
 }
 
 /* A phone around a phone screenshot. */
@@ -313,7 +385,8 @@ details[open] .faq-icon {
   html {
     scroll-behavior: auto;
   }
-  .rise {
+  .rise,
+  .orbit {
     animation: none;
   }
 }
