@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Keine Antwort gefunden? Schreiben Sie uns, wir zeigen Ihnen SparxDeck gern.",
     "items": [
       {
-        "question": "Für wen ist SparxDeck gedacht?",
-        "answer": "Für Servicefirmen, die Brandschutzeinrichtungen prüfen und warten, typischerweise mit 3 bis 30 Mitarbeitenden. Techniker arbeiten vor Ort auf dem Handy, das Büro am Computer."
-      },
-      {
-        "question": "Welche Geräte unterstützt SparxDeck?",
-        "answer": "Feuerlöscher, Hydranten, Notbeleuchtung, Brandschutzklappen und Brandschutztüren. Gerätetypen und ihre Prüfpunkte passen Sie selbst an, damit der Techniker genau das prüft, was er soll."
-      },
-      {
-        "question": "Funktioniert die App ohne Netz?",
-        "answer": "Ja. Eine laufende Prüfung und der Tagesplan werden im Handy gespeichert. Prüfungen, Fotos und besuchte Gebäude warten dort und werden gesendet, sobald eine Verbindung besteht."
-      },
-      {
-        "question": "Kann ich das Protokoll anpassen?",
-        "answer": "Ja. Im Vorlageneditor legen Sie Blöcke, Texte, Logo, Schrift und Farbe fest. Was ein Protokoll nach den Vorschriften enthalten muss, bestimmt Ihre Firma; die App erfindet keine Vorschriften. Ein ausgestelltes Protokoll ändert sich nicht mehr."
-      },
-      {
-        "question": "Wie übernehme ich meine bisherigen Daten?",
-        "answer": "Kunden, Gebäude und Geräte importieren Sie aus einer Excel- oder CSV-Datei. Die App erkennt die Spalten, zeigt vor dem Speichern eine Vorschau und ein Import lässt sich rückgängig machen."
-      },
-      {
         "question": "Was kostet SparxDeck?",
-        "answer": "Den Preis vereinbaren wir nach der Größe Ihrer Firma, bezahlt wird per Überweisung auf Grundlage eines Vertrags. Vereinbaren Sie eine kurze Demo und wir erstellen Ihnen ein Angebot."
+        "answer": "Den Preis vereinbaren wir je nach Größe Ihrer Firma. Bezahlt wird per Überweisung auf Grundlage eines Vertrags, Ihre Kunden zahlen nichts. Vereinbaren Sie eine kurze Vorführung, und wir erstellen Ihnen ein Angebot."
       },
       {
-        "question": "Wie lange dauert die Einarbeitung?",
-        "answer": "Wenige Minuten. Ein Techniker schafft die erste Prüfung ohne Schulung, und in der App gibt es Beispieldaten zum Ausprobieren."
+        "question": "Welche Vorteile bringt SparxDeck?",
+        "answer": "Techniker tippen Prüfungen abends nicht mehr ab: Sie scannen das QR-Etikett, haken die Prüfung auf dem Handy ab, und das Protokoll entsteht direkt aus den erfassten Daten. Fristen und offene Mängel überwacht das System statt Excel, und alle Protokolle haben ein einheitliches Aussehen mit Ihrem Logo. Weniger Papier, weniger Abtippen, weniger Fehler."
+      },
+      {
+        "question": "Auf welchen Geräten läuft SparxDeck?",
+        "answer": "Es läuft im Browser auf iPhone, Android und Computer, ohne Installation aus einem App Store. Auf dem Handy legen Sie es wie eine normale App auf den Startbildschirm. Es funktioniert auch ohne Empfang: Eine begonnene Prüfung, Fotos und besuchte Gebäude werden im Handy gespeichert und gesendet, sobald eine Verbindung besteht."
+      },
+      {
+        "question": "Was unterscheidet SparxDeck von Excel oder allgemeinen Systemen?",
+        "answer": "Es ist gezielt für die Prüfung von Brandschutzeinrichtungen gebaut und nicht aus einem allgemeinen Servicesystem angepasst. Es bietet QR-Etiketten, Checklisten je Gerätetyp, Mängelverwaltung, Fristen, Grundrisse und eine Gebäudekarte. Angebote und Rechnungen gehören nicht dazu, deshalb bleibt es einfach."
+      },
+      {
+        "question": "Wie übernehme ich meinen Bestand und binde andere Systeme an?",
+        "answer": "Kunden, Gebäude und Geräte importieren Sie aus einer Excel- oder CSV-Datei. Die App erkennt die Spalten selbst, zeigt vor dem Speichern eine Vorschau, und der ganze Import lässt sich rückgängig machen. Daten exportieren Sie jederzeit als CSV. Eine direkte Anbindung an Buchhaltungssysteme gibt es noch nicht."
+      },
+      {
+        "question": "Wie schnell können wir starten?",
+        "answer": "Sofort. Sie legen das Konto selbst an und probieren alles mit Beispieldaten aus. Den Bestand importieren Sie aus einer Datei, drucken die QR-Etiketten, und ein Techniker schafft die erste Prüfung ohne lange Schulung."
+      },
+      {
+        "question": "Wie schützt SparxDeck die Daten?",
+        "answer": "Die Daten jeder Firma sind von allen anderen getrennt, und der Zugriff richtet sich nach Rollen: Inhaber, Administrator und Techniker. Ein ausgestelltes Protokoll wird nie überschrieben; eine Korrektur erzeugt eine neue Version, und das Original bleibt erhalten."
       }
     ]
   },

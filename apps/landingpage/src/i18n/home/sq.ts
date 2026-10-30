@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Nuk e gjetët përgjigjen? Na shkruani, me kënaqësi do t'ju tregojmë SparxDeck.",
     "items": [
       {
-        "question": "Për kë është SparxDeck?",
-        "answer": "Për firmat e shërbimit që kontrollojnë dhe testojnë pajisjet kundër zjarrit, zakonisht me 3 deri në 30 persona. Teknikët punojnë me telefon në terren, zyra në kompjuter."
-      },
-      {
-        "question": "Cilat pajisje mbështet SparxDeck?",
-        "answer": "Fikëse, hidrantë, ndriçim emergjent, klapa dhe dyer kundër zjarrit. Llojet e pajisjeve dhe pikat e kontrollit i përshtatni vetë, që tekniku të kontrollojë saktësisht atë që duhet."
-      },
-      {
-        "question": "A punon aplikacioni pa sinjal?",
-        "answer": "Po. Një kontroll i nisur dhe plani i ditës ruhen në telefon. Kontrollet, fotot dhe ndërtesat e vizituara presin aty dhe dërgohen sapo ka lidhje."
-      },
-      {
-        "question": "A mund ta përshtat procesverbalin?",
-        "answer": "Po. Në redaktorin e shablloneve caktoni blloqet, tekstet, logon, shkronjat dhe ngjyrën. Çfarë duhet të përmbajë procesverbali sipas rregullave e vendos firma juaj; aplikacioni nuk shpik rregulla. Një procesverbal i lëshuar nuk ndryshon më."
-      },
-      {
-        "question": "Si t'i transferoj të dhënat ekzistuese?",
-        "answer": "Klientët, ndërtesat dhe pajisjet i importoni nga një skedar Excel ose CSV. Aplikacioni njeh kolonat, tregon një parapamje para ruajtjes dhe importi mund të anulohet."
-      },
-      {
         "question": "Sa kushton SparxDeck?",
-        "answer": "Çmimi bihet dakord sipas madhësisë së firmës suaj dhe paguhet me transfertë bankare në bazë të kontratës. Rezervoni një demo të shkurtër dhe do t'ju përgatisim një ofertë."
+        "answer": "Çmimin e caktojmë sipas madhësisë së kompanisë suaj. Pagesa bëhet me transfertë bankare në bazë të një kontrate dhe klientët tuaj nuk paguajnë asgjë. Rezervoni një demonstrim të shkurtër dhe ne do t’ju përgatisim një ofertë."
       },
       {
-        "question": "Sa zgjat trajnimi?",
-        "answer": "Disa minuta. Tekniku e kryen kontrollin e parë pa trajnim dhe aplikacioni ka të dhëna shembull për të provuar gjithçka."
+        "question": "Çfarë përfitimesh sjell SparxDeck?",
+        "answer": "Tekniku nuk i rishkruan më kontrollet në mbrëmje: skanon etiketën QR, shënon kontrollin në telefon dhe raporti krijohet direkt nga të dhënat e plotësuara. Afatet dhe defektet e hapura i ndjek sistemi në vend të Excel-it, dhe të gjitha raportet kanë të njëjtën pamje me logon tuaj. Më pak letra, më pak rishkrim dhe më pak gabime."
+      },
+      {
+        "question": "Në cilat pajisje funksionon SparxDeck?",
+        "answer": "Funksionon në shfletues në iPhone, Android dhe kompjuter, pa instaluar asgjë nga dyqani i aplikacioneve. Në telefon e shtoni në ekranin kryesor si një aplikacion të zakonshëm. Funksionon edhe pa sinjal: kontrolli i nisur, fotot dhe ndërtesat e vizituara ruhen në telefon dhe dërgohen sapo të ketë lidhje."
+      },
+      {
+        "question": "Si ndryshon SparxDeck nga Excel ose sistemet e përgjithshme?",
+        "answer": "Është ndërtuar posaçërisht për kontrollet e pajisjeve kundër zjarrit, jo i përshtatur nga një sistem i përgjithshëm shërbimi. Ka etiketa QR, lista kontrolli sipas llojit të pajisjes, regjistrim defektesh, afate, planimetri ndërtesash dhe hartë. Nuk merret me oferta apo faturim, prandaj mbetet i thjeshtë."
+      },
+      {
+        "question": "Si i transferoj të dhënat ekzistuese dhe lidh sisteme të tjera?",
+        "answer": "Klientët, ndërtesat dhe pajisjet i importoni nga një skedar Excel ose CSV. Aplikacioni i njeh vetë kolonat, tregon një parapamje para ruajtjes dhe i gjithë importi mund të kthehet mbrapsht. Të dhënat i eksportoni në CSV në çdo kohë. Lidhje direkte me sistemet e kontabilitetit nuk kemi ende."
+      },
+      {
+        "question": "Sa shpejt mund të fillojmë?",
+        "answer": "Menjëherë. Llogarinë e krijoni vetë dhe gjithçka e provoni me të dhëna shembull. Importoni të dhënat nga një skedar, printoni etiketat QR dhe tekniku e bën kontrollin e parë pa trajnim të gjatë."
+      },
+      {
+        "question": "Si i mbron SparxDeck të dhënat?",
+        "answer": "Të dhënat e çdo kompanie janë të ndara nga të tjerat dhe qasja varet nga rolet: pronar, administrator dhe teknik. Një raport i lëshuar nuk mbishkruhet kurrë; korrigjimi i një kontrolli krijon një version të ri dhe origjinali mbetet i ruajtur."
       }
     ]
   },

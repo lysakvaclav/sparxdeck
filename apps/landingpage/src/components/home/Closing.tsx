@@ -57,8 +57,23 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
 /** Questions on one side, the way to ask more on the other. Works without JavaScript. */
 export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string }) {
   const f = dict.faq;
+  // The same questions for search engines (schema.org FAQPage).
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: f.items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
   return (
     <section aria-labelledby="faq-title" id="faq" className="border-t border-line">
+      <script
+        type="application/ld+json"
+        // Text from our own dictionaries; "<" escaped so it can't close the tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
+      />
       <div className="container-site grid gap-12 py-24 md:py-32 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <h2 id="faq-title" className="text-4xl leading-[1.05] md:text-5xl">

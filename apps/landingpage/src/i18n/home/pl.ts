@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Nie znalazłeś odpowiedzi? Napisz do nas, chętnie pokażemy Ci SparxDeck.",
     "items": [
       {
-        "question": "Dla kogo jest SparxDeck?",
-        "answer": "Dla firm serwisowych, które wykonują przeglądy i kontrole urządzeń przeciwpożarowych, zwykle zatrudniających od 3 do 30 osób. Technicy pracują w terenie na telefonie, biuro na komputerze."
-      },
-      {
-        "question": "Jakie urządzenia obsługuje SparxDeck?",
-        "answer": "Gaśnice, hydranty, oświetlenie awaryjne, klapy i drzwi przeciwpożarowe. Typy urządzeń i ich punkty kontrolne dostosujesz do siebie, dzięki czemu technik sprawdza dokładnie to, co powinien."
-      },
-      {
-        "question": "Czy aplikacja działa bez zasięgu?",
-        "answer": "Tak. Rozpoczęty przegląd i plan dnia zapisują się w telefonie. Kontrole, zdjęcia i odwiedzone budynki czekają tam i wysyłają się, gdy pojawi się połączenie."
-      },
-      {
-        "question": "Czy mogę dostosować protokół?",
-        "answer": "Tak. W edytorze szablonów ustawisz bloki, teksty, logo, czcionkę i kolor. O tym, co protokół musi zawierać zgodnie z przepisami, decyduje Twoja firma; aplikacja nie wymyśla przepisów. Wydany protokół już się nie zmienia."
-      },
-      {
-        "question": "Jak przenieść obecną ewidencję?",
-        "answer": "Klientów, budynki i urządzenia zaimportujesz z pliku Excel lub CSV. Aplikacja rozpozna kolumny, przed zapisem pokaże podgląd, a import można cofnąć."
-      },
-      {
         "question": "Ile kosztuje SparxDeck?",
-        "answer": "Cenę ustalamy według wielkości Twojej firmy, a płatność odbywa się przelewem na podstawie umowy. Umów krótką prezentację, a przygotujemy ofertę."
+        "answer": "Cenę ustalamy w zależności od wielkości Twojej firmy. Płatność odbywa się przelewem na podstawie umowy, a Twoi klienci nic nie płacą. Umów się na krótką prezentację, a przygotujemy dla Ciebie ofertę."
       },
       {
-        "question": "Ile trwa wdrożenie?",
-        "answer": "Kilka minut. Technik wykona pierwszą kontrolę bez szkolenia, a w aplikacji są przykładowe dane, na których wszystko wypróbujesz."
+        "question": "Jakie korzyści daje SparxDeck?",
+        "answer": "Technik nie przepisuje już przeglądów wieczorem: skanuje etykietę QR, odhacza kontrolę w telefonie, a protokół powstaje bezpośrednio z wprowadzonych danych. Terminy i otwarte usterki pilnuje system zamiast Excela, a wszystkie protokoły mają jednolity wygląd z Twoim logo. Mniej papierów, mniej przepisywania i mniej błędów."
+      },
+      {
+        "question": "Na jakich urządzeniach działa SparxDeck?",
+        "answer": "Działa w przeglądarce na iPhonie, Androidzie i komputerze, bez instalowania ze sklepu z aplikacjami. Na telefonie dodasz go do ekranu głównego jak zwykłą aplikację. Działa też bez zasięgu: rozpoczęta kontrola, zdjęcia i odwiedzone budynki zapisują się w telefonie i wysyłają, gdy tylko jest połączenie."
+      },
+      {
+        "question": "Czym SparxDeck różni się od Excela lub ogólnych systemów?",
+        "answer": "Jest zbudowany specjalnie do przeglądów urządzeń przeciwpożarowych, a nie przerobiony z ogólnego systemu do prac serwisowych. Ma etykiety QR, listy kontrolne według typu urządzenia, ewidencję usterek, terminy, plany budynków i mapę. Nie obsługuje ofert ani fakturowania, dzięki czemu pozostaje prosty."
+      },
+      {
+        "question": "Jak przenieść obecną ewidencję i połączyć inne systemy?",
+        "answer": "Klientów, budynki i urządzenia zaimportujesz z pliku Excel lub CSV. Aplikacja sama rozpozna kolumny, przed zapisem pokaże podgląd, a cały import można cofnąć. Dane w każdej chwili wyeksportujesz do CSV. Bezpośredniego połączenia z systemami księgowymi jeszcze nie mamy."
+      },
+      {
+        "question": "Jak szybko możemy zacząć?",
+        "answer": "Od razu. Konto założysz sam i wszystko wypróbujesz na danych przykładowych. Ewidencję zaimportujesz z pliku, wydrukujesz etykiety QR, a technik wykona pierwszą kontrolę bez długiego szkolenia."
+      },
+      {
+        "question": "Jak SparxDeck chroni dane?",
+        "answer": "Dane każdej firmy są oddzielone od pozostałych, a dostęp zależy od ról: właściciel, administrator i technik. Wydany protokół nigdy nie jest nadpisywany; korekta przeglądu tworzy nową wersję, a oryginał pozostaje zapisany."
       }
     ]
   },

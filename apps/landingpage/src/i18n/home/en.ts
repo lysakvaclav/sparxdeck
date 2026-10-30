@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Didn't find your answer? Write to us, we'll be happy to show you SparxDeck.",
     "items": [
       {
-        "question": "Who is SparxDeck for?",
-        "answer": "For service companies that inspect and test fire safety equipment, typically with 3 to 30 people. Technicians work on a phone in the field, the office on a computer."
-      },
-      {
-        "question": "Which equipment does SparxDeck support?",
-        "answer": "Fire extinguishers, hydrants, emergency lighting, fire dampers and fire doors. You can adjust equipment types and their checklist items, so the technician checks exactly what they should."
-      },
-      {
-        "question": "Does the app work without a signal?",
-        "answer": "Yes. An inspection under way and today's plan are saved in the phone. Checks, photos and visited buildings wait there and are sent once there is a connection."
-      },
-      {
-        "question": "Can I adjust the report?",
-        "answer": "Yes. In the template editor you set the blocks, texts, logo, font and colour. What a report must contain under the regulations is up to your company; the app doesn't make up any rules. An issued report never changes."
-      },
-      {
-        "question": "How do I move my current records?",
-        "answer": "Import customers, buildings and equipment from an Excel or CSV file. The app recognises the columns, shows a preview before saving, and an import can be undone."
-      },
-      {
         "question": "How much does SparxDeck cost?",
-        "answer": "The price is agreed according to the size of your company and paid by bank transfer under a contract. Book a short demo and we'll prepare an offer."
+        "answer": "We agree on the price based on the size of your company. You pay by bank transfer under a contract, and your customers pay nothing. Book a short demo and we will prepare an offer for you."
       },
       {
-        "question": "How long does it take to learn?",
-        "answer": "A few minutes. A technician manages the first check without training, and the app includes sample data to try everything on."
+        "question": "What are the benefits of SparxDeck?",
+        "answer": "Technicians no longer retype inspections in the evening: they scan the QR label, tick off the check on the phone and the report is created straight from the entered data. Due dates and open defects are tracked by the system instead of Excel, and every report has the same look with your logo. Less paperwork, less retyping and fewer mistakes."
+      },
+      {
+        "question": "Which devices does SparxDeck run on?",
+        "answer": "It runs in the browser on iPhone, Android and computers, with nothing to install from an app store. On a phone you can add it to the home screen like any other app. It also works without a signal: an unfinished check, photos and visited buildings are saved on the phone and sent as soon as there is a connection."
+      },
+      {
+        "question": "How is SparxDeck different from Excel or general-purpose systems?",
+        "answer": "It is built specifically for fire safety equipment inspections, not adapted from a general field service system. It has QR labels, checklists by device type, defect tracking, due dates, floor plans and a building map. It does not do quotes or invoicing, which keeps it simple."
+      },
+      {
+        "question": "How do I bring over my current records and connect other systems?",
+        "answer": "Import customers, buildings and devices from an Excel or CSV file. The app recognises the columns itself, shows a preview before saving, and the whole import can be undone. You can export data to CSV at any time. A direct connection to accounting systems is not available yet."
+      },
+      {
+        "question": "How quickly can we get started?",
+        "answer": "Right away. You create the account yourself and try everything on sample data. Import your records from a file, print the QR labels, and a technician can do the first check without lengthy training."
+      },
+      {
+        "question": "How does SparxDeck protect data?",
+        "answer": "Each company's data is kept separate from all others, and access follows roles: owner, administrator and technician. An issued report is never overwritten; correcting an inspection creates a new version and the original stays on record."
       }
     ]
   },

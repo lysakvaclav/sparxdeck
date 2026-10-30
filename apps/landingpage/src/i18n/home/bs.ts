@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Niste pronašli odgovor? Pišite nam, rado ćemo vam pokazati SparxDeck.",
     "items": [
       {
-        "question": "Kome je SparxDeck namijenjen?",
-        "answer": "Servisnim firmama koje pregledaju i ispituju protivpožarnu opremu, obično s 3 do 30 ljudi. Tehničari rade na telefonu na terenu, kancelarija na računaru."
-      },
-      {
-        "question": "Koju opremu SparxDeck podržava?",
-        "answer": "Vatrogasne aparate, hidrante, panik rasvjetu, protivpožarne klapne i vrata. Tipove opreme i stavke pregleda podešavate sami, pa tehničar provjerava tačno ono što treba."
-      },
-      {
-        "question": "Da li aplikacija radi bez signala?",
-        "answer": "Da. Započet pregled i dnevni plan se čuvaju u telefonu. Pregledi, fotografije i posjećene zgrade čekaju tamo i šalju se čim ima veze."
-      },
-      {
-        "question": "Mogu li prilagoditi zapisnik?",
-        "answer": "Da. U uređivaču šablona podešavate blokove, tekstove, logotip, font i boju. Šta zapisnik mora sadržavati po propisima odlučuje vaša firma; aplikacija ne izmišlja propise. Izdat zapisnik se više ne mijenja."
-      },
-      {
-        "question": "Kako da prenesem postojeću evidenciju?",
-        "answer": "Klijente, zgrade i opremu uvezete iz Excel ili CSV fajla. Aplikacija prepozna kolone, prije spremanja pokaže pregled, a uvoz se može i poništiti."
-      },
-      {
         "question": "Koliko košta SparxDeck?",
-        "answer": "Cijenu dogovaramo prema veličini vaše firme, a plaća se uplatom na osnovu ugovora. Zakažite kratak demo i pripremit ćemo vam ponudu."
+        "answer": "Cijenu dogovaramo prema veličini vaše firme. Plaća se prenosom na osnovu ugovora, a vaši klijenti ne plaćaju ništa. Zakažite kratku demonstraciju i pripremit ćemo vam ponudu."
       },
       {
-        "question": "Koliko traje obuka?",
-        "answer": "Nekoliko minuta. Tehničar uradi prvi pregled bez obuke, a u aplikaciji postoje probni podaci na kojima sve isprobate."
+        "question": "Koje prednosti donosi SparxDeck?",
+        "answer": "Tehničar više ne prepisuje preglede navečer: skenira QR naljepnicu, označi kontrolu na telefonu i zapisnik nastaje direktno iz unesenih podataka. Rokove i otvorene nedostatke prati sistem umjesto Excela, a svi zapisnici imaju isti izgled s vašim logom. Manje papira, manje prepisivanja i manje grešaka."
+      },
+      {
+        "question": "Na kojim uređajima radi SparxDeck?",
+        "answer": "Radi u pregledniku na iPhoneu, Androidu i računaru, bez instaliranja iz trgovine aplikacija. Na telefonu ga dodate na početni ekran kao običnu aplikaciju. Radi i bez signala: započeta kontrola, fotografije i posjećene zgrade spremaju se u telefon i šalju čim postoji veza."
+      },
+      {
+        "question": "Po čemu se SparxDeck razlikuje od Excela ili općih sistema?",
+        "answer": "Napravljen je posebno za preglede protivpožarne opreme, a ne prilagođen iz općeg sistema za servisne poslove. Ima QR naljepnice, kontrolne liste po tipu uređaja, evidenciju nedostataka, rokove, planove zgrada i mapu. Ne bavi se ponudama ni fakturisanjem, pa ostaje jednostavan."
+      },
+      {
+        "question": "Kako da prenesem postojeću evidenciju i povežem druge sisteme?",
+        "answer": "Klijente, zgrade i uređaje uvezete iz Excel ili CSV datoteke. Aplikacija sama prepoznaje kolone, prije spremanja pokaže pregled, a cijeli uvoz se može poništiti. Podatke u svakom trenutku izvezete u CSV. Direktnu vezu s računovodstvenim sistemima još nemamo."
+      },
+      {
+        "question": "Koliko brzo možemo početi?",
+        "answer": "Odmah. Račun otvorite sami i sve isprobate na probnim podacima. Evidenciju uvezete iz datoteke, odštampate QR naljepnice i tehničar obavi prvu kontrolu bez duge obuke."
+      },
+      {
+        "question": "Kako SparxDeck štiti podatke?",
+        "answer": "Podaci svake firme odvojeni su od ostalih, a pristup zavisi od uloga: vlasnik, administrator i tehničar. Izdati zapisnik se nikada ne prepisuje; ispravka pregleda pravi novu verziju, a original ostaje sačuvan."
       }
     ]
   },

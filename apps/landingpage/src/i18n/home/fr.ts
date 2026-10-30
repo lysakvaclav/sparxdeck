@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Vous n'avez pas trouvé votre réponse ? Écrivez-nous, nous vous montrerons SparxDeck avec plaisir.",
     "items": [
       {
-        "question": "À qui s'adresse SparxDeck ?",
-        "answer": "Aux entreprises de maintenance qui vérifient et testent les équipements de sécurité incendie, généralement de 3 à 30 personnes. Les techniciens travaillent sur téléphone, le bureau sur ordinateur."
-      },
-      {
-        "question": "Quels équipements SparxDeck prend-il en charge ?",
-        "answer": "Extincteurs, bouches d'incendie, éclairage de sécurité, clapets et portes coupe-feu. Vous adaptez les types d'équipement et leurs points de contrôle, pour que le technicien vérifie exactement ce qu'il faut."
-      },
-      {
-        "question": "L'application fonctionne-t-elle sans réseau ?",
-        "answer": "Oui. Une vérification en cours et le plan du jour sont enregistrés dans le téléphone. Contrôles, photos et bâtiments visités y attendent et partent dès qu'il y a une connexion."
-      },
-      {
-        "question": "Puis-je adapter le rapport ?",
-        "answer": "Oui. Dans l'éditeur de modèles, vous réglez blocs, textes, logo, police et couleur. Ce que le rapport doit contenir selon la réglementation relève de votre entreprise ; l'application n'invente aucune règle. Un rapport émis ne change plus."
-      },
-      {
-        "question": "Comment reprendre mes données actuelles ?",
-        "answer": "Importez clients, bâtiments et équipements depuis un fichier Excel ou CSV. L'application reconnaît les colonnes, affiche un aperçu avant l'enregistrement et un import peut être annulé."
-      },
-      {
         "question": "Combien coûte SparxDeck ?",
-        "answer": "Le prix est convenu selon la taille de votre entreprise et réglé par virement dans le cadre d'un contrat. Demandez une courte démo et nous vous préparerons une offre."
+        "answer": "Le prix est convenu selon la taille de votre entreprise. Le paiement se fait par virement sur la base d’un contrat, et vos clients ne paient rien. Réservez une courte démonstration et nous vous préparerons une offre."
       },
       {
-        "question": "Combien de temps pour la prise en main ?",
-        "answer": "Quelques minutes. Un technicien réalise son premier contrôle sans formation, et l'application contient des données d'exemple pour tout essayer."
+        "question": "Quels avantages apporte SparxDeck ?",
+        "answer": "Le technicien ne recopie plus ses vérifications le soir : il scanne l’étiquette QR, coche le contrôle sur son téléphone et le rapport est créé directement à partir des données saisies. Les échéances et les anomalies ouvertes sont suivies par le système au lieu d’Excel, et tous les rapports ont la même présentation avec votre logo. Moins de papier, moins de ressaisie et moins d’erreurs."
+      },
+      {
+        "question": "Sur quels appareils fonctionne SparxDeck ?",
+        "answer": "Il fonctionne dans le navigateur sur iPhone, Android et ordinateur, sans rien installer depuis une boutique d’applications. Sur le téléphone, vous l’ajoutez à l’écran d’accueil comme une application. Il fonctionne aussi sans réseau : un contrôle en cours, les photos et les bâtiments visités sont enregistrés sur le téléphone et envoyés dès que la connexion revient."
+      },
+      {
+        "question": "En quoi SparxDeck diffère-t-il d’Excel ou des systèmes généralistes ?",
+        "answer": "Il est conçu spécifiquement pour la vérification des équipements de sécurité incendie, et non adapté d’un logiciel généraliste d’interventions. Il propose des étiquettes QR, des listes de contrôle par type d’équipement, le suivi des anomalies, les échéances, les plans des bâtiments et une carte. Il ne gère ni devis ni facturation, ce qui le garde simple."
+      },
+      {
+        "question": "Comment reprendre mes données actuelles et connecter d’autres systèmes ?",
+        "answer": "Importez clients, bâtiments et équipements depuis un fichier Excel ou CSV. L’application reconnaît elle-même les colonnes, affiche un aperçu avant l’enregistrement, et l’import entier peut être annulé. Vous pouvez exporter les données en CSV à tout moment. Il n’existe pas encore de connexion directe aux logiciels comptables."
+      },
+      {
+        "question": "En combien de temps pouvons-nous démarrer ?",
+        "answer": "Tout de suite. Vous créez le compte vous-même et testez tout sur des données d’exemple. Importez vos données depuis un fichier, imprimez les étiquettes QR, et un technicien réalise son premier contrôle sans longue formation."
+      },
+      {
+        "question": "Comment SparxDeck protège-t-il les données ?",
+        "answer": "Les données de chaque entreprise sont séparées de toutes les autres, et l’accès dépend des rôles : propriétaire, administrateur et technicien. Un rapport émis n’est jamais écrasé ; corriger une vérification crée une nouvelle version et l’original reste conservé."
       }
     ]
   },

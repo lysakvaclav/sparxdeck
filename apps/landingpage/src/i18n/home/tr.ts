@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Cevabınızı bulamadınız mı? Bize yazın, SparxDeck'i size memnuniyetle gösteririz.",
     "items": [
       {
-        "question": "SparxDeck kimler için?",
-        "answer": "Yangın güvenliği ekipmanını denetleyen ve test eden, genellikle 3 ila 30 kişilik servis firmaları için. Teknisyenler sahada telefonla, ofis bilgisayarla çalışır."
-      },
-      {
-        "question": "SparxDeck hangi ekipmanları destekler?",
-        "answer": "Yangın söndürücüler, hidrantlar, acil aydınlatma, yangın damperleri ve yangın kapıları. Ekipman türlerini ve kontrol maddelerini kendiniz uyarlarsınız; böylece teknisyen tam olarak gerekeni kontrol eder."
-      },
-      {
-        "question": "Uygulama sinyalsiz çalışır mı?",
-        "answer": "Evet. Başlanmış bir denetim ve günün planı telefona kaydedilir. Kontroller, fotoğraflar ve ziyaret edilen binalar orada bekler ve bağlantı olunca gönderilir."
-      },
-      {
-        "question": "Raporu uyarlayabilir miyim?",
-        "answer": "Evet. Şablon düzenleyicisinde blokları, metinleri, logoyu, yazı tipini ve rengi ayarlarsınız. Raporun mevzuata göre ne içermesi gerektiğine firmanız karar verir; uygulama kural uydurmaz. Düzenlenen bir rapor artık değişmez."
-      },
-      {
-        "question": "Mevcut kayıtlarımı nasıl aktarırım?",
-        "answer": "Müşterileri, binaları ve ekipmanı bir Excel veya CSV dosyasından içe aktarırsınız. Uygulama sütunları tanır, kaydetmeden önce önizleme gösterir ve içe aktarma geri alınabilir."
-      },
-      {
         "question": "SparxDeck ne kadar?",
-        "answer": "Fiyat firmanızın büyüklüğüne göre belirlenir ve bir sözleşmeye dayalı olarak banka havalesiyle ödenir. Kısa bir demo ayarlayın, size bir teklif hazırlayalım."
+        "answer": "Fiyatı firmanızın büyüklüğüne göre belirliyoruz. Ödeme sözleşmeye dayalı banka havalesiyle yapılır ve müşterileriniz hiçbir şey ödemez. Kısa bir tanıtım ayarlayın, size bir teklif hazırlayalım."
       },
       {
-        "question": "Alışmak ne kadar sürer?",
-        "answer": "Birkaç dakika. Teknisyen ilk kontrolü eğitimsiz yapar ve uygulamada her şeyi denemek için örnek veriler vardır."
+        "question": "SparxDeck ne gibi faydalar sağlar?",
+        "answer": "Teknisyen denetimleri artık akşamları yeniden yazmaz: QR etiketini tarar, kontrolü telefonda işaretler ve rapor doğrudan girilen verilerden oluşur. Son tarihleri ve açık arızaları Excel yerine sistem takip eder; tüm raporlar logonuzla aynı görünüme sahiptir. Daha az kâğıt, daha az yeniden yazma ve daha az hata."
+      },
+      {
+        "question": "SparxDeck hangi cihazlarda çalışır?",
+        "answer": "iPhone, Android ve bilgisayarda tarayıcıda çalışır; uygulama mağazasından bir şey yüklemeniz gerekmez. Telefonda normal bir uygulama gibi ana ekrana ekleyebilirsiniz. Sinyal olmadan da çalışır: yarım kalan kontrol, fotoğraflar ve ziyaret edilen binalar telefonda saklanır ve bağlantı gelince gönderilir."
+      },
+      {
+        "question": "SparxDeck'i Excel'den veya genel sistemlerden ayıran nedir?",
+        "answer": "Genel bir servis sisteminden uyarlanmamış, doğrudan yangın güvenliği ekipmanı denetimleri için tasarlanmıştır. QR etiketler, cihaz türüne göre kontrol listeleri, arıza takibi, son tarihler, bina kat planları ve harita sunar. Teklif ve faturalama işlerine girmez, bu yüzden basit kalır."
+      },
+      {
+        "question": "Mevcut kayıtlarımı nasıl aktarır ve başka sistemlere bağlarım?",
+        "answer": "Müşterileri, binaları ve cihazları Excel veya CSV dosyasından içe aktarırsınız. Uygulama sütunları kendisi tanır, kaydetmeden önce önizleme gösterir ve içe aktarmanın tamamı geri alınabilir. Verileri istediğiniz zaman CSV olarak dışa aktarabilirsiniz. Muhasebe sistemlerine doğrudan bağlantı henüz yok."
+      },
+      {
+        "question": "Ne kadar hızlı başlayabiliriz?",
+        "answer": "Hemen. Hesabı kendiniz açar, her şeyi örnek verilerle denersiniz. Kayıtlarınızı dosyadan içe aktarır, QR etiketleri yazdırırsınız; teknisyen ilk kontrolü uzun bir eğitim olmadan yapar."
+      },
+      {
+        "question": "SparxDeck verileri nasıl korur?",
+        "answer": "Her firmanın verileri diğerlerinden ayrıdır ve erişim rollere bağlıdır: sahip, yönetici ve teknisyen. Düzenlenen bir rapor asla üzerine yazılmaz; bir denetimin düzeltilmesi yeni bir sürüm oluşturur ve orijinal saklanır."
       }
     ]
   },

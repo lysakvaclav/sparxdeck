@@ -127,32 +127,32 @@ const home: HomeDictionary = {
     "body": "Nenašli jste odpověď? Napište nám, rádi vám SparxDeck ukážeme.",
     "items": [
       {
-        "question": "Pro koho je SparxDeck určený?",
-        "answer": "Pro servisní firmy, které dělají revize a kontroly požárně bezpečnostních zařízení, typicky se 3 až 30 lidmi. Technici pracují na telefonu v terénu, kancelář na počítači."
-      },
-      {
-        "question": "Jaká zařízení SparxDeck podporuje?",
-        "answer": "Hasicí přístroje, hydranty, nouzové osvětlení, požární klapky a dveře. Typy zařízení i jejich kontrolní položky si upravíte podle sebe, takže technik kontroluje přesně to, co má."
-      },
-      {
-        "question": "Funguje aplikace bez signálu?",
-        "answer": "Ano. Rozpracovaná revize i dnešní plán se uloží do telefonu. Kontroly, fotky i označení navštívených budov čekají v telefonu a odešlou se, jakmile je spojení."
-      },
-      {
-        "question": "Můžu si protokol upravit podle sebe?",
-        "answer": "Ano. V editoru šablon nastavíte bloky, texty, logo, písmo i barvu. Co má protokol obsahovat podle předpisů, určuje vaše firma, aplikace žádné předpisy nevymýšlí. Vydaný protokol se už nezmění."
-      },
-      {
-        "question": "Jak převedu stávající evidenci?",
-        "answer": "Zákazníky, budovy a zařízení naimportujete ze souboru Excel nebo CSV. Aplikace rozpozná sloupce, před uložením ukáže náhled a import jde i vrátit."
-      },
-      {
         "question": "Kolik SparxDeck stojí?",
-        "answer": "Cenu domluvíme podle velikosti vaší firmy. Platí se převodem na základě smlouvy. Domluvte si krátkou ukázku a připravíme vám nabídku."
+        "answer": "Cenu domluvíme podle velikosti vaší firmy. Platí se převodem na základě smlouvy a vaši zákazníci nic neplatí. Domluvte si krátkou ukázku a připravíme vám nabídku na míru."
       },
       {
-        "question": "Jak dlouho trvá zaučení?",
-        "answer": "Pár minut. Technik zvládne první kontrolu bez školení a v aplikaci jsou ukázková data, na kterých si vše vyzkoušíte."
+        "question": "Jaké výhody SparxDeck přináší?",
+        "answer": "Technik už nepřepisuje revize večer doma: naskenuje QR štítek, odklikne kontrolu na telefonu a protokol vznikne rovnou z vyplněných údajů. Termíny dalších revizí a otevřené závady hlídá systém místo Excelu a protokoly mají jednotný vzhled s vaším logem. Méně papírování, méně přepisování a méně chyb."
+      },
+      {
+        "question": "Na jakých zařízeních SparxDeck funguje?",
+        "answer": "Běží v prohlížeči na iPhonu, Androidu i počítači, nic se neinstaluje z obchodu s aplikacemi. Na telefonu si ho přidáte na plochu jako běžnou aplikaci. Funguje i bez signálu: rozpracovaná kontrola, fotky a označení navštívených budov se uloží do telefonu a odešlou se, jakmile je spojení."
+      },
+      {
+        "question": "Čím se SparxDeck liší od Excelu nebo obecných systémů?",
+        "answer": "Je postavený přímo pro revize požárně bezpečnostních zařízení, ne upravený z obecného systému pro servisní práce. Má QR štítky, kontrolní seznamy podle typu zařízení, evidenci závad, hlídání termínů, půdorysy budov a mapu. Nabídky ani fakturaci neřeší, a proto zůstává jednoduchý."
+      },
+      {
+        "question": "Jak převedu stávající evidenci a napojím další systémy?",
+        "answer": "Zákazníky, budovy a zařízení naimportujete ze souboru Excel nebo CSV. Aplikace sama rozpozná sloupce, před uložením ukáže náhled a celý import jde vrátit zpět. Data kdykoli vyexportujete do CSV. Přímé napojení na účetní systémy zatím nemáme."
+      },
+      {
+        "question": "Jak rychle můžeme začít?",
+        "answer": "Hned. Účet si založíte sami a na ukázkových datech si vše vyzkoušíte. Evidenci naimportujete ze souboru, vytisknete QR štítky a technik zvládne první kontrolu bez dlouhého školení."
+      },
+      {
+        "question": "Jak SparxDeck chrání data?",
+        "answer": "Data každé firmy jsou oddělená od ostatních a přístup se řídí rolemi: vlastník, administrátor a technik. Vydaný protokol se zpětně nepřepíše; oprava revize vytvoří novou verzi a původní zůstane uložená."
       }
     ]
   },
