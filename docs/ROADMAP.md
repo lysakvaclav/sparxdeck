@@ -41,7 +41,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 22 | Editor protokolů (etapy A–D) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 23 | Trasy pro techniky (etapy A–B) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
-| 31 | AI asistenti (MCP) | Fáze 3, zadání majitele 2026-11-02 | Hotovo (2026-11-02), nenasazeno |
+| 31 | AI asistenti (MCP) | Fáze 3, zadání majitele 2026-11-02 | Hotovo a nasazeno (2026-11-02) |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -734,7 +734,7 @@ Dvě etapy, po každé zpráva majiteli. Rozhodnutí majitele (2026-10-28, dopor
 
 Zadání majitele z 2026-11-02: plnohodnotný MCP server, aby si zákazníci připojili svého AI asistenta (Claude a další) a pracovali s daty SparxDecku. Rozhodnutí: OAuth hned (osobní tokeny navíc), připojit se smí každý člen s právy své role, veřejná stránka ve všech 16 jazycích. Ověřeno proti specifikaci MCP 2026-07-28 (oficiální dokumentace). Číslo 31 proto, že 24–30 jsou rozplánované části fáze 2.
 
-**Stav (2026-11-02): hotovo** (lokálně, nenasazeno).
+**Stav (2026-11-02): hotovo a nasazeno** na portal.sparxdeck.com (MCP je u firem vypnuté, dokud ho vlastník nezapne).
 
 - **Endpoint** `/api/mcp`: Streamable HTTP bez relací (MCP 2026-07-28) a pro starší klienty i verze 2025 (bezstavová záloha knihovny `@modelcontextprotocol/server` 2.4.0). Kontrola hlavičky Origin, odpověď 401 s `resource_metadata` (RFC 9728), CORS pro tokeny.
 - **OAuth 2.1 v platformě** (žádná cizí služba): metadata `/.well-known/oauth-protected-resource/api/mcp` a `/.well-known/oauth-authorization-server`, dynamická registrace `/oauth/register` (RFC 7591) i Client ID Metadata Documents (stažení jen z veřejné https adresy, ochrana před SSRF), souhlasová obrazovka `/oauth/authorize` (firma, čtení, nebo i změny), kód na 10 minut s PKCE S256, `resource` podle RFC 8707, `/oauth/token` s obnovou tokenu (nový obnovovací token při každé obnově, znovu použitý starý zruší celé připojení), `/oauth/revoke`. Ukládají se jen otisky (SHA-256) tajemství.
