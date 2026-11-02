@@ -41,6 +41,7 @@ srozumitelné prázdné stavy a chybové hlášky, potvrzení před smazáním (
 | 21 | Mapa budov se semaforem | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 22 | Editor protokolů (etapy A–D) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
 | 23 | Trasy pro techniky (etapy A–B) | Fáze 3 | Hotovo (2026-10-28), nenasazeno |
+| 31 | AI asistenti (MCP) | Fáze 3, zadání majitele 2026-11-02 | Hotovo (2026-11-02), nenasazeno |
 
 Pořadí vychází ze závislostí: nastavení firmy (logo, údaje) potřebují protokoly, zařízení potřebují zákazníky a šablony, revize potřebuje zařízení a štítky, protokol potřebuje dokončenou revizi.
 
@@ -728,6 +729,24 @@ Dvě etapy, po každé zpráva majiteli. Rozhodnutí majitele (2026-10-28, dopor
 - **Kalendář:** návštěva ze zastávky má ikonu trasy a v dialogu dne odkaz „Otevřít trasu“ (místo úpravy, kterou databáze u návštěv z trasy nepustí).
 - **Opravy navíc:** procházka části 16 nepočítala s vysvětlením polohy před prvním skenem (část 20) a padala; ukládání stránek do telefonu je sdílené (`src/lib/client/keep-page.ts`).
 - **Ověření:** testy fronty označení; RLS test času z telefonu; `e2e/part23-today.mjs` (8 kroků: tip, kalendář, Moje práce, uložení do telefonu, označení bez signálu i po znovunačtení, stránka bez signálu, odeslání s původním časem, tmavý režim a angličtina); audit přístupnosti Dnešního plánu (i dotykové plochy); části 16, 19, 23 a hlavní tok.
+
+### Část 31: AI asistenti (MCP)
+
+Zadání majitele z 2026-11-02: plnohodnotný MCP server, aby si zákazníci připojili svého AI asistenta (Claude a další) a pracovali s daty SparxDecku. Rozhodnutí: OAuth hned (osobní tokeny navíc), připojit se smí každý člen s právy své role, veřejná stránka ve všech 16 jazycích. Ověřeno proti specifikaci MCP 2026-07-28 (oficiální dokumentace). Číslo 31 proto, že 24–30 jsou rozplánované části fáze 2.
+
+**Stav (2026-11-02): hotovo** (lokálně, nenasazeno).
+
+- **Endpoint** `/api/mcp`: Streamable HTTP bez relací (MCP 2026-07-28) a pro starší klienty i verze 2025 (bezstavová záloha knihovny `@modelcontextprotocol/server` 2.4.0). Kontrola hlavičky Origin, odpověď 401 s `resource_metadata` (RFC 9728), CORS pro tokeny.
+- **OAuth 2.1 v platformě** (žádná cizí služba): metadata `/.well-known/oauth-protected-resource/api/mcp` a `/.well-known/oauth-authorization-server`, dynamická registrace `/oauth/register` (RFC 7591) i Client ID Metadata Documents (stažení jen z veřejné https adresy, ochrana před SSRF), souhlasová obrazovka `/oauth/authorize` (firma, čtení, nebo i změny), kód na 10 minut s PKCE S256, `resource` podle RFC 8707, `/oauth/token` s obnovou tokenu (nový obnovovací token při každé obnově, znovu použitý starý zruší celé připojení), `/oauth/revoke`. Ukládají se jen otisky (SHA-256) tajemství.
+- **Práva:** každé volání běží v databázi jako člen (role `authenticated` a jeho id), takže platí RLS i zápisové funkce jako v aplikaci; dotazy navíc omezené na firmu tokenu. Rozsahy `sparxdeck:read` a `sparxdeck:write`; zápis jen se zápisovým rozsahem a když ho vlastník povolil. MCP pro firmu i zápis jsou výchozí vypnuté, mění je jen vlastník (`set_mcp_settings`, trigger hlídá i přímou úpravu).
+- **Čtení (17 nástrojů):** přehled, co propadá, budovy se semaforem, zákazníci, zařízení, revize a souhrn za období, závady, kalendář, tým, typy zařízení, hledání. Popisy, vstupní a výstupní schémata, anotace, stránkování kurzorem, chyby s kódem a návodem. Zdroje (firma, typy, budova, zákazník, zařízení, závada, revize, průvodce) a 4 hotové instrukce.
+- **Zápis (7 nástrojů):** založení, úprava, komentář a vyřešení závady, naplánování a přesun návštěvy, řádek do poznámek. Vždy dvakrát: náhled změny s potvrzovacím kódem (10 minut, jednorázový, vázaný na token, nástroj a přesné parametry), pak provedení přes stejné funkce jako v aplikaci. Nic se nemaže, protokoly se nevydávají.
+- **Bezpečnost:** texty z evidence jsou označená data (v textu mezi značkami, `<` escapované, aby je nešlo uzavřít), poloha techniků se nikdy nevybírá, limit 60 volání za minutu a 2000 za den na token (Postgres, bez Redisu), audit (kdo, kdy, nástroj, parametry bez potvrzovacího kódu, výsledek), odvolání a vypršení tokenů.
+- **Aplikace:** stránka AI asistenti `/assistants` (přepínače vlastníka, adresa a návod pro Claude a Claude Code, připojení s odvoláním, osobní token, použití za 7 dní a posledních 50 volání). Web: stránka `sparxdeck.com/<jazyk>/mcp` v 16 jazycích, sekce MCP na úvodní stránce na ni odkazuje.
+- **Technicky:** migrace `20261102090000_mcp.sql`; `src/lib/mcp/*` (konfigurace, připojení k databázi pod rolí člena, OAuth, pravidla, výstupy, ochrany, čtení, zápis, server); proměnná `DATABASE_POOLER_URL` (transakční pooler).
+- **Ověření:** `tests/mcp.test.ts` (33 testů proti vývojové databázi: metadata, OAuth včetně PKCE a znovu použitého kódu a obnovovacího tokenu, cizí `resource`, čtecí nástroje, cizí firma, podstrčený text v poznámce, žádné souřadnice, zdroje a instrukce, klient verze 2025, audit, vypnutá firma, přepínače jen vlastníka, skryté zápisové nástroje, náhled a potvrzení, cizí potvrzení, role technika, vyřešení závady, odvolaný a prošlý token, limit, RLS nových tabulek), `tests/mcp-rules.test.ts` (15 testů pravidel), `e2e/part31.mjs` (7 kroků včetně skutečné souhlasové obrazovky), audit přístupnosti stránky AI asistentů na počítači i telefonu a veřejné stránky v obou motivech a arabštině.
+
+**Zbývá po nasazení:** vyzkoušet připojení ze skutečného Claude (claude.ai a Claude Desktop potřebují veřejnou adresu).
 
 ---
 

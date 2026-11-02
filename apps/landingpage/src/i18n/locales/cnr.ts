@@ -1,5 +1,6 @@
 import type { Dictionary } from "../types";
 import home from "../home/cnr";
+import mcp from "../mcp/cnr";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -21,6 +22,7 @@ const cnr: Dictionary = {
     megaContactLabel: "Kontakt",
   },
   home,
+  mcp,
   footer: {
     allRightsReserved: "Sva prava zadržana.",
     cookiesSettings: "Kolačići",

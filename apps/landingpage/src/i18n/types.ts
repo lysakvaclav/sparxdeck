@@ -119,10 +119,33 @@ export type CommonDictionary = {
   backToHome: string;
 };
 
+/** The public MCP page (src/app/[locale]/mcp/page.tsx). Group lists follow the order in the page. */
+export type McpPageDictionary = {
+  title: string;
+  subtitle: string;
+  intro: string;
+  connectTitle: string;
+  address: string;
+  steps: string[];
+  note: string;
+  toolsTitle: string;
+  readTitle: string;
+  readGroups: string[];
+  writeTitle: string;
+  writeBody: string;
+  writeGroups: string[];
+  extras: string;
+  securityTitle: string;
+  security: string[];
+  technicalTitle: string;
+  technical: string[];
+};
+
 export type Dictionary = {
   common: CommonDictionary;
   header: HeaderDictionary;
   home: HomeDictionary;
+  mcp: McpPageDictionary;
   footer: FooterDictionary;
   pages: PagesDictionary;
   legal: LegalDictionary;

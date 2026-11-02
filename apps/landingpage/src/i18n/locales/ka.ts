@@ -1,5 +1,6 @@
 import type { Dictionary } from "../types";
 import home from "../home/ka";
+import mcp from "../mcp/ka";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -21,6 +22,7 @@ const ka: Dictionary = {
     megaContactLabel: "კონტაქტი",
   },
   home,
+  mcp,
   footer: {
     allRightsReserved: "ყველა უფლება დაცულია.",
     cookiesSettings: "Cookies",

@@ -55,6 +55,7 @@ Založte projekt typu Next.js v **EU** regionu. Do Vercelu patří `NEXT_PUBLIC_
    | `RESEND_API_KEY`, `EMAIL_FROM` | ano | nechat prázdné (náhledy e-maily neposílají) |
    | `CRON_SECRET` | dlouhý náhodný řetězec | nechat prázdné |
    | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | ano | volitelně |
+   | `DATABASE_POOLER_URL` | Supabase → Connect → *Transaction pooler* (port 6543) s heslem databáze | vývojový projekt |
 
 5. *Settings → Domains:* přidejte `portal.sparxdeck.com` a u registrátora nastavte CNAME na `cname.vercel-dns.com`.
 6. Týdenní souhrn se naplánuje sám podle `vercel.json` (pondělí 5:00 UTC). Vercel posílá `CRON_SECRET` automaticky.
@@ -150,3 +151,16 @@ Použitá verze: build 2026-10-27 (tiles v4.15.2), `@protomaps/basemaps` 5.7.2. 
 **Licence:** mapa sama ukazuje „© OpenStreetMap, Protomaps“ (ODbL vyžaduje uvedení). Písmo Noto Sans je OFL, ikony MIT.
 
 **Aktualizace:** jednou za čas (nové ulice) stejným postupem a nahrát přes staré soubory.
+
+## 11. AI asistenti (MCP, část 31)
+
+Endpoint `https://portal.sparxdeck.com/api/mcp`, autorizační server je v platformě (žádná další služba).
+
+1. Před nasazením migrace `20261102090000_mcp.sql` (`npm run db:push:production`). Přidává jen sloupce a tabulky; u všech firem je MCP vypnuté.
+2. Ve Vercelu u platformy proměnná `DATABASE_POOLER_URL` (transakční pooler Supabase, port 6543, s heslem databáze). Bez ní endpoint MCP vrací chybu 500, zbytek aplikace funguje dál.
+3. Kontrola po nasazení:
+   - `curl https://portal.sparxdeck.com/.well-known/oauth-protected-resource/api/mcp` vrací `resource` a `authorization_servers`;
+   - `curl -X POST https://portal.sparxdeck.com/api/mcp` vrací 401 s hlavičkou `WWW-Authenticate: Bearer resource_metadata=…`.
+4. Zkouška s Claude: vlastník zapne AI asistenty v aplikaci (AI asistenti), v claude.ai *Nastavení → Konektory → Přidat vlastní konektor* s adresou výše, přihlásit se, povolit, zeptat se „Co nám propadá příští měsíc?“.
+5. Odvolání: připojení se ruší v aplikaci (AI asistenti), vypnutí pro celou firmu okamžitě zastaví všechna volání.
+

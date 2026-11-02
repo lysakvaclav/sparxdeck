@@ -134,7 +134,8 @@
     "groupAdmin": "Administration",
     "map": "Building map",
     "protocolTemplates": "Protocol templates",
-    "routes": "Routes"
+    "routes": "Routes",
+    "assistants": "AI assistants"
   },
   "dashboard": {
     "title": "Overview",
@@ -333,7 +334,8 @@
     "noteRequired": "Write a short note on what changed in this version.",
     "routeTooLong": "A route can have at most 30 stops.",
     "routeChanged": "The route changed meanwhile. It has been reloaded, please try again.",
-    "planInRoute": "This visit belongs to a route. Change its day and technician in the route."
+    "planInRoute": "This visit belongs to a route. Change its day and technician in the route.",
+    "mcpDisabled": "AI assistants are not turned on in the company."
   },
   "email": {
     "invite": {
@@ -3049,6 +3051,129 @@
       "markVisited": "Visited?",
       "edit": "Edit the route",
       "dropped": "{count, plural, one {# mark wasn't saved} other {# marks weren't saved}}: the stop is no longer in the route."
+    }
+  },
+  "mcp": {
+    "consent": {
+      "title": "Connect an AI assistant",
+      "subtitle": "{client} wants access to your company's data in SparxDeck.",
+      "unknownClient": "Unknown application",
+      "returnsTo": "After you answer, you will return to {host}.",
+      "company": "Company",
+      "companyRead": "reading only",
+      "companyWrite": "reading and changes",
+      "canTitle": "The assistant will be able to:",
+      "canRead": "read your records: customers, buildings, devices, inspections, defects, due dates and planned visits,",
+      "canWrite": "propose changes to defects, visits and notes; you must explicitly confirm every change in the assistant,",
+      "never": "it never deletes anything, never issues a protocol and never sees where technicians are.",
+      "allowWrite": "Also allow changes",
+      "allowWriteHint": "Without this, the assistant can only read.",
+      "writeNotAllowed": "The company's owner has not allowed changes through AI assistants, so the assistant can only read.",
+      "allow": "Allow access",
+      "deny": "Deny",
+      "cancel": "Back to the assistant",
+      "revokeHint": "You can revoke access at any time in the app under AI assistants.",
+      "disabledTitle": "AI assistants are not turned on",
+      "disabledBody": "AI assistants are not turned on in your company yet. The company's owner can turn them on in the app under AI assistants.",
+      "back": "Back to the app",
+      "errorTitle": "The connection can't be completed",
+      "errors": {
+        "unknown_client": "The application that wants to connect is not known. Start connecting again from the assistant.",
+        "redirect_invalid": "The return address does not match the registered application. For your safety the connection stops here."
+      }
+    },
+    "page": {
+      "title": "AI assistants",
+      "docs": "Tools and security",
+      "status": {
+        "title": "Company setting",
+        "description": "AI assistants such as Claude connect over MCP and work with the company's data with the rights of the member who connected them.",
+        "enabled": "Turn on AI assistants for the company",
+        "write": "Also allow changes to defects, visits and notes (the user confirms every change)",
+        "ownerOnly": "Only the company's owner can turn this on or off.",
+        "on": "On",
+        "off": "Off",
+        "writeOn": "Reading and changes",
+        "writeOff": "Reading only",
+        "save": "Save",
+        "saved": "Saved"
+      },
+      "connect": {
+        "title": "Connect an assistant",
+        "description": "The SparxDeck server address for AI assistants:",
+        "copy": "Copy",
+        "copied": "Copied",
+        "disabledNote": "Connecting will work once the company's owner turns AI assistants on.",
+        "claudeTitle": "Claude (web, desktop and mobile)",
+        "claudeStep1": "In Claude, open Settings, Connectors and choose Add custom connector.",
+        "claudeStep2": "Paste the address above and confirm.",
+        "claudeStep3": "Sign in to SparxDeck, choose the company and allow access.",
+        "claudeCodeTitle": "Claude Code",
+        "claudeCodeBody": "Run this in a terminal, then sign in from Claude Code with /mcp:",
+        "otherTitle": "Other assistants",
+        "otherBody": "Any assistant that supports remote MCP servers with OAuth sign-in connects with the same address. If it can't sign in, use a personal token below in the Authorization: Bearer header."
+      },
+      "connections": {
+        "title": "My connections",
+        "titleAll": "Connections in the company",
+        "description": "Assistants and tokens with access to the company's data. A revoked connection stops working immediately.",
+        "empty": "No connections yet.",
+        "name": "Name",
+        "person": "Member",
+        "access": "Access",
+        "created": "Created",
+        "lastUsed": "Last used",
+        "expires": "Valid until",
+        "state": "State",
+        "accessRead": "Reading",
+        "accessWrite": "Reading and changes",
+        "kindOauth": "Assistant",
+        "kindPersonal": "Personal token",
+        "stateActive": "Active",
+        "stateRevoked": "Revoked",
+        "stateExpired": "Expired",
+        "never": "never",
+        "revoke": "Revoke",
+        "revokeTitle": "Revoke the connection?",
+        "revokeBody": "{name} loses access to the data immediately. You can connect again later.",
+        "revoked": "The connection is revoked."
+      },
+      "token": {
+        "title": "Personal token",
+        "description": "For assistants and tools that don't sign in with OAuth. The token has the same rights as your account.",
+        "name": "Name",
+        "namePlaceholder": "E.g. Claude Code on my laptop",
+        "days": "Valid for",
+        "days30": "30 days",
+        "days90": "90 days",
+        "days365": "1 year",
+        "write": "Also allow changes (you confirm each one)",
+        "writeUnavailable": "The company's owner has not allowed changes, so the token can only read.",
+        "create": "Create token",
+        "createdTitle": "The token is ready",
+        "createdBody": "Copy it now; you won't see it again. It goes in the Authorization: Bearer header.",
+        "done": "Done"
+      },
+      "usage": {
+        "title": "Usage",
+        "description": "The last 7 days and the last 50 calls. Who, when, which tool and with which arguments is recorded.",
+        "calls": "Calls",
+        "ok": "Succeeded",
+        "errors": "Errors",
+        "denied": "Denied",
+        "limited": "Over the limit",
+        "time": "Time",
+        "person": "Member",
+        "action": "Action",
+        "result": "Result",
+        "empty": "No calls yet.",
+        "outcome": {
+          "ok": "OK",
+          "error": "Error",
+          "denied": "Denied",
+          "rate_limited": "Over the limit"
+        }
+      }
     }
   }
 }

@@ -51,6 +51,8 @@ export const config = {
     // Everything except static files, images and metadata files.
     // vendor/: the map worker, base map tiles, fonts and sprites (public files,
     // read in byte ranges; a sign-in redirect would break them).
-    "/((?!_next/static|_next/image|vendor/|favicon.ico|icon|apple-icon|manifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    // api/mcp, .well-known and the OAuth endpoints answer AI assistants with
+    // tokens, never a session cookie (part 31).
+    "/((?!_next/static|_next/image|vendor/|api/mcp|\.well-known|oauth/token|oauth/register|oauth/revoke|favicon.ico|icon|apple-icon|manifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

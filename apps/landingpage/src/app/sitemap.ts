@@ -18,6 +18,7 @@ const pages: Entry[] = [
   { path: '/inspection-reports', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/deadline-tracking', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/defect-tracking', changeFrequency: 'monthly', priority: 0.6 },
+  { path: '/mcp', changeFrequency: 'monthly', priority: 0.6 },
 
   // Company pages
   { path: '/about', changeFrequency: 'monthly', priority: 0.5 },

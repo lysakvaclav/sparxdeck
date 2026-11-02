@@ -80,6 +80,9 @@ export type Database = {
           guide_dismissed_at: string | null;
           base_latitude: number | null;
           base_longitude: number | null;
+          /** AI assistants over MCP (part 31); changed only through set_mcp_settings. */
+          mcp_enabled: boolean;
+          mcp_write_enabled: boolean;
         } & Timestamps;
         Insert: never;
         Update: Partial<{
@@ -323,6 +326,47 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      mcp_tokens: {
+        // The hashes of the secrets are not readable (column grants).
+        Row: {
+          id: string;
+          organization_id: string;
+          user_id: string;
+          kind: "oauth" | "personal";
+          client_id: string | null;
+          name: string;
+          scopes: string[];
+          access_expires_at: string;
+          expires_at: string;
+          created_at: string;
+          last_used_at: string | null;
+          revoked_at: string | null;
+          revoked_by: string | null;
+        };
+        // Issued by the server; revoked through revoke_mcp_token.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      mcp_audit: {
+        Row: {
+          id: number;
+          organization_id: string;
+          user_id: string;
+          token_id: string | null;
+          client_name: string | null;
+          method: string;
+          name: string | null;
+          params: Json | null;
+          outcome: "ok" | "error" | "denied" | "rate_limited";
+          error_code: string | null;
+          duration_ms: number | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
       };
       member_homes: {
         Row: {
@@ -1174,6 +1218,11 @@ export type Database = {
       };
       add_route_stops: { Args: { p_route: string; p_sites: string[] }; Returns: number };
       remove_route_stop: { Args: { p_stop: string }; Returns: undefined };
+      set_mcp_settings: {
+        Args: { p_organization: string; p_enabled: boolean; p_write: boolean };
+        Returns: undefined;
+      };
+      revoke_mcp_token: { Args: { p_token: string }; Returns: undefined };
       reorder_route_stops: { Args: { p_route: string; p_stops: string[] }; Returns: undefined };
       set_route_stop_visited: {
         Args: { p_stop: string; p_visited: boolean; p_at?: string | null };

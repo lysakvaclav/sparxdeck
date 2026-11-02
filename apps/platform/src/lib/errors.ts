@@ -16,6 +16,7 @@ export type ErrorCode =
   | "alreadyInvited"
   | "alreadyInTeam"
   | "forbidden"
+  | "mcpDisabled"
   | "invitationNotFound"
   | "invitationExpired"
   | "invitationUsed"

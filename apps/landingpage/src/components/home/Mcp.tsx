@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BsOpenai } from "react-icons/bs";
 import { SiClaude } from "react-icons/si";
 import { TextLogo } from "@/components/ui/text-logo";
 import { SITE } from "@/config/site";
-import type { HomeDictionary } from "@/i18n/dictionary";
+import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
 /** Gemini's spark in its own gradient (the icon set has it only in one colour). */
 function GeminiLogo({ className }: { className?: string }) {
@@ -90,8 +91,9 @@ function Orbits() {
 }
 
 /** SparxDeck's data in AI assistants over MCP. */
-export function Mcp({ dict }: { dict: HomeDictionary }) {
+export function Mcp({ dict, locale }: { dict: HomeDictionary; locale: Locale }) {
   const m = dict.mcp;
+  const learnMore = dict.platform.learnMore;
   return (
     <section aria-labelledby="mcp-title" id="mcp" className="border-t border-line">
       <div className="container-site grid items-center gap-16 py-24 md:py-32 lg:grid-cols-2 lg:gap-20">
@@ -114,10 +116,15 @@ export function Mcp({ dict }: { dict: HomeDictionary }) {
             </div>
           </div>
 
-          <a href={SITE.bookingUrl} className="button button-primary mt-10">
-            {m.cta}
-            <ArrowRight className="arrow" aria-hidden />
-          </a>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <a href={SITE.bookingUrl} className="button button-primary">
+              {m.cta}
+              <ArrowRight className="arrow" aria-hidden />
+            </a>
+            <Link href={`/${locale}/mcp`} className="button button-secondary">
+              {learnMore}
+            </Link>
+          </div>
         </div>
 
         {/* The drawing is the same in both directions (positions are physical). */}

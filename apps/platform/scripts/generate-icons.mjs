@@ -12,6 +12,8 @@ const icons = {
   send: "Send",
   star: "Star",
   route: "Route",
+  sparkles: "Sparkles",
+  copy: "Copy",
   navigation: "Navigation",
   "sort-route": "ArrowDownWideNarrow",
   circle: "Circle",

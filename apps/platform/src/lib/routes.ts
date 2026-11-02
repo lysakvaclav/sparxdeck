@@ -13,6 +13,13 @@ export const PUBLIC_PATHS = [
   // The service worker and the page it shows without a signal (data only from the phone).
   "/sw.js",
   "/offline",
+  // AI assistants (MCP, part 31): bearer tokens and OAuth, not a session. The
+  // proxy skips these entirely (see its matcher); listed here for clarity.
+  "/api/mcp",
+  "/.well-known",
+  "/oauth/token",
+  "/oauth/register",
+  "/oauth/revoke",
 ];
 
 /** Signed-in users are sent away from these (to the app). */

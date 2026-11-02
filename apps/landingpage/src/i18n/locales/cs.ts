@@ -1,5 +1,6 @@
 import type { Dictionary } from "../types";
 import home from "../home/cs";
+import mcp from "../mcp/cs";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -21,6 +22,7 @@ const cs: Dictionary = {
     megaContactLabel: "Kontakt",
   },
   home,
+  mcp,
   footer: {
     allRightsReserved: "Všechna práva vyhrazena.",
     cookiesSettings: "Cookies",

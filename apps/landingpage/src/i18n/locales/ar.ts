@@ -1,5 +1,6 @@
 import type { Dictionary } from "../types";
 import home from "../home/ar";
+import mcp from "../mcp/ar";
 import { SITE } from "@/config/site";
 import { locales } from "../config";
 
@@ -21,6 +22,7 @@ const ar: Dictionary = {
     megaContactLabel: "تواصل معنا",
   },
   home,
+  mcp,
   footer: {
     allRightsReserved: "جميع الحقوق محفوظة.",
     cookiesSettings: "ملفات تعريف الارتباط",

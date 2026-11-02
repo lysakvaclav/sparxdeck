@@ -109,6 +109,8 @@ try {
   await page.waitForText("Ukázková data jsou připravená.");
   await sleep(1500);
   const org = await organizationOf(owner);
+  // AI assistants on, so their page shows every section (part 31).
+  await updateRows("organizations", `id=eq.${org}`, { mcp_enabled: true, mcp_write_enabled: true });
   const [customer] = await selectRows("customers", `organization_id=eq.${org}&select=id`);
   const [site] = await selectRows(
     "sites",
@@ -230,6 +232,7 @@ try {
     ["routes", "/routes"],
     ["routes-today", "/routes/today"],
     ["route", `/routes/${route.id}`],
+    ["assistants", "/assistants"],
   ];
   for (const [label, path] of pages) await visit(page, label, path);
 
@@ -330,6 +333,7 @@ try {
     ["phone plan", `/sites/${plan.site_id}/plans/${plan.id}`],
     ["phone offline", "/offline"],
     ["phone calendar", "/calendar"],
+    ["phone assistants", "/assistants"],
   ]) {
     await visit(page, label, path);
     await touchTargets(page, label);

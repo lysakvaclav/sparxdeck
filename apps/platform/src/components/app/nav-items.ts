@@ -13,6 +13,7 @@ import {
   MapIcon,
   PeopleIcon,
   RouteIcon,
+  SparklesIcon,
   type IconComponent,
 } from "@/components/icons";
 
@@ -36,6 +37,7 @@ export type NavItem = {
     | "deviceTypes"
     | "protocolTemplates"
     | "team"
+    | "assistants"
     | "settings";
   icon: IconComponent;
   /** Section of the desktop sidebar. */
@@ -159,6 +161,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: PeopleIcon,
     group: "admin",
     headerTone: "text-[#0f9960] dark:text-[#3dcc91]",
+    phone: "more",
+  },
+  {
+    href: "/assistants",
+    label: "assistants",
+    icon: SparklesIcon,
+    group: "admin",
+    headerTone: "text-[#7157d9] dark:text-[#ad99ff]",
     phone: "more",
   },
   {

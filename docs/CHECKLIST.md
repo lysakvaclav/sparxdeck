@@ -378,13 +378,21 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [x] P2 Tip „poblíž končí revize“ (okruh 3 km, termín do 30 dní nebo po termínu) (část 23 B, `e2e/part23-today.mjs`)
 - [x] P2 Dnešní plán na telefonu, dostupný bez signálu (část 23 B: označení čeká v telefonu a odešle se s časem označení, `tests/route-visits.test.ts`)
 
+**AI asistenti přes MCP (část 31, zadání majitele 2026-11-02)**
+- [x] P2 Vzdálený MCP server přes Streamable HTTP v aplikaci, verze 2026-07-28 i klienti 2025 (část 31: `/api/mcp`, `tests/mcp.test.ts`)
+- [x] P2 Ověření OAuth 2.1 podle specifikace: metadata RFC 9728 a 8414, PKCE S256, dynamická registrace i Client ID Metadata Documents, `resource` (RFC 8707), obnova tokenu s rotací, odvolání; osobní tokeny navíc (část 31)
+- [x] P2 Čtecí nástroje se schématy, anotacemi, stránkováním a srozumitelnými chybami; zdroje a hotové instrukce (část 31: 17 nástrojů, `src/lib/mcp/server.ts`)
+- [x] P2 Zápis za pojistkami: vypnutý ve výchozím stavu, zapíná vlastník zvlášť, rozsah `sparxdeck:write`, náhled a jednorázové potvrzení, nic nemaže a nevydává protokoly (část 31: 7 nástrojů)
+- [x] P2 Bezpečnost: RLS a role jako v aplikaci, texty z evidence jako označená data, limit volání, audit, odvolané a prošlé tokeny, žádná poloha techniků, vypnutí pro celou firmu (část 31: `tests/mcp.test.ts`)
+- [x] P2 Stránka AI asistenti v aplikaci (zapnutí, připojení, tokeny, použití, návod pro Claude) a veřejná stránka s popisem nástrojů v 16 jazycích (část 31: `/assistants`, `sparxdeck.com/<jazyk>/mcp`, `e2e/part31.mjs`)
+
 ---
 
 ## Co zatím nedělat (neodškrtávat a nestavět)
 
 - Žádný vlastní fakturační systém ani účetnictví.
 - Žádné automatické tvrzení o souladu s předpisy. Aplikace dokumentuje kontroly, ne zaručuje právní soulad.
-- Žádná umělá inteligence a žádné chytré funkce navíc, dokud základní tok nefunguje spolehlivě.
+- Žádná umělá inteligence a žádné chytré funkce navíc uvnitř aplikace, dokud základní tok nefunguje spolehlivě. (Připojení cizích AI asistentů přes MCP je výslovné zadání majitele, část 31; aplikace sama AI nepoužívá.)
 - Žádné další typy zařízení před ověřením u skutečných zákazníků.
 - Žádné vymyšlené recenze, počty zákazníků ani čísla úspor na webu nebo v aplikaci.
 

@@ -40,7 +40,7 @@ export default async function LocaleHome({ params }: LocalePageProps) {
       <Statement dict={home} />
       <Principles dict={home} />
       <Platform dict={home} locale={locale} />
-      <Mcp dict={home} />
+      <Mcp dict={home} locale={locale} />
       <Comparison dict={home} />
       <Faq dict={home} bookDemo={dict.header.bookDemo} />
       <Cta dict={home} />

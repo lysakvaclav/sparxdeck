@@ -677,3 +677,17 @@ export type InspectionDeviceInput = z.input<typeof inspectionDeviceSchema>;
 export type InspectionDeviceValues = z.output<typeof inspectionDeviceSchema>;
 export type SkipCheckInput = z.input<typeof skipCheckSchema>;
 export type SkipCheckValues = z.output<typeof skipCheckSchema>;
+
+// ---------------------------------------------------------------------------
+// AI assistants (MCP, part 31)
+// ---------------------------------------------------------------------------
+
+export const mcpSettingsSchema = z.object({ enabled: z.boolean(), write: z.boolean() });
+export type McpSettingsInput = z.input<typeof mcpSettingsSchema>;
+
+export const personalTokenSchema = z.object({
+  name: z.string().trim().min(1, "required").max(100, "tooLong"),
+  days: z.enum(["30", "90", "365"]),
+  write: z.boolean(),
+});
+export type PersonalTokenInput = z.input<typeof personalTokenSchema>;

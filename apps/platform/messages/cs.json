@@ -134,7 +134,8 @@
     "groupAdmin": "Správa",
     "map": "Mapa budov",
     "protocolTemplates": "Šablony protokolů",
-    "routes": "Trasy"
+    "routes": "Trasy",
+    "assistants": "AI asistenti"
   },
   "dashboard": {
     "title": "Přehled",
@@ -333,7 +334,8 @@
     "noteRequired": "Napište krátkou poznámku, co se ve verzi změnilo.",
     "routeTooLong": "Trasa může mít nejvýš 30 zastávek.",
     "routeChanged": "Trasa se mezitím změnila. Načetli jsme ji znovu, zkuste to prosím ještě jednou.",
-    "planInRoute": "Návštěva patří do trasy. Den a technika změňte v trase."
+    "planInRoute": "Návštěva patří do trasy. Den a technika změňte v trase.",
+    "mcpDisabled": "AI asistenti nejsou ve firmě zapnutí."
   },
   "email": {
     "invite": {
@@ -3049,6 +3051,129 @@
       "markVisited": "Navštíveno?",
       "edit": "Upravit trasu",
       "dropped": "{count, plural, one {# označení se neuložilo} few {# označení se neuložila} other {# označení se neuložilo}}: zastávka už v trase není."
+    }
+  },
+  "mcp": {
+    "consent": {
+      "title": "Připojit AI asistenta",
+      "subtitle": "{client} chce přístup k datům vaší firmy ve SparxDecku.",
+      "unknownClient": "Neznámá aplikace",
+      "returnsTo": "Po odpovědi se vrátíte na {host}.",
+      "company": "Firma",
+      "companyRead": "jen čtení",
+      "companyWrite": "čtení i změny",
+      "canTitle": "Asistent bude moci:",
+      "canRead": "číst evidenci: zákazníky, budovy, zařízení, revize, závady, termíny a plán návštěv,",
+      "canWrite": "navrhovat změny závad, návštěv a poznámek; každou změnu musíte v asistentovi výslovně potvrdit,",
+      "never": "nikdy nic nesmaže, nevydá protokol a neuvidí polohu techniků.",
+      "allowWrite": "Povolit i změny",
+      "allowWriteHint": "Bez zaškrtnutí bude asistent data jen číst.",
+      "writeNotAllowed": "Změny přes AI asistenty vlastník firmy nepovolil, asistent bude data jen číst.",
+      "allow": "Povolit přístup",
+      "deny": "Zamítnout",
+      "cancel": "Zpět k asistentovi",
+      "revokeHint": "Přístup můžete kdykoli zrušit v aplikaci v části AI asistenti.",
+      "disabledTitle": "AI asistenti nejsou zapnutí",
+      "disabledBody": "Ve vaší firmě zatím AI asistenti nejsou zapnutí. Zapnout je může vlastník firmy v aplikaci v části AI asistenti.",
+      "back": "Zpět do aplikace",
+      "errorTitle": "Připojení nejde dokončit",
+      "errors": {
+        "unknown_client": "Aplikace, která se chce připojit, není známá. Začněte připojení v asistentovi znovu.",
+        "redirect_invalid": "Adresa pro návrat neodpovídá registrované aplikaci. Z bezpečnostních důvodů připojení nepokračuje."
+      }
+    },
+    "page": {
+      "title": "AI asistenti",
+      "docs": "Popis nástrojů a bezpečnosti",
+      "status": {
+        "title": "Stav ve firmě",
+        "description": "AI asistenti, třeba Claude, se připojí přes MCP a pracují s daty firmy s právy člena, který je připojil.",
+        "enabled": "Zapnout AI asistenty pro firmu",
+        "write": "Povolit i změny závad, návštěv a poznámek (každou změnu uživatel potvrzuje)",
+        "ownerOnly": "Zapnout nebo vypnout je může jen vlastník firmy.",
+        "on": "Zapnuto",
+        "off": "Vypnuto",
+        "writeOn": "Čtení i změny",
+        "writeOff": "Jen čtení",
+        "save": "Uložit",
+        "saved": "Uloženo"
+      },
+      "connect": {
+        "title": "Připojení asistenta",
+        "description": "Adresa serveru SparxDeck pro AI asistenty:",
+        "copy": "Kopírovat",
+        "copied": "Zkopírováno",
+        "disabledNote": "Připojit se půjde, až vlastník firmy AI asistenty zapne.",
+        "claudeTitle": "Claude (web, desktop a mobil)",
+        "claudeStep1": "V Claude otevřete Nastavení, Konektory a zvolte Přidat vlastní konektor.",
+        "claudeStep2": "Vložte adresu výše a potvrďte.",
+        "claudeStep3": "Přihlaste se do SparxDecku, vyberte firmu a povolte přístup.",
+        "claudeCodeTitle": "Claude Code",
+        "claudeCodeBody": "V terminálu spusťte tento příkaz a pak se v Claude Code přihlaste přes /mcp:",
+        "otherTitle": "Jiní asistenti",
+        "otherBody": "Asistent, který umí vzdálené MCP servery s přihlášením OAuth, se připojí stejnou adresou. Pokud přihlášení neumí, použijte osobní token níže v hlavičce Authorization: Bearer."
+      },
+      "connections": {
+        "title": "Moje připojení",
+        "titleAll": "Připojení ve firmě",
+        "description": "Asistenti a tokeny s přístupem k datům firmy. Zrušené připojení přestane fungovat okamžitě.",
+        "empty": "Zatím žádné připojení.",
+        "name": "Název",
+        "person": "Člen",
+        "access": "Přístup",
+        "created": "Vytvořeno",
+        "lastUsed": "Naposledy",
+        "expires": "Platí do",
+        "state": "Stav",
+        "accessRead": "Čtení",
+        "accessWrite": "Čtení a změny",
+        "kindOauth": "Asistent",
+        "kindPersonal": "Osobní token",
+        "stateActive": "Aktivní",
+        "stateRevoked": "Zrušeno",
+        "stateExpired": "Vypršelo",
+        "never": "nikdy",
+        "revoke": "Zrušit",
+        "revokeTitle": "Zrušit připojení?",
+        "revokeBody": "{name} okamžitě ztratí přístup k datům. Připojit se dá znovu.",
+        "revoked": "Připojení je zrušené."
+      },
+      "token": {
+        "title": "Osobní token",
+        "description": "Pro asistenty a nástroje, které se nepřihlašují přes OAuth. Token má stejná práva jako váš účet.",
+        "name": "Název",
+        "namePlaceholder": "Např. Claude Code na notebooku",
+        "days": "Platnost",
+        "days30": "30 dní",
+        "days90": "90 dní",
+        "days365": "1 rok",
+        "write": "Povolit i změny (každou změnu potvrzujete)",
+        "writeUnavailable": "Změny vlastník firmy nepovolil, token bude jen pro čtení.",
+        "create": "Vytvořit token",
+        "createdTitle": "Token je vytvořený",
+        "createdBody": "Zkopírujte si ho hned, znovu už ho neuvidíte. Patří do hlavičky Authorization: Bearer.",
+        "done": "Hotovo"
+      },
+      "usage": {
+        "title": "Použití",
+        "description": "Posledních 7 dní a posledních 50 volání. Zapisuje se, kdo, kdy, jaký nástroj a s jakými parametry.",
+        "calls": "Volání",
+        "ok": "Úspěšná",
+        "errors": "Chyby",
+        "denied": "Odmítnutá",
+        "limited": "Nad limit",
+        "time": "Čas",
+        "person": "Člen",
+        "action": "Akce",
+        "result": "Výsledek",
+        "empty": "Zatím žádné volání.",
+        "outcome": {
+          "ok": "OK",
+          "error": "Chyba",
+          "denied": "Odmítnuto",
+          "rate_limited": "Nad limit"
+        }
+      }
     }
   }
 }
