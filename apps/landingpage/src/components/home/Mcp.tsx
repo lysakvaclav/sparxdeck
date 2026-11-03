@@ -96,15 +96,15 @@ export function Mcp({ dict, locale }: { dict: HomeDictionary; locale: Locale }) 
   const learnMore = dict.platform.learnMore;
   return (
     <section aria-labelledby="mcp-title" id="mcp" className="border-t border-line">
-      <div className="container-site grid items-center gap-16 py-24 md:py-32 lg:grid-cols-2 lg:gap-20">
+      <div className="container-site grid items-center gap-16 py-20 md:py-28 lg:grid-cols-2 lg:gap-20">
         <div>
-          <h2 id="mcp-title" className="text-4xl leading-[1.05] md:text-5xl lg:text-[3.5rem]">
-            {m.title} <span className="text-muted">{m.titleRest}</span>
+          <h2 id="mcp-title" className="text-[2rem] leading-[1.22] tracking-[-0.02em] md:text-[2.5rem]">
+            {m.title} <span className="text-faint">{m.titleRest}</span>
           </h2>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted md:text-lg">{m.body}</p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted">{m.body}</p>
 
           {/* An example: a question to the assistant and the answer from SparxDeck. */}
-          <div className="mt-10 max-w-xl space-y-4 rounded-2xl border border-line p-5">
+          <div className="mt-10 max-w-xl space-y-4 rounded-[4px] border border-line p-5">
             <p className="ms-auto w-fit max-w-[85%] rounded-2xl rounded-ee-md bg-surface px-4 py-2.5 text-sm text-strong">
               {m.question}
             </p>
@@ -116,12 +116,12 @@ export function Mcp({ dict, locale }: { dict: HomeDictionary; locale: Locale }) 
             </div>
           </div>
 
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
             <a href={SITE.bookingUrl} className="button button-primary">
               {m.cta}
               <ArrowRight className="arrow" aria-hidden />
             </a>
-            <Link href={`/${locale}/mcp`} className="button button-secondary">
+            <Link href={`/${locale}/mcp`} className="text-link">
               {learnMore}
             </Link>
           </div>

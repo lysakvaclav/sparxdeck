@@ -1,22 +1,39 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { DesktopShot } from "@/components/site/Screenshot";
 import { SITE } from "@/config/site";
 import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
-/** The top of the home page: the promise, one way in, the product itself. */
+/**
+ * The top of the home page: a short announcement, a small tile, then one long
+ * heading whose first sentence is bright and the rest faint, the button and a
+ * plain link beside it. The product itself underneath.
+ */
 export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale }) {
   const hero = dict.hero;
   return (
     <section id="hero" className="relative">
-      <div className="container-site pt-40 md:pt-52">
-        <h1 className="rise max-w-5xl text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[5rem]">{hero.title}</h1>
-        <p className="rise rise-delay-1 mt-8 max-w-2xl text-lg leading-relaxed text-muted md:text-xl">{hero.body}</p>
-        <a href={SITE.bookingUrl} className="rise rise-delay-2 button button-primary button-lg mt-10">
-          {hero.cta}
-          <ArrowRight className="arrow" aria-hidden />
-        </a>
+      <div className="container-site pt-28 md:pt-36">
+        <Link href={`/${locale}/mcp`} className="rise news-chip">
+          <span>{hero.news}</span>
+          <span className="text-muted">{hero.newsTag}</span>
+          <ArrowRight aria-hidden />
+        </Link>
+        <div aria-hidden className="rise rise-delay-1 hero-tile mx-auto mt-24 md:mt-40" />
+        <h1 className="rise rise-delay-1 mt-10 max-w-[70rem] text-[2rem] leading-[1.22] tracking-[-0.02em] sm:text-[2.5rem] lg:text-[3rem]">
+          {hero.title} <span className="text-faint">{hero.rest}</span>
+        </h1>
+        <div className="rise rise-delay-2 mt-12 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <a href={SITE.bookingUrl} className="button button-primary button-lg">
+            {hero.cta}
+            <ArrowRight className="arrow" aria-hidden />
+          </a>
+          <a href="#platform" className="text-link">
+            {hero.secondary}
+          </a>
+        </div>
       </div>
-      <div className="container-site rise rise-delay-3 relative mt-16 md:mt-24">
+      <div className="container-site rise rise-delay-3 relative mt-20 md:mt-28">
         <DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />
         {/* The picture fades into the page. */}
         <div
@@ -36,7 +53,7 @@ export function Facts({ dict }: { dict: HomeDictionary }) {
         {dict.facts.map((fact) => (
           <div key={fact.value} className="flex flex-col gap-2">
             <dt className="order-2 max-w-[16rem] text-sm leading-snug text-muted">{fact.label}</dt>
-            <dd className="order-1 font-[family-name:var(--font-display)] text-xl font-medium tracking-tight text-strong md:text-2xl">
+            <dd className="order-1 text-xl tracking-[-0.01em] text-strong md:text-2xl">
               {fact.value}
             </dd>
           </div>
@@ -50,7 +67,7 @@ export function Facts({ dict }: { dict: HomeDictionary }) {
 export function Statement({ dict }: { dict: HomeDictionary }) {
   return (
     <section aria-label={dict.platform.eyebrow} className="border-t border-line">
-      <p className="container-site py-24 font-[family-name:var(--font-display)] text-3xl leading-[1.12] font-medium tracking-tight text-muted md:py-36 md:text-5xl lg:text-[3.5rem]">
+      <p className="container-site py-24 text-[2rem] leading-[1.22] tracking-[-0.02em] text-faint md:py-36 md:text-[2.5rem] lg:text-[3rem]">
         <span className="text-strong">{dict.platform.title}</span> {dict.platform.body}
       </p>
     </section>

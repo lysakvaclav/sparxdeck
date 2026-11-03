@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Oprogramowanie do przeglądów urządzeń przeciwpożarowych",
     "title": "Kompletny system do przeglądów sprzętu przeciwpożarowego.",
     "body": "Oprogramowanie stworzone dla firm serwisowych. Ewidencja urządzeń, etykiety QR, planowanie i trasy techników, kontrole w telefonie, protokoły, usterki i terminy w jednym miejscu.",
-    "cta": "Umów prezentację"
+    "cta": "Umów prezentację",
+    "rest": "Ewidencja. Etykiety QR. Kontrole w telefonie. Protokoły. Usterki. Terminy. Wszystko, czego potrzebuje firma serwisowa.",
+    "secondary": "Zobacz, jak to działa",
+    "news": "Asystenci AI przez MCP",
+    "newsTag": "Nowość"
   },
   "facts": [
     {

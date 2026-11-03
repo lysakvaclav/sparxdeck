@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Software pro revize požárně bezpečnostních zařízení",
     "title": "Kompletní systém pro revize požární techniky.",
     "body": "Software vytvořený pro servisní firmy. Evidence zařízení, QR štítky, plánování a trasy techniků, kontroly na telefonu, protokoly, závady a hlídání termínů na jednom místě.",
-    "cta": "Domluvit ukázku"
+    "cta": "Domluvit ukázku",
+    "rest": "Evidence. QR štítky. Kontroly na telefonu. Protokoly. Závady. Termíny. Vše, co revizní firma potřebuje.",
+    "secondary": "Jak to funguje",
+    "news": "AI asistenti přes MCP",
+    "newsTag": "Novinka"
   },
   "facts": [
     {

@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Software for fire safety equipment inspections",
     "title": "The complete system for fire safety inspections.",
     "body": "Software built for service companies. Equipment records, QR labels, scheduling and technician routes, checks on the phone, reports, defects and due dates in one place.",
-    "cta": "Book a demo"
+    "cta": "Book a demo",
+    "rest": "Equipment records. QR labels. Checks on the phone. Protocols. Defects. Due dates. Everything an inspection company needs.",
+    "secondary": "See how it works",
+    "news": "AI assistants over MCP",
+    "newsTag": "New"
   },
   "facts": [
     {

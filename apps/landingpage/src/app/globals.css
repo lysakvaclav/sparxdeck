@@ -5,23 +5,27 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * SparxDeck's website: an official, quiet look. Near-black and white, one
- * signal colour only in drawings, hairline rules, rounded buttons. Every
- * text colour keeps at least 4.5:1 against its background.
+ * SparxDeck's website: a quiet, warm editorial look. Warm near-black on white,
+ * a muted grey for secondary text and a faint grey for the rest of a heading,
+ * light-weight headings, pill buttons, hairline cards with soft grey panels.
+ * Text keeps at least 4.5:1 against its background; the faint grey is used
+ * only for large text (3:1, WCAG AA for large text).
  */
 :root {
   --background: #ffffff;
-  --surface: #f7f7f8;
-  --surface-2: #efeff1;
-  --border: #e6e6e9;
-  --border-strong: #cfd0d4;
-  --text-strong: #08090a;
-  --text-main: #3c3f44;
-  --text-muted: #62666d;
-  --accent: #08090a;
+  --surface: #f6f6f6;
+  --surface-2: #ececeb;
+  --panel: #fafafa;
+  --border: #ececeb;
+  --border-strong: #d7d6d4;
+  --text-strong: #161514;
+  --text-main: #3d3c3a;
+  --text-muted: #71706f;
+  --text-faint: #8e8d8b;
+  --accent: #161514;
   /* Only in drawings (the arrows on the MCP section's orbits). */
   --signal: #e5544a;
-  --shot-shadow: 0 0 0 1px rgba(8, 9, 10, 0.04), 0 30px 60px -30px rgba(8, 9, 10, 0.25);
+  --shot-shadow: 0 0 0 1px rgba(22, 21, 20, 0.04), 0 30px 60px -30px rgba(22, 21, 20, 0.22);
 
   /* Older names, still used by the language switcher and the theme menu. */
   --foreground: var(--text-strong);
@@ -38,17 +42,19 @@
 }
 
 :root.dark {
-  --background: #08090a;
-  --surface: #0f1011;
-  --surface-2: #161719;
-  --border: #23252a;
-  --border-strong: #34363c;
-  --text-strong: #f7f8f8;
-  --text-main: #b4b7bd;
-  --text-muted: #8a8f98;
-  --accent: #f7f8f8;
+  --background: #0f0f0e;
+  --surface: #1a1918;
+  --surface-2: #232220;
+  --panel: #151413;
+  --border: #252422;
+  --border-strong: #3a3937;
+  --text-strong: #f4f3f1;
+  --text-main: #c9c8c5;
+  --text-muted: #9b9a97;
+  --text-faint: #6f6e6b;
+  --accent: #f4f3f1;
   --signal: #ff6a5c;
-  --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+  --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
 
@@ -62,9 +68,12 @@
   --color-strong: var(--text-strong);
   --color-main: var(--text-main);
   --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-panel: var(--panel);
   --color-accent: var(--accent);
   --font-sans: var(--font-inter);
-  --font-display: var(--font-display);
+  /* Geist is variable: "medium" is a touch lighter than 500, as in the reference. */
+  --font-weight-medium: 460;
 }
 
 @layer base {
@@ -77,6 +86,7 @@ body {
   color: var(--text-main);
   font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-weight: 400;
+  letter-spacing: 0.003em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -84,10 +94,10 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   color: var(--text-strong);
-  font-weight: 500;
-  letter-spacing: -0.025em;
+  font-weight: 400;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
@@ -126,8 +136,8 @@ h4 {
   padding: 0 1.25rem;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 460;
   line-height: 1;
   white-space: nowrap;
   transition:
@@ -184,14 +194,105 @@ h4 {
   background: color-mix(in srgb, var(--background) 88%, var(--text-strong));
 }
 
-/* The one large call to action (the hero): a soft highlight on top, a shadow beneath. */
+/* The hero's call to action: a little larger, still flat. */
 .button-lg {
-  min-height: 3.25rem;
-  padding: 0 1.5rem;
+  min-height: 3rem;
+  padding: 0 1.4rem;
   font-size: 1rem;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    0 10px 30px -12px color-mix(in srgb, var(--text-strong) 55%, transparent);
+}
+
+/* The quiet second action beside a button: plain text, as tall as the button. */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  color: var(--text-strong);
+  font-size: 0.9375rem;
+  font-weight: 460;
+  transition: color 160ms ease-out;
+}
+
+.text-link:hover {
+  color: var(--text-muted);
+}
+
+/* The small announcement above the hero. */
+.news-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 0.9375rem;
+  transition: background-color 160ms ease-out;
+}
+
+.news-chip:hover {
+  background: var(--surface-2);
+}
+
+.news-chip svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 160ms ease-out;
+}
+
+.news-chip:hover svg {
+  transform: translateX(2px);
+}
+
+[dir="rtl"] .news-chip svg {
+  transform: scaleX(-1);
+}
+
+/* The small tile above the hero's heading: a soft metallic gradient with grain. */
+.hero-tile {
+  position: relative;
+  width: 3.75rem;
+  height: 3.75rem;
+  background: linear-gradient(100deg, #f3f2f0 0%, #e3e2df 40%, #b8b7b3 100%);
+}
+
+.hero-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:root.dark .hero-tile {
+  background: radial-gradient(120% 120% at 15% 10%, #8a8986 0%, #4a4946 50%, #262523 100%);
+}
+
+:root.dark .hero-tile::after {
+  mix-blend-mode: soft-light;
+}
+
+/* A card as in the reference: a hairline frame, a soft grey panel for the picture. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background);
+}
+
+.card-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 15rem;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--panel);
 }
 
 .button-sm {
@@ -245,7 +346,7 @@ h4 {
 .shot {
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shot-shadow);
 }

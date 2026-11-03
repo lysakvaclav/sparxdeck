@@ -8,10 +8,10 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
   const c = dict.comparison;
   return (
     <section aria-labelledby="comparison-title" className="border-t border-line">
-      <div className="container-site py-24 md:py-32">
-        <SectionHeading title={c.title} body={c.body} id="comparison-title" />
+      <div className="container-site py-20 md:py-28">
+        <SectionHeading eyebrow={c.eyebrow} title={c.title} body={c.body} id="comparison-title" />
         {/* Scrolls sideways on narrow phones: reachable by keyboard too. */}
-        <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-16 overflow-x-auto rounded-2xl border border-line">
+        <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-12 overflow-x-auto rounded-[4px] border border-line">
           <table className="w-full border-collapse text-start text-sm md:text-base">
             <thead>
               <tr className="bg-surface">
@@ -74,9 +74,10 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
         // Text from our own dictionaries; "<" escaped so it can't close the tag.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
       />
-      <div className="container-site grid gap-12 py-24 md:py-32 lg:grid-cols-12">
+      <div className="container-site grid gap-12 py-20 md:py-28 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <h2 id="faq-title" className="text-4xl leading-[1.05] md:text-5xl">
+          <p className="mb-3 text-[0.9375rem] text-muted">{f.eyebrow}</p>
+          <h2 id="faq-title" className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
             {f.title}
           </h2>
           <p className="mt-5 text-base leading-relaxed text-muted">{f.body}</p>
@@ -88,7 +89,7 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
         <div className="border-t border-line lg:col-span-8">
           {f.items.map((item) => (
             <details key={item.question} className="group border-b border-line">
-              <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-5 text-base font-medium text-strong md:text-lg">
+              <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-5 text-base text-strong md:text-[1.0625rem]">
                 {item.question}
                 <Plus className="faq-icon h-5 w-5 shrink-0 text-muted transition-transform duration-200" aria-hidden />
               </summary>
@@ -101,23 +102,23 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
   );
 }
 
-/** The closing statement, centred, as at the end of the reference. */
+/** The closing statement, centred as in the reference: the heading, the button and a plain link. */
 export function Cta({ dict }: { dict: HomeDictionary }) {
   const c = dict.cta;
   return (
     <section aria-labelledby="cta-title" className="border-t border-line">
       <div className="container-site flex flex-col items-center py-28 text-center md:py-40">
-        <h2 id="cta-title" className="max-w-4xl text-4xl leading-[1.05] md:text-6xl">
+        <h2 id="cta-title" className="max-w-3xl text-[2rem] leading-[1.3] md:text-[2.5rem] md:leading-[1.4]">
           {c.title}
         </h2>
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-muted md:text-lg">{c.body}</p>
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <a href={SITE.signupUrl} className="button button-primary">
-            {c.primary}
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">{c.body}</p>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          <a href={SITE.bookingUrl} className="button button-primary">
+            {c.secondary}
             <ArrowRight className="arrow" aria-hidden />
           </a>
-          <a href={SITE.bookingUrl} className="button button-secondary">
-            {c.secondary}
+          <a href={SITE.signupUrl} className="text-link">
+            {c.primary}
           </a>
         </div>
       </div>

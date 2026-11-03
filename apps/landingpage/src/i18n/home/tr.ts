@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Yangın güvenliği ekipmanı denetimleri için yazılım",
     "title": "Yangın ekipmanı denetimleri için eksiksiz sistem.",
     "body": "Servis firmaları için geliştirilmiş yazılım. Ekipman kaydı, QR etiketler, teknisyen planlaması ve rotaları, telefonda kontroller, raporlar, arızalar ve son tarihler tek yerde.",
-    "cta": "Demo ayarlayın"
+    "cta": "Demo ayarlayın",
+    "rest": "Ekipman kaydı. QR etiketler. Telefonda kontroller. Tutanaklar. Arızalar. Son tarihler. Bir servis firmasının ihtiyaç duyduğu her şey.",
+    "secondary": "Nasıl çalıştığını görün",
+    "news": "MCP ile yapay zekâ asistanları",
+    "newsTag": "Yeni"
   },
   "facts": [
     {

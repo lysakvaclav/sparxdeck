@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Softver za preglede protivpožarne opreme",
     "title": "Kompletan sistem za preglede protivpožarne opreme.",
     "body": "Softver napravljen za servisne firme. Evidencija uređaja, QR naljepnice, planiranje i rute tehničara, kontrole na telefonu, zapisnici, nedostaci i rokovi na jednom mjestu.",
-    "cta": "Zakažite demo"
+    "cta": "Zakažite demo",
+    "rest": "Evidencija opreme. QR naljepnice. Kontrole na telefonu. Zapisnici. Nedostaci. Rokovi. Sve što servisnoj firmi treba.",
+    "secondary": "Kako funkcioniše",
+    "news": "AI asistenti preko MCP-a",
+    "newsTag": "Novo"
   },
   "facts": [
     {

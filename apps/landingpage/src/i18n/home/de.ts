@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Software für die Prüfung von Brandschutzeinrichtungen",
     "title": "Das Komplettsystem für Brandschutzprüfungen.",
     "body": "Software für Servicefirmen. Anlagenverzeichnis, QR-Etiketten, Planung und Routen der Techniker, Prüfungen auf dem Handy, Protokolle, Mängel und Fristen an einem Ort.",
-    "cta": "Demo vereinbaren"
+    "cta": "Demo vereinbaren",
+    "rest": "Anlagenbestand. QR-Etiketten. Prüfungen am Handy. Protokolle. Mängel. Termine. Alles, was ein Prüfbetrieb braucht.",
+    "secondary": "So funktioniert es",
+    "news": "KI-Assistenten über MCP",
+    "newsTag": "Neu"
   },
   "facts": [
     {

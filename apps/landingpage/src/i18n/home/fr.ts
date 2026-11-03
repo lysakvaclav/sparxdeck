@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Logiciel pour la vérification des équipements de sécurité incendie",
     "title": "Le système complet pour les vérifications incendie.",
     "body": "Un logiciel conçu pour les entreprises de maintenance. Registre des équipements, étiquettes QR, planning et tournées des techniciens, contrôles sur téléphone, rapports, anomalies et échéances au même endroit.",
-    "cta": "Demander une démo"
+    "cta": "Demander une démo",
+    "rest": "Parc d’équipements. Étiquettes QR. Contrôles sur mobile. Rapports. Défauts. Échéances. Tout ce dont une entreprise de vérification a besoin.",
+    "secondary": "Voir comment ça marche",
+    "news": "Assistants IA via MCP",
+    "newsTag": "Nouveau"
   },
   "facts": [
     {

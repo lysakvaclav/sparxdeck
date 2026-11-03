@@ -1,4 +1,5 @@
 import type { HomeDictionary } from "@/i18n/dictionary";
+import { SectionHeading } from "./Platform";
 
 // Three principles, each with an isometric line drawing. The drawings are
 // built from points in space and projected, so everything lies exactly in its
@@ -152,24 +153,28 @@ const FIGURES = [simpleShapes, offlineShapes, dataShapes];
 export function Principles({ dict }: { dict: HomeDictionary }) {
   const p = dict.principles;
   return (
-    <section aria-label={p.title} className="border-t border-line">
-      <ul className="container-site grid md:grid-cols-3">
-        {p.items.map((item, index) => {
-          const shapes = (FIGURES[index] ?? simpleShapes)();
-          return (
-            <li
-              key={item.title}
-              className="flex flex-col border-line py-14 md:py-20 md:ps-10 md:first:ps-0 md:[&:not(:first-child)]:border-s max-md:[&:not(:first-child)]:border-t"
-            >
-              <div className="mx-auto mb-12 h-56 w-full max-w-[300px] text-main">
-                <Drawing shapes={shapes} />
-              </div>
-              <h3 className="text-lg font-medium tracking-tight">{item.title}</h3>
-              <p className="mt-3 max-w-sm text-base leading-relaxed text-muted">{item.body}</p>
-            </li>
-          );
-        })}
-      </ul>
+    <section aria-labelledby="principles-title" className="border-t border-line">
+      <div className="container-site py-20 md:py-28">
+        <SectionHeading eyebrow={p.eyebrow} title={p.title} id="principles-title" />
+        <ul className="mt-12 grid gap-6 md:grid-cols-3 lg:gap-10">
+          {p.items.map((item, index) => {
+            const shapes = (FIGURES[index] ?? simpleShapes)();
+            return (
+              <li key={item.title} className="card min-h-[25rem]">
+                <div className="card-panel text-main">
+                  <div className="h-48 w-full max-w-[260px]">
+                    <Drawing shapes={shapes} />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-base tracking-normal">{item.title}</h3>
+                  <p className="text-[0.9375rem] leading-relaxed text-muted">{item.body}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </section>
   );
 }

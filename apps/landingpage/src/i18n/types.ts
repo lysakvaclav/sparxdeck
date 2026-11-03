@@ -27,6 +27,13 @@ export type HomeDictionary = {
     body: string;
     /** The one button: book a demo. */
     cta: string;
+    /** The rest of the heading, in the faint colour: what the product does, word by word. */
+    rest: string;
+    /** The plain text link beside the button (to the platform section). */
+    secondary: string;
+    /** The small announcement above the hero (links to the MCP page). */
+    news: string;
+    newsTag: string;
   };
   /** Short product facts under the hero (no invented numbers). */
   facts: { value: string; label: string }[];

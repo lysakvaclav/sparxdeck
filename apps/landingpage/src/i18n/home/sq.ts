@@ -6,7 +6,11 @@ const home: HomeDictionary = {
     "eyebrow": "Softuer për kontrollin e pajisjeve kundër zjarrit",
     "title": "Sistemi i plotë për kontrollet e pajisjeve kundër zjarrit.",
     "body": "Softuer i krijuar për kompanitë e shërbimit. Regjistri i pajisjeve, etiketat QR, planifikimi dhe itineraret e teknikëve, kontrollet në telefon, raportet, defektet dhe afatet në një vend.",
-    "cta": "Rezervoni një demo"
+    "cta": "Rezervoni një demo",
+    "rest": "Regjistri i pajisjeve. Etiketa QR. Kontrolle në telefon. Procesverbale. Defekte. Afate. Gjithçka që i duhet një kompanie shërbimi.",
+    "secondary": "Shihni si funksionon",
+    "news": "Asistentë AI përmes MCP",
+    "newsTag": "E re"
   },
   "facts": [
     {

@@ -23,11 +23,11 @@ export function PageHero({ title, subtitle }: { title: string; subtitle?: string
   return (
     <section>
       <div className="container-site pt-40 pb-16 md:pt-52 md:pb-24">
-        <h1 className="rise max-w-4xl text-[2.75rem] leading-[1.02] md:text-6xl lg:text-[4.5rem]">
+        <h1 className="rise max-w-4xl text-[2rem] leading-[1.22] tracking-[-0.02em] sm:text-[2.5rem] lg:text-[3rem]">
           {title}
         </h1>
         {subtitle && (
-          <p className="rise rise-delay-2 mt-8 max-w-2xl text-lg leading-snug text-muted md:text-[1.4rem] md:leading-[1.35]">
+          <p className="rise rise-delay-2 mt-6 max-w-2xl text-lg leading-relaxed text-muted">
             {subtitle}
           </p>
         )}
@@ -94,7 +94,7 @@ export function FeaturePage({ locale, dict, index }: { locale: Locale; dict: Dic
           {"desktop" in feature.shot ? (
             <DesktopShot name={feature.shot.desktop} locale={locale} alt={dict.home.shots[feature.shot.desktop]} priority />
           ) : (
-            <div className="flex items-start justify-center gap-6 rounded-3xl border border-line bg-surface px-6 py-12 sm:gap-12 md:py-16">
+            <div className="flex items-start justify-center gap-6 rounded-[6px] bg-panel px-6 py-12 sm:gap-12 md:py-16">
               {feature.shot.phones.map((name, i) => (
                 <PhoneShot
                   key={name}

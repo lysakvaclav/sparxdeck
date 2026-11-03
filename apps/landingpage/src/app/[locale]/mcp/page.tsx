@@ -77,10 +77,10 @@ export default async function McpPage({ params }: { params: PageParams }) {
         <div className="container-site grid gap-12 py-16 md:py-24 lg:grid-cols-2 lg:gap-20">
           <p className="max-w-xl text-lg leading-relaxed text-main md:text-xl">{m.intro}</p>
           <div>
-            <h2 className="text-3xl leading-tight md:text-4xl">{m.connectTitle}</h2>
+            <h2 className="text-[1.75rem] leading-[1.25] md:text-[2rem]">{m.connectTitle}</h2>
             <p className="mt-6 text-sm text-muted">{m.address}</p>
             <p
-              className="mt-2 rounded-2xl border border-line bg-surface px-4 py-3 font-mono text-sm break-all text-strong select-all"
+              className="mt-2 rounded-[4px] border border-line bg-surface px-4 py-3 font-mono text-sm break-all text-strong select-all"
               dir="ltr"
             >
               {address}
@@ -102,7 +102,7 @@ export default async function McpPage({ params }: { params: PageParams }) {
 
       <section className="border-t border-line" aria-labelledby="mcp-tools">
         <div className="container-site py-16 md:py-24">
-          <h2 id="mcp-tools" className="text-3xl leading-tight md:text-5xl">
+          <h2 id="mcp-tools" className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
             {m.toolsTitle}
           </h2>
           <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:gap-20">
@@ -118,7 +118,7 @@ export default async function McpPage({ params }: { params: PageParams }) {
 
       <section className="border-t border-line" aria-labelledby="mcp-security">
         <div className="container-site py-16 md:py-24">
-          <h2 id="mcp-security" className="text-3xl leading-tight md:text-5xl">
+          <h2 id="mcp-security" className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
             {m.securityTitle}
           </h2>
           <div className="mt-12">
@@ -129,7 +129,7 @@ export default async function McpPage({ params }: { params: PageParams }) {
 
       <section className="border-t border-line" aria-labelledby="mcp-technical">
         <div className="container-site py-16 md:py-24">
-          <h2 id="mcp-technical" className="text-3xl leading-tight md:text-4xl">
+          <h2 id="mcp-technical" className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
             {m.technicalTitle}
           </h2>
           <div className="mt-10">

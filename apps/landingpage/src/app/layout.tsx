@@ -1,46 +1,17 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import localFont from "next/font/local";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SITE } from "@/config/site";
 
-const helveticaNow = localFont({
-  src: [
-    {
-      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
+// Geist (SIL Open Font License, served from our own domain by next/font): a
+// quiet grotesk with a variable weight, so headings can sit at a light 400
+// and body text at 400 with 460 for emphasis. Armenian, Georgian and Arabic
+// fall back to the system font, as before.
+const geist = Geist({
+  subsets: ["latin", "latin-ext", "cyrillic"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const helveticaNowDisplay = localFont({
-  src: [
-    {
-      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/helvetica-now-display/HelveticaNowDisplay-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-  ],
-  variable: "--font-display",
   display: "swap",
 });
 
@@ -89,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${helveticaNow.variable} ${helveticaNowDisplay.variable} antialiased`}>
+      <body className={`${geist.variable} antialiased`}>
         <ThemeProvider>
           {/* JSON-LD: Organization */}
           <Script id="ld-org" type="application/ld+json">
