@@ -71,44 +71,95 @@ function scene() {
   };
 }
 
-function draw(ctx: CanvasRenderingContext2D, blobs: ReturnType<typeof scene>, t: number) {
-  const wind = Math.sin(t * 0.17) * 2 + Math.sin(t * 0.41) * 0.8;
+/** Margin around the sketch, so the blur has no dark rim at the edges. */
+const M = 8;
+
+type Painter = (t: number) => void;
+
+/**
+ * The light, drawn without any filter into a sketch (every group of shapes is
+ * one path and one fill), then copied to the visible canvas through a single
+ * blur. Blurring each shape on its own cost a whole frame on a laptop.
+ */
+function painter(ctx: CanvasRenderingContext2D): Painter {
+  const blobs = scene();
+  const sketch = document.createElement("canvas");
+  sketch.width = W + M * 2;
+  sketch.height = H + M * 2;
+  const s = sketch.getContext("2d")!;
+  // Browsers without the canvas filter (older Safari) blur by drawing small and enlarging.
+  ctx.filter = "blur(2px)";
+  const filter = ctx.filter === "blur(2px)";
   ctx.filter = "none";
-  ctx.fillStyle = SHADOW;
-  ctx.fillRect(0, 0, W, H);
-  ctx.filter = "blur(3px)";
-  ctx.fillStyle = LIGHT;
-  const paint = (list: Blob[]) => {
+  const small = document.createElement("canvas");
+  small.width = Math.round(W / 5);
+  small.height = Math.round(H / 5);
+  const sm = small.getContext("2d")!;
+
+  const ellipses = (list: Blob[], t: number, wind: number) => {
+    s.beginPath();
     for (const b of list) {
-      ctx.beginPath();
-      ctx.ellipse(
-        b.x + Math.sin(t * b.f + b.phase) * b.ax + wind,
-        b.y + Math.cos(t * b.f * 0.8 + b.phase) * b.ay,
-        b.r,
-        b.r * b.stretch,
-        b.tilt + Math.sin(t * b.f + b.phase) * 0.25,
-        0,
-        Math.PI * 2,
-      );
-      ctx.fill();
+      const x = M + b.x + Math.sin(t * b.f + b.phase) * b.ax + wind;
+      const y = M + b.y + Math.cos(t * b.f * 0.8 + b.phase) * b.ay;
+      const tilt = b.tilt + Math.sin(t * b.f + b.phase) * 0.25;
+      s.moveTo(x + Math.cos(tilt) * b.r, y + Math.sin(tilt) * b.r);
+      s.ellipse(x, y, b.r, b.r * b.stretch, tilt, 0, Math.PI * 2);
+    }
+    s.fill();
+  };
+
+  return (t) => {
+    const wind = Math.sin(t * 0.17) * 2 + Math.sin(t * 0.41) * 0.8;
+    s.globalAlpha = 1;
+    s.fillStyle = SHADOW;
+    s.fillRect(0, 0, sketch.width, sketch.height);
+    s.fillStyle = LIGHT;
+    // Broad soft light first, then a long streak past a trunk, then the gaps between leaves.
+    s.globalAlpha = 0.45;
+    ellipses(blobs.glow, t, wind);
+    s.globalAlpha = 1;
+    const sway = Math.sin(t * 0.2) * 1.2 + wind * 0.3;
+    s.beginPath();
+    s.moveTo(M + W * 0.36 + sway, 0);
+    s.bezierCurveTo(M + W * 0.42 + sway, M + H * 0.3, M + W * 0.4, M + H * 0.6, M + W * 0.47, H + M * 2);
+    s.lineTo(M + W * 0.56, H + M * 2);
+    s.bezierCurveTo(M + W * 0.5, M + H * 0.6, M + W * 0.52 + sway, M + H * 0.3, M + W * 0.47 + sway, 0);
+    s.closePath();
+    s.fill();
+    ellipses(blobs.light, t, wind);
+    // Leaves in front of the light.
+    s.fillStyle = SHADOW;
+    ellipses(blobs.leaves, t, wind);
+
+    if (filter) {
+      ctx.filter = "blur(2px)";
+      ctx.drawImage(sketch, -M, -M);
+      ctx.filter = "none";
+    } else {
+      sm.drawImage(sketch, M, M, W, H, 0, 0, small.width, small.height);
+      ctx.drawImage(small, 0, 0, W, H);
     }
   };
-  // Broad soft light first, then a long streak past a trunk, then the leaf gaps.
-  ctx.globalAlpha = 0.45;
-  paint(blobs.glow);
-  ctx.globalAlpha = 1;
-  const sway = Math.sin(t * 0.2) * 1.2 + wind * 0.3;
-  ctx.beginPath();
-  ctx.moveTo(W * 0.36 + sway, -6);
-  ctx.bezierCurveTo(W * 0.42 + sway, H * 0.3, W * 0.4, H * 0.6, W * 0.47, H + 6);
-  ctx.lineTo(W * 0.56, H + 6);
-  ctx.bezierCurveTo(W * 0.5, H * 0.6, W * 0.52 + sway, H * 0.3, W * 0.47 + sway, -6);
-  ctx.closePath();
-  ctx.fill();
-  paint(blobs.light);
-  // Leaves in front of the light.
-  ctx.fillStyle = SHADOW;
-  paint(blobs.leaves);
+}
+
+/** Film grain: a small tile of random light and dark specks, made once. */
+function grainTile(): string {
+  const size = 128;
+  const tile = document.createElement("canvas");
+  tile.width = size;
+  tile.height = size;
+  const g = tile.getContext("2d")!;
+  const image = g.createImageData(size, size);
+  const rnd = random(7);
+  for (let i = 0; i < image.data.length; i += 4) {
+    const value = rnd() < 0.5 ? 0 : 255;
+    image.data[i] = value;
+    image.data[i + 1] = value;
+    image.data[i + 2] = value;
+    image.data[i + 3] = Math.round(rnd() * 30);
+  }
+  g.putImageData(image, 0, 0);
+  return `url(${tile.toDataURL("image/png")})`;
 }
 
 export function HeroScroll({
@@ -130,6 +181,7 @@ export function HeroScroll({
   const intro = useRef<HTMLDivElement>(null);
   const slot = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
   const shot = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [live, setLive] = useState(false);
@@ -143,89 +195,130 @@ export function HeroScroll({
     return () => query.removeEventListener("change", apply);
   }, []);
 
-  // The moving light (one still picture with reduced motion), only while in view.
+  // The moving light and the grain (one still picture with reduced motion),
+  // only while the hero is on screen.
   useEffect(() => {
     const element = canvas.current;
     const ctx = element?.getContext("2d");
-    if (!element || !ctx) return;
-    const blobs = scene();
+    const root = section.current;
+    if (!element || !ctx || !root) return;
+    frame.current?.style.setProperty("--grain", grainTile());
+    const paint = painter(ctx);
     const start = performance.now();
-    draw(ctx, blobs, 0);
+    paint(0);
     if (!live) return;
     let raf = 0;
     let last = 0;
-    let visible = false;
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      if (now - last < 33) return;
+      // 30 pictures a second are plenty for leaves in a breeze.
+      if (now - last < 32) return;
       last = now;
-      draw(ctx, blobs, (now - start) / 1000);
+      paint((now - start) / 1000);
     };
     const observer = new IntersectionObserver(([entry]) => {
-      visible = Boolean(entry?.isIntersecting);
+      const visible = Boolean(entry?.isIntersecting);
+      root.classList.toggle("is-playing", visible);
       cancelAnimationFrame(raf);
       if (visible) raf = requestAnimationFrame(tick);
     });
-    observer.observe(element);
+    observer.observe(root);
     return () => {
       observer.disconnect();
       cancelAnimationFrame(raf);
+      root.classList.remove("is-playing");
     };
   }, [live]);
 
-  // The scene follows the scroll position.
+  // The scene follows the scroll. Sizes are measured only when the window
+  // changes; while scrolling only transform and opacity change, which the
+  // browser composes without laying out or repainting anything.
   useEffect(() => {
-    const el = { section: section.current, stage: stage.current, intro: intro.current, slot: slot.current, frame: frame.current, shot: shot.current };
-    if (!live || !el.section || !el.stage || !el.intro || !el.slot || !el.frame || !el.shot) return;
-    const { section: s, stage: st, intro: i, slot: sl, frame: f, shot: sh } = el as { [K in keyof typeof el]: NonNullable<(typeof el)[K]> };
+    const [s, st, i, sl, f, inn, sh] = [section.current, stage.current, intro.current, slot.current, frame.current, inner.current, shot.current];
+    if (!live || !s || !st || !i || !sl || !f || !inn || !sh) return;
     let raf = 0;
+    let sectionTop = 0;
+    let distance = 1;
+    let from = { x: 0, y: 0, w: 1, h: 1 };
+    let to = { x: 0, y: 0, w: 1, h: 1 };
+    let lastP = -1;
+    let introHidden = false;
+    let shotHidden = false;
+
+    const measure = () => {
+      const vw = st.clientWidth;
+      const vh = st.clientHeight;
+      sectionTop = s.getBoundingClientRect().top + window.scrollY;
+      distance = Math.max(1, s.offsetHeight - vh);
+      const phone = vw < 768;
+      const gutter = phone ? 12 : 32;
+      const topEdge = phone ? 76 : 92;
+      const w = Math.min(vw - gutter * 2, 1500);
+      to = { x: (vw - w) / 2, y: topEdge, w, h: vh - topEdge - gutter };
+      from = { x: i.offsetLeft + sl.offsetLeft, y: i.offsetTop + sl.offsetTop, w: sl.offsetWidth, h: sl.offsetHeight };
+      f.style.left = `${to.x}px`;
+      f.style.top = `${to.y}px`;
+      f.style.width = `${to.w}px`;
+      f.style.height = `${to.h}px`;
+      f.style.opacity = "1";
+      lastP = -1;
+    };
 
     const update = () => {
       raf = 0;
-      const vw = st.clientWidth;
-      const vh = st.clientHeight;
-      const distance = s.offsetHeight - vh;
-      const p = distance > 0 ? clamp(-s.getBoundingClientRect().top / distance) : 0;
+      const p = clamp((window.scrollY - sectionTop) / distance);
+      if (p === lastP) return;
+      lastP = p;
 
       // The text leaves first.
       const fade = clamp(p / 0.16);
       i.style.opacity = String(1 - fade);
-      i.style.transform = `translate3d(0, ${-fade * 48}px, 0)`;
-      i.style.visibility = fade >= 1 ? "hidden" : "visible";
+      i.style.transform = `translate3d(0, ${(-fade * 48).toFixed(2)}px, 0)`;
+      if (fade >= 1 !== introHidden) {
+        introHidden = fade >= 1;
+        i.style.visibility = introHidden ? "hidden" : "";
+      }
 
-      // The tile grows from its place to the whole stage.
-      const phone = vw < 768;
-      const gutter = phone ? 12 : 32;
-      const topEdge = phone ? 76 : 92;
-      const toW = Math.min(vw - gutter * 2, 1500);
-      const toH = vh - topEdge - gutter;
-      const from = { x: i.offsetLeft + sl.offsetLeft, y: i.offsetTop + sl.offsetTop, w: sl.offsetWidth, h: sl.offsetHeight };
-      const to = { x: (vw - toW) / 2, y: topEdge, w: toW, h: toH };
+      // The tile grows from its place to the whole stage. The frame is always
+      // full size and scaled down, its content scaled back up, so the frame
+      // works as a window that opens.
       const g = ease(clamp((p - 0.03) / 0.52));
-      f.style.left = `${lerp(from.x, to.x, g)}px`;
-      f.style.top = `${lerp(from.y, to.y, g)}px`;
-      f.style.width = `${lerp(from.w, to.w, g)}px`;
-      f.style.height = `${lerp(from.h, to.h, g)}px`;
-      f.style.borderRadius = `${lerp(0, 8, g)}px`;
-      f.style.opacity = "1";
+      const w = lerp(from.w, to.w, g);
+      const h = lerp(from.h, to.h, g);
+      const sx = w / to.w;
+      const sy = h / to.h;
+      const dx = lerp(from.x, to.x, g) - to.x;
+      const dy = lerp(from.y, to.y, g) - to.y;
+      f.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${sx.toFixed(5)}, ${sy.toFixed(5)})`;
+      inn.style.transform = `scale(${(1 / sx).toFixed(5)}, ${(1 / sy).toFixed(5)}) translate3d(${(-(to.w - w) / 2).toFixed(2)}px, ${(-(to.h - h) / 2).toFixed(2)}px, 0)`;
 
       // The platform rises into it.
       const r = easeOut(clamp((p - 0.6) / 0.3));
       sh.style.opacity = String(r);
-      sh.style.transform = `translate3d(0, ${(1 - r) * 80}px, 0)`;
-      sh.style.visibility = r <= 0 ? "hidden" : "visible";
+      sh.style.transform = `translate3d(0, ${((1 - r) * 80).toFixed(2)}px, 0)`;
+      if (r <= 0 !== shotHidden) {
+        shotHidden = r <= 0;
+        sh.style.visibility = shotHidden ? "hidden" : "";
+      }
     };
     const request = () => {
       if (!raf) raf = requestAnimationFrame(update);
     };
+    const resize = () => {
+      measure();
+      request();
+    };
+    measure();
     update();
+    const observer = new ResizeObserver(resize);
+    observer.observe(st);
+    observer.observe(i);
     window.addEventListener("scroll", request, { passive: true });
-    window.addEventListener("resize", request);
     return () => {
+      observer.disconnect();
       window.removeEventListener("scroll", request);
-      window.removeEventListener("resize", request);
       cancelAnimationFrame(raf);
-      for (const node of [i, f, sh]) node.removeAttribute("style");
+      for (const node of [i, f, inn, sh]) node.removeAttribute("style");
     };
   }, [live]);
 
@@ -238,11 +331,13 @@ export function HeroScroll({
           {bottom}
         </div>
         <div ref={frame} className="hero-frame">
-          <canvas ref={canvas} width={W} height={H} aria-hidden className="hero-light" />
-          <div aria-hidden className="hero-grain" />
-          <div ref={shot} className="hero-shot">
-            <div className="hero-shot-desktop">{desktop}</div>
-            <div className="hero-shot-phone">{phone}</div>
+          <div ref={inner} className="hero-inner">
+            <canvas ref={canvas} width={W} height={H} aria-hidden className="hero-light" />
+            <div aria-hidden className="hero-grain" />
+            <div ref={shot} className="hero-shot">
+              <div className="hero-shot-desktop">{desktop}</div>
+              <div className="hero-shot-phone">{phone}</div>
+            </div>
           </div>
         </div>
       </div>

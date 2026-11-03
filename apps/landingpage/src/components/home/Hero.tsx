@@ -38,7 +38,7 @@ export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale })
           </div>
         </>
       }
-      desktop={<DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />}
+      desktop={<DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} />}
       phone={<PhoneShot name="check" locale={locale} alt={dict.shots.check} />}
     />
   );
