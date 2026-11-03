@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "Sa shpejt mund të fillojmë?",
-        "answer": "Menjëherë. Llogarinë e krijoni vetë dhe gjithçka e provoni me të dhëna shembull. Importoni të dhënat nga një skedar, printoni etiketat QR dhe tekniku e bën kontrollin e parë pa trajnim të gjatë."
+        "answer": "Pas një bisede të shkurtër ju hapim regjistrimin. Pastaj krijoni kompaninë, ftoni teknikët, importoni të dhënat nga një skedar dhe printoni etiketat QR. Gjithçka e provoni me të dhëna shembull dhe tekniku e bën kontrollin e parë pa trajnim të gjatë."
       },
       {
         "question": "Si i mbron SparxDeck të dhënat?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "Provoni SparxDeck në firmën tuaj",
-    "body": "Krijoni një llogari dhe eksploroni aplikacionin me të dhëna shembull, ose rezervoni një demo të shkurtër.",
+    "body": "Rezervoni një demonstrim të shkurtër. Pastaj ju hapim një llogari dhe aplikacionin mund ta eksploroni edhe me të dhëna shembull.",
     "primary": "Filloni me SparxDeck",
     "secondary": "Rezervoni një demo"
   },

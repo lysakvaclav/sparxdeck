@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "Ne kadar hızlı başlayabiliriz?",
-        "answer": "Hemen. Hesabı kendiniz açar, her şeyi örnek verilerle denersiniz. Kayıtlarınızı dosyadan içe aktarır, QR etiketleri yazdırırsınız; teknisyen ilk kontrolü uzun bir eğitim olmadan yapar."
+        "answer": "Kısa bir görüşmeden sonra size kaydı açıyoruz. Ardından firmanızı oluşturur, teknisyenlerinizi davet eder, kayıtlarınızı dosyadan içe aktarır ve QR etiketleri yazdırırsınız. Her şeyi örnek verilerle denersiniz; teknisyen ilk kontrolü uzun bir eğitim olmadan yapar."
       },
       {
         "question": "SparxDeck verileri nasıl korur?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "SparxDeck'i firmanızda deneyin",
-    "body": "Bir hesap oluşturun ve uygulamayı örnek verilerle keşfedin ya da kısa bir demo ayarlayın.",
+    "body": "Kısa bir tanıtım ayarlayın. Ardından size bir hesap açıyoruz; uygulamayı örnek verilerle de keşfedebilirsiniz.",
     "primary": "SparxDeck ile başlayın",
     "secondary": "Demo ayarlayın"
   },

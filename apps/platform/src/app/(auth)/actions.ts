@@ -52,6 +52,10 @@ export async function signUp(input: unknown, next?: string): Promise<ActionResul
       data: { locale: await getLocale() },
     },
   });
+  // Closed sign-up: the database refuses an e-mail that is neither on the
+  // allowlist nor invited, and Supabase reports it only as a database error.
+  if (error && error.status === 500 && /database error saving new user/i.test(error.message))
+    return { ok: false, error: "signupNotAllowed" };
   if (error) return { ok: false, error: authErrorCode(error) };
 
   // With e-mail confirmation off (local setups), Supabase returns a session right away.

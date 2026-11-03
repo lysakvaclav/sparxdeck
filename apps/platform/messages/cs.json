@@ -58,7 +58,7 @@
     },
     "signup": {
       "title": "Vytvořit účet",
-      "subtitle": "Začněte se SparxDeck. Firmu nastavíte v dalším kroku.",
+      "subtitle": "Účet si založí firmy, se kterými jsme se domluvili, a pozvaní členové týmu.",
       "submit": "Vytvořit účet",
       "hasAccount": "Už máte účet?",
       "loginLink": "Přihlaste se",
@@ -335,7 +335,8 @@
     "routeTooLong": "Trasa může mít nejvýš 30 zastávek.",
     "routeChanged": "Trasa se mezitím změnila. Načetli jsme ji znovu, zkuste to prosím ještě jednou.",
     "planInRoute": "Návštěva patří do trasy. Den a technika změňte v trase.",
-    "mcpDisabled": "AI asistenti nejsou ve firmě zapnutí."
+    "mcpDisabled": "AI asistenti nejsou ve firmě zapnutí.",
+    "signupNotAllowed": "Registrace je jen pro firmy, se kterými jsme se domluvili, a pro pozvané členy týmu. Napište nám na info@sparxdeck.com."
   },
   "email": {
     "invite": {

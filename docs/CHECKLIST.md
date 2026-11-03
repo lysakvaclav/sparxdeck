@@ -31,6 +31,8 @@ Stav pokrytí na konci: spočítej odškrtnuté P1, P2 a P3 zvlášť a řekni m
 - [ ] P2 Seznam aktivních zařízení a odhlášení všude
 - [ ] P3 Přihlášení přes Microsoft / SSO pro větší firmy
 
+- [x] P1 Uzavřená registrace: účet jen pro e-mail ze seznamu `signup_allowlist` (vede se v Supabase) nebo s platnou pozvánkou; firmu zakládá jen e-mail ze seznamu (2026-11-03, migrace `20261103090000_closed_signup.sql`, testy `tests/rls.test.ts` „closed sign-up“)
+
 ## B. Organizace, role a členové
 
 - [x] P1 Vytvoření organizace při první registraci (část 1: `supabase/migrations/20261011090000_phase1_organizations.sql` (`create_organization`), `src/app/(auth)/onboarding`)

@@ -5882,3 +5882,101 @@ describe.skipIf(!configured)("row level security: organizations are isolated", (
     });
   });
 });
+
+describe.skipIf(!configured)("closed sign-up: only the allowlist and invited people", () => {
+  const stamp = randomUUID().slice(0, 8);
+  const allowed = `allowed-${stamp}@closed-signup.example`;
+  const invited = `invited-${stamp}@closed-signup.example`;
+  const stranger = `stranger-${stamp}@closed-signup.example`;
+  let service: Client;
+  const created: string[] = [];
+  const orgs: string[] = [];
+
+  const anonClient = () =>
+    createClient<Database>(url!, anonKey!, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  beforeAll(async () => {
+    service = createClient<Database>(url!, serviceKey!, { auth: { persistSession: false, autoRefreshToken: false } });
+  });
+
+  afterAll(async () => {
+    if (!service) return;
+    if (orgs.length) await service.from("organizations").delete().in("id", orgs);
+    await Promise.all(created.map((id) => service.auth.admin.deleteUser(id)));
+    await (service as unknown as SupabaseClient)
+      .from("signup_allowlist")
+      .delete()
+      .eq("email", allowed);
+  });
+
+  it("refuses an e-mail that is neither on the list nor invited", async () => {
+    const { data, error } = await anonClient().auth.signUp({ email: stranger, password });
+    expect(error?.status).toBe(500);
+    expect(data.user).toBeNull();
+    const magic = await anonClient().auth.signInWithOtp({ email: stranger, options: { shouldCreateUser: true } });
+    expect(magic.error).not.toBeNull();
+  });
+
+  it("lets an allowlisted e-mail sign up and found a company, and stamps the row", async () => {
+    // Typed in the dashboard with capitals and spaces: still matches.
+    const { error: listError } = await (service as unknown as SupabaseClient)
+      .from("signup_allowlist")
+      .insert({ email: `  ${allowed.toUpperCase()} `, note: "test" });
+    expect(listError).toBeNull();
+    const { data, error } = await service.auth.admin.createUser({ email: allowed, password, email_confirm: true });
+    expect(error).toBeNull();
+    created.push(data.user!.id);
+    const client = anonClient();
+    await client.auth.signInWithPassword({ email: allowed, password });
+    const { data: org, error: orgError } = await client.rpc("create_organization", {
+      p_name: `Allowed ${stamp}`,
+      p_display_name: "Allowed",
+    });
+    expect(orgError).toBeNull();
+    orgs.push(org!);
+    const { data: row } = await (service as unknown as SupabaseClient)
+      .from("signup_allowlist")
+      .select("used_at, used_by")
+      .eq("email", allowed)
+      .single();
+    expect(row?.used_by).toBe(data.user!.id);
+    expect(row?.used_at).not.toBeNull();
+
+    // An invitation from that company lets a team member sign up, but not found a company.
+    const { error: inviteError } = await client.from("invitations").insert({
+      organization_id: org!,
+      email: invited,
+      role: "technician",
+      token_hash: hashToken(generateToken()),
+      invited_by: data.user!.id,
+    });
+    expect(inviteError).toBeNull();
+    const { data: member, error: memberError } = await service.auth.admin.createUser({
+      email: invited,
+      password,
+      email_confirm: true,
+    });
+    expect(memberError).toBeNull();
+    created.push(member.user!.id);
+    const memberClient = anonClient();
+    await memberClient.auth.signInWithPassword({ email: invited, password });
+    const { error: foundError } = await memberClient.rpc("create_organization", {
+      p_name: "Own company",
+      p_display_name: "Invited",
+    });
+    expect(foundError?.message).toMatch(/signup_not_allowed/);
+  });
+
+  it("never shows the list to clients, signed in or not", async () => {
+    const { data: anonRows } = await (anonClient() as unknown as SupabaseClient).from("signup_allowlist").select("*");
+    expect(anonRows ?? []).toEqual([]);
+    const { error } = await (anonClient() as unknown as SupabaseClient)
+      .from("signup_allowlist")
+      .insert({ email: `sneaky-${stamp}@closed-signup.example` });
+    expect(error).not.toBeNull();
+    const { error: rpcError } = await (anonClient() as unknown as SupabaseClient).rpc("signup_allowed", {
+      p_email: allowed,
+    });
+    expect(rpcError).not.toBeNull();
+  });
+});

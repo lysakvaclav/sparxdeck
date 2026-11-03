@@ -17,6 +17,7 @@ export type ErrorCode =
   | "alreadyInTeam"
   | "forbidden"
   | "mcpDisabled"
+  | "signupNotAllowed"
   | "invitationNotFound"
   | "invitationExpired"
   | "invitationUsed"
@@ -142,6 +143,7 @@ export function databaseErrorCode(
 ): ErrorCode {
   const message = error?.message ?? "";
   if (message.includes("already_member")) return "alreadyMember";
+  if (message.includes("signup_not_allowed")) return "signupNotAllowed";
   if (message.includes("invitation_not_found")) return "invitationNotFound";
   if (message.includes("invitation_expired")) return "invitationExpired";
   if (message.includes("invitation_used")) return "invitationUsed";

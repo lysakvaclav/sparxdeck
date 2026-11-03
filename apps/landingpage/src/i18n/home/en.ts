@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "How quickly can we get started?",
-        "answer": "Right away. You create the account yourself and try everything on sample data. Import your records from a file, print the QR labels, and a technician can do the first check without lengthy training."
+        "answer": "After a short call we open sign-up for you. Then you create your company, invite your technicians, import your records from a file and print the QR labels. You can try everything on sample data, and a technician manages the first check without lengthy training."
       },
       {
         "question": "How does SparxDeck protect data?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "Try SparxDeck in your company",
-    "body": "Create an account and explore the app on sample data, or book a short demo.",
+    "body": "Book a short demo. Then we open an account for you, and you can explore the app on sample data too.",
     "primary": "Get started with SparxDeck",
     "secondary": "Book a demo"
   },

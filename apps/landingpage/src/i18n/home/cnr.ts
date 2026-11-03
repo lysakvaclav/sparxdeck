@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "Koliko brzo možemo da počnemo?",
-        "answer": "Odmah. Nalog otvorite sami i sve isprobate na probnim podacima. Evidenciju uvezete iz datoteke, odštampate QR naljepnice i tehničar obavi prvu kontrolu bez duge obuke."
+        "answer": "Nakon kratkog razgovora otvaramo vam registraciju. Zatim otvorite firmu, pozovete tehničare, uvezete evidenciju iz datoteke i odštampate QR naljepnice. Sve isprobate na probnim podacima, a tehničar obavi prvu kontrolu bez duge obuke."
       },
       {
         "question": "Kako SparxDeck štiti podatke?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "Isprobajte SparxDeck u svojoj firmi",
-    "body": "Otvorite nalog i istražite aplikaciju na probnim podacima ili zakažite kratak demo.",
+    "body": "Zakažite kratku demonstraciju. Zatim vam otvaramo nalog, a aplikaciju možete da istražite i na probnim podacima.",
     "primary": "Počnite sa SparxDeck",
     "secondary": "Zakažite demo"
   },

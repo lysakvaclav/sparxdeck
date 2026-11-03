@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "Jak rychle můžeme začít?",
-        "answer": "Hned. Účet si založíte sami a na ukázkových datech si vše vyzkoušíte. Evidenci naimportujete ze souboru, vytisknete QR štítky a technik zvládne první kontrolu bez dlouhého školení."
+        "answer": "Po krátké domluvě vám zpřístupníme registraci. Pak založíte firmu, pozvete techniky, naimportujete evidenci ze souboru a vytisknete QR štítky. Na ukázkových datech si vše vyzkoušíte a technik zvládne první kontrolu bez dlouhého školení."
       },
       {
         "question": "Jak SparxDeck chrání data?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "Vyzkoušejte SparxDeck ve své firmě",
-    "body": "Založte účet a projděte si aplikaci na ukázkových datech, nebo si domluvte krátkou ukázku.",
+    "body": "Domluvte si krátkou ukázku. Pak vám zpřístupníme účet a aplikaci si projdete i na ukázkových datech.",
     "primary": "Začít se SparxDeck",
     "secondary": "Domluvit ukázku"
   },

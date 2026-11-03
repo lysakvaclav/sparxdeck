@@ -164,3 +164,14 @@ Endpoint `https://portal.sparxdeck.com/api/mcp`, autorizační server je v platf
 4. Zkouška s Claude: vlastník zapne AI asistenty v aplikaci (AI asistenti), v claude.ai *Nastavení → Konektory → Přidat vlastní konektor* s adresou výše, přihlásit se, povolit, zeptat se „Co nám propadá příští měsíc?“.
 5. Odvolání: připojení se ruší v aplikaci (AI asistenti), vypnutí pro celou firmu okamžitě zastaví všechna volání.
 
+## 12. Kdo se smí zaregistrovat
+
+Registrace je uzavřená (migrace `20261103090000_closed_signup.sql`). Nový zákazník po domluvě:
+
+1. Supabase (produkční projekt) → **Table Editor** → tabulka `signup_allowlist` → **Insert row**.
+2. Do `email` napsat e-mail majitele firmy (velikost písmen a mezery nevadí), do `note` třeba název firmy a datum domluvy. Celou doménu povolí řádek `@firma.cz` (opatrně: zaregistrovat se pak může kdokoli s adresou té domény).
+3. Majitel se zaregistruje na portal.sparxdeck.com/signup, založí firmu a techniky pozve v aplikaci (Tým). Pozvaní žádný řádek nepotřebují, stačí jim platná pozvánka.
+4. Po založení firmy se u řádku vyplní `used_at` a `used_by`. Smazání řádku nic nezruší; jen tím e-mailem už nepůjde založit další účet.
+
+Kdo na seznamu není a nemá pozvánku, uvidí při registraci hlášku s odkazem na info@sparxdeck.com a účet nevznikne (platí i pro přihlášení odkazem v e-mailu).
+

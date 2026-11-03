@@ -58,7 +58,7 @@
     },
     "signup": {
       "title": "Create account",
-      "subtitle": "Get started with SparxDeck. You'll set up your company in the next step.",
+      "subtitle": "For companies we have agreed with and for invited team members.",
       "submit": "Create account",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
@@ -335,7 +335,8 @@
     "routeTooLong": "A route can have at most 30 stops.",
     "routeChanged": "The route changed meanwhile. It has been reloaded, please try again.",
     "planInRoute": "This visit belongs to a route. Change its day and technician in the route.",
-    "mcpDisabled": "AI assistants are not turned on in the company."
+    "mcpDisabled": "AI assistants are not turned on in the company.",
+    "signupNotAllowed": "Sign-up is open only to companies we have agreed with and to invited team members. Write to us at info@sparxdeck.com."
   },
   "email": {
     "invite": {

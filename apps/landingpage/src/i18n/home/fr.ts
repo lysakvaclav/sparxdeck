@@ -148,7 +148,7 @@ const home: HomeDictionary = {
       },
       {
         "question": "En combien de temps pouvons-nous démarrer ?",
-        "answer": "Tout de suite. Vous créez le compte vous-même et testez tout sur des données d’exemple. Importez vos données depuis un fichier, imprimez les étiquettes QR, et un technicien réalise son premier contrôle sans longue formation."
+        "answer": "Après un court échange, nous vous ouvrons l’inscription. Vous créez ensuite votre entreprise, invitez vos techniciens, importez vos données depuis un fichier et imprimez les étiquettes QR. Vous testez tout sur des données d’exemple, et un technicien réalise son premier contrôle sans longue formation."
       },
       {
         "question": "Comment SparxDeck protège-t-il les données ?",
@@ -158,7 +158,7 @@ const home: HomeDictionary = {
   },
   "cta": {
     "title": "Essayez SparxDeck dans votre entreprise",
-    "body": "Créez un compte et découvrez l'application sur des données d'exemple, ou demandez une courte démo.",
+    "body": "Réservez une courte démonstration. Nous vous ouvrons ensuite un compte, et vous pouvez aussi explorer l’application sur des données d’exemple.",
     "primary": "Commencer avec SparxDeck",
     "secondary": "Demander une démo"
   },
