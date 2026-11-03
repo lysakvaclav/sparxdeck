@@ -1,8 +1,11 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { buildServer } from "@/lib/mcp/server";
 import {
   isMetadataClientId,
+  ourResource,
   parseScopes,
+  publicClientDocument,
   redirectMatches,
   safeToFetch,
   sameResource,
@@ -147,5 +150,48 @@ describe("notes", () => {
     expect(appendNote("Keys at the desk.\n", "[2026-11-02, Alice, AI] code 1234")).toBe(
       "Keys at the desk.\n[2026-11-02, Alice, AI] code 1234",
     );
+  });
+});
+
+describe("compatibility with ChatGPT and Gemini", () => {
+  it("accepts ChatGPT's client metadata document (prefers private_key_jwt, also lists none)", () => {
+    expect(
+      publicClientDocument({
+        token_endpoint_auth_method: "private_key_jwt",
+        token_endpoint_auth_methods_supported: ["none", "private_key_jwt"],
+      }),
+    ).toBe(true);
+    expect(publicClientDocument({})).toBe(true);
+    expect(publicClientDocument({ token_endpoint_auth_method: "private_key_jwt" })).toBe(false);
+  });
+
+  it("accepts the server's origin as its resource indicator, never another server", () => {
+    const resource = "https://portal.sparxdeck.com/api/mcp";
+    expect(ourResource("https://portal.sparxdeck.com/api/mcp", resource)).toBe(true);
+    expect(ourResource("https://portal.sparxdeck.com", resource)).toBe(true);
+    expect(ourResource("https://portal.sparxdeck.com/", resource)).toBe(true);
+    expect(ourResource("https://evil.example", resource)).toBe(false);
+    expect(ourResource("https://portal.sparxdeck.com/other", resource)).toBe(false);
+  });
+
+  it("publishes input schemas every assistant reads (no format, pattern or unions)", () => {
+    const server = buildServer({
+      tokenId: "t",
+      organizationId: "o",
+      userId: "u",
+      role: "owner",
+      scopes: ["sparxdeck:read", "sparxdeck:write"],
+      clientName: "test",
+      kind: "oauth",
+      expiresAt: 0,
+    });
+    const names = Object.keys((server as unknown as { _registeredTools: Record<string, unknown> })._registeredTools);
+    expect(names).toContain("search");
+    expect(names).toContain("fetch");
+    expect(names).toContain("update_defect");
+    for (const name of names) {
+      const schema = JSON.stringify(server.toolInputSchemaJson(name));
+      expect(schema, name).not.toMatch(/"(format|pattern|anyOf|oneOf|allOf)"/);
+    }
   });
 });

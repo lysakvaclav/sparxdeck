@@ -2,7 +2,7 @@ import "server-only";
 import type { McpScope } from "./config";
 import { appOrigin, resourceUrl } from "./http";
 import { findClient, type McpClient } from "./oauth";
-import { parseScopes, redirectMatches, sameResource, validChallenge } from "./oauth-rules";
+import { ourResource, parseScopes, redirectMatches, validChallenge } from "./oauth-rules";
 
 // The authorization request of an AI assistant (OAuth 2.1, part 31), checked
 // the same way when the consent page shows and when the member answers.
@@ -60,7 +60,7 @@ export async function checkAuthorizeRequest(params: AuthorizeParams): Promise<Au
   if (!codeChallenge || !validChallenge(codeChallenge) || one(params, "code_challenge_method") !== "S256")
     return back("invalid_request", "PKCE with code_challenge_method=S256 is required");
   const resource = one(params, "resource");
-  if (resource && !sameResource(resource, resourceUrl()))
+  if (resource && !ourResource(resource, resourceUrl()))
     return back("invalid_target", "Tokens are issued only for this server's MCP endpoint");
 
   return {

@@ -1,9 +1,11 @@
 import "server-only";
 import { McpServer, ResourceNotFoundError, ResourceTemplate } from "@modelcontextprotocol/server";
 import { z } from "zod";
-import { CONFIRMATION_TTL, MAX_PAGE_SIZE, SCOPE_WRITE } from "./config";
+import { isIsoDate } from "@/lib/due";
+import { CONFIRMATION_TTL, MAX_PAGE_SIZE, SCOPE_READ, SCOPE_WRITE } from "./config";
 import { asMember, type Tx } from "./db";
 import { confirmationHash, consumeConfirmation, createConfirmation, recordAudit } from "./guard";
+import { appOrigin } from "./http";
 import type { McpPrincipal } from "./oauth";
 import { dataJson, dataResult, decodeCursor, errorResult, pageSize, ToolError, type ToolResult } from "./output";
 import * as read from "./read";
@@ -28,8 +30,29 @@ How to work with it:
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 
-const id = z.guid();
-const date = z.iso.date();
+// Input schemas stay within what every assistant reads: plain strings checked
+// on the server, no "format", "pattern" or nullable unions in the JSON Schema
+// (Gemini's function calling supports only a subset of JSON Schema). "none"
+// clears a value where clearing is allowed.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const id = z
+  .string()
+  .refine((value) => UUID.test(value), "Must be an id returned by SparxDeck.")
+  .describe("A SparxDeck id (UUID) returned by another tool.");
+const date = z
+  .string()
+  .refine((value) => isIsoDate(value), "Must be a date as YYYY-MM-DD.")
+  .describe("A calendar date as YYYY-MM-DD.");
+const idOrNone = z
+  .string()
+  .refine((value) => value === "none" || UUID.test(value), 'Must be an id, or "none".')
+  .describe('A SparxDeck id, or "none" to clear it.');
+const dateOrNone = z
+  .string()
+  .refine((value) => value === "none" || isIsoDate(value), 'Must be YYYY-MM-DD, or "none".')
+  .describe('A date as YYYY-MM-DD, or "none" to clear it.');
+/** "none" as the clearing value of a field (undefined stays: the field doesn't change). */
+const cleared = (value: string | undefined) => (value === "none" ? null : value);
 const limit = z.number().int().min(1).max(MAX_PAGE_SIZE).optional()
   .describe(`Items per page, at most ${MAX_PAGE_SIZE} (default 25).`);
 const cursor = z.string().max(200).optional().describe("next_cursor from the previous page.");
@@ -95,6 +118,7 @@ export function buildServer(principal: McpPrincipal): McpServer {
         inputSchema: config.input,
         outputSchema: config.output,
         annotations: { title: config.title, ...READ_ONLY },
+        _meta: { securitySchemes: [{ type: "oauth2", scopes: [SCOPE_READ] }] },
       },
       async (args) =>
         audited("tools/call", name, args, async () => {
@@ -462,11 +486,29 @@ export function buildServer(principal: McpPrincipal): McpServer {
       description:
         "Finds customers, buildings, devices, defects and inspections by text or number: a label number (0012), a defect (D-0012), a protocol (2026-0001), or part of a name, address or serial number.",
       input: z.object({ query: z.string().trim().min(1).max(100) }),
-      output: z.object({ query: z.string(), hits: z.array(loose) }),
+      output: z.object({
+        query: z.string(),
+        results: z.array(z.looseObject({ id: z.string(), title: z.string(), url: z.string() })),
+      }),
     },
     async (tx, org, args) => {
-      const data = await read.search(tx, org, args.query);
-      return { summary: `${data.hits.length} results for "${args.query}".`, data };
+      const data = await read.search(tx, org, appOrigin(), args.query);
+      return { summary: `${data.results.length} results for "${args.query}".`, data };
+    },
+  );
+
+  readTool(
+    "fetch",
+    {
+      title: "Open a record",
+      description:
+        "The whole record behind a search result, by its id from search (e.g. device:<id>): title, the record as text and its page in SparxDeck.",
+      input: z.object({ id: z.string().trim().min(3).max(100).describe("An id from search, e.g. device:<id>.") }),
+      output: z.looseObject({ id: z.string(), title: z.string(), text: z.string(), url: z.string() }),
+    },
+    async (tx, org, args) => {
+      const data = await read.fetchRecord(tx, org, appOrigin(), args.id);
+      return { summary: `${data.title}.`, data };
     },
   );
 
@@ -501,6 +543,7 @@ export function buildServer(principal: McpPrincipal): McpServer {
           idempotentHint: config.idempotent,
           openWorldHint: false,
         },
+        _meta: { securitySchemes: [{ type: "oauth2", scopes: [SCOPE_READ, SCOPE_WRITE] }] },
       },
       async (args) =>
         audited("tools/call", name, args, async () => {
@@ -571,19 +614,24 @@ export function buildServer(principal: McpPrincipal): McpServer {
       {
         title: "Change a defect",
         description:
-          "Changes a defect's severity, description, state (open or in_progress; use resolve_defect to resolve), assignee or due date. Send only what changes; null clears the assignee or the due date.",
+          `Changes a defect's severity, description, state (open or in_progress; use resolve_defect to resolve), assignee or due date. Send only what changes; "none" clears the assignee or the due date.`,
         input: z.object({
           defect_id: id,
           severity: severity.optional(),
           description: z.string().trim().min(1).max(2000).optional(),
           status: z.enum(["open", "in_progress"]).optional(),
-          assigned_to: id.nullable().optional(),
-          due_on: date.nullable().optional(),
+          assigned_to: idOrNone.optional(),
+          due_on: dateOrNone.optional(),
         }),
         destructive: true,
         idempotent: true,
       },
-      { preview: write.previewUpdateDefect, execute: write.updateDefect },
+      {
+        preview: (tx, org, args) =>
+          write.previewUpdateDefect(tx, org, { ...args, assigned_to: cleared(args.assigned_to), due_on: cleared(args.due_on) }),
+        execute: (tx, org, args) =>
+          write.updateDefect(tx, org, { ...args, assigned_to: cleared(args.assigned_to), due_on: cleared(args.due_on) }),
+      },
     );
 
     writeTool(
@@ -634,19 +682,21 @@ export function buildServer(principal: McpPrincipal): McpServer {
       "reschedule_visit",
       {
         title: "Change a planned visit",
-        description: "Moves a planned visit to another day, changes its technician (null for none) or its note (owners and admins only).",
+        description:
+          'Moves a planned visit to another day, changes its technician ("none" for nobody) or its note (an empty note clears it). Owners and admins only.',
         input: z.object({
           visit_id: id.describe("A visit id from get_calendar or get_site."),
           planned_on: date.optional(),
-          technician_id: id.nullable().optional(),
-          note: z.string().trim().max(500).nullable().optional(),
+          technician_id: idOrNone.optional(),
+          note: z.string().trim().max(500).optional(),
         }),
         destructive: true,
         idempotent: true,
       },
       {
-        preview: (tx, org, args) => write.previewRescheduleVisit(tx, org, principal.role, args),
-        execute: write.rescheduleVisit,
+        preview: (tx, org, args) =>
+          write.previewRescheduleVisit(tx, org, principal.role, { ...args, technician_id: cleared(args.technician_id) }),
+        execute: (tx, org, args) => write.rescheduleVisit(tx, org, { ...args, technician_id: cleared(args.technician_id) }),
       },
     );
 

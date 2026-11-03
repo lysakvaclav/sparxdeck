@@ -397,7 +397,64 @@ describe.skipIf(!configured)("MCP: AI assistants", () => {
       expect(result.isError).toBe(true);
       expect(result.content[0]!.text).toContain("not_found");
       const search = await tool(bobRead, "search", { query: `SN-${run}` });
-      expect((search.structuredContent as { hits: unknown[] }).hits).toEqual([]);
+      expect((search.structuredContent as { results: unknown[] }).results).toEqual([]);
+      const fetched = await tool(bobRead, "fetch", { id: `device:${deviceA}` });
+      expect(fetched.isError).toBe(true);
+    });
+
+    it("searches and fetches records in the shape ChatGPT expects", async () => {
+      const search = await tool(read, "search", { query: `SN-${run}` });
+      const results = (search.structuredContent as { results: { id: string; title: string; url: string }[] }).results;
+      expect(results).toHaveLength(1);
+      expect(results[0]!.id).toBe(`device:${deviceA}`);
+      expect(results[0]!.url).toBe(`http://localhost:3001/devices/${deviceA}`);
+      const fetched = await tool(read, "fetch", { id: results[0]!.id });
+      const record = fetched.structuredContent as { id: string; title: string; text: string; url: string };
+      expect(record.id).toBe(`device:${deviceA}`);
+      expect(record.text).toContain(`SN-${run}`);
+      expect(record.url).toBe(results[0]!.url);
+    });
+
+    it("serves a whole 2025-era session: initialize, tools/list, tools/call", async () => {
+      const legacy = async (body: Record<string, unknown>) => {
+        const response = await mcp.POST(
+          new Request("http://localhost:3001/api/mcp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json, text/event-stream",
+              "MCP-Protocol-Version": "2025-06-18",
+              Authorization: `Bearer ${read}`,
+            },
+            body: JSON.stringify({ jsonrpc: "2.0", ...body }),
+          }),
+        );
+        const text = await response.text();
+        const json = text.startsWith("{") ? text : (/data: (\{.*\})/.exec(text)?.[1] ?? "{}");
+        return { status: response.status, body: JSON.parse(json) as Record<string, unknown> };
+      };
+      const init = await legacy({
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "gemini-cli", version: "1" } },
+      });
+      expect(init.status).toBe(200);
+      const initialized = await legacy({ method: "notifications/initialized" });
+      expect([200, 202]).toContain(initialized.status);
+      const list = await legacy({ id: 2, method: "tools/list" });
+      const tools = (list.body.result as { tools: { name: string }[] }).tools.map((t) => t.name);
+      expect(tools).toContain("search");
+      expect(tools).toContain("fetch");
+      const called = await legacy({ id: 3, method: "tools/call", params: { name: "get_overview", arguments: {} } });
+      const result = called.body.result as { structuredContent: { company: { name: string } } };
+      expect(result.structuredContent.company.name).toBe(`MCP A ${run}`);
+    });
+
+    it("accepts ChatGPT's real client metadata document", async () => {
+      const client = await oauth.findClient("https://chatgpt.com/oauth/client.json");
+      expect(client?.clientName).toBe("ChatGPT");
+      expect(client?.authMethod).toBe("none");
+      expect(client?.redirectUris).toContain("https://chatgpt.com/connector_platform_oauth_redirect");
     });
 
     it("reads resources and offers prompts", async () => {

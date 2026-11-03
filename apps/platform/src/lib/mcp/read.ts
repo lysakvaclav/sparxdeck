@@ -749,25 +749,41 @@ export async function deviceTypes(tx: Tx, org: Org) {
   });
 }
 
-// ---------- Search ----------
+// ---------- Search and fetch (the shape ChatGPT expects of these two tools) ----------
 
-export async function search(tx: Tx, org: Org, query: string) {
+export const RECORD_KINDS = ["customer", "site", "device", "defect", "inspection"] as const;
+type RecordKind = (typeof RECORD_KINDS)[number];
+
+const RECORD_PATHS: Record<RecordKind, string> = {
+  customer: "customers",
+  site: "sites",
+  device: "devices",
+  defect: "defects",
+  inspection: "inspections",
+};
+
+/** A record's id for search and fetch ("device:<uuid>") and its page in the app. */
+function recordRef(kind: RecordKind, id: string, appOrigin: string) {
+  return { id: `${kind}:${id}`, url: `${appOrigin}/${RECORD_PATHS[kind]}/${id}` };
+}
+
+export async function search(tx: Tx, org: Org, appOrigin: string, query: string) {
   const terms = searchTerms(query);
-  const hits: { kind: string; id: string; title: string; subtitle: string | null }[] = [];
+  const results: { id: string; title: string; url: string; kind: RecordKind; subtitle: string | null }[] = [];
+  const add = (kind: RecordKind, id: string, title: string, subtitle: string | null) =>
+    results.push({ ...recordRef(kind, id, appOrigin), title, kind, subtitle });
   if (terms.label !== null) {
     const rows = await tx`
       select d.id, d.label_number, t.name as type, s.name as site from public.devices d
         join public.device_types t on t.id = d.device_type_id join public.sites s on s.id = d.site_id
        where d.organization_id = ${org.id} and d.deleted_at is null and d.label_number = ${terms.label}`;
-    for (const row of rows)
-      hits.push({ kind: "device", id: row.id, title: `${formatLabel(row.label_number)} ${row.type}`, subtitle: row.site });
+    for (const row of rows) add("device", row.id, `${formatLabel(row.label_number)} ${row.type}`, row.site);
   }
   if (terms.defect !== null) {
     const rows = await tx`
       select id, number, description from public.defects
        where organization_id = ${org.id} and number = ${terms.defect}`;
-    for (const row of rows)
-      hits.push({ kind: "defect", id: row.id, title: defectRef(row.number), subtitle: row.description });
+    for (const row of rows) add("defect", row.id, defectRef(row.number), row.description);
   }
   if (terms.protocol) {
     const rows = await tx`
@@ -776,12 +792,7 @@ export async function search(tx: Tx, org: Org, query: string) {
        where p.organization_id = ${org.id} and p.active
          and p.year = ${terms.protocol.year} and p.number = ${terms.protocol.number}`;
     for (const row of rows)
-      hits.push({
-        kind: "inspection",
-        id: row.inspection_id,
-        title: protocolNumber(row.year, row.number, row.number_format),
-        subtitle: row.site,
-      });
+      add("inspection", row.inspection_id, protocolNumber(row.year, row.number, row.number_format), row.site);
   }
   if (terms.text) {
     const pattern = like(terms.text);
@@ -790,27 +801,67 @@ export async function search(tx: Tx, org: Org, query: string) {
        where organization_id = ${org.id} and deleted_at is null
          and (name ilike ${pattern} or company_id ilike ${pattern} or contact_person ilike ${pattern})
        order by name limit 5`;
-    for (const row of customers) hits.push({ kind: "customer", id: row.id, title: row.name, subtitle: row.company_id });
+    for (const row of customers) add("customer", row.id, row.name, row.company_id);
     const sites = await tx`
       select s.id, s.name, s.address from public.sites s
        where s.organization_id = ${org.id} and s.deleted_at is null
          and (s.name ilike ${pattern} or s.address ilike ${pattern})
        order by s.name limit 5`;
-    for (const row of sites) hits.push({ kind: "site", id: row.id, title: row.name, subtitle: row.address });
+    for (const row of sites) add("site", row.id, row.name, row.address);
     const devices = await tx`
       select d.id, d.label_number, t.name as type, s.name as site from public.devices d
         join public.device_types t on t.id = d.device_type_id join public.sites s on s.id = d.site_id
        where d.organization_id = ${org.id} and d.deleted_at is null
          and (d.serial_number ilike ${pattern} or d.manufacturer ilike ${pattern} or d.model ilike ${pattern})
        order by d.label_number limit 5`;
-    for (const row of devices)
-      hits.push({ kind: "device", id: row.id, title: `${formatLabel(row.label_number)} ${row.type}`, subtitle: row.site });
+    for (const row of devices) add("device", row.id, `${formatLabel(row.label_number)} ${row.type}`, row.site);
     const defects = await tx`
       select id, number, description from public.defects
        where organization_id = ${org.id} and description ilike ${pattern}
        order by created_at desc limit 5`;
-    for (const row of defects)
-      hits.push({ kind: "defect", id: row.id, title: defectRef(row.number), subtitle: row.description });
+    for (const row of defects) add("defect", row.id, defectRef(row.number), row.description);
   }
-  return plain({ query, hits });
+  return plain({ query, results });
+}
+
+/** One record by its search id, as a document: title, the record as text, its page in the app. */
+export async function fetchRecord(tx: Tx, org: Org, appOrigin: string, ref: string) {
+  const match = /^(customer|site|device|defect|inspection):([0-9a-f-]{36})$/i.exec(ref.trim());
+  if (!match) throw new ToolError("invalid_input", "Use an id from search, such as device:<id>.");
+  const kind = match[1]!.toLowerCase() as RecordKind;
+  const id = match[2]!.toLowerCase();
+  let record: Record<string, unknown>;
+  let title: string;
+  switch (kind) {
+    case "customer":
+      record = (await getCustomer(tx, org, id)) as Record<string, unknown>;
+      title = String(record.name);
+      break;
+    case "site":
+      record = (await getSite(tx, org, id)) as Record<string, unknown>;
+      title = String(record.name ?? "");
+      break;
+    case "device": {
+      const device = await getDevice(tx, org, { deviceId: id });
+      record = device as Record<string, unknown>;
+      title = `${device.label} ${device.type.name}`;
+      break;
+    }
+    case "defect": {
+      const defect = await getDefect(tx, org, { defectId: id });
+      record = defect as Record<string, unknown>;
+      title = String(defect.number);
+      break;
+    }
+    case "inspection":
+      record = (await getInspection(tx, org, id)) as Record<string, unknown>;
+      title = `${String(record.site_name)} (${String(record.status)})`;
+      break;
+  }
+  return plain({
+    ...recordRef(kind, id, appOrigin),
+    title,
+    text: JSON.stringify(record, null, 2),
+    metadata: { kind },
+  });
 }

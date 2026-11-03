@@ -3110,6 +3110,13 @@
         "claudeStep3": "Sign in to SparxDeck, choose the company and allow access.",
         "claudeCodeTitle": "Claude Code",
         "claudeCodeBody": "Run this in a terminal, then sign in from Claude Code with /mcp:",
+        "chatgptTitle": "ChatGPT",
+        "chatgptStep1": "Open chatgpt.com/plugins, choose + and Add custom MCP server.",
+        "chatgptStep2": "Enter the name SparxDeck, paste the address above and choose OAuth for authentication.",
+        "chatgptStep3": "Accept the warning, choose Create as a plugin, sign in to SparxDeck and allow access.",
+        "chatgptNote": "Whether you can add a custom MCP server depends on your ChatGPT plan and workspace settings.",
+        "geminiTitle": "Gemini (Gemini CLI)",
+        "geminiBody": "Add the server to ~/.gemini/settings.json and sign in from Gemini CLI with /mcp auth sparxdeck. Signing in opens a browser on this computer.",
         "otherTitle": "Other assistants",
         "otherBody": "Any assistant that supports remote MCP servers with OAuth sign-in connects with the same address. If it can't sign in, use a personal token below in the Authorization: Bearer header."
       },

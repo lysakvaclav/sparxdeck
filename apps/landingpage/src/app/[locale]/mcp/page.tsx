@@ -16,7 +16,7 @@ const READ_TOOLS = [
   ["list_devices", "get_device"],
   ["list_inspections", "get_inspection", "get_inspection_summary"],
   ["list_defects", "get_defect", "get_calendar"],
-  ["search", "list_members", "list_device_types"],
+  ["search", "fetch", "list_members", "list_device_types"],
 ];
 const WRITE_TOOLS = [
   ["create_defect", "update_defect", "comment_defect", "resolve_defect"],

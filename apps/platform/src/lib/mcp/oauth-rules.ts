@@ -134,3 +134,31 @@ export function sameResource(a: string, b: string): boolean {
   const left = normal(a);
   return left !== null && left === normal(b);
 }
+
+/**
+ * Whether a Client ID Metadata Document describes a client that can use this
+ * server as a public client (no secret, PKCE only). ChatGPT's document, for
+ * one, prefers private_key_jwt but also lists "none"; the client then picks
+ * "none" because our metadata offers no private_key_jwt.
+ */
+export function publicClientDocument(doc: {
+  token_endpoint_auth_method?: string;
+  token_endpoint_auth_methods_supported?: string[];
+}): boolean {
+  if (doc.token_endpoint_auth_methods_supported?.includes("none")) return true;
+  return !doc.token_endpoint_auth_method || doc.token_endpoint_auth_method === "none";
+}
+
+/**
+ * Whether a resource indicator names this MCP server: its endpoint URL, or its
+ * origin (some clients send the origin of the server they connected).
+ */
+export function ourResource(value: string, resourceUrl: string): boolean {
+  if (sameResource(value, resourceUrl)) return true;
+  try {
+    return sameResource(value, new URL(resourceUrl).origin);
+  } catch {
+    return false;
+  }
+}
+

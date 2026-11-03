@@ -18,8 +18,9 @@ import { mcpDb } from "./db";
 import {
   isMetadataClientId,
   isScope,
+  ourResource,
+  publicClientDocument,
   safeToFetch,
-  sameResource,
   validRedirectUri,
   verifyPkce,
 } from "./oauth-rules";
@@ -123,6 +124,7 @@ const metadataSchema = z.object({
   client_uri: z.string().max(2048).optional(),
   redirect_uris: z.array(z.string()).min(1).max(10),
   token_endpoint_auth_method: z.string().optional(),
+  token_endpoint_auth_methods_supported: z.array(z.string()).max(20).optional(),
 });
 
 async function fetchMetadataClient(clientId: string): Promise<McpClient | null> {
@@ -154,7 +156,7 @@ async function fetchMetadataClient(clientId: string): Promise<McpClient | null> 
     const doc = parsed.data;
     // The document must describe itself, and a public document can't hold a secret.
     if (doc.client_id !== clientId) return null;
-    if (doc.token_endpoint_auth_method && doc.token_endpoint_auth_method !== "none") return null;
+    if (!publicClientDocument(doc)) return null;
     if (!doc.redirect_uris.every(validRedirectUri)) return null;
     const clientUri = doc.client_uri && /^https:\/\//.test(doc.client_uri) ? doc.client_uri : null;
     const [row] = await mcpDb()<ClientRow[]>`
@@ -351,7 +353,7 @@ export async function exchangeCode(input: {
       return fail("invalid_grant", "redirect_uri does not match the authorization request");
     if (!verifyPkce(input.verifier, row.code_challenge))
       return fail("invalid_grant", "PKCE verification failed");
-    if (input.resource && !sameResource(input.resource, row.resource))
+    if (input.resource && !ourResource(input.resource, row.resource))
       return fail("invalid_target", "The resource does not match the authorization request");
 
     const [token] = await tx<{ id: string }[]>`
@@ -378,7 +380,7 @@ export async function refreshTokens(input: {
   resource: string | null;
   expectedResource: string;
 }): Promise<TokenResponse | OAuthFailure> {
-  if (input.resource && !sameResource(input.resource, input.expectedResource))
+  if (input.resource && !ourResource(input.resource, input.expectedResource))
     return fail("invalid_target", "Tokens are issued only for this server");
   const access = secret(TOKEN_PREFIX.access);
   const refresh = secret(TOKEN_PREFIX.refresh);

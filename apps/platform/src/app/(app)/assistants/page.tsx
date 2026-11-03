@@ -138,6 +138,25 @@ export default async function AssistantsPage() {
                 </div>
               </div>
               <div>
+                <h3 className="font-semibold">{t("connect.chatgptTitle")}</h3>
+                <ol className="mt-1.5 list-decimal space-y-1 ps-5">
+                  <li>{t("connect.chatgptStep1")}</li>
+                  <li>{t("connect.chatgptStep2")}</li>
+                  <li>{t("connect.chatgptStep3")}</li>
+                </ol>
+                <p className="mt-1.5 text-muted-foreground">{t("connect.chatgptNote")}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">{t("connect.geminiTitle")}</h3>
+                <p className="mt-1.5">{t("connect.geminiBody")}</p>
+                <div className="mt-2">
+                  <CopyField
+                    value={JSON.stringify({ mcpServers: { sparxdeck: { httpUrl: serverUrl } } })}
+                    label={t("connect.geminiTitle")}
+                  />
+                </div>
+              </div>
+              <div>
                 <h3 className="font-semibold">{t("connect.otherTitle")}</h3>
                 <p className="mt-1.5">{t("connect.otherBody")}</p>
               </div>

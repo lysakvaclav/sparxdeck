@@ -106,6 +106,9 @@ try {
     await page.goto(`${APP}/assistants`);
     await page.waitForText("Čtení i změny");
     await page.screenshot(`${OUT}/part31-01-assistants.png`);
+    await page.evaluate(`[...document.querySelectorAll("h3")].find((h) => h.textContent === "ChatGPT").scrollIntoView()`);
+    await sleep(300);
+    await page.screenshot(`${OUT}/part31-01b-guides.png`);
   });
 
   await step("a personal token is shown once and works against /api/mcp", async () => {
@@ -215,7 +218,7 @@ try {
     const techPage = await launch({ width: 390, height: 844, mobile: true });
     try {
       await signIn(techPage, tech);
-      await techPage.waitForText("Vítejte", 30000);
+      await techPage.waitForText("Vítejte, Tomáš", 30000);
       await techPage.goto(`${APP}/assistants`);
       await techPage.waitForText("Zapnout nebo vypnout je může jen vlastník firmy.");
       await techPage.waitForText("Moje připojení");

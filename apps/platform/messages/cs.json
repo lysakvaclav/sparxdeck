@@ -3110,6 +3110,13 @@
         "claudeStep3": "Přihlaste se do SparxDecku, vyberte firmu a povolte přístup.",
         "claudeCodeTitle": "Claude Code",
         "claudeCodeBody": "V terminálu spusťte tento příkaz a pak se v Claude Code přihlaste přes /mcp:",
+        "chatgptTitle": "ChatGPT",
+        "chatgptStep1": "Otevřete chatgpt.com/plugins, zvolte + a Add custom MCP server.",
+        "chatgptStep2": "Zadejte název SparxDeck, vložte adresu výše a jako ověření zvolte OAuth.",
+        "chatgptStep3": "Potvrďte upozornění, zvolte Create as a plugin, přihlaste se do SparxDecku a povolte přístup.",
+        "chatgptNote": "Zda můžete přidat vlastní MCP server, záleží na tarifu ChatGPT a na nastavení pracovního prostoru.",
+        "geminiTitle": "Gemini (Gemini CLI)",
+        "geminiBody": "Přidejte server do souboru ~/.gemini/settings.json a v Gemini CLI se přihlaste příkazem /mcp auth sparxdeck. Přihlášení otevře prohlížeč na tomto počítači.",
         "otherTitle": "Jiní asistenti",
         "otherBody": "Asistent, který umí vzdálené MCP servery s přihlášením OAuth, se připojí stejnou adresou. Pokud přihlášení neumí, použijte osobní token níže v hlavičce Authorization: Bearer."
       },
