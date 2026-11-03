@@ -4,15 +4,13 @@ import { FEATURES } from "@/components/home/features";
 import { DesktopShot, PhoneShot } from "@/components/site/Screenshot";
 import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
-/** A section's heading: a small grey label, the title, then the text (and a link). */
+/** A section's heading: the title, then the text (and a link). */
 export function SectionHeading({
-  eyebrow,
   title,
   body,
   id,
   children,
 }: {
-  eyebrow?: string;
   title: string;
   body?: string;
   id: string;
@@ -20,7 +18,6 @@ export function SectionHeading({
 }) {
   return (
     <div className="flex max-w-2xl flex-col items-start">
-      {eyebrow && <p className="mb-3 text-[0.9375rem] text-muted">{eyebrow}</p>}
       <h2 id={id} className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
         {title}
       </h2>
@@ -40,7 +37,7 @@ export function Platform({ dict, locale }: { dict: HomeDictionary; locale: Local
         return (
           <section key={text.label} aria-labelledby={id} className="border-t border-line">
             <div className="container-site py-20 md:py-28">
-              <SectionHeading eyebrow={text.label} title={text.title} body={text.body} id={id}>
+              <SectionHeading title={text.title} body={text.body} id={id}>
                 {feature.path && (
                   <Link
                     href={`/${locale}/${feature.path}`}

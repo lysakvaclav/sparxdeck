@@ -1,47 +1,46 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { DesktopShot } from "@/components/site/Screenshot";
+import { HeroScroll } from "@/components/home/HeroScroll";
+import { DesktopShot, PhoneShot } from "@/components/site/Screenshot";
 import { SITE } from "@/config/site";
 import type { HomeDictionary, Locale } from "@/i18n/dictionary";
 
 /**
  * The top of the home page: a short announcement, a small tile, then one long
  * heading whose first sentence is bright and the rest faint, the button and a
- * plain link beside it. The product itself underneath.
+ * plain link beside it. Scrolling grows the tile into a screen of moving light
+ * with the platform inside (HeroScroll).
  */
 export function Hero({ dict, locale }: { dict: HomeDictionary; locale: Locale }) {
   const hero = dict.hero;
   return (
-    <section id="hero" className="relative">
-      <div className="container-site pt-28 md:pt-36">
-        <Link href={`/${locale}/mcp`} className="rise news-chip">
+    <HeroScroll
+      top={
+        <Link href={`/${locale}/mcp`} className="rise news-chip self-start">
           <span>{hero.news}</span>
           <span className="text-muted">{hero.newsTag}</span>
           <ArrowRight aria-hidden />
         </Link>
-        <div aria-hidden className="rise rise-delay-1 hero-tile mx-auto mt-24 md:mt-40" />
-        <h1 className="rise rise-delay-1 mt-10 max-w-[70rem] text-[2rem] leading-[1.22] tracking-[-0.02em] sm:text-[2.5rem] lg:text-[3rem]">
-          {hero.title} <span className="text-faint">{hero.rest}</span>
-        </h1>
-        <div className="rise rise-delay-2 mt-12 flex flex-wrap items-center gap-x-8 gap-y-3">
-          <a href={SITE.bookingUrl} className="button button-primary button-lg">
-            {hero.cta}
-            <ArrowRight className="arrow" aria-hidden />
-          </a>
-          <a href="#platform" className="text-link">
-            {hero.secondary}
-          </a>
-        </div>
-      </div>
-      <div className="container-site rise rise-delay-3 relative mt-20 md:mt-28">
-        <DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />
-        {/* The picture fades into the page. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background via-background/70 to-transparent"
-        />
-      </div>
-    </section>
+      }
+      bottom={
+        <>
+          <h1 className="hero-title rise rise-delay-1 max-w-[70rem]">
+            {hero.title} <span className="text-faint">{hero.rest}</span>
+          </h1>
+          <div className="hero-actions rise rise-delay-2 flex flex-wrap items-center gap-x-8 gap-y-3">
+            <a href={SITE.bookingUrl} className="button button-primary button-lg">
+              {hero.cta}
+              <ArrowRight className="arrow" aria-hidden />
+            </a>
+            <a href="#platform" className="text-link">
+              {hero.secondary}
+            </a>
+          </div>
+        </>
+      }
+      desktop={<DesktopShot name="dashboard" locale={locale} alt={dict.shots.dashboard} priority />}
+      phone={<PhoneShot name="check" locale={locale} alt={dict.shots.check} />}
+    />
   );
 }
 

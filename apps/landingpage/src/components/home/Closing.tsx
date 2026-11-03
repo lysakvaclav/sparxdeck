@@ -9,7 +9,7 @@ export function Comparison({ dict }: { dict: HomeDictionary }) {
   return (
     <section aria-labelledby="comparison-title" className="border-t border-line">
       <div className="container-site py-20 md:py-28">
-        <SectionHeading eyebrow={c.eyebrow} title={c.title} body={c.body} id="comparison-title" />
+        <SectionHeading title={c.title} body={c.body} id="comparison-title" />
         {/* Scrolls sideways on narrow phones: reachable by keyboard too. */}
         <div tabIndex={0} role="region" aria-labelledby="comparison-title" className="mt-12 overflow-x-auto rounded-[4px] border border-line">
           <table className="w-full border-collapse text-start text-sm md:text-base">
@@ -76,7 +76,6 @@ export function Faq({ dict, bookDemo }: { dict: HomeDictionary; bookDemo: string
       />
       <div className="container-site grid gap-12 py-20 md:py-28 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <p className="mb-3 text-[0.9375rem] text-muted">{f.eyebrow}</p>
           <h2 id="faq-title" className="text-[1.75rem] leading-[1.25] md:text-[2rem]">
             {f.title}
           </h2>

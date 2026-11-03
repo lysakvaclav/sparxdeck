@@ -155,7 +155,7 @@ export function Principles({ dict }: { dict: HomeDictionary }) {
   return (
     <section aria-labelledby="principles-title" className="border-t border-line">
       <div className="container-site py-20 md:py-28">
-        <SectionHeading eyebrow={p.eyebrow} title={p.title} id="principles-title" />
+        <SectionHeading title={p.title} id="principles-title" />
         <ul className="mt-12 grid gap-6 md:grid-cols-3 lg:gap-10">
           {p.items.map((item, index) => {
             const shapes = (FIGURES[index] ?? simpleShapes)();

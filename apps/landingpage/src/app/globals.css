@@ -8,8 +8,9 @@
  * SparxDeck's website: a quiet, warm editorial look. Warm near-black on white,
  * a muted grey for secondary text and a faint grey for the rest of a heading,
  * light-weight headings, pill buttons, hairline cards with soft grey panels.
- * Text keeps at least 4.5:1 against its background; the faint grey is used
- * only for large text (3:1, WCAG AA for large text).
+ * Text keeps at least 4.5:1 against its background, except the faint grey
+ * of the rest of a large heading: as light as in the reference, the owner's
+ * choice (2026-11-03).
  */
 :root {
   --background: #ffffff;
@@ -21,7 +22,7 @@
   --text-strong: #161514;
   --text-main: #3d3c3a;
   --text-muted: #71706f;
-  --text-faint: #8e8d8b;
+  --text-faint: #d7d6d4;
   --accent: #161514;
   /* Only in drawings (the arrows on the MCP section's orbits). */
   --signal: #e5544a;
@@ -51,7 +52,7 @@
   --text-strong: #f4f3f1;
   --text-main: #c9c8c5;
   --text-muted: #9b9a97;
-  --text-faint: #6f6e6b;
+  --text-faint: #3d3c3a;
   --accent: #f4f3f1;
   --signal: #ff6a5c;
   --shot-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 40px 80px -40px rgba(0, 0, 0, 0.9);
@@ -249,29 +250,149 @@ h4 {
   transform: scaleX(-1);
 }
 
-/* The small tile above the hero's heading: a soft metallic gradient with grain. */
-.hero-tile {
+/*
+ * The hero's scroll scene (HeroScroll.tsx). Without the class is-live (no
+ * JavaScript, reduced motion) the text and a still frame sit one under the
+ * other; with it the stage is pinned for three screens and the script moves
+ * the frame.
+ */
+.hero-intro {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 7rem;
+}
+
+.hero-slot {
   width: 3.75rem;
   height: 3.75rem;
+  margin: clamp(3rem, 13vh, 10rem) auto 0;
   background: linear-gradient(100deg, #f3f2f0 0%, #e3e2df 40%, #b8b7b3 100%);
 }
 
-.hero-tile::after {
-  content: "";
+.hero-title {
+  margin-top: clamp(1.5rem, 4.5vh, 2.5rem);
+  font-size: clamp(1.75rem, min(3.4vw, 5.6vh), 3rem);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+}
+
+.hero-actions {
+  margin-top: clamp(1.5rem, 5.5vh, 3rem);
+}
+
+.hero-frame {
+  position: relative;
+  overflow: hidden;
+  width: calc(100% - 2rem);
+  max-width: 74rem;
+  aspect-ratio: 3 / 4;
+  margin: 4rem auto 0;
+  border-radius: 8px;
+  background: #9a9b97;
+  isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  .hero-intro {
+    padding-top: 9rem;
+  }
+  .hero-frame {
+    width: calc(100% - 4rem);
+    aspect-ratio: 16 / 10;
+  }
+}
+
+.hero-light {
   position: absolute;
   inset: 0;
-  opacity: 0.28;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-:root.dark .hero-tile {
-  background: radial-gradient(120% 120% at 15% 10%, #8a8986 0%, #4a4946 50%, #262523 100%);
+:root.dark .hero-light {
+  filter: brightness(0.5) contrast(1.05);
 }
 
-:root.dark .hero-tile::after {
-  mix-blend-mode: soft-light;
+/* Film grain over the light, flickering a few times a second. */
+.hero-grain {
+  position: absolute;
+  inset: -50%;
+  opacity: 0.9;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.8s steps(1) infinite;
+  pointer-events: none;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-7%, 4%); }
+  40% { transform: translate(5%, -6%); }
+  60% { transform: translate(-3%, -9%); }
+  80% { transform: translate(8%, 6%); }
+}
+
+.hero-shot {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-shot-desktop,
+.hero-shot-phone {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.hero-shot-desktop {
+  display: none;
+  top: 8%;
+  width: min(86%, 72rem);
+}
+
+.hero-shot-phone {
+  top: 7%;
+  width: min(64%, 280px);
+}
+
+@media (min-width: 768px) {
+  .hero-shot-desktop {
+    display: block;
+  }
+  .hero-shot-phone {
+    display: none;
+  }
+}
+
+.hero-scroll.is-live {
+  height: 300svh;
+}
+
+.hero-scroll.is-live .hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.hero-scroll.is-live .hero-intro {
+  height: 100%;
+  will-change: opacity, transform;
+}
+
+.hero-scroll.is-live .hero-slot {
+  /* The frame lies over it; the slot only keeps the place. */
+  background: none;
+}
+
+.hero-scroll.is-live .hero-frame {
+  position: absolute;
+  margin: 0;
+  max-width: none;
+  aspect-ratio: auto;
+  opacity: 0;
 }
 
 /* A card as in the reference: a hairline frame, a soft grey panel for the picture. */
@@ -445,7 +566,8 @@ details[open] .faq-icon {
   }
   .rise,
   .orbit,
-  .flow {
+  .flow,
+  .hero-grain {
     animation: none;
   }
 }
