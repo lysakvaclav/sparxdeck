@@ -14,11 +14,10 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
 const easeOut = (t: number) => 1 - (1 - t) ** 3;
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/** The light through the leaves: drawn small, the browser enlarges it softly. */
+/** The light through the leaves: a small scene the browser enlarges softly. */
 const W = 160;
 const H = 100;
 const SHADOW = "#9a9b97";
-const LIGHT = "#e8e6e1";
 
 type Blob = { x: number; y: number; r: number; stretch: number; tilt: number; ax: number; ay: number; f: number; phase: number };
 
@@ -71,95 +70,77 @@ function scene() {
   };
 }
 
-/** Margin around the sketch, so the blur has no dark rim at the edges. */
-const M = 8;
+/** Pixels per unit of the scene. */
+const R = 2;
+/** How far a shape's soft edge reaches beyond its solid core. */
+const FEATHER = 2.4;
 
 type Painter = (t: number) => void;
 
+/** A colour fading to nothing from the middle of a unit circle outward. */
+function softFill(ctx: CanvasRenderingContext2D, [r, g, b]: [number, number, number]) {
+  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  // A smooth bell, without a visible rim anywhere.
+  for (const [at, alpha] of [[0, 1], [0.25, 0.94], [0.45, 0.72], [0.62, 0.42], [0.78, 0.17], [0.9, 0.05], [1, 0]] as const) {
+    gradient.addColorStop(at, `rgb(${r} ${g} ${b} / ${alpha})`);
+  }
+  return gradient;
+}
+
 /**
- * The light, drawn without any filter into a sketch (every group of shapes is
- * one path and one fill), then copied to the visible canvas through a single
- * blur. Blurring each shape on its own cost a whole frame on a laptop.
+ * The light: every leaf and gap is a soft-edged ellipse, so the picture needs
+ * no blur filter (a large canvas blur is blocky in Chrome and cost a whole
+ * frame when applied shape by shape). Smooth at any size and cheap to draw.
  */
 function painter(ctx: CanvasRenderingContext2D): Painter {
   const blobs = scene();
-  const sketch = document.createElement("canvas");
-  sketch.width = W + M * 2;
-  sketch.height = H + M * 2;
-  const s = sketch.getContext("2d")!;
-  // Browsers without the canvas filter (older Safari) blur by drawing small and enlarging.
-  ctx.filter = "blur(2px)";
-  const filter = ctx.filter === "blur(2px)";
-  ctx.filter = "none";
-  const small = document.createElement("canvas");
-  small.width = Math.round(W / 5);
-  small.height = Math.round(H / 5);
-  const sm = small.getContext("2d")!;
+  const light = softFill(ctx, [232, 230, 225]);
+  const shadow = softFill(ctx, [154, 155, 151]);
 
-  const ellipses = (list: Blob[], t: number, wind: number) => {
-    s.beginPath();
+  const blob = (x: number, y: number, rx: number, ry: number, tilt: number) => {
+    const cos = Math.cos(tilt);
+    const sin = Math.sin(tilt);
+    // Scale to pixels, move to the centre, turn, stretch the unit circle.
+    ctx.setTransform(R * rx * FEATHER * cos, R * rx * FEATHER * sin, -R * ry * FEATHER * sin, R * ry * FEATHER * cos, R * x, R * y);
+    ctx.fillRect(-1, -1, 2, 2);
+  };
+
+  const paintAll = (list: Blob[], t: number, wind: number) => {
     for (const b of list) {
-      const x = M + b.x + Math.sin(t * b.f + b.phase) * b.ax + wind;
-      const y = M + b.y + Math.cos(t * b.f * 0.8 + b.phase) * b.ay;
-      const tilt = b.tilt + Math.sin(t * b.f + b.phase) * 0.25;
-      s.moveTo(x + Math.cos(tilt) * b.r, y + Math.sin(tilt) * b.r);
-      s.ellipse(x, y, b.r, b.r * b.stretch, tilt, 0, Math.PI * 2);
+      blob(
+        b.x + Math.sin(t * b.f + b.phase) * b.ax + wind,
+        b.y + Math.cos(t * b.f * 0.8 + b.phase) * b.ay,
+        b.r,
+        b.r * b.stretch,
+        b.tilt + Math.sin(t * b.f + b.phase) * 0.25,
+      );
     }
-    s.fill();
   };
 
   return (t) => {
     const wind = Math.sin(t * 0.17) * 2 + Math.sin(t * 0.41) * 0.8;
-    s.globalAlpha = 1;
-    s.fillStyle = SHADOW;
-    s.fillRect(0, 0, sketch.width, sketch.height);
-    s.fillStyle = LIGHT;
-    // Broad soft light first, then a long streak past a trunk, then the gaps between leaves.
-    s.globalAlpha = 0.45;
-    ellipses(blobs.glow, t, wind);
-    s.globalAlpha = 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = SHADOW;
+    ctx.fillRect(0, 0, W * R, H * R);
+    ctx.fillStyle = light;
+    // Broad soft light first.
+    ctx.globalAlpha = 0.45;
+    paintAll(blobs.glow, t, wind);
+    ctx.globalAlpha = 1;
+    // A long streak of light past a trunk: soft ellipses along a gentle curve.
     const sway = Math.sin(t * 0.2) * 1.2 + wind * 0.3;
-    s.beginPath();
-    s.moveTo(M + W * 0.36 + sway, 0);
-    s.bezierCurveTo(M + W * 0.42 + sway, M + H * 0.3, M + W * 0.4, M + H * 0.6, M + W * 0.47, H + M * 2);
-    s.lineTo(M + W * 0.56, H + M * 2);
-    s.bezierCurveTo(M + W * 0.5, M + H * 0.6, M + W * 0.52 + sway, M + H * 0.3, M + W * 0.47 + sway, 0);
-    s.closePath();
-    s.fill();
-    ellipses(blobs.light, t, wind);
-    // Leaves in front of the light.
-    s.fillStyle = SHADOW;
-    ellipses(blobs.leaves, t, wind);
-
-    if (filter) {
-      ctx.filter = "blur(2px)";
-      ctx.drawImage(sketch, -M, -M);
-      ctx.filter = "none";
-    } else {
-      sm.drawImage(sketch, M, M, W, H, 0, 0, small.width, small.height);
-      ctx.drawImage(small, 0, 0, W, H);
+    for (let i = 0; i <= 18; i++) {
+      const k = i / 18;
+      const x = W * (0.42 + 0.08 * k) + sway * (1 - k) + Math.sin(k * 3) * 2;
+      blob(x, -4 + k * (H + 8), W * 0.05, 7, 0.08);
     }
+    // The gaps between leaves, then leaves in front of the light.
+    paintAll(blobs.light, t, wind);
+    ctx.fillStyle = shadow;
+    paintAll(blobs.leaves, t, wind);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   };
-}
-
-/** Film grain: a small tile of random light and dark specks, made once. */
-function grainTile(): string {
-  const size = 128;
-  const tile = document.createElement("canvas");
-  tile.width = size;
-  tile.height = size;
-  const g = tile.getContext("2d")!;
-  const image = g.createImageData(size, size);
-  const rnd = random(7);
-  for (let i = 0; i < image.data.length; i += 4) {
-    const value = rnd() < 0.5 ? 0 : 255;
-    image.data[i] = value;
-    image.data[i + 1] = value;
-    image.data[i + 2] = value;
-    image.data[i + 3] = Math.round(rnd() * 30);
-  }
-  g.putImageData(image, 0, 0);
-  return `url(${tile.toDataURL("image/png")})`;
 }
 
 export function HeroScroll({
@@ -195,14 +176,13 @@ export function HeroScroll({
     return () => query.removeEventListener("change", apply);
   }, []);
 
-  // The moving light and the grain (one still picture with reduced motion),
+  // The moving light (one still picture with reduced motion),
   // only while the hero is on screen.
   useEffect(() => {
     const element = canvas.current;
     const ctx = element?.getContext("2d");
     const root = section.current;
     if (!element || !ctx || !root) return;
-    frame.current?.style.setProperty("--grain", grainTile());
     const paint = painter(ctx);
     const start = performance.now();
     paint(0);
@@ -218,7 +198,6 @@ export function HeroScroll({
     };
     const observer = new IntersectionObserver(([entry]) => {
       const visible = Boolean(entry?.isIntersecting);
-      root.classList.toggle("is-playing", visible);
       cancelAnimationFrame(raf);
       if (visible) raf = requestAnimationFrame(tick);
     });
@@ -226,7 +205,6 @@ export function HeroScroll({
     return () => {
       observer.disconnect();
       cancelAnimationFrame(raf);
-      root.classList.remove("is-playing");
     };
   }, [live]);
 
@@ -332,8 +310,7 @@ export function HeroScroll({
         </div>
         <div ref={frame} className="hero-frame">
           <div ref={inner} className="hero-inner">
-            <canvas ref={canvas} width={W} height={H} aria-hidden className="hero-light" />
-            <div aria-hidden className="hero-grain" />
+            <canvas ref={canvas} width={W * R} height={H * R} aria-hidden className="hero-light" />
             <div ref={shot} className="hero-shot">
               <div className="hero-shot-desktop">{desktop}</div>
               <div className="hero-shot-phone">{phone}</div>
